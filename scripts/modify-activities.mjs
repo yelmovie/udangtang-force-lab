@@ -1,0 +1,62 @@
+import fs from 'node:fs';
+function edit(file, fn) { let s = fs.readFileSync(file,'utf8').replace(/\r\n/g,'\n'); const replace=(a,b)=>{if(!s.includes(a))throw new Error(file+': '+a.slice(0,90)); s=s.replace(a,b);}; fn(replace,()=>s,v=>s=v); fs.writeFileSync(file,s); }
+edit('src/screens/scale.ts',(r,get,set)=>{
+ r("import '../instruments.css';", "import { canCompleteScale, comparisonParts, recordScaleRun, scaleComparison } from '../scaleModel';\nimport '../instruments.css';");
+ const s=get(); const a=s.indexOf('  let feedback ='),b=s.indexOf('\n\n  root.innerHTML',a); set(s.slice(0,a)+"  let feedback = '겉모습만으로 무게를 정확히 알 수 있을까요? 사과와 책 모형을 하나씩 재 봐요.';"+s.slice(b));
+ r('03 · 측정 동력실','03 · 재료 보급소'); r('${targetWeight} g 동력 부품을 찾아라!','저울로 무게를 비교해요');
+ r("['빈 저울 0 g','목표 150 g','다른 조합 재기']", "['빈 저울 0 맞추기','사과 재기','책 재기']");
+ r('목표 <strong>${targetWeight} g</strong>','하나씩 재고 <strong>비교해요</strong>');
+ r('id="scale-measure" class="scale-measure-button">무게 재기','id="scale-measure" class="scale-measure-button">모두 내리기');
+ r('<p id="scale-insight"></p>', '<p id="scale-insight"></p><p>더 해보기: 여러 모형으로 150 g 만들기 (선택). 실제 물체의 무게는 모형과 다를 수 있어요.</p>');
+ r('<div class="instrument-dock scale-dock"', '<div class="scale-comparison" id="scale-comparison" aria-label="두 모형의 측정 결과"></div><div class="instrument-dock scale-dock"');
+ r('동력 부품 보내기 →','비교 기록 저장 →');
+ const x=get();const c=x.indexOf('  function canFinish()'),d=x.indexOf('    basketItems.innerHTML',c);
+ set(x.slice(0,c)+`  function canFinish() { return canCompleteScale(state); }
+  function update() {
+    const compared = scaleComparison(state.runs);
+    setMissionProgress(root,[state.zeroed,...comparisonParts.map(id=>compared.some(run=>run.parts[0]===id))],'');
+    root.querySelector('#scale-comparison')!.innerHTML=comparisonParts.map(id=>{const run=compared.find(run=>run.parts[0]===id);return \`<span>\${props[id].name} <strong>\${run ? run.reading+' g ✓' : '아직 안 쟀어요'}</strong></span>\`;}).join('');
+`+x.slice(d));
+ r("(state.parts.length ? '---' : state.zeroed ? '000' : '015')", "String(state.parts.reduce((sum,id)=>sum+scaleParts.find(p=>p.id===id)!.weight,0)+(state.zeroed?0:15)).padStart(3,'0')");
+ r("root.querySelector('#scale-phase')!.textContent=busy ? '손을 떼고 숫자가 멈출 때까지 관찰해요' : !state.zeroed ? '① 빈 저울의 숫자를 확인해요' : state.parts.length ? '③ 무게를 재고 목표와 비교해요' : '② 모형 부품을 쟁반으로 옮겨요';", "root.querySelector('#scale-phase')!.textContent=busy ? '숫자가 멈출 때까지 살펴봐요' : !state.zeroed ? state.parts.length ? '모두 내리고 빈 저울을 0으로 맞춰요' : '빈 저울을 0으로 맞춰요' : canFinish() ? '두 숫자로 무게를 비교해요' : state.parts.length ? '모두 내린 뒤 다른 모형을 하나만 올려요' : '사과와 책 모형을 하나씩 재 봐요';");
+ const y=get(); const e=y.indexOf('    difference.textContent='),f=y.indexOf("    root.querySelector('#scale-count')",e);
+ set(y.slice(0,e)+"    difference.textContent=busy ? '안정되면 자동으로 기록해요' : !state.zeroed ? '빈 저울의 15 g이 더해져 있어요' : canFinish() ? '사과 80 g > 책 70 g · 사과가 10 g 더 무거워요' : '겉모습만으로 정확한 무게는 알기 어려워요';\n"+y.slice(f));
+ r("canFinish() ? '영점을 맞추고 조합을 바꾸어 목표 무게를 만들었어요.' : '한 조합을 잰 뒤, 부품을 바꿔 다시 비교해요. 무게가 모자라면 무엇을 더할까요?'", "canFinish() ? '저울을 쓰니 어느 쪽이 얼마나 무거운지 알 수 있어요.' : '사과와 책 모형을 하나씩 재어 두 숫자를 비교해요.'");
+ r("feedback=`${props[id].name}을 올렸어요. 손을 떼고 '무게 재기'를 눌러요.`;", "feedback=`${props[id].name}을 올렸어요. 숫자가 멈추면 자동으로 기록돼요.`;");
+ r('update(); bounce();\n  }\n  function removePart', 'update(); bounce(); weigh();\n  }\n  function removePart');
+ r('update(); bounce();\n  }\n  function weigh', 'update(); bounce(); if(state.parts.length) weigh();\n  }\n  function weigh');
+ r('state.runs=[...state.runs,{parts,reading:measured,zeroed}].slice(-20);','state.runs=recordScaleRun(state.runs,{parts,reading:measured,zeroed});');
+ const z=get();const g=z.indexOf('      feedback=!zeroed'),h=z.indexOf('\n      companion.setMood',g);
+ set(z.slice(0,g)+"      feedback=!zeroed ? '빈 저울을 0으로 맞춰야 정확히 잴 수 있어요.' : canFinish() ? '저울로 어느 쪽이 얼마나 무거운지 알아냈어요! 비교 기록을 저장해요.' : parts.length>1 ? '비교할 때는 사과와 책 모형을 하나씩 올려요.' : `${props[parts[0]].name}은 ${measured} g이에요. 다른 모형과 비교해요.`;"+z.slice(h));
+ r("if(button.id==='scale-measure') weigh();", "if(button.id==='scale-measure') { state.parts=[]; reading=null; feedback='빈 저울이에요. 다른 모형 하나를 올려요.'; context.commit(); update(); }");
+ const q=get();const i=q.indexOf('      const successful='),j=q.indexOf('\n    }',i);
+ set(q.slice(0,i)+"      context.finish('scale','빈 저울을 0으로 맞추고 사과 모형 80 g과 책 모형 70 g을 하나씩 재었어요. 사과 모형이 10 g 더 무거웠어요. 겉모습으로 헷갈리던 무게를 저울의 숫자로 정확히 비교했어요.');"+q.slice(j));
+ r('  update();\n  return()=>', '  update(); if(state.parts.length) weigh();\n  return()=>');
+});
+edit('src/screens/workshop.ts',(r,get,set)=>{
+ r('canCompleteWorkshop,','canFinishWorkshopExploration,');
+ set(get().replaceAll('canCompleteWorkshop(state)','canFinishWorkshopExploration(state)'));
+ r('MISSION 04 · 힘 절약 공방','04 · 운반 공방');
+ r("['직접 들기','지레 비교','빗면 비교']", "['직접 들기','지레로 힘 줄이기','빗면으로 힘 줄이기']");
+ r('<span>실험 → 답 고르기</span>','<span>직접 들 때와 비교해요</span>');
+ r('<span class="question-label">실험 후 풀어볼 문제</span>','');
+ r('내 설계도 얻기 →','생활 속 도구 찾기 →');
+ r("tool==='lever' ? '① 그림의 받침대를 옮겨요 ② 아이 곁에서 지레를 아래로 눌러요 ③ 오른쪽 문제에서 답을 골라요' : '손잡이를 화살표 방향으로 끝까지 끌고, 두 기록이 모이면 오른쪽 문제에서 답을 골라요'", "tool==='lever' ? '받침대를 옮긴 뒤 손잡이를 아래로 끌어요' : '손잡이를 화살표 방향으로 끝까지 끌어요'");
+ r('`${Number(state.leverFinding) + Number(state.rampFinding)} / 2`', "`${Number(state.trials.some(r=>r.tool==='lever'&&r.force<100)) + Number(state.trials.some(r=>r.tool==='ramp'&&r.force<100))} / 2`");
+ r("tool === 'direct' ? '먼저 직접 들어 보고, 두 도구를 시험해요' : entries.length < 2 ? '설계 두 가지를 시험한 뒤 답을 골라요' : '작은 힘으로 움직인 설계는?'", "tool === 'direct' ? '도구 없이 들 때의 힘을 살펴봐요' : entries.length === 0 ? '도구를 쓰면 힘이 어떻게 달라질까요?' : '직접 들 때보다 힘이 줄었나요?'");
+ r('Math.max(1, ...entries.map(run => run.force))','Math.max(100, ...entries.map(run => run.force))');
+ r("choosing?`${fingerIcon} 아래 기록에서 답을 하나 눌러요`:finding?'✓ 답을 골라 발견했어요':`${fingerIcon} 실험하면 답 선택이 열려요`", "choosing?'더 탐구하기 (선택): 작은 힘이 든 기록 고르기':finding?'✓ 추가 비교를 설명했어요':'같은 화물 · 같은 높이에서 비교해요'");
+ r("entries.map((run,index) => {", "(state.direct ? `<article class=\"workshop-run baseline-run\"><strong>도구 없이 직접 들기</strong><div class=\"workshop-force\"><i style=\"width:${100/forceScale*100}%\"></i></div><span>기준이 되는 힘</span></article>` : '') + entries.map((run,index) => {");
+ r('<div class="workshop-metric"><span class="workshop-metric-label"><b aria-hidden="true">↔</b>', '<details class="workshop-distance-detail"><summary>움직인 길도 보기 (선택)</summary><div class="workshop-metric"><span class="workshop-metric-label"><b aria-hidden="true">↔</b>');
+ r('${distanceWord}</span></div></div>`','${distanceWord}</span></div></details></div>`');
+ const s=get(),a=s.indexOf('    const nextTool ='),b=s.indexOf('    setFeedback(feedback);',a);
+ set(s.slice(0,a)+`    const leverDone=state.trials.some(r=>r.tool==='lever'&&r.force<100);
+    const rampDone=state.trials.some(r=>r.tool==='ramp'&&r.force<100);
+    setMissionProgress(root,[state.direct,leverDone,rampDone],!state.direct?'먼저 직접 들어요':!leverDone?'받침대를 바꿔 직접 들 때보다 힘을 줄여요':!rampDone?'빗면으로도 올려 봐요':'생활 속 도구를 찾아요');
+`+s.slice(b));
+ r("'설계를 바꾸어 한 번 더 시험해요.'", "design.force<100 ? '직접 들 때보다 힘이 줄었어요. 다른 도구도 살펴봐요.' : '받침대를 옮겨 힘을 줄여 봐요.'");
+ r('각 도구에서 같은 화물과 같은 도착 높이를 유지해 ${state.trials.length}가지 설계를 시험했어요.', '직접 들기와 두 도구를 같은 화물·같은 도착 높이에서 비교했어요.');
+ r('를 직접 비교했고, ${getWorkshopDesign(name, best.setting).label}에서 더 작은 힘이 드는 것을 찾았어요.', '를 시험했고, ${getWorkshopDesign(name, best.setting).label}에서 직접 들 때보다 작은 힘이 들었어요.');
+ r("${summaries.join(' ')} 작은 힘을 쓸 때는 움직이는 길이 더 길었어요.", "${summaries.join(' ')}");
+});
+edit('src/missionProgress.ts',(r)=>{r('progress.querySelector(\'.mission-progress-next\')!.textContent = `콩이의 단서 · ${next}`;', "progress.querySelector('.mission-progress-next')!.textContent = next;\n  (progress.querySelector('.mission-progress-next') as HTMLElement).hidden = !next;");});

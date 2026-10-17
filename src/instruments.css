@@ -1,0 +1,178 @@
+/* Instrument missions: one playable workbench, a compact tool drawer, and an optional notebook. */
+.instrument-screen.experiment-screen { padding:12px 22px 14px; gap:10px; display:flex; flex-direction:column; min-height:0; }
+.instrument-screen .experiment-heading { flex:0 0 auto; min-height:44px; align-items:center; }
+.instrument-screen .experiment-heading h1 { font-size:clamp(23px,2.3vw,32px); line-height:1.2; }
+.instrument-screen .eyebrow { font-size:16px; margin-bottom:3px; color:#1c6760; }
+.instrument-reward { color:#3b6255; font-size:16px; font-weight:800; padding:8px 12px; background:#fff7dc; border-radius:12px; }
+.instrument-screen .instrument-stage { flex:1 1 auto; min-height:310px; position:relative; width:100%; overflow:hidden; border:3px solid #8d663f; border-radius:24px; box-shadow:0 6px 0 #533b2930,inset 0 0 70px #332b2340; }
+.instrument-screen .instrument-phase { position:absolute; top:12px; left:50%; transform:translateX(-50%); max-width:65%; padding:8px 16px; z-index:5; background:#fff9e9f2; border:2px solid #e5c792; border-radius:18px; font-size:17px; font-weight:900; text-align:center; color:#244d47; }
+.instrument-screen .instrument-notebook { position:absolute; top:12px; right:12px; z-index:8; width:156px; color:#294d43; font-size:16px; }
+.instrument-screen .instrument-notebook summary { cursor:pointer; min-height:48px; display:flex; gap:8px; align-items:center; justify-content:center; list-style:none; background:#fff5d9; border:2px solid #c7a267; border-radius:12px; font-weight:900; box-shadow:0 4px 0 #604a2720; }
+.instrument-notebook summary::before { content:'▤'; font-size:23px; }
+.instrument-notebook summary span { display:inline-grid; place-items:center; min-width:26px; height:26px; border-radius:50%; background:#21776e; color:#fff; }
+.instrument-screen .instrument-notebook[open] { width:290px; max-height:calc(100% - 25px); overflow-y:auto; background:#fff8e6; padding:8px; border:2px solid #bd9863; border-radius:15px; box-shadow:0 12px 30px #1b343344; }
+.instrument-notebook p { font-size:16px; line-height:1.5; padding:8px; margin:0; }
+.instrument-notebook .result-row { font-size:16px; padding:8px 2px; }
+.instrument-screen .instrument-notebook .result-list { font-size:16px; }
+.instrument-screen .instrument-companion { position:absolute; left:2%; bottom:8%; width:16%; z-index:3; pointer-events:none; }
+.instrument-screen .instrument-companion .game-companion { --companion-height:clamp(86px,10vw,138px); }
+.instrument-screen .instrument-dock { flex:0 0 auto; display:grid; grid-template-columns:1.15fr 1fr; gap:18px; align-items:start; background:linear-gradient(#f2dfb8,#e6c58e); border:2px solid #bb915c; border-bottom-width:6px; border-radius:15px; padding:8px 14px; box-shadow:inset 0 2px #fff2d2; }
+.instrument-screen .dock-label { display:flex; align-items:center; justify-content:space-between; color:#523b23; font-size:16px; font-weight:900; line-height:1.3; margin-bottom:6px; }
+.instrument-screen .dock-label small { font-size:16px; color:#725332; font-weight:700; }
+.instrument-screen .object-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.instrument-screen .object-card { min-height:68px; border:2px solid transparent; background:#fff6e280; border-radius:11px; padding:4px 8px; display:flex; flex-direction:row; align-items:center; justify-content:center; gap:7px; touch-action:none; color:#314e43; }
+.instrument-screen .object-card.selected { border-color:#197d73; background:#f8ffe7; }
+.instrument-screen .object-card strong { font-size:16px; line-height:1.25; }
+.instrument-object { display:inline-block!important; position:relative; width:54px!important; height:52px!important; flex:0 0 54px; background:linear-gradient(140deg,#e6b66e,#ba7134)!important; border-radius:9px!important; border:2px solid #7d4a26; box-shadow:inset -8px -7px #0002,0 4px 5px #33241740!important; transform-origin:center bottom; }
+.instrument-object::before { content:''; position:absolute; inset:5px; border:2px solid #ffffff50; border-radius:4px; }
+.instrument-object b { position:absolute; inset:auto 1px 1px auto; width:25px; height:27px; display:grid; place-items:center; border:1px solid #9b8359; border-radius:6px; background:#fff7dc; font-size:24px; font-weight:900; color:#243f35; text-shadow:none; }
+.instrument-object.object-A { background:url('/assets/game/wood-block.webp') center/contain no-repeat!important; border:0; box-shadow:none!important; }
+.instrument-object.object-A::before { display:none; }
+.instrument-object.object-B { background:linear-gradient(130deg,#d4e9e7,#558583 60%,#a9c5c3)!important; border-color:#4c716f; }
+.instrument-object.object-C { background:linear-gradient(140deg,#eee8f5,#a696b7)!important; border-color:#8b77a3; }
+.instrument-screen .predict-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
+.instrument-screen .predict-options button { min-height:48px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:25px; border-radius:10px; }
+.instrument-screen .predict-options button span { font-size:17px; }
+.instrument-screen .instrument-text-button { min-height:48px; width:100%; margin-top:2px; font-size:16px; font-weight:800; border:0; background:transparent; color:#275d53; text-decoration:underline; text-underline-offset:3px; }
+.instrument-screen .experiment-footer { flex:0 0 auto; gap:12px; }
+.instrument-screen .feedback { font-size:17px; line-height:1.4; }
+.instrument-screen .experiment-footer .button { min-height:50px; font-size:18px; }
+.instrument-screen .experiment-footer .button-primary { color:#34200e; text-shadow:none; }
+.instrument-screen button:focus-visible, .instrument-screen summary:focus-visible { outline:4px solid #ec9e24; outline-offset:3px; }
+.instrument-screen button:disabled { opacity:.48; cursor:default; }
+.instrument-drag-ghost { position:fixed; transform:translate(-50%,-50%) scale(1.2); pointer-events:none; z-index:10000; width:68px; height:68px; display:grid; place-items:center; filter:drop-shadow(0 9px 7px #182b3b55); }
+.instrument-drag-ghost img { width:100%; height:100%; object-fit:contain; }
+.instrument-screen.balance-screen .balance-board { width:64%; left:18%; top:20%; height:170px; transform-origin:50% 74%; z-index:3; }
+.instrument-screen.balance-screen .balance-pan { width:152px; height:138px; top:0; border-top:0; border-bottom:0; border-radius:0; border-left:4px solid #8d6d45; border-right:4px solid #8d6d45; background:transparent url('/assets/game/balance-pan.webp') center bottom/100% 45px no-repeat; padding:0 4px 23px; gap:4px; color:#fef7df; text-shadow:0 2px 3px #342511; font-size:16px; touch-action:none; z-index:4; }
+.instrument-screen.balance-screen .balance-pan::after { display:none; }
+.instrument-screen.balance-screen .balance-pan > span:first-child { padding:2px 8px; border-radius:8px; color:#3d4b35; background:#fff7dc; text-shadow:none; }
+.instrument-screen.balance-screen .balance-pan:not(:disabled):active { transform:none; }
+.instrument-screen.balance-screen .balance-pan .pan-object { background:none; box-shadow:none; width:100%; height:65px; margin:0; border-radius:0; }
+.instrument-screen.balance-screen .balance-pan .instrument-object { width:68px!important; height:65px!important; }
+.instrument-screen .pan-drop-hint { width:auto; height:auto; padding:7px; background:#fff7daeb; border-radius:10px; color:#775d34; font-size:16px; text-shadow:none; }
+.instrument-screen.balance-screen .balance-beam { top:74%; height:20px; background:url('/assets/game/balance-beam.webp') center/100% 100%; border:0; }
+.instrument-screen.balance-screen .balance-pivot { left:calc(50% - 77px); width:154px; height:106px; top:calc(20% + 130px); border:0; background:url('/assets/game/balance-base.webp') center/contain no-repeat; z-index:2; }
+.instrument-screen.balance-screen .balance-stand { display:none; }
+.instrument-screen .balance-pin-track { position:absolute; left:50%; bottom:67px; transform:translateX(-50%); display:flex; align-items:center; gap:8px; width:290px; height:62px; padding:4px 10px; background:#41666c; border:3px solid #dfba73; border-radius:18px; z-index:4; color:#fff6de; font-size:16px; font-weight:800; }
+.instrument-screen .balance-pin { --pin-x:0px; min-height:48px; width:152px; flex:0 0 152px; transform:translateX(var(--pin-x)); border:2px solid #ffe2a5; border-radius:13px; background:linear-gradient(#f7ce7b,#bc7939); color:#251607; display:flex; align-items:center; justify-content:center; gap:7px; touch-action:none; box-shadow:0 4px 0 #293e3c; }
+.instrument-screen .balance-pin:not(:disabled):active { transform:translateX(var(--pin-x)); }
+.instrument-screen .balance-pin strong { font-size:16px; }
+.instrument-screen .balance-pin i { display:block; width:8px; height:24px; border-left:2px solid #855625; border-right:2px solid #855625; }
+.instrument-screen.balance-screen .balance-result { bottom:10px; left:20%; right:20%; min-height:45px; font-size:16px; line-height:1.3; padding:7px 12px; z-index:4; border-radius:12px; }
+.instrument-screen.scale-screen { --device-width:clamp(330px,39vw,445px); }
+.instrument-screen.scale-screen .scale-target { left:12px; top:12px; transform:none; font-size:17px; padding:9px 13px; z-index:6; }
+.instrument-screen.scale-screen .scale-target strong { font-size:25px; color:#98441b; }
+.instrument-screen.scale-screen .instrument-phase { max-width:50%; }
+.instrument-screen.scale-screen .scale-body { width:var(--device-width); height:calc(var(--device-width) * .74); min-height:0; left:50%; top:auto; right:auto; bottom:43px; transform:translateX(-50%); border:0; border-radius:0; background:url('/assets/game/scale.webp') center/100% 100% no-repeat; box-shadow:none; display:block; z-index:2; }
+.instrument-screen.scale-screen .scale-platform { display:none; }
+.instrument-screen.scale-screen .scale-display { position:absolute; left:12%; top:49%; width:51.5%; height:29%; min-width:0; padding:10px 8px 2px; border:4px solid #417f76; border-radius:13px; background:#c0e1c6; box-shadow:inset 0 3px 7px #123e3540; color:#164b4e; display:flex; align-items:center; justify-content:center; }
+.instrument-screen.scale-screen .scale-display strong { font-size:clamp(34px,4vw,50px); line-height:1; }
+.instrument-screen.scale-screen .scale-display > span:last-child { margin:0 0 5px; font-size:20px; align-self:flex-end; }
+.instrument-screen .scale-stability { position:absolute; top:1px; left:0; right:0; text-align:center; font-size:16px; font-weight:800; }
+.instrument-screen.scale-screen .zero-button, .instrument-screen .scale-measure-button { position:absolute; top:50%; width:17.5%; height:23%; min-width:48px; min-height:48px; border:3px solid #f8e5bc; border-radius:50%; padding:1px; box-shadow:0 4px 0 #57645c; color:white; font-size:16px; font-weight:900; line-height:1.1; }
+.instrument-screen.scale-screen .zero-button { right:2%; background:#246482; }
+.instrument-screen.scale-screen .zero-button.zeroed { background:#287953; }
+.instrument-screen .scale-measure-button { right:21%; background:#a93625; }
+.instrument-screen.scale-screen .zero-button:disabled, .instrument-screen .scale-measure-button:disabled { opacity:1; filter:grayscale(.45); }
+.instrument-screen.scale-screen .scale-basket { left:50%; right:auto; top:auto; bottom:calc(43px + var(--device-width) * .44); width:calc(var(--device-width) * .8); height:100px; transform:translateX(-50%); border:2px dashed transparent; border-radius:22px; background:transparent; padding:0; box-shadow:none; z-index:4; }
+.instrument-screen.scale-screen .scale-basket .basket-label { position:absolute; bottom:5px; color:#36574e; font-size:16px; font-weight:900; text-shadow:0 1px #fff; }
+.instrument-screen.scale-screen .scale-basket:has(.basket-part) .basket-label { display:none; }
+.instrument-screen.scale-screen .basket-items { flex-wrap:nowrap; width:100%; gap:2px; margin:0; justify-content:center; align-items:flex-end; }
+.instrument-screen.scale-screen .basket-part { position:relative; flex:1 1 20%; max-width:75px; min-width:48px; min-height:48px; height:88px; border:0; background:transparent; padding:1px 2px; color:#24493e; box-shadow:none; border-radius:8px; touch-action:none; font-size:16px; }
+.instrument-screen.scale-screen .basket-part img { width:100%; height:65px; object-fit:contain; display:block; filter:drop-shadow(0 4px 3px #223c3638); }
+.instrument-screen.scale-screen .basket-part span { font-size:16px; background:#fff7def0; padding:1px 4px; border-radius:5px; }
+.instrument-screen.scale-screen .basket-part i { position:absolute; top:0; right:0; width:22px; height:22px; display:grid; place-items:center; border-radius:50%; background:#7c4330; color:white; font-style:normal; font-size:18px; }
+.instrument-screen .scale-difference { position:absolute; left:23%; right:23%; bottom:8px; z-index:3; padding:8px 12px; border-radius:13px; color:#214e45; background:#fff8e5ed; border:2px solid #cfb16e; font-size:17px; font-weight:900; text-align:center; }
+.instrument-screen .scale-difference.matched { background:#d9f5b7; border-color:#469878; }
+.instrument-screen .scale-dock { display:block; transition:background .15s; }
+.instrument-screen .scale-parts { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
+.instrument-screen .scale-part { min-height:77px; display:grid; grid-template-columns:58px 1fr; grid-template-rows:1fr 1fr; column-gap:5px; padding:5px 8px; border-radius:12px; border:1px solid #bd955e; background:#fff7e299; color:#3d4e3f; touch-action:none; align-items:center; justify-items:center; }
+.instrument-screen .scale-part img { grid-row:1/3; width:58px; height:65px; object-fit:contain; filter:drop-shadow(0 3px 2px #47311b40); }
+.instrument-screen .scale-part strong { font-size:16px; line-height:1.15; }
+.instrument-screen .known-weight { font-size:16px; color:#235c4f; font-weight:900; white-space:nowrap; }
+.instrument-screen .scale-basket.drop-ready { border-color:#fff9ad; background:#e4fbbe66; box-shadow:0 0 0 5px #58a68b66; }
+.instrument-screen .scale-dock.drop-ready { background:#c4e1b2; box-shadow:inset 0 0 0 4px #337e63; }
+@media (min-width:1440px) {
+  .instrument-screen .instrument-stage { min-height:420px; }
+  .instrument-screen.balance-screen .balance-board { top:24%; height:210px; }
+  .instrument-screen.balance-screen .balance-pivot { top:calc(24% + 158px); }
+  .instrument-screen.balance-screen .balance-pan { width:180px; height:165px; }
+  .instrument-screen .instrument-phase, .instrument-screen .feedback, .instrument-screen .scale-difference { font-size:20px; }
+  .instrument-screen .instrument-companion .game-companion { --companion-height:160px; }
+  .instrument-screen .object-card, .instrument-screen .scale-part { min-height:96px; }
+  .instrument-screen .object-card strong, .instrument-screen .scale-part strong, .instrument-screen .dock-label { font-size:19px; }
+}
+@media (min-width:1600px) and (min-height:900px) {
+  .instrument-screen.experiment-screen { padding:18px 30px; gap:14px; }
+  .instrument-screen .experiment-heading h1 { font-size:40px; }
+  .instrument-screen .eyebrow { font-size:18px; }
+  .instrument-screen .instrument-reward { font-size:20px; }
+  .instrument-screen .instrument-phase, .instrument-screen .feedback,
+  .instrument-screen .scale-difference { font-size:22px; }
+  .instrument-screen .experiment-footer .button { min-height:64px; font-size:22px; padding:12px 26px; }
+  .instrument-screen .instrument-dock { padding:12px 18px; gap:22px; }
+  .instrument-screen .dock-label, .instrument-screen .dock-label small,
+  .instrument-screen .object-card strong, .instrument-screen .scale-part strong,
+  .instrument-screen .known-weight { font-size:20px; }
+  .instrument-screen .instrument-notebook { width:194px; font-size:20px; }
+  .instrument-screen .instrument-notebook summary { min-height:58px; }
+  .instrument-screen .instrument-notebook[open] { width:360px; }
+  .instrument-screen .instrument-notebook p,
+  .instrument-screen .instrument-notebook .result-list,
+  .instrument-screen .instrument-notebook .result-row { font-size:20px; }
+  .instrument-screen .instrument-object { width:70px!important; height:68px!important; flex-basis:70px; }
+  .instrument-screen .instrument-object b { font-size:28px; width:31px; height:33px; }
+  .instrument-screen .predict-options button { min-height:60px; font-size:30px; }
+  .instrument-screen .predict-options button span { font-size:22px; }
+  .instrument-screen .instrument-text-button { min-height:48px; font-size:20px; }
+  .instrument-screen.balance-screen .balance-pan { font-size:20px; }
+  .instrument-screen .pan-drop-hint { font-size:20px; }
+  .instrument-screen.balance-screen .balance-pan .instrument-object { width:84px!important; height:80px!important; }
+  .instrument-screen .balance-pin-track { width:344px; height:72px; bottom:83px; font-size:20px; }
+  .instrument-screen .balance-pin { width:182px; flex-basis:182px; min-height:56px; }
+  .instrument-screen .balance-pin strong { font-size:20px; }
+  .instrument-screen.balance-screen .balance-result { min-height:60px; font-size:20px; }
+  .instrument-screen.scale-screen { --device-width:550px; }
+  .instrument-screen.scale-screen .scale-target { font-size:22px; }
+  .instrument-screen.scale-screen .scale-target strong { font-size:32px; }
+  .instrument-screen.scale-screen .scale-display { padding-top:18px; }
+  .instrument-screen.scale-screen .scale-display strong { font-size:64px; }
+  .instrument-screen.scale-screen .scale-display > span:last-child { font-size:26px; }
+  .instrument-screen .scale-stability { top:4px; font-size:20px; }
+  .instrument-screen.scale-screen .zero-button,
+  .instrument-screen .scale-measure-button { font-size:22px; min-width:64px; min-height:64px; }
+  .instrument-screen.scale-screen .scale-basket { height:140px; }
+  .instrument-screen.scale-screen .scale-basket .basket-label { font-size:20px; }
+  .instrument-screen.scale-screen .basket-part { max-width:90px; height:120px; font-size:20px; }
+  .instrument-screen.scale-screen .basket-part img { height:92px; }
+  .instrument-screen.scale-screen .basket-part span { font-size:20px; }
+  .instrument-screen.scale-screen .basket-part i { width:28px; height:28px; font-size:22px; }
+  .instrument-screen .scale-part { grid-template-columns:78px 1fr; min-height:106px; }
+  .instrument-screen .scale-part img { width:78px; height:85px; }
+}
+@media (max-width:1080px) {
+  .instrument-screen.experiment-screen { padding:10px 14px; gap:8px; }
+  .instrument-screen .instrument-notebook { width:136px; right:8px; }
+  .instrument-screen .instrument-phase { max-width:62%; left:43%; font-size:16px; padding:7px 10px; }
+  .instrument-screen.scale-screen .instrument-phase { left:49%; max-width:49%; }
+  .instrument-screen .instrument-stage { min-height:315px; }
+  .instrument-screen .instrument-dock { gap:12px; padding:7px 10px; }
+  .instrument-screen .object-card { padding:4px; }
+  .instrument-screen .instrument-object { width:43px!important; height:44px!important; flex-basis:43px; }
+  .instrument-screen.scale-screen { --device-width:330px; }
+  .instrument-screen .scale-part { grid-template-columns:45px 1fr; padding:4px; }
+  .instrument-screen .scale-part img { width:45px; height:55px; }
+  .instrument-screen .instrument-reward { display:none; }
+}
+@media (max-width:800px), (max-height:600px) {
+  .instrument-screen.experiment-screen { height:auto; min-height:650px; }
+  .instrument-screen .instrument-stage { flex:0 0 340px; min-height:340px; order:0; }
+  .instrument-screen .instrument-dock { grid-template-columns:1fr 1fr; }
+  .instrument-screen .object-card { flex-direction:column; }
+  .instrument-screen .scale-part { display:flex; flex-direction:column; gap:2px; }
+  .instrument-screen .instrument-companion { width:15%; }
+  .instrument-screen.balance-screen .balance-result { left:14%; right:14%; }
+  .instrument-screen .scale-difference { left:18%; right:18%; }
+  .instrument-screen .experiment-footer { flex-wrap:wrap; }
+}
+@media (prefers-reduced-motion:reduce) { .instrument-screen .balance-board { transition:none; } }

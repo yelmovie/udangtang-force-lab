@@ -1,0 +1,109 @@
+.cargo-adventure{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}
+.cargo-scene{position:relative;min-height:300px;flex:1;border-radius:26px;overflow:hidden;background:url('/assets/backgrounds/cargo.webp') center/cover;box-shadow:inset 0 0 0 3px #dbb780}
+.cargo-scene::after{content:'';position:absolute;inset:35% 0 0;background:linear-gradient(transparent,#133c3630);pointer-events:none}
+.cargo-scene-caption{position:absolute;inset:16px 20px auto;display:flex;justify-content:space-between;gap:16px;z-index:5;font-size:16px;font-weight:800;color:#173f42}
+.cargo-scene-caption>span{background:#fff8e9ed;padding:10px 16px;border-radius:12px}
+.cargo-rail{--crate-size:clamp(112px,14vw,200px);position:absolute;inset:30% 5% 15%;border-bottom:14px solid #985d34;z-index:2}
+.rail-ticks{position:absolute;bottom:-9px;left:0;right:0;height:9px;background:repeating-linear-gradient(90deg,#ffdb89 0 2px,transparent 2px 5%)}
+.rail-start,.rail-end{position:absolute;bottom:-45px;padding:5px 12px;background:#fef4d9;font-size:16px;font-weight:900;border-radius:8px}
+.rail-start{left:9%}.rail-end{right:3%}
+.cargo-object{--worker-width:clamp(130px,17vw,200px);position:absolute;left:17%;bottom:-8px;width:var(--crate-size);height:var(--crate-size);z-index:4;filter:drop-shadow(0 9px 3px #402e3340);transform-origin:center bottom}
+.cargo-worker-grip{position:absolute;bottom:-4px;right:calc(100% - 29px);width:var(--worker-width);aspect-ratio:800/670;padding:0;border:0;background:transparent;box-shadow:none;z-index:4;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;transform:none!important}
+.cargo-worker-grip:hover:not(:disabled){background:transparent;filter:drop-shadow(0 0 7px #fff3b8)}
+.cargo-worker-grip:active:not(:disabled){cursor:grabbing}
+.cargo-worker-grip:disabled{opacity:1;cursor:default}
+.cargo-worker-grip:focus-visible{outline:3px dashed #ffdf7b;outline-offset:5px;border-radius:20px}
+.cargo-worker{position:absolute;inset:0;width:100%;height:auto;pointer-events:none;transform-origin:50% 95%;filter:drop-shadow(0 5px 3px #402e3338)}
+.cargo-worker-pull{display:none}
+.cargo-grab-cue{position:absolute;bottom:100%;left:0;display:flex;align-items:center;gap:5px;padding:5px;border:2px solid #e6bc67;border-radius:14px;background:#fff6dced;color:#174b4c;white-space:nowrap;pointer-events:none;font-size:16px;box-shadow:0 3px 8px #49361c30}
+.cargo-grab-cue svg{width:27px;height:30px;animation:cargo-finger-tap 1.5s ease-in-out infinite}
+.cargo-grab-cue::after{content:'';position:absolute;top:100%;left:35%;border:8px solid transparent;border-top-color:#e6bc67}
+.cargo-scene[data-busy="true"] .cargo-grab-cue,.cargo-scene[data-setup="false"] .cargo-grab-cue,.cargo-dragging .cargo-grab-cue{display:none}
+.cargo-pull-strap{position:absolute;left:calc(100% - 9px);bottom:41%;width:calc(var(--worker-width)*.49);height:7px;border-radius:8px;background:linear-gradient(#f2d5a0,#aa7545);box-shadow:0 2px 2px #48312555;transform:rotate(-3deg);transform-origin:left center;z-index:1;display:none}
+.cargo-scene[data-action="pull"] .cargo-worker-push{display:none}
+.cargo-scene[data-action="pull"] .cargo-worker-pull,.cargo-scene[data-action="pull"] .cargo-pull-strap{display:block}
+.cargo-scene[data-action="pull"] .cargo-worker-grip{right:auto;left:calc(100% + 16px)}
+.cargo-object[data-mood="effort"]::after{content:'';position:absolute;bottom:-4px;left:-40px;width:10px;height:5px;border-radius:50%;background:#e6c5909c;box-shadow:-16px 3px 0 #e6c59075,-32px 0 0 #e6c59055;animation:cargo-dust .5s ease-out infinite;pointer-events:none}
+.cargo-object[data-mood="effort"] .cargo-worker-push{animation:cargo-push-effort .4s ease-in-out infinite}
+.cargo-object[data-mood="effort"] .cargo-worker-pull{animation:cargo-pull-effort .42s ease-in-out infinite}
+.cargo-object[data-mood="observe"] .cargo-worker{animation:cargo-worker-settle .5s ease-out}
+.cargo-object[data-mood="success"] .cargo-worker{animation:cargo-worker-cheer .7s ease-out}
+@keyframes cargo-push-effort{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(4px,-2px) rotate(2deg)}}
+@keyframes cargo-pull-effort{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(4px,-3px) rotate(-2deg)}}
+@keyframes cargo-worker-settle{0%{transform:translateX(4px) rotate(2deg)}55%{transform:translateX(-2px) rotate(-1deg)}100%{transform:none}}
+@keyframes cargo-worker-cheer{0%,100%{transform:none}40%{transform:translateY(-9px) rotate(-3deg)}70%{transform:translateY(0) rotate(2deg)}}
+@keyframes cargo-dust{from{opacity:.8;transform:translateX(0)}to{opacity:0;transform:translate(-15px,-5px)}}
+@keyframes cargo-finger-tap{0%,60%,100%{transform:translateY(0) rotate(-9deg)}30%{transform:translateY(4px) rotate(3deg)}}
+@media(prefers-reduced-motion:reduce){.cargo-object .cargo-worker,.cargo-object::after,.cargo-grab-cue svg,.cargo-choice-finger,.cargo-order-card[data-state="now"]{animation:none!important}.cargo-force-arrow{transition:none}}
+.cargo-box-art{position:absolute;inset:8% 0 0;width:100%;height:90%;object-fit:contain;z-index:2;pointer-events:none}
+.cargo-contents{position:absolute;inset:0 5% 25%;z-index:3;pointer-events:none}
+.cargo-contents img{position:absolute;width:42%;left:calc(8% + var(--part)*9%);bottom:calc(30% + var(--part)*5%);transform:rotate(calc(var(--part)*8deg - 12deg));filter:drop-shadow(0 3px 2px #0d424655)}
+.cargo-load-tag{position:absolute;bottom:2%;left:4%;right:4%;z-index:5;padding:6px 4px;text-align:center;background:#fff8e8f0;color:#164c4c;border-radius:9px;font-weight:800;font-size:16px}
+.cargo-object.drop-ready{filter:drop-shadow(0 0 15px #fef395)}
+.cargo-gesture-guide{position:absolute;left:var(--gesture-start);bottom:-42px;width:var(--gesture-travel);height:9px;border-radius:8px;background:#fff3d573;z-index:6;pointer-events:none}
+.cargo-gesture-guide::before{content:'';position:absolute;inset:0 auto 0 0;width:calc(var(--charge,0)*100%);border-radius:inherit;background:#ffce65}
+.cargo-gesture-arrow{position:absolute;left:8px;bottom:9px;color:#fff3bc;font-size:36px;line-height:1;text-shadow:0 2px 3px #51371a}
+.cargo-gesture-target{position:absolute;left:100%;bottom:0;height:32px;border-left:3px dashed #ffdf7b;white-space:nowrap;padding-left:7px;color:#153e45;font-size:16px;font-weight:900}
+.cargo-gesture-target::before{content:'';position:absolute;inset:-4px -6px 10px 2px;background:#fff1cded;border-radius:6px;z-index:-1}
+.cargo-scene[data-busy="true"] .cargo-gesture-guide,.cargo-scene[data-setup="false"] .cargo-gesture-guide{visibility:hidden}
+.cargo-distance{position:absolute;right:7%;bottom:28px;z-index:7;color:#fff7d8;background:#153e45e8;border-radius:10px;padding:4px 12px;font-size:clamp(24px,2.5vw,38px);font-weight:900}
+/* Ghost crates: where earlier tries stopped. Label sits above the ghost so the live crate's tag never covers it. */
+.cargo-ghosts{position:absolute;inset:0;pointer-events:none;z-index:2}
+.cargo-ghost{position:absolute;bottom:-8px;width:var(--crate-size);height:var(--crate-size)}
+.cargo-ghost img{position:absolute;inset:8% 0 0;width:100%;height:90%;object-fit:contain;opacity:.42;filter:sepia(1) saturate(.6)}
+.cargo-ghost[data-age="1"] img{opacity:.26}
+.cargo-ghost span{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);white-space:nowrap;background:#fffbdfee;border:2px dashed #c9a45f;color:#5a4320;font-size:16px;font-weight:800;padding:3px 9px;border-radius:9px}
+.cargo-ghost[data-age="1"] span{bottom:calc(100% + 38px);opacity:.85}
+/* Level 2 target: the crate's front edge has to stop on this yellow strip (left is set to the zone start). */
+.cargo-target-zone{position:absolute;bottom:-14px;margin-left:var(--crate-size);width:var(--zone-span,4%);height:calc(var(--crate-size)*.95);z-index:1;border:3px dashed #f2b51f;border-bottom:14px solid #ffd54a;border-radius:10px 10px 0 0;background:linear-gradient(#ffe27a00,#ffe27a88);pointer-events:none}
+.cargo-target-zone[hidden]{display:none}
+.cargo-target-zone span{position:absolute;top:-30px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:2px 10px;border-radius:8px;background:#ffd54a;color:#4b3405;font-size:16px;font-weight:900}
+/* Force arrow from the child's hand: length and thickness follow the force step, never finger pressure. */
+.cargo-force-arrow{position:absolute;left:4%;bottom:50%;z-index:6;width:calc(var(--charge,0)*(28px + var(--force-step,2)*30px));height:calc(4px + var(--force-step,2)*4px);border-radius:4px 0 0 4px;background:#ff8a2a;box-shadow:0 0 0 2px #fff6dc;opacity:0;pointer-events:none;transition:opacity .15s}
+.cargo-force-arrow::after{content:'';position:absolute;left:100%;top:50%;transform:translateY(-50%);border-left:calc(10px + var(--force-step,2)*4px) solid #ff8a2a;border-top:calc(6px + var(--force-step,2)*3px) solid transparent;border-bottom:calc(6px + var(--force-step,2)*3px) solid transparent}
+.cargo-force-arrow b{position:absolute;bottom:calc(100% + 8px);left:0;white-space:nowrap;padding:2px 8px;border-radius:8px;background:#fff6dc;color:#7a3d06;font-size:16px;font-weight:900}
+.cargo-dragging .cargo-force-arrow,.cargo-scene[data-busy="true"] .cargo-force-arrow{opacity:1}
+.cargo-scene[data-action="pull"] .cargo-force-arrow{left:calc(100% + 2px);bottom:56%}
+.cargo-dock{display:flex;align-items:center;gap:24px;background:#fdf6e5;border:2px solid #d9c39d;border-radius:18px;padding:12px 20px;color:#174b4c;box-shadow:0 4px 0 #c9a87b}
+.cargo-inventory,.cargo-method{display:flex;align-items:center;gap:14px}.cargo-inventory>strong,.cargo-method>strong{max-width:130px;font-size:16px}
+.cargo-load-options{display:flex;gap:10px}
+.cargo-load-options button{position:relative;min-width:68px;min-height:64px;padding:4px 8px;display:flex;flex-direction:column;align-items:center;border:2px solid #cdbb98;background:#fffdf7;border-radius:12px;font-weight:900;color:#174b4c;touch-action:none}
+.cargo-load-options button img{height:33px;width:50px;object-fit:contain;pointer-events:none}
+.cargo-load-options button.selected{border-color:#087c79;background:#d2f1e5;box-shadow:inset 0 0 0 2px #087c79}
+.cargo-load-options button.cargo-next-choice{border-color:#be8c38;box-shadow:0 0 0 2px #ffe0a4}
+.cargo-choice-finger{position:absolute;right:-10px;bottom:-13px;width:29px;height:33px;z-index:2;pointer-events:none;animation:cargo-finger-tap 1.5s ease-in-out infinite;filter:drop-shadow(0 2px 2px #49361c40)}
+.cargo-choice-finger svg{width:100%;height:100%}
+.cargo-method .segmented button{font-size:16px;min-height:56px;padding:8px 12px}
+.cargo-orders,.cargo-force{display:flex;align-items:center;gap:14px}.cargo-orders>strong,.cargo-force>strong{max-width:130px;font-size:16px}
+.cargo-order-cards{display:flex;gap:8px}
+.cargo-order-card{display:grid;justify-items:center;align-content:center;min-width:84px;min-height:60px;padding:4px 8px;border:2px dashed #cdbb98;border-radius:12px;background:#fffdf7;color:#7b6a4c;font-size:14px;line-height:1.2}
+.cargo-order-card b{font-size:16px}.cargo-order-card em{font-style:normal;font-weight:900;font-size:14px}
+.cargo-order-card[data-state="now"]{border:3px solid #087c79;background:#d2f1e5;color:#174b4c;animation:cargo-order-pop .6s ease-out}
+.cargo-order-card[data-state="done"]{border:2px solid #4c9a5a;background:#e6f4e7;color:#1c5a43}
+@keyframes cargo-order-pop{0%{transform:scale(.9)}60%{transform:scale(1.05)}100%{transform:none}}
+.cargo-force .segmented button{display:flex;align-items:center;gap:8px;font-size:16px;min-height:56px;padding:8px 12px}
+.cargo-step-arrow{position:relative;display:inline-block;width:calc(8px + var(--step)*7px);height:calc(2px + var(--step)*2px);background:currentColor;border-radius:2px;margin-right:calc(4px + var(--step)*2px)}
+.cargo-step-arrow::after{content:'';position:absolute;left:100%;top:50%;transform:translateY(-50%);border-left:calc(4px + var(--step)*2px) solid currentColor;border-top:calc(3px + var(--step)*2px) solid transparent;border-bottom:calc(3px + var(--step)*2px) solid transparent}
+#cargo-direction{color:#3d5f4a;font-weight:700}
+.cargo-discovery #cargo-open-orders{margin-top:8px}
+.cargo-notebook-toggle{margin-left:auto;min-height:56px;padding:10px 16px;background:#1e6664;color:#fff4d7;border:0;border-radius:12px;font-weight:800;font-size:16px;white-space:nowrap}
+.cargo-notebook-toggle span{background:#f5ce74;color:#264846;border-radius:50%;padding:3px 7px}
+.cargo-notebook{position:absolute;left:1%;right:1%;bottom:110px;z-index:20;display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:16px 20px;background:#fffaf0;border:2px solid #d8c395;border-radius:18px;color:#214d4b;font-size:16px;box-shadow:0 10px 30px #183b4266}
+.cargo-notebook[hidden],.cargo-dock [hidden],.rail-end[hidden]{display:none}
+.cargo-notebook h2{font-size:18px;margin:0 0 8px}.cargo-notebook p{margin:6px 0;font-size:16px}
+.cargo-trace{display:grid;grid-template-columns:3em 1fr 4.2em;align-items:center;gap:10px;font-size:18px;font-weight:800;white-space:nowrap;margin:8px 0}.cargo-trace b{height:16px;border-radius:8px;background:#ece2cc;overflow:hidden}.cargo-trace i{display:block;height:100%;border-radius:8px;background:var(--trace)}
+.cargo-discovery>div{display:flex;gap:8px;margin-top:8px}.cargo-discovery button{min-height:48px;border:2px solid #8eb8a6;background:#e6f4e7;color:#164c49;border-radius:10px;padding:8px 12px;font:inherit;font-weight:700}
+#cargo-results{display:flex;flex-direction:column;gap:8px;justify-content:center}
+.cargo-load-ghost{position:fixed;z-index:1500;width:90px;pointer-events:none;transform:translate(-50%,-50%);text-align:center;background:#fff7ddbd;border-radius:14px;padding:5px;color:#184945}
+.cargo-load-ghost img{width:70px;display:block}.cargo-load-ghost b{font-size:18px}
+@media(max-width:1280px){.cargo-dock{gap:12px;padding:10px 12px}.cargo-inventory,.cargo-method{gap:8px}.cargo-inventory>strong,.cargo-method>strong,.cargo-orders>strong,.cargo-force>strong{display:none}.cargo-order-card{min-width:70px}.cargo-notebook{grid-template-columns:1fr 1fr}.cargo-notebook #cargo-results{display:none}}
+@media(min-width:1600px){.cargo-dock{padding:18px 26px}.cargo-dock strong,.cargo-method .segmented button,.cargo-notebook-toggle,.cargo-force .segmented button,.cargo-scene-caption,.cargo-notebook,.cargo-notebook p{font-size:20px}.cargo-load-options button{min-width:90px;font-size:18px}.cargo-load-tag,.cargo-gesture-target,.cargo-ghost span,.cargo-force-arrow b,.cargo-target-zone span,.cargo-order-card b{font-size:18px}.cargo-trace{font-size:20px}.cargo-order-card{min-width:100px}}
+
+/* One colour per load, shared by the rail ghosts and the side-by-side bars. */
+.cargo-trace[data-parts="1"],.cargo-ghost[data-parts="1"]{--trace:#20978c}
+.cargo-trace[data-parts="3"],.cargo-ghost[data-parts="3"]{--trace:#d29a1e}
+.cargo-trace[data-parts="5"],.cargo-ghost[data-parts="5"]{--trace:#c0612a}
+.cargo-ghost:not([data-parts="0"]) span{border:3px solid var(--trace);color:#3d2f15}
+.cargo-discovery>.cargo-bakery-call{display:block}.cargo-discovery>.cargo-bakery-call[hidden]{display:none}
+.cargo-bakery-call{margin-top:12px;padding:10px 14px;border-radius:12px;background:#fff1cf;border:2px solid #f2c45a}
+.cargo-bakery-call p{margin:0 0 8px;word-break:keep-all}

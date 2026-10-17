@@ -1,0 +1,24 @@
+{
+  "name": "udangtang-force-lab-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "assets:prepare": "node scripts/prepare-assets.mjs",
+    "assets:core": "node scripts/prepare-core-models.mjs",
+    "build": "tsc --noEmit && vite build",
+    "test": "node --test scripts/test-model.mjs scripts/test-village-story.mjs scripts/test-village-map.mjs scripts/test-rescue-flow.mjs scripts/test-cargo-l2.mjs scripts/test-scale-l2.mjs scripts/test-workshop-l2.mjs scripts/test-balance-l2.mjs scripts/test-stars.mjs scripts/test-life-cards.mjs scripts/test-tool-cards.mjs scripts/test-request-board.mjs",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.180.0",
+    "meshoptimizer": "0.25.0",
+    "sharp": "^0.35.4",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.0"
+  }
+}

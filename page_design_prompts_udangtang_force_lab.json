@@ -1,0 +1,382 @@
+{
+  "meta": {
+    "schemaVersion": "1.0",
+    "projectTitle": "우당탕 힘 실험실",
+    "repositoryName": "udangtang-force-lab",
+    "grade": 3,
+    "semester": "3-1",
+    "unit": "힘과 우리 생활",
+    "stages": 5,
+    "screens": 10,
+    "primaryDevice": "tablet-landscape",
+    "threeDPages": [2, 7, 10],
+    "curriculumStandards": [
+      {
+        "code": "4과01-01",
+        "text": "일상생활에서 힘과 관련된 현상에 흥미를 갖고, 물체를 밀거나 당길 때 나타나는 현상을 관찰할 수 있다."
+      },
+      {
+        "code": "4과01-02",
+        "text": "수평잡기 활동을 통해 물체의 무게를 비교할 수 있다."
+      },
+      {
+        "code": "4과01-03",
+        "text": "무게를 정확히 비교하기 위해서는 저울이 필요함을 알고, 저울을 사용해 무게를 비교할 수 있다."
+      },
+      {
+        "code": "4과01-04",
+        "text": "지레, 빗면과 같은 도구를 이용하면 물체를 들어 올릴 때 드는 힘의 크기가 달라짐을 알고, 도구가 일상생활에서 어떻게 쓰이는지 조사하여 공유할 수 있다."
+      }
+    ]
+  },
+  "globalDesignSystem": {
+    "concept": "밝고 세련된 과학 실험실과 메이커 공방이 결합된 프리미엄 교육 게임. 초등 3학년에게 친근하지만 유아용처럼 단순하거나 과장되지 않는다.",
+    "palette": ["teal", "blue", "warm orange", "cream", "restrained gold"],
+    "learningLoop": ["예상 또는 계획", "직접 조작", "결과 관찰", "비교", "수정 또는 재실험", "적용"],
+    "uiRules": [
+      "한국어 텍스트는 이미지에 굽지 않고 HTML/CSS/SVG로 구현",
+      "16:9 가로형, safe area 6%",
+      "최소 터치 44px, 권장 48px",
+      "한 화면의 핵심 CTA 최대 2개",
+      "색만으로 상태 구분 금지",
+      "이모지 중심 UI, 유아용 스티커북 느낌, 템플릿형 바이브코딩 UI 금지"
+    ],
+    "forbidden": [
+      "OX 퀴즈만으로 스테이지 완료",
+      "객관식 연속 페이지",
+      "힘의 단위 N 계산",
+      "토크/모멘트 공식 노출",
+      "지레 기계적 이득 계산",
+      "정답 즉시 공개 후 다음 버튼",
+      "10페이지 모두 동일한 드래그 조작",
+      "첨부 수업자료의 화면·문항·게임 규칙 직접 복제"
+    ]
+  },
+  "pages": [
+    {
+      "pageNumber": 1,
+      "pageId": "p01",
+      "stage": 1,
+      "stageName": "힘 배송실",
+      "title": "짐을 옮겨라",
+      "standardCodes": ["4과01-01"],
+      "runtime": "phaser-2d",
+      "learningGoal": "무게 조건을 바꾸어 같은 물체를 밀고 당길 때 드는 힘의 차이를 관찰한다.",
+      "studentMission": "실험 부품을 상자에 넣고 빼며 무게를 바꾼 뒤 같은 거리까지 밀기와 당기기를 모두 시험한다.",
+      "coreInteractions": [
+        "부품을 상자 안으로 drag-and-drop",
+        "상자를 미는 방향으로 swipe",
+        "손잡이를 잡고 당기는 방향으로 drag",
+        "1개/3개/5개 조건 즉시 재실험"
+      ],
+      "layout": {
+        "top": "Stage 표시와 한 줄 미션",
+        "center": "캐릭터, 출발선, 상자, 도착선",
+        "left": "가상 실험 부품 선반",
+        "right": "현재 상자 상태와 정성적 힘 게이지",
+        "bottom": "자동 연구노트와 다시 실험"
+      },
+      "gameLogic": [
+        "상자 총 질량은 내부값으로 계산하되 힘 수치 N은 노출하지 않는다.",
+        "무거운 조건에서 동일 gesture 대비 이동 반응을 줄이고 캐릭터 자세를 더 힘든 모습으로 바꾼다.",
+        "최소 두 무게 조건과 밀기/당기기 모두 수행해야 완료한다.",
+        "조건과 관찰 결과를 ResearchNotebook에 자동 기록한다."
+      ],
+      "feedback": {
+        "success": "내용물이 많아진 상자를 움직일 때 더 큰 힘이 들었어.",
+        "retry": "상자 조건을 바꾸어 한 번 더 비교해 보자.",
+        "punitiveFailure": false
+      },
+      "visualPrompt": "밝은 미래형 과학 실험실 배송 구역. 낮은 컨베이어, 청록색 실험 상자, 주황 안전선, 작은 과학 부품 선반. 중앙에 캐릭터와 상자가 크게 보이고 출발선과 도착선이 명확하다. polished 2D/2.5D game art, clean laboratory toy-diorama feeling, no embedded text.",
+      "implementationPrompt": "Phaser 3로 구현. 상자에 부품을 넣고 빼면 내부 massValue를 갱신하고 밀기/당기기 제스처 반응량과 캐릭터 애니메이션을 정성적으로 바꾼다. 정답 버튼이 아니라 최소 두 조건의 직접 비교를 완료 조건으로 사용한다. DOM 연구노트에 실험 조건과 관찰을 저장한다."
+    },
+    {
+      "pageNumber": 2,
+      "pageId": "p02",
+      "stage": 1,
+      "stageName": "힘 배송실",
+      "title": "막힌 창고 탈출",
+      "standardCodes": ["4과01-01"],
+      "runtime": "threejs-3d",
+      "learningGoal": "공간에서 캐릭터와 상자의 상대 위치를 보고 밀기와 당기기 방향을 선택한다.",
+      "studentMission": "창고를 둘러보고 캐릭터 위치를 바꾸어 상자를 목표 구역까지 옮긴다.",
+      "coreInteractions": [
+        "좌우 swipe로 제한된 카메라 회전",
+        "바닥 tap 또는 가상 스틱으로 캐릭터 이동",
+        "상자 가까이에서 밀기/당기기",
+        "상자 이동 후 캐릭터 위치 재배치",
+        "되돌리기"
+      ],
+      "layout": {
+        "world": "3D 창고, 통로, 벽, 상자 1~2개, 목표 패드",
+        "hudTop": "현재 목표",
+        "hudBottomLeft": "이동 입력",
+        "hudBottomRight": "밀기/당기기 컨텍스트 액션",
+        "hudCorner": "되돌리기"
+      },
+      "gameLogic": [
+        "그리드/AABB 기반 kinematic 이동을 사용하고 별도 강체엔진은 필수로 쓰지 않는다.",
+        "캐릭터가 상자의 적절한 면에 접근했을 때만 밀기/당기기 가능하다.",
+        "최소 2회 이상의 위치 변경 또는 힘 방향 전환이 필요한 레벨을 포함한다.",
+        "최근 10개 의미 있는 상태를 snapshot으로 저장해 되돌리기 제공."
+      ],
+      "feedback": {
+        "blocked": "이쪽에서는 길이 막혔어. 상자 반대쪽으로 이동해 볼까?",
+        "success": "상자의 위치와 힘의 방향을 바꾸어 길을 열었어."
+      },
+      "threeDReason": "캐릭터-상자-통로의 상대 위치와 힘 방향을 실제 공간에서 판단하게 하기 위해 3D가 핵심 학습 기능을 담당한다.",
+      "visualPrompt": "밝은 3D 과학 창고. 청록·파랑 금속 선반, 주황 안전선, 넓은 통로, 실험 상자, 바닥 목표 패드. 위에서 약간 내려다보는 3/4 뷰, 공간 구조가 잘 읽히고 장식은 절제된 프리미엄 교육 게임.",
+      "implementationPrompt": "Three.js로 구현. 오른손 좌표계, Y up, XZ 이동. 제한된 orbit camera와 단순 AABB 충돌을 사용한다. Hub와 Phaser 렌더 루프는 동시에 돌리지 않는다. 상자는 kinematic grid 이동, 되돌리기는 상태 snapshot으로 처리한다."
+    },
+    {
+      "pageNumber": 3,
+      "pageId": "p03",
+      "stage": 2,
+      "stageName": "균형 실험실",
+      "title": "기울기를 예측하라",
+      "standardCodes": ["4과01-02"],
+      "runtime": "phaser-2d-physics",
+      "learningGoal": "수평잡기 결과를 관찰하여 두 물체의 무게를 비교한다.",
+      "studentMission": "물체를 올리기 전 기울기 방향을 예상한 뒤 직접 배치하고 실제 결과와 비교한다.",
+      "coreInteractions": ["왼쪽/수평/오른쪽 예상", "물체를 수평대 위치 칸에 drag", "물체 위치 재조정", "재실험"],
+      "layout": {
+        "top": "예상 패널",
+        "center": "큰 수평대와 받침점, 좌우 위치 칸",
+        "bottom": "가상 샘플 트레이",
+        "side": "나의 예상 / 실제 결과 카드"
+      },
+      "gameLogic": [
+        "내부 계산은 무게와 받침점 거리를 사용하지만 공식을 UI에 표시하지 않는다.",
+        "같은 거리 비교 라운드와 서로 다른 위치에서 수평 만들기 라운드를 포함한다.",
+        "예상이 틀려도 정답을 즉시 공개하지 않고 실제 결과를 보여 준 뒤 위치를 바꾸게 한다."
+      ],
+      "feedback": {
+        "mismatch": "예상과 실제가 달랐어. 물체의 위치를 바꾸어 다시 확인해 보자.",
+        "balanced": "어느 쪽으로도 기울지 않았어. 수평이야."
+      },
+      "visualPrompt": "밝은 균형 실험실. 중앙에 큰 파란 수평대와 금색 받침점, 좌우에 명확한 위치 칸. 외형만으로 무게를 단정하기 어려운 가상 캡슐과 샘플 용기. clean 2D game UI with subtle 3D shading.",
+      "implementationPrompt": "Phaser 3로 수평대 pivot 회전을 시각화한다. 내부 solver는 mass*distance 합을 사용하되 학생에게 공식과 수치를 노출하지 않는다. prediction/observation 이벤트를 ExperimentLog에 저장한다."
+    },
+    {
+      "pageNumber": 4,
+      "pageId": "p04",
+      "stage": 2,
+      "stageName": "균형 실험실",
+      "title": "세 물체의 비밀",
+      "standardCodes": ["4과01-02"],
+      "runtime": "phaser-2d",
+      "learningGoal": "두 물체씩 비교한 결과를 연결하여 세 물체의 무게 순서를 추론한다.",
+      "studentMission": "A, B, C 중 원하는 두 개를 골라 수평잡기 실험을 하고 가장 무거운 것부터 순서를 완성한다.",
+      "coreInteractions": ["비교할 두 물체 선택", "수평잡기 실행", "비교 결과 자동 기록", "세 물체 drag sorting"],
+      "layout": {
+        "top": "실험 횟수와 목표",
+        "center": "수평대",
+        "bottom": "A/B/C 샘플",
+        "right": "비교 기록 보드",
+        "final": "무거운 순서 정렬 슬롯"
+      },
+      "gameLogic": [
+        "실제 내부 무게 순서는 sessionSeed로 결정한다.",
+        "비교 결과를 A>B 형태의 방향 관계로 누적한다.",
+        "학생이 충분한 근거를 모았다고 판단하면 최종 정렬을 제출한다.",
+        "추가 실험은 허용하고 실패 패널티를 주지 않는다."
+      ],
+      "feedback": {
+        "insufficient": "아직 확실하지 않다면 한 번 더 비교해도 좋아.",
+        "success": "여러 비교 결과를 연결해 무게 순서를 알아냈어."
+      },
+      "visualPrompt": "과학 추론 보드가 있는 균형실. A/B/C 샘플은 서로 다른 형태와 색이지만 크기만으로 무게를 추측하기 어렵다. 오른쪽에는 실험 기록 카드가 깔끔하게 쌓인다. 유치한 탐정 장식은 피한다.",
+      "implementationPrompt": "ComparisonGraph 서비스를 사용해 A>B, B>C 관계를 누적하고 최종 정렬과 실제 seed 순서를 비교한다. 최소 비교 횟수는 보너스에만 사용한다."
+    },
+    {
+      "pageNumber": 5,
+      "pageId": "p05",
+      "stage": 3,
+      "stageName": "무게 측정실",
+      "title": "목표 무게를 맞춰라",
+      "standardCodes": ["4과01-03"],
+      "runtime": "phaser-dom-hybrid",
+      "learningGoal": "어림만으로 정확한 비교가 어렵다는 점을 경험하고 전자저울을 올바르게 사용한다.",
+      "studentMission": "가상 실험 부품을 조합해 목표 무게 꾸러미를 만들고 전자저울로 확인한다.",
+      "coreInteractions": ["부품을 바구니에 drag", "예상 확정", "전자저울 전원/영점", "바구니 올리기", "부품 교체 후 재측정"],
+      "layout": {
+        "top": "목표 무게",
+        "left": "가상 실험 부품",
+        "center": "조합 바구니",
+        "right": "전자저울",
+        "bottom": "예상값/측정값/조정 기록"
+      },
+      "gameLogic": [
+        "일부 라운드는 저울이 0이 아닌 offset으로 시작한다.",
+        "영점 조절 전 측정은 오류 상태지만 정답 팝업 대신 0이 아님을 스스로 발견하게 한다.",
+        "가상 부품 무게는 sessionSeed로 결정한다.",
+        "실제 생활물품의 고정 무게 암기를 피한다."
+      ],
+      "feedback": {
+        "needsZero": "저울 위에 아무것도 없는데 숫자가 0일까?",
+        "tooHeavy": "목표보다 무거워. 어떤 부품을 바꾸면 좋을까?",
+        "tooLight": "목표보다 가벼워. 다시 조합해 보자."
+      },
+      "visualPrompt": "밝은 전자계측 실험실. 왼쪽에 가상 샘플 부품, 중앙 투명 바구니, 오른쪽 큰 전자저울. 숫자 UI는 DOM으로 구현할 빈 공간을 충분히 둔다. clean 2.5D laboratory game art.",
+      "implementationPrompt": "Phaser는 물체 조합과 애니메이션, DOM은 저울 숫자와 버튼을 담당한다. ScaleSystem에 offset, zeroed, stable 상태를 둔다. sessionSeed 기반 weight set을 저장한다."
+    },
+    {
+      "pageNumber": 6,
+      "pageId": "p06",
+      "stage": 3,
+      "stageName": "무게 측정실",
+      "title": "고장 난 저울을 고쳐라",
+      "standardCodes": ["4과01-03"],
+      "runtime": "phaser-2_5d",
+      "learningGoal": "용수철저울의 영점, 표시자 안정, 눈높이 맞추기 절차를 수행한다.",
+      "studentMission": "측정값이 이상한 용수철저울의 원인을 직접 조작으로 바로잡고 눈금을 읽는다.",
+      "coreInteractions": ["영점 조절 나사를 원형 drag", "고리에 물체 drag", "표시자 흔들림 관찰", "관찰 시점을 위/아래 drag", "눈금 판독"],
+      "layout": {
+        "center": "큰 용수철저울 클로즈업",
+        "right": "관찰 시점 조절 영역",
+        "bottom": "물체 트레이",
+        "top": "현재 점검 목표",
+        "side": "영점/안정/눈높이 점검 아이콘"
+      },
+      "gameLogic": [
+        "표시자는 감쇠 진동 후 stable 상태가 된다.",
+        "영점이 틀리면 target에 offset이 더해져 보인다.",
+        "눈높이가 맞지 않으면 표시자와 눈금 사이에 시차가 생긴다.",
+        "영점·안정·눈높이 세 조건을 모두 바로잡아야 판독 가능 상태가 된다."
+      ],
+      "feedback": {
+        "zero": "표시자가 0에 맞았어.",
+        "wait": "표시자가 아직 움직이고 있어. 잠시 관찰해 보자.",
+        "eyeLevel": "표시자와 눈높이가 맞았어. 이제 눈금을 읽을 수 있어."
+      },
+      "visualPrompt": "용수철저울을 크게 확대한 2.5D 계측 화면. 손잡이, 영점 조절 나사, 용수철, 표시자, 눈금, 고리가 명확히 구분된다. 특정 교과서 그림을 복제하지 않고 시점 변화에 따른 표시자-눈금 관계가 잘 보이게 한다.",
+      "implementationPrompt": "SpringScaleStateMachine을 구현한다. pointer는 damped oscillation, vertical viewOffset은 parallax를 표현한다. 학생에게 수식은 노출하지 않는다. 최종 판독은 큰 숫자 패드 또는 스크롤 입력으로 처리한다."
+    },
+    {
+      "pageNumber": 7,
+      "pageId": "p07",
+      "stage": 4,
+      "stageName": "힘 절약 공방",
+      "title": "장치를 만들어라",
+      "standardCodes": ["4과01-04"],
+      "runtime": "threejs-3d",
+      "learningGoal": "직접 들어 올리기와 지레·빗면 이용 시 드는 힘의 차이를 관찰한다.",
+      "studentMission": "긴 판과 받침대, 경사판을 직접 배치해 화물을 올리는 두 가지 장치를 만든다.",
+      "coreInteractions": ["3D 부품 drag", "부품 회전", "스냅 포인트 맞추기", "지레 누르기", "빗면 따라 화물 이동", "세 방법 비교"],
+      "layout": {
+        "world": "3D 작업대, 화물, 부품 랙, 높이가 다른 플랫폼",
+        "hudTop": "현재 실험 단계",
+        "hudBottom": "부품 정보",
+        "hudSide": "직접/지레/빗면 힘 느낌 기록"
+      },
+      "gameLogic": [
+        "완성품 버튼 대신 부품을 올바른 snap point에 배치해야 장치가 활성화된다.",
+        "완전한 rigid-body보다 snap constraints와 scripted motion을 사용한다.",
+        "같은 화물로 직접 들기, 지레, 빗면을 모두 수행한다.",
+        "정량 N이 아니라 큰 힘/중간/작은 힘의 정성 피드백을 사용한다."
+      ],
+      "feedback": {
+        "snap": "부품이 안정적으로 연결됐어.",
+        "wrongAssembly": "이 위치에서는 장치가 작동하기 어려워. 받침대와 판의 위치를 다시 보자.",
+        "success": "도구를 이용하니 직접 들 때와 드는 힘이 달라졌어."
+      },
+      "threeDReason": "지레와 빗면을 완성품으로 고르는 대신 부품의 위치와 구조를 직접 구성하게 하기 위해 3D를 사용한다.",
+      "visualPrompt": "밝은 3D 메이커 공방형 과학 실험실. 긴 판, 둥근 받침대, 경사판, 파란 화물 상자, 높이가 다른 작업 플랫폼. 청록·주황·크림·금색 포인트. 부품 구조가 잘 읽히는 프리미엄 3D 교육 게임.",
+      "implementationPrompt": "Three.js BaseThreeLearningScene 사용. SnapPoint3D 시스템으로 plank/fulcrum/ramp를 제한된 위치에 배치한다. 레버와 램프 작동은 결정론적 애니메이션으로 구현해 결과를 안정시킨다. 별도 물리엔진은 필수 추가하지 않는다."
+    },
+    {
+      "pageNumber": 8,
+      "pageId": "p08",
+      "stage": 4,
+      "stageName": "힘 절약 공방",
+      "title": "생활 도구 분석실",
+      "standardCodes": ["4과01-04"],
+      "runtime": "phaser-2_5d",
+      "learningGoal": "생활 속 지레·빗면 도구를 작동시킨 뒤 쓰임과 연결하여 분류하고 공유 자료를 만든다.",
+      "studentMission": "도구를 맞는 대상에 사용해 보고 어떤 종류인지 도감에 등록한다.",
+      "coreInteractions": ["도구 선택", "도구를 대상에 drag", "도구별 미니 조작", "지레/빗면 도감 등록", "도구 사용 카드 생성"],
+      "layout": {
+        "center": "작동 테스트 테이블",
+        "left": "도구 선반",
+        "right": "지레/빗면 도감",
+        "bottom": "작동 설명과 사용 카드"
+      },
+      "toolExamples": ["병따개", "가위", "시소", "경사로", "나사못"],
+      "gameLogic": [
+        "도구 이름을 클릭하는 대신 실제 대상에 사용해야 분석이 열린다.",
+        "작동 후 도구가 힘을 다르게 쓰게 해 주는 장면을 짧은 애니메이션으로 보여 준다.",
+        "2개 이상 분석하면 결과 카드를 생성한다.",
+        "공유는 백엔드 없이 PNG 저장 또는 지원 브라우저 Web Share API를 사용한다."
+      ],
+      "feedback": {
+        "wrongTarget": "이 도구는 여기에서 어떻게 쓰일까? 다른 대상을 시험해 보자.",
+        "success": "직접 작동해 보고 도구의 쓰임을 확인했어."
+      },
+      "visualPrompt": "현대적인 생활도구 실험 테이블. 병, 종이, 작은 구조물, 경사 플랫폼 등 도구가 쓰이는 대상이 정돈되어 있고 왼쪽 도구 선반, 오른쪽 두 분류 도감 슬롯이 있다. 수업 PPT나 활동지를 복제하지 않은 독자적 2.5D 게임 화면.",
+      "implementationPrompt": "tool-catalog.json에 target, interactionType, category를 정의한다. ToolInteractionController가 도구별 조작을 실행하고 성공 후 catalog state를 갱신한다. Canvas API로 이름 없는 결과 카드 PNG를 만든다."
+    },
+    {
+      "pageNumber": 9,
+      "pageId": "p09",
+      "stage": 5,
+      "stageName": "긴급 운반 작전",
+      "title": "긴급 화물 운반",
+      "standardCodes": ["4과01-01", "4과01-02", "4과01-03", "4과01-04"],
+      "runtime": "phaser-2_5d",
+      "learningGoal": "밀기·당기기, 무게 비교, 저울, 지레·빗면을 하나의 문제에 조합해 적용한다.",
+      "studentMission": "에너지 코어를 연구동까지 옮겨라. 해결 순서는 학생이 정한다.",
+      "coreInteractions": ["화물 상태 조사", "수평잡기 또는 저울 호출", "밀기/당기기 방향 선택", "경로 선택", "지레/빗면 설치 위치 결정", "작전 실행"],
+      "layout": {
+        "top": "작전 목표",
+        "center": "2.5D 연구동 운반 맵",
+        "left": "사용 가능한 실험 도구",
+        "right": "작전 계획 슬롯",
+        "bottom": "실행 / 계획 수정"
+      },
+      "gameLogic": [
+        "MissionRuleEngine이 여러 validSolutions를 허용한다.",
+        "최소 3개 이상의 앞 단계 개념을 사용해야 완료 가능하다.",
+        "정답 순서를 고정하지 않고 사용한 개념과 결과의 타당성을 검증한다.",
+        "화물과 경로 배치는 seed로 일부 변경한다."
+      ],
+      "feedback": {
+        "planIssue": "이 계획으로는 한 구간을 통과하기 어려워. 어떤 정보를 더 확인하면 좋을까?",
+        "success": "여러 실험 방법을 연결해 운반 계획을 완성했어."
+      },
+      "visualPrompt": "과학 연구동을 연결하는 2.5D 운반 지도. 낮은 경사 구간, 좁은 통로, 측정 스테이션, 화물 대기 구역이 한눈에 보이는 아이소메트릭 디오라마. 경로는 2~3개로 명료하게 구성한다.",
+      "implementationPrompt": "Phaser 2.5D와 MissionRuleEngine 사용. compare/scale/forceDirection/route/tool 액션을 검증하고 각 미션 JSON에 validSolutions 배열을 둔다. 힌트는 정답 순서가 아니라 부족한 정보나 아직 쓰지 않은 개념을 안내한다."
+    },
+    {
+      "pageNumber": 10,
+      "pageId": "p10",
+      "stage": 5,
+      "stageName": "긴급 운반 작전",
+      "title": "힘 슈트 최종 출동",
+      "standardCodes": ["4과01-01", "4과01-02", "4과01-03", "4과01-04"],
+      "runtime": "threejs-3d",
+      "learningGoal": "단원 개념을 종합 적용하고 힘을 보조하는 과학기술의 활용을 경험한다.",
+      "studentMission": "마지막 연구동의 잔해를 조사하고 알맞은 힘 방향과 도구를 준비한 뒤 힘 보조 슈트를 활성화해 통로를 복구한다.",
+      "coreInteractions": ["3인칭 캐릭터 이동", "잔해 조사", "밀기/당기기 방향 결정", "도구 준비", "힘 보조 슈트 활성화", "복구 연출", "최종 기록 확인"],
+      "layout": {
+        "world": "3D 연구동 마지막 구역과 막힌 통로",
+        "hudTop": "최종 임무",
+        "hudBottomLeft": "이동",
+        "hudBottomRight": "조사/도구/슈트 컨텍스트 액션",
+        "result": "나의 힘 실험 기록 + 5개 배지 조각 완성"
+      },
+      "gameLogic": [
+        "슈트는 조사와 도구 준비가 끝난 뒤에만 unlock된다.",
+        "캐릭터 이동은 kinematic, 카메라는 3인칭 follow.",
+        "마지막 이동은 scripted cooperative action으로 안정적으로 연출한다.",
+        "힘 보조 슈트는 확장 요소이며 별도 성취기준 평가로 사용하지 않는다."
+      ],
+      "feedback": {
+        "lockedSuit": "힘을 더하기 전에 어떤 방향과 도구가 필요한지 먼저 확인하자.",
+        "success": "배운 힘의 원리를 이용해 실험실을 다시 움직이게 했어."
+      },
+      "threeDReason": "단원 전체에서 사용한 공간 판단과 도구 적용을 하나의 환경에서 통합하고 최종 성취감을 주기 위해 3D를 사용한다.",
+      "visualPrompt": "밝고 극적인 3D 과학 연구동 최종 구역. 무섭지 않은 안전한 고장 상황, 청록빛 에너지 코어, 기계 잔해, 경사판 설치 지점, 간결한 힘 보조 슈트. 과도한 전투 메카 스타일은 피하고 복구 후 조명과 장치가 단계적으로 켜진다.",
+      "implementationPrompt": "Three.js 3인칭 follow camera와 kinematic mover 사용. 잔해 조사 -> 방향 결정 -> 도구 준비 -> 슈트 활성화 순서를 state machine으로 관리한다. 종료 시 TopicResult를 만들고 Three runtime을 dispose한 뒤 Science World Hub를 재개한다."
+    }
+  ]
+}

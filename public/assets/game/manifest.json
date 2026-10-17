@@ -1,0 +1,275 @@
+[
+  {
+    "name": "scale",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_02 (1).png",
+    "crop": {
+      "left": 0,
+      "top": 65,
+      "width": 388,
+      "height": 287
+    },
+    "width": 388,
+    "height": 287,
+    "bytes": 19902
+  },
+  {
+    "name": "tray",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_02 (1).png",
+    "crop": {
+      "left": 776,
+      "top": 142,
+      "width": 338,
+      "height": 201
+    },
+    "width": 338,
+    "height": 201,
+    "bytes": 15968
+  },
+  {
+    "name": "wood-block",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_02 (1).png",
+    "crop": {
+      "left": 1214,
+      "top": 647,
+      "width": 212,
+      "height": 190
+    },
+    "width": 180,
+    "height": 161,
+    "bytes": 7980
+  },
+  {
+    "name": "nut",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_02 (1).png",
+    "crop": {
+      "left": 39,
+      "top": 662,
+      "width": 197,
+      "height": 183
+    },
+    "width": 180,
+    "height": 167,
+    "bytes": 9552
+  },
+  {
+    "name": "book",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_02 (1).png",
+    "crop": {
+      "left": 526,
+      "top": 630,
+      "width": 292,
+      "height": 222
+    },
+    "width": 180,
+    "height": 137,
+    "bytes": 8666
+  },
+  {
+    "name": "apple",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_02 (1).png",
+    "crop": {
+      "left": 900,
+      "top": 370,
+      "width": 246,
+      "height": 259
+    },
+    "width": 180,
+    "height": 190,
+    "bytes": 10476
+  },
+  {
+    "name": "eraser",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_02 (1).png",
+    "crop": {
+      "left": 342,
+      "top": 399,
+      "width": 210,
+      "height": 211
+    },
+    "width": 180,
+    "height": 181,
+    "bytes": 8470
+  },
+  {
+    "name": "rock",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_22 (1).png",
+    "crop": {
+      "left": 776,
+      "top": 591,
+      "width": 164,
+      "height": 164
+    },
+    "width": 164,
+    "height": 164,
+    "bytes": 7676
+  },
+  {
+    "name": "balance-pan",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_22 (1).png",
+    "crop": {
+      "left": 43,
+      "top": 354,
+      "width": 448,
+      "height": 197
+    },
+    "width": 400,
+    "height": 176,
+    "bytes": 14426
+  },
+  {
+    "name": "balance-base",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_22 (1).png",
+    "crop": {
+      "left": 545,
+      "top": 352,
+      "width": 353,
+      "height": 216
+    },
+    "width": 320,
+    "height": 196,
+    "bytes": 13760
+  },
+  {
+    "name": "balance-beam",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_22 (1).png",
+    "crop": {
+      "left": 445,
+      "top": 128,
+      "width": 163,
+      "height": 51
+    },
+    "width": 163,
+    "height": 51,
+    "bytes": 1366
+  },
+  {
+    "name": "crate-empty",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_41 (1).png",
+    "crop": {
+      "left": 24,
+      "top": 117,
+      "width": 457,
+      "height": 373
+    },
+    "width": 457,
+    "height": 373,
+    "bytes": 27390
+  },
+  {
+    "name": "cargo-metal",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_41 (1).png",
+    "crop": {
+      "left": 1100,
+      "top": 529,
+      "width": 337,
+      "height": 215
+    },
+    "width": 180,
+    "height": 115,
+    "bytes": 7642
+  },
+  {
+    "name": "student-idle",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_03 (3).png",
+    "crop": {
+      "left": 47,
+      "top": 0,
+      "width": 294,
+      "height": 435
+    },
+    "width": 220,
+    "height": 326,
+    "bytes": 25026
+  },
+  {
+    "name": "student-effort",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_03 (3).png",
+    "crop": {
+      "left": 392,
+      "top": 8,
+      "width": 331,
+      "height": 425
+    },
+    "width": 220,
+    "height": 282,
+    "bytes": 22834
+  },
+  {
+    "name": "student-observe",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_03 (3).png",
+    "crop": {
+      "left": 726,
+      "top": 42,
+      "width": 364,
+      "height": 387
+    },
+    "width": 220,
+    "height": 234,
+    "bytes": 18666
+  },
+  {
+    "name": "student-success",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_03 (3).png",
+    "crop": {
+      "left": 1110,
+      "top": 0,
+      "width": 329,
+      "height": 437
+    },
+    "width": 220,
+    "height": 292,
+    "bytes": 22928
+  },
+  {
+    "name": "corgi-idle",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_03 (3).png",
+    "crop": {
+      "left": 41,
+      "top": 440,
+      "width": 306,
+      "height": 307
+    },
+    "width": 190,
+    "height": 191,
+    "bytes": 14298
+  },
+  {
+    "name": "corgi-effort",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_03 (3).png",
+    "crop": {
+      "left": 388,
+      "top": 428,
+      "width": 341,
+      "height": 319
+    },
+    "width": 190,
+    "height": 178,
+    "bytes": 14702
+  },
+  {
+    "name": "corgi-observe",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_03 (3).png",
+    "crop": {
+      "left": 1121,
+      "top": 438,
+      "width": 325,
+      "height": 310
+    },
+    "width": 190,
+    "height": 181,
+    "bytes": 16522
+  },
+  {
+    "name": "corgi-success",
+    "source": "ChatGPT Image 2026년 9월 22일 오후 02_08_03 (3).png",
+    "crop": {
+      "left": 760,
+      "top": 430,
+      "width": 337,
+      "height": 326
+    },
+    "width": 190,
+    "height": 184,
+    "bytes": 14420
+  }
+]

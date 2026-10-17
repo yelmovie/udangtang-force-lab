@@ -1,0 +1,1978 @@
+{
+  "schemaVersion": 3,
+  "generatedAt": "2026-10-07T14:52:59.538Z",
+  "reviewStatus": "UNVERIFIED",
+  "policy": "Extract full grid cells without trim/resize/background removal. Lossless WebP. Not approved for production.",
+  "sources": [
+    {
+      "file": "raw/terrain.png",
+      "width": 1672,
+      "height": 941,
+      "columns": 1,
+      "rows": 1,
+      "xBounds": [
+        0,
+        1672
+      ],
+      "yBounds": [
+        0,
+        941
+      ],
+      "cellWidths": [
+        1672
+      ],
+      "cellHeights": [
+        941
+      ],
+      "variableCellSize": false,
+      "hasAlpha": false,
+      "opaque": true,
+      "sha256": "b891bbe407d75960fd46054d3a8ce3bfc3aa8a5709e5b359b3d8a090d797b6fd"
+    },
+    {
+      "file": "raw/buildings.png",
+      "width": 1536,
+      "height": 1024,
+      "columns": 3,
+      "rows": 2,
+      "xBounds": [
+        0,
+        512,
+        1024,
+        1536
+      ],
+      "yBounds": [
+        0,
+        512,
+        1024
+      ],
+      "cellWidths": [
+        512,
+        512,
+        512
+      ],
+      "cellHeights": [
+        512,
+        512
+      ],
+      "variableCellSize": false,
+      "hasAlpha": true,
+      "opaque": false,
+      "sha256": "6335586017da988afc580414fc9e8582a5f3c199dab5dabd7fff8fd3622c87a5"
+    },
+    {
+      "file": "raw/student-walk.png",
+      "width": 1254,
+      "height": 1254,
+      "columns": 4,
+      "rows": 4,
+      "xBounds": [
+        0,
+        313,
+        627,
+        940,
+        1254
+      ],
+      "yBounds": [
+        0,
+        313,
+        627,
+        940,
+        1254
+      ],
+      "cellWidths": [
+        313,
+        314,
+        313,
+        314
+      ],
+      "cellHeights": [
+        313,
+        314,
+        313,
+        314
+      ],
+      "variableCellSize": true,
+      "hasAlpha": true,
+      "opaque": false,
+      "sha256": "98c213c392822bc3ea60b64cd9c0820ee4f385a103d5c98e73df5df9aa6cba92"
+    },
+    {
+      "file": "raw/corgi-walk.png",
+      "width": 1254,
+      "height": 1254,
+      "columns": 4,
+      "rows": 4,
+      "xBounds": [
+        0,
+        313,
+        627,
+        940,
+        1254
+      ],
+      "yBounds": [
+        0,
+        313,
+        627,
+        940,
+        1254
+      ],
+      "cellWidths": [
+        313,
+        314,
+        313,
+        314
+      ],
+      "cellHeights": [
+        313,
+        314,
+        313,
+        314
+      ],
+      "variableCellSize": true,
+      "hasAlpha": true,
+      "opaque": false,
+      "sha256": "7927e837796925566fe5c93cbc9b77d8aab9b43915f628e8bb3fc7357a5afb54"
+    },
+    {
+      "file": "raw/interior-cargo.png",
+      "width": 1672,
+      "height": 940,
+      "columns": 1,
+      "rows": 1,
+      "xBounds": [
+        0,
+        1672
+      ],
+      "yBounds": [
+        0,
+        940
+      ],
+      "cellWidths": [
+        1672
+      ],
+      "cellHeights": [
+        940
+      ],
+      "variableCellSize": false,
+      "hasAlpha": false,
+      "opaque": true,
+      "sha256": "49921c3ba7a19fa80deee834a3148f5311f0d8972a2276d82b79ff4189d70cfb"
+    },
+    {
+      "file": "raw/interior-balance.png",
+      "width": 1672,
+      "height": 941,
+      "columns": 1,
+      "rows": 1,
+      "xBounds": [
+        0,
+        1672
+      ],
+      "yBounds": [
+        0,
+        941
+      ],
+      "cellWidths": [
+        1672
+      ],
+      "cellHeights": [
+        941
+      ],
+      "variableCellSize": false,
+      "hasAlpha": false,
+      "opaque": true,
+      "sha256": "98c09ea8cc507e074584b76652e9da771e2f5be90c97a1067555645dd92985a8"
+    },
+    {
+      "file": "raw/interior-scale.png",
+      "width": 1672,
+      "height": 941,
+      "columns": 1,
+      "rows": 1,
+      "xBounds": [
+        0,
+        1672
+      ],
+      "yBounds": [
+        0,
+        941
+      ],
+      "cellWidths": [
+        1672
+      ],
+      "cellHeights": [
+        941
+      ],
+      "variableCellSize": false,
+      "hasAlpha": false,
+      "opaque": true,
+      "sha256": "47eedbab6b3f82c57b0e491c50706125cda36cc72bb5a0b2956dc0558f32cc23"
+    },
+    {
+      "file": "raw/interior-workshop.png",
+      "width": 1672,
+      "height": 941,
+      "columns": 1,
+      "rows": 1,
+      "xBounds": [
+        0,
+        1672
+      ],
+      "yBounds": [
+        0,
+        941
+      ],
+      "cellWidths": [
+        1672
+      ],
+      "cellHeights": [
+        941
+      ],
+      "variableCellSize": false,
+      "hasAlpha": false,
+      "opaque": true,
+      "sha256": "afad946824fb14be6ecd1939057c9144ba0ac8fba1375df6b245225c42176953"
+    },
+    {
+      "file": "raw/interior-core.png",
+      "width": 1672,
+      "height": 941,
+      "columns": 1,
+      "rows": 1,
+      "xBounds": [
+        0,
+        1672
+      ],
+      "yBounds": [
+        0,
+        941
+      ],
+      "cellWidths": [
+        1672
+      ],
+      "cellHeights": [
+        941
+      ],
+      "variableCellSize": false,
+      "hasAlpha": false,
+      "opaque": true,
+      "sha256": "0bae06de953e42c0356765bce3d7ac451d75a73a87b5d3775ad5c4569d9525f5"
+    },
+    {
+      "file": "raw/props.png",
+      "width": 1448,
+      "height": 1086,
+      "columns": 4,
+      "rows": 3,
+      "xBounds": [
+        0,
+        362,
+        724,
+        1086,
+        1448
+      ],
+      "yBounds": [
+        0,
+        362,
+        724,
+        1086
+      ],
+      "cellWidths": [
+        362,
+        362,
+        362,
+        362
+      ],
+      "cellHeights": [
+        362,
+        362,
+        362
+      ],
+      "variableCellSize": false,
+      "hasAlpha": true,
+      "opaque": false,
+      "sha256": "d2790701f82a5d6b239828f4d57d1794ad812cfaeee851d33dcc0e71ff265478"
+    },
+    {
+      "file": "raw/npc-guide.png",
+      "width": 1254,
+      "height": 1254,
+      "columns": 2,
+      "rows": 2,
+      "xBounds": [
+        0,
+        627,
+        1254
+      ],
+      "yBounds": [
+        0,
+        627,
+        1254
+      ],
+      "cellWidths": [
+        627,
+        627
+      ],
+      "cellHeights": [
+        627,
+        627
+      ],
+      "variableCellSize": false,
+      "hasAlpha": true,
+      "opaque": false,
+      "sha256": "8fcc7621276e5d255c9b8881a7ce77266c13bc338f5dcf03e32f07613fcbad62"
+    }
+  ],
+  "outputs": [
+    {
+      "source": "raw/terrain.png",
+      "file": "terrain.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 1672,
+        "height": 941
+      },
+      "width": 1672,
+      "height": 941,
+      "bytes": 2161122,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 0,
+        "top": 0,
+        "width": 1672,
+        "height": 941
+      },
+      "pivot": {
+        "x": 836,
+        "y": 941
+      }
+    },
+    {
+      "source": "raw/buildings.png",
+      "file": "buildings/cargo.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "width": 512,
+      "height": 512,
+      "bytes": 222622,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 23,
+        "top": 47,
+        "width": 473,
+        "height": 413
+      },
+      "pivot": {
+        "x": 259.5,
+        "y": 460
+      }
+    },
+    {
+      "source": "raw/buildings.png",
+      "file": "buildings/balance.webp",
+      "index": 1,
+      "row": 0,
+      "column": 1,
+      "crop": {
+        "left": 512,
+        "top": 0,
+        "width": 512,
+        "height": 512
+      },
+      "width": 512,
+      "height": 512,
+      "bytes": 198096,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 66,
+        "top": 29,
+        "width": 380,
+        "height": 429
+      },
+      "pivot": {
+        "x": 256,
+        "y": 458
+      }
+    },
+    {
+      "source": "references/pixel-village-v1/redrawn/scale.png",
+      "file": "buildings/scale.webp",
+      "index": 2,
+      "row": 0,
+      "column": 2,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 1280,
+        "height": 1280
+      },
+      "width": 512,
+      "height": 512,
+      "bytes": 257480,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 13,
+        "top": 61,
+        "width": 486,
+        "height": 411
+      },
+      "pivot": {
+        "x": 256,
+        "y": 472
+      }
+    },
+    {
+      "source": "references/pixel-village-v1/redrawn/workshop.png",
+      "file": "buildings/workshop.webp",
+      "index": 3,
+      "row": 1,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 1280,
+        "height": 1280
+      },
+      "width": 512,
+      "height": 512,
+      "bytes": 232330,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 10,
+        "top": 52,
+        "width": 500,
+        "height": 391
+      },
+      "pivot": {
+        "x": 260,
+        "y": 443
+      }
+    },
+    {
+      "source": "raw/buildings.png",
+      "file": "buildings/core.webp",
+      "index": 4,
+      "row": 1,
+      "column": 1,
+      "crop": {
+        "left": 512,
+        "top": 512,
+        "width": 512,
+        "height": 512
+      },
+      "width": 512,
+      "height": 512,
+      "bytes": 225140,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 52,
+        "top": 4,
+        "width": 410,
+        "height": 434
+      },
+      "pivot": {
+        "x": 257,
+        "y": 438
+      }
+    },
+    {
+      "source": "raw/buildings.png",
+      "file": "buildings/empty.webp",
+      "index": 5,
+      "row": 1,
+      "column": 2,
+      "crop": {
+        "left": 1024,
+        "top": 512,
+        "width": 512,
+        "height": 512
+      },
+      "width": 512,
+      "height": 512,
+      "bytes": 1960,
+      "alphaThreshold": 128,
+      "alphaBounds": null,
+      "pivot": {
+        "x": 256,
+        "y": 512
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/down-1.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 313,
+        "height": 313
+      },
+      "width": 313,
+      "height": 313,
+      "bytes": 53046,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 84,
+        "top": 51,
+        "width": 164,
+        "height": 260
+      },
+      "pivot": {
+        "x": 166,
+        "y": 311
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/down-2.webp",
+      "index": 1,
+      "row": 0,
+      "column": 1,
+      "crop": {
+        "left": 313,
+        "top": 0,
+        "width": 314,
+        "height": 313
+      },
+      "width": 314,
+      "height": 313,
+      "bytes": 53588,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 79,
+        "top": 52,
+        "width": 165,
+        "height": 259
+      },
+      "pivot": {
+        "x": 161.5,
+        "y": 311
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/down-3.webp",
+      "index": 2,
+      "row": 0,
+      "column": 2,
+      "crop": {
+        "left": 627,
+        "top": 0,
+        "width": 313,
+        "height": 313
+      },
+      "width": 313,
+      "height": 313,
+      "bytes": 53482,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 74,
+        "top": 52,
+        "width": 166,
+        "height": 259
+      },
+      "pivot": {
+        "x": 157,
+        "y": 311
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/down-4.webp",
+      "index": 3,
+      "row": 0,
+      "column": 3,
+      "crop": {
+        "left": 940,
+        "top": 0,
+        "width": 314,
+        "height": 313
+      },
+      "width": 314,
+      "height": 313,
+      "bytes": 52574,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 75,
+        "top": 52,
+        "width": 166,
+        "height": 259
+      },
+      "pivot": {
+        "x": 158,
+        "y": 311
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/left-1.webp",
+      "index": 4,
+      "row": 1,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 313,
+        "width": 313,
+        "height": 314
+      },
+      "width": 313,
+      "height": 314,
+      "bytes": 52276,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 80,
+        "top": 38,
+        "width": 157,
+        "height": 259
+      },
+      "pivot": {
+        "x": 158.5,
+        "y": 297
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/left-2.webp",
+      "index": 5,
+      "row": 1,
+      "column": 1,
+      "crop": {
+        "left": 313,
+        "top": 313,
+        "width": 314,
+        "height": 314
+      },
+      "width": 314,
+      "height": 314,
+      "bytes": 51102,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 81,
+        "top": 38,
+        "width": 157,
+        "height": 259
+      },
+      "pivot": {
+        "x": 159.5,
+        "y": 297
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/left-3.webp",
+      "index": 6,
+      "row": 1,
+      "column": 2,
+      "crop": {
+        "left": 627,
+        "top": 313,
+        "width": 313,
+        "height": 314
+      },
+      "width": 313,
+      "height": 314,
+      "bytes": 54644,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 78,
+        "top": 38,
+        "width": 158,
+        "height": 259
+      },
+      "pivot": {
+        "x": 157,
+        "y": 297
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/left-4.webp",
+      "index": 7,
+      "row": 1,
+      "column": 3,
+      "crop": {
+        "left": 940,
+        "top": 313,
+        "width": 314,
+        "height": 314
+      },
+      "width": 314,
+      "height": 314,
+      "bytes": 52338,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 79,
+        "top": 38,
+        "width": 158,
+        "height": 261
+      },
+      "pivot": {
+        "x": 158,
+        "y": 299
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/right-1.webp",
+      "index": 8,
+      "row": 2,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 627,
+        "width": 313,
+        "height": 313
+      },
+      "width": 313,
+      "height": 313,
+      "bytes": 52504,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 79,
+        "top": 28,
+        "width": 161,
+        "height": 261
+      },
+      "pivot": {
+        "x": 159.5,
+        "y": 289
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/right-2.webp",
+      "index": 9,
+      "row": 2,
+      "column": 1,
+      "crop": {
+        "left": 313,
+        "top": 627,
+        "width": 314,
+        "height": 313
+      },
+      "width": 314,
+      "height": 313,
+      "bytes": 49764,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 79,
+        "top": 28,
+        "width": 159,
+        "height": 261
+      },
+      "pivot": {
+        "x": 158.5,
+        "y": 289
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/right-3.webp",
+      "index": 10,
+      "row": 2,
+      "column": 2,
+      "crop": {
+        "left": 627,
+        "top": 627,
+        "width": 313,
+        "height": 313
+      },
+      "width": 313,
+      "height": 313,
+      "bytes": 54612,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 78,
+        "top": 28,
+        "width": 161,
+        "height": 261
+      },
+      "pivot": {
+        "x": 158.5,
+        "y": 289
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/right-4.webp",
+      "index": 11,
+      "row": 2,
+      "column": 3,
+      "crop": {
+        "left": 940,
+        "top": 627,
+        "width": 314,
+        "height": 313
+      },
+      "width": 314,
+      "height": 313,
+      "bytes": 52322,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 79,
+        "top": 28,
+        "width": 160,
+        "height": 261
+      },
+      "pivot": {
+        "x": 159,
+        "y": 289
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/up-1.webp",
+      "index": 12,
+      "row": 3,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 940,
+        "width": 313,
+        "height": 314
+      },
+      "width": 313,
+      "height": 314,
+      "bytes": 49758,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 79,
+        "top": 19,
+        "width": 161,
+        "height": 262
+      },
+      "pivot": {
+        "x": 159.5,
+        "y": 281
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/up-2.webp",
+      "index": 13,
+      "row": 3,
+      "column": 1,
+      "crop": {
+        "left": 313,
+        "top": 940,
+        "width": 314,
+        "height": 314
+      },
+      "width": 314,
+      "height": 314,
+      "bytes": 49194,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 79,
+        "top": 19,
+        "width": 159,
+        "height": 262
+      },
+      "pivot": {
+        "x": 158.5,
+        "y": 281
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/up-3.webp",
+      "index": 14,
+      "row": 3,
+      "column": 2,
+      "crop": {
+        "left": 627,
+        "top": 940,
+        "width": 313,
+        "height": 314
+      },
+      "width": 313,
+      "height": 314,
+      "bytes": 49586,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 75,
+        "top": 18,
+        "width": 163,
+        "height": 263
+      },
+      "pivot": {
+        "x": 156.5,
+        "y": 281
+      }
+    },
+    {
+      "source": "raw/student-walk.png",
+      "file": "student/up-4.webp",
+      "index": 15,
+      "row": 3,
+      "column": 3,
+      "crop": {
+        "left": 940,
+        "top": 940,
+        "width": 314,
+        "height": 314
+      },
+      "width": 314,
+      "height": 314,
+      "bytes": 48650,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 77,
+        "top": 19,
+        "width": 160,
+        "height": 254
+      },
+      "pivot": {
+        "x": 157,
+        "y": 273
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/down-1.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 313,
+        "height": 313
+      },
+      "width": 313,
+      "height": 313,
+      "bytes": 63830,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 75,
+        "top": 34,
+        "width": 200,
+        "height": 275
+      },
+      "pivot": {
+        "x": 175,
+        "y": 309
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/down-2.webp",
+      "index": 1,
+      "row": 0,
+      "column": 1,
+      "crop": {
+        "left": 313,
+        "top": 0,
+        "width": 314,
+        "height": 313
+      },
+      "width": 314,
+      "height": 313,
+      "bytes": 64726,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 69,
+        "top": 34,
+        "width": 198,
+        "height": 273
+      },
+      "pivot": {
+        "x": 168,
+        "y": 307
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/down-3.webp",
+      "index": 2,
+      "row": 0,
+      "column": 2,
+      "crop": {
+        "left": 627,
+        "top": 0,
+        "width": 313,
+        "height": 313
+      },
+      "width": 313,
+      "height": 313,
+      "bytes": 65682,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 64,
+        "top": 34,
+        "width": 196,
+        "height": 273
+      },
+      "pivot": {
+        "x": 162,
+        "y": 307
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/down-4.webp",
+      "index": 3,
+      "row": 0,
+      "column": 3,
+      "crop": {
+        "left": 940,
+        "top": 0,
+        "width": 314,
+        "height": 313
+      },
+      "width": 314,
+      "height": 313,
+      "bytes": 63478,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 63,
+        "top": 34,
+        "width": 194,
+        "height": 273
+      },
+      "pivot": {
+        "x": 160,
+        "y": 307
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/left-1.webp",
+      "index": 4,
+      "row": 1,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 313,
+        "width": 313,
+        "height": 314
+      },
+      "width": 313,
+      "height": 314,
+      "bytes": 66206,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 26,
+        "top": 43,
+        "width": 276,
+        "height": 236
+      },
+      "pivot": {
+        "x": 164,
+        "y": 279
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/left-2.webp",
+      "index": 5,
+      "row": 1,
+      "column": 1,
+      "crop": {
+        "left": 313,
+        "top": 313,
+        "width": 314,
+        "height": 314
+      },
+      "width": 314,
+      "height": 314,
+      "bytes": 63962,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 24,
+        "top": 41,
+        "width": 275,
+        "height": 237
+      },
+      "pivot": {
+        "x": 161.5,
+        "y": 278
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/left-3.webp",
+      "index": 6,
+      "row": 1,
+      "column": 2,
+      "crop": {
+        "left": 627,
+        "top": 313,
+        "width": 313,
+        "height": 314
+      },
+      "width": 313,
+      "height": 314,
+      "bytes": 65118,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 18,
+        "top": 41,
+        "width": 274,
+        "height": 242
+      },
+      "pivot": {
+        "x": 155,
+        "y": 283
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/left-4.webp",
+      "index": 7,
+      "row": 1,
+      "column": 3,
+      "crop": {
+        "left": 940,
+        "top": 313,
+        "width": 314,
+        "height": 314
+      },
+      "width": 314,
+      "height": 314,
+      "bytes": 65716,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 11,
+        "top": 42,
+        "width": 270,
+        "height": 241
+      },
+      "pivot": {
+        "x": 146,
+        "y": 283
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/right-1.webp",
+      "index": 8,
+      "row": 2,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 627,
+        "width": 313,
+        "height": 313
+      },
+      "width": 313,
+      "height": 313,
+      "bytes": 61820,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 35,
+        "top": 32,
+        "width": 266,
+        "height": 234
+      },
+      "pivot": {
+        "x": 168,
+        "y": 266
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/right-2.webp",
+      "index": 9,
+      "row": 2,
+      "column": 1,
+      "crop": {
+        "left": 313,
+        "top": 627,
+        "width": 314,
+        "height": 313
+      },
+      "width": 314,
+      "height": 313,
+      "bytes": 62532,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 28,
+        "top": 31,
+        "width": 266,
+        "height": 232
+      },
+      "pivot": {
+        "x": 161,
+        "y": 263
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/right-3.webp",
+      "index": 10,
+      "row": 2,
+      "column": 2,
+      "crop": {
+        "left": 627,
+        "top": 627,
+        "width": 313,
+        "height": 313
+      },
+      "width": 313,
+      "height": 313,
+      "bytes": 62108,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 18,
+        "top": 31,
+        "width": 272,
+        "height": 237
+      },
+      "pivot": {
+        "x": 154,
+        "y": 268
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/right-4.webp",
+      "index": 11,
+      "row": 2,
+      "column": 3,
+      "crop": {
+        "left": 940,
+        "top": 627,
+        "width": 314,
+        "height": 313
+      },
+      "width": 314,
+      "height": 313,
+      "bytes": 66036,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 18,
+        "top": 32,
+        "width": 269,
+        "height": 231
+      },
+      "pivot": {
+        "x": 152.5,
+        "y": 263
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/up-1.webp",
+      "index": 12,
+      "row": 3,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 940,
+        "width": 313,
+        "height": 314
+      },
+      "width": 313,
+      "height": 314,
+      "bytes": 52736,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 66,
+        "top": 3,
+        "width": 177,
+        "height": 267
+      },
+      "pivot": {
+        "x": 154.5,
+        "y": 270
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/up-2.webp",
+      "index": 13,
+      "row": 3,
+      "column": 1,
+      "crop": {
+        "left": 313,
+        "top": 940,
+        "width": 314,
+        "height": 314
+      },
+      "width": 314,
+      "height": 314,
+      "bytes": 52880,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 56,
+        "top": 2,
+        "width": 180,
+        "height": 268
+      },
+      "pivot": {
+        "x": 146,
+        "y": 270
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/up-3.webp",
+      "index": 14,
+      "row": 3,
+      "column": 2,
+      "crop": {
+        "left": 627,
+        "top": 940,
+        "width": 313,
+        "height": 314
+      },
+      "width": 313,
+      "height": 314,
+      "bytes": 51314,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 58,
+        "top": 3,
+        "width": 176,
+        "height": 264
+      },
+      "pivot": {
+        "x": 146,
+        "y": 267
+      }
+    },
+    {
+      "source": "raw/corgi-walk.png",
+      "file": "corgi/up-4.webp",
+      "index": 15,
+      "row": 3,
+      "column": 3,
+      "crop": {
+        "left": 940,
+        "top": 940,
+        "width": 314,
+        "height": 314
+      },
+      "width": 314,
+      "height": 314,
+      "bytes": 52144,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 48,
+        "top": 4,
+        "width": 180,
+        "height": 267
+      },
+      "pivot": {
+        "x": 138,
+        "y": 271
+      }
+    },
+    {
+      "source": "raw/interior-cargo.png",
+      "file": "interiors/cargo.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 1672,
+        "height": 940
+      },
+      "width": 1672,
+      "height": 940,
+      "bytes": 1586988,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 0,
+        "top": 0,
+        "width": 1672,
+        "height": 940
+      },
+      "pivot": {
+        "x": 836,
+        "y": 940
+      }
+    },
+    {
+      "source": "raw/interior-balance.png",
+      "file": "interiors/balance.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 1672,
+        "height": 941
+      },
+      "width": 1672,
+      "height": 941,
+      "bytes": 1538460,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 0,
+        "top": 0,
+        "width": 1672,
+        "height": 941
+      },
+      "pivot": {
+        "x": 836,
+        "y": 941
+      }
+    },
+    {
+      "source": "raw/interior-scale.png",
+      "file": "interiors/scale.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 1672,
+        "height": 941
+      },
+      "width": 1672,
+      "height": 941,
+      "bytes": 1403402,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 0,
+        "top": 0,
+        "width": 1672,
+        "height": 941
+      },
+      "pivot": {
+        "x": 836,
+        "y": 941
+      }
+    },
+    {
+      "source": "raw/interior-workshop.png",
+      "file": "interiors/workshop.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 1672,
+        "height": 941
+      },
+      "width": 1672,
+      "height": 941,
+      "bytes": 1487072,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 0,
+        "top": 0,
+        "width": 1672,
+        "height": 941
+      },
+      "pivot": {
+        "x": 836,
+        "y": 941
+      }
+    },
+    {
+      "source": "raw/interior-core.png",
+      "file": "interiors/core.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 1672,
+        "height": 941
+      },
+      "width": 1672,
+      "height": 941,
+      "bytes": 1767588,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 0,
+        "top": 0,
+        "width": 1672,
+        "height": 941
+      },
+      "pivot": {
+        "x": 836,
+        "y": 941
+      }
+    },
+    {
+      "source": "raw/props.png",
+      "file": "props/prop-01.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 362,
+        "height": 362
+      },
+      "width": 362,
+      "height": 362,
+      "bytes": 68220,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 45,
+        "top": 85,
+        "width": 286,
+        "height": 255
+      },
+      "pivot": {
+        "x": 188,
+        "y": 340
+      }
+    },
+    {
+      "source": "raw/props.png",
+      "file": "props/prop-02.webp",
+      "index": 1,
+      "row": 0,
+      "column": 1,
+      "crop": {
+        "left": 362,
+        "top": 0,
+        "width": 362,
+        "height": 362
+      },
+      "width": 362,
+      "height": 362,
+      "bytes": 40342,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 83,
+        "top": 132,
+        "width": 205,
+        "height": 186
+      },
+      "pivot": {
+        "x": 185.5,
+        "y": 318
+      }
+    },
+    {
+      "source": "raw/props.png",
+      "file": "props/prop-03.webp",
+      "index": 2,
+      "row": 0,
+      "column": 2,
+      "crop": {
+        "left": 724,
+        "top": 0,
+        "width": 362,
+        "height": 362
+      },
+      "width": 362,
+      "height": 362,
+      "bytes": 57792,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 61,
+        "top": 80,
+        "width": 228,
+        "height": 264
+      },
+      "pivot": {
+        "x": 175,
+        "y": 344
+      }
+    },
+    {
+      "source": "raw/props.png",
+      "file": "props/prop-04.webp",
+      "index": 3,
+      "row": 0,
+      "column": 3,
+      "crop": {
+        "left": 1086,
+        "top": 0,
+        "width": 362,
+        "height": 362
+      },
+      "width": 362,
+      "height": 362,
+      "bytes": 73808,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 43,
+        "top": 88,
+        "width": 276,
+        "height": 256
+      },
+      "pivot": {
+        "x": 181,
+        "y": 344
+      }
+    },
+    {
+      "source": "raw/props.png",
+      "file": "props/prop-05.webp",
+      "index": 4,
+      "row": 1,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 362,
+        "width": 362,
+        "height": 362
+      },
+      "width": 362,
+      "height": 362,
+      "bytes": 52542,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 33,
+        "top": 101,
+        "width": 313,
+        "height": 200
+      },
+      "pivot": {
+        "x": 189.5,
+        "y": 301
+      }
+    },
+    {
+      "source": "raw/props.png",
+      "file": "props/prop-06.webp",
+      "index": 5,
+      "row": 1,
+      "column": 1,
+      "crop": {
+        "left": 362,
+        "top": 362,
+        "width": 362,
+        "height": 362
+      },
+      "width": 362,
+      "height": 362,
+      "bytes": 48820,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 31,
+        "top": 126,
+        "width": 309,
+        "height": 150
+      },
+      "pivot": {
+        "x": 185.5,
+        "y": 276
+      }
+    },
+    {
+      "source": "raw/props.png",
+      "file": "props/prop-07.webp",
+      "index": 6,
+      "row": 1,
+      "column": 2,
+      "crop": {
+        "left": 724,
+        "top": 362,
+        "width": 362,
+        "height": 362
+      },
+      "width": 362,
+      "height": 362,
+      "bytes": 22746,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 8,
+        "top": 137,
+        "width": 354,
+        "height": 89
+      },
+      "pivot": {
+        "x": 185,
+        "y": 226
+      }
+    },
+    {
+      "source": "raw/props.png",
+      "file": "props/prop-08.webp",
+      "index": 7,
+      "row": 1,
+      "column": 3,
+      "crop": {
+        "left": 1086,
+        "top": 362,
+        "width": 362,
+        "height": 362
+      },
+      "width": 362,
+      "height": 362,
+      "bytes": 64972,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 0,
+        "top": 22,
+        "width": 302,
+        "height": 310
+      },
+      "pivot": {
+        "x": 151,
+        "y": 332
+      }
+    },
+    {
+      "source": "raw/props.png",
+      "file": "props/prop-09.webp",
+      "index": 8,
+      "row": 2,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 724,
+        "width": 362,
+        "height": 362
+      },
+      "width": 362,
+      "height": 362,
+      "bytes": 46054,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 43,
+        "top": 53,
+        "width": 319,
+        "height": 207
+      },
+      "pivot": {
+        "x": 202.5,
+        "y": 260
+      }
+    },
+    {
+      "source": "raw/props.png",
+      "file": "props/prop-10.webp",
+      "index": 9,
+      "row": 2,
+      "column": 1,
+      "crop": {
+        "left": 362,
+        "top": 724,
+        "width": 362,
+        "height": 362
+      },
+      "width": 362,
+      "height": 362,
+      "bytes": 23070,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 0,
+        "top": 127,
+        "width": 356,
+        "height": 70
+      },
+      "pivot": {
+        "x": 178,
+        "y": 197
+      }
+    },
+    {
+      "source": "raw/props.png",
+      "file": "props/prop-11.webp",
+      "index": 10,
+      "row": 2,
+      "column": 2,
+      "crop": {
+        "left": 724,
+        "top": 724,
+        "width": 362,
+        "height": 362
+      },
+      "width": 362,
+      "height": 362,
+      "bytes": 68930,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 7,
+        "top": 37,
+        "width": 355,
+        "height": 221
+      },
+      "pivot": {
+        "x": 184.5,
+        "y": 258
+      }
+    },
+    {
+      "source": "raw/props.png",
+      "file": "props/prop-12.webp",
+      "index": 11,
+      "row": 2,
+      "column": 3,
+      "crop": {
+        "left": 1086,
+        "top": 724,
+        "width": 362,
+        "height": 362
+      },
+      "width": 362,
+      "height": 362,
+      "bytes": 104930,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 0,
+        "top": 8,
+        "width": 324,
+        "height": 285
+      },
+      "pivot": {
+        "x": 162,
+        "y": 293
+      }
+    },
+    {
+      "source": "raw/npc-guide.png",
+      "file": "npc/guide.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 627,
+        "height": 627
+      },
+      "width": 627,
+      "height": 627,
+      "bytes": 125678,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 218,
+        "top": 54,
+        "width": 239,
+        "height": 520
+      },
+      "pivot": {
+        "x": 337.5,
+        "y": 574
+      }
+    },
+    {
+      "source": "raw/npc-guide.png",
+      "file": "npc/wave.webp",
+      "index": 1,
+      "row": 0,
+      "column": 1,
+      "crop": {
+        "left": 627,
+        "top": 0,
+        "width": 627,
+        "height": 627
+      },
+      "width": 627,
+      "height": 627,
+      "bytes": 149762,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 94,
+        "top": 55,
+        "width": 328,
+        "height": 519
+      },
+      "pivot": {
+        "x": 258,
+        "y": 574
+      }
+    },
+    {
+      "source": "raw/npc-guide.png",
+      "file": "npc/think.webp",
+      "index": 2,
+      "row": 1,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 627,
+        "width": 627,
+        "height": 627
+      },
+      "width": 627,
+      "height": 627,
+      "bytes": 127824,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 216,
+        "top": 34,
+        "width": 262,
+        "height": 533
+      },
+      "pivot": {
+        "x": 347,
+        "y": 567
+      }
+    },
+    {
+      "source": "raw/npc-guide.png",
+      "file": "npc/point.webp",
+      "index": 3,
+      "row": 1,
+      "column": 1,
+      "crop": {
+        "left": 627,
+        "top": 627,
+        "width": 627,
+        "height": 627
+      },
+      "width": 627,
+      "height": 627,
+      "bytes": 151884,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 112,
+        "top": 49,
+        "width": 410,
+        "height": 516
+      },
+      "pivot": {
+        "x": 317,
+        "y": 565
+      }
+    },
+    {
+      "source": "higgsfield/gpt_image_2_5/70ab873c-6192-4725-bf7b-4fa25880cace",
+      "file": "npc/baker.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 627,
+        "height": 627
+      },
+      "width": 627,
+      "height": 627,
+      "bytes": 153290,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 157,
+        "top": 54,
+        "width": 312,
+        "height": 520
+      },
+      "pivot": {
+        "x": 313.0,
+        "y": 574
+      }
+    }
+  ],
+  "warnings": [
+    "buildings/empty.webp: alpha >= 128인 픽셀이 없어 셀 아래쪽 중심을 임시 기준점으로 기록했습니다.",
+    "student-walk.png: floor 경계 분할, 칸 너비 313/314/313/314px·높이 313/314/313/314px. 원본 픽셀을 빠짐없이 보존했습니다.",
+    "corgi-walk.png: floor 경계 분할, 칸 너비 313/314/313/314px·높이 313/314/313/314px. 원본 픽셀을 빠짐없이 보존했습니다."
+  ],
+  "errors": [],
+  "complete": true
+}

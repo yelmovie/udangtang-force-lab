@@ -1,0 +1,179 @@
+{
+  "shared": {
+    "characters": [
+      {
+        "id": "student_2d",
+        "format": "PNG/WEBP sprite",
+        "reuse": true
+      },
+      {
+        "id": "corgi_2d",
+        "format": "PNG/WEBP sprite",
+        "reuse": true
+      },
+      {
+        "id": "squirrel_2d",
+        "format": "PNG/WEBP sprite",
+        "reuse": true
+      },
+      {
+        "id": "student_3d",
+        "format": "Rigged GLB",
+        "reuse": true
+      },
+      {
+        "id": "force_suit",
+        "format": "GLB attachment",
+        "reuse": true
+      }
+    ],
+    "vfx": [
+      "snap",
+      "dust",
+      "motion_line",
+      "impact",
+      "balance_success",
+      "scale_pulse",
+      "evidence_unlock",
+      "path",
+      "glow",
+      "light_particle",
+      "core_activation",
+      "floor_line_activation",
+      "world_restore"
+    ]
+  },
+  "page_asset_groups": {
+    "1": [
+      "main_background",
+      "logo",
+      "student_welcome",
+      "corgi_welcome",
+      "squirrel_welcome",
+      "save_button_art",
+      "continue_button_art",
+      "sound_icon",
+      "settings_icon"
+    ],
+    "2": [
+      "world_map",
+      "mission_landmarks_5",
+      "core_marker",
+      "route_states",
+      "lock/current/complete markers"
+    ],
+    "3": [
+      "cart_box_states",
+      "book",
+      "newspaper_bundle",
+      "metal_parts",
+      "target_pad",
+      "record_panel"
+    ],
+    "4": [
+      "warehouse_glb",
+      "crate_variants",
+      "shelf_glb",
+      "shutter_glb",
+      "cones",
+      "exit_marker",
+      "floor_guides"
+    ],
+    "5": [
+      "balance_scale",
+      "trays",
+      "apple",
+      "wood_block",
+      "book",
+      "metal_weight",
+      "prediction_icons"
+    ],
+    "6": [
+      "balance_scale",
+      "A_B_C_objects",
+      "compare_log",
+      "reorder_slots"
+    ],
+    "7": [
+      "digital_scale",
+      "basket",
+      "pencil",
+      "eraser",
+      "ruler",
+      "apple",
+      "book",
+      "nut_bolt",
+      "target_150g"
+    ],
+    "8": [
+      "spring_scale_body",
+      "zero_dial",
+      "pointer",
+      "hook",
+      "spring",
+      "weights",
+      "book",
+      "eye_level_guide"
+    ],
+    "9": [
+      "workshop_glb",
+      "long_plank",
+      "short_plank",
+      "fulcrum",
+      "ramp",
+      "core_crate",
+      "workbench"
+    ],
+    "10": [
+      "bottle_opener",
+      "bottle",
+      "scissors",
+      "paper",
+      "seesaw",
+      "ramp",
+      "small_cart",
+      "screw"
+    ],
+    "11": [
+      "core_crate",
+      "transport_cart",
+      "boulder",
+      "barrier",
+      "ramp",
+      "route_marker",
+      "goal_marker",
+      "plan_card"
+    ],
+    "12": [
+      "force_suit",
+      "final_lab_glb",
+      "big_boulder",
+      "lever",
+      "ramp",
+      "core",
+      "central_machine",
+      "floor_energy_lines"
+    ],
+    "13": [
+      "evidence_cards_5",
+      "research_notebook",
+      "stamp",
+      "report_board"
+    ],
+    "14": [
+      "final_movie_scenes",
+      "core_glow",
+      "floor_line_vfx",
+      "world_restore_vfx"
+    ],
+    "15": [
+      "certificate_frame",
+      "master_badge",
+      "exploration_style_badges_5",
+      "ribbon",
+      "stamp",
+      "printer",
+      "celebration_vfx"
+    ]
+  }
+}

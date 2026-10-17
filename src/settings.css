@@ -1,0 +1,31 @@
+.settings-layer { padding: 20px; }
+.settings-layer .settings-card { width: min(760px, 96vw); max-height: calc(100dvh - 40px); overflow-y: auto; overscroll-behavior: contain; padding: clamp(20px,3vw,32px); text-align: left; }
+.settings-layer .settings-heading { position: sticky; top: -32px; background: #fff9e9; padding-block: 8px; z-index: 1; }
+.settings-layer .settings-heading h2 { font-size: clamp(26px,2.5vw,34px); }
+.settings-layer .settings-close { min-width: 48px; height: 48px; }
+.settings-layer .settings-links { grid-template-columns: 1fr 1fr; }
+.settings-layer .settings-links button { min-height: 54px; font-size: clamp(18px,1.6vw,22px); }
+.settings-layer .settings-links button small { font-size: 16px; }
+.settings-reading { font-size: clamp(18px,1.65vw,22px); line-height: 1.65; color: #315652; word-break: keep-all; overflow-wrap: anywhere; }
+.settings-reading p { margin-block: 14px; }
+.settings-reading h3 { font-size: clamp(22px,2vw,28px); margin: 24px 0 8px; color: #165e5d; }
+.settings-reading li { margin-block: 12px; }
+.settings-reading ol { padding-left: 1.5em; }
+.curriculum-list dt { font-weight: 900; color: #126f70; margin-top: 16px; }
+.curriculum-list dd { margin: 4px 0 0; }
+.settings-reading .settings-source { border-top: 2px solid #dbdec9; padding-top: 14px; font-size: 16px; }
+.settings-audio { margin: 18px 0; padding: 16px; background: #edf3e7; border: 2px solid #c2d9ca; border-radius: 16px; }
+.settings-audio label { display: flex; justify-content: space-between; align-items: center; font-size: 20px; font-weight: 900; }
+.settings-audio input { display: block; width: 100%; min-height: 48px; accent-color: #177574; margin: 4px 0 0; }
+.settings-audio .button { width: 100%; min-height: 48px; font-size: 20px; }
+.settings-offline { font-size: 16px; line-height: 1.5; padding: 12px 14px; background: #fff4d9; border-radius: 12px; color: #485b4d; }
+.settings-back { margin-top: 18px; min-height: 52px; font-size: 20px; }
+.settings-layer .settings-lead { font-size: 20px; }
+.settings-layer .settings-danger { border-color: #c99d79; background: #fff1df; }
+.teacher-diagnostics { font-size: 16px; color: #50625b; margin-block: 16px; }
+.teacher-diagnostics summary { cursor: pointer; padding: 14px 10px; min-height: 48px; border: 2px solid #c2d9ca; border-radius: 10px; font-weight: 800; }
+.teacher-diagnostics dl { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin: 14px 0; }
+.teacher-diagnostics dd { margin: 0; font-variant-numeric: tabular-nums; }
+.teacher-diagnostics p { line-height: 1.5; }
+.teacher-save-record { max-height: 320px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; padding: 14px; border: 1px solid #c2d9ca; border-radius: 10px; background: #f4f8ed; font-size: 14px; line-height: 1.5; }
+@media (max-width: 600px) { .settings-layer .settings-links { grid-template-columns: 1fr; } }

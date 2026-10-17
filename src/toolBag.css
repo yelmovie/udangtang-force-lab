@@ -1,0 +1,93 @@
+/* Tool cards and the tool bag dialog */
+.toolcard-icon { display: block; width: 100%; height: 100%; }
+.toolcard {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  width: 100%; height: 100%; min-height: 48px; box-sizing: border-box;
+  padding: 12px 10px 14px; border-radius: 18px;
+  border: 3px solid #e7c98f; background: linear-gradient(#fffdf6, #fff3da);
+  box-shadow: 0 4px 0 #c9a46c, 0 8px 16px rgba(35, 68, 65, .14);
+  color: #173d40; font: inherit; text-align: center; word-break: keep-all;
+}
+button.toolcard { cursor: pointer; transition: transform .12s ease, box-shadow .12s ease; }
+button.toolcard:not(:disabled):active { transform: translateY(3px); box-shadow: 0 1px 0 #c9a46c; }
+button.toolcard:focus-visible { outline: 3px solid #ffc247; outline-offset: 3px; }
+.toolcard-art {
+  display: grid; place-items: center; width: 76px; height: 76px; padding: 8px; box-sizing: border-box;
+  border-radius: 50%; background: #fff4e6; background: color-mix(in srgb, var(--card-color, #e58b43) 22%, #fff);
+  border: 3px solid var(--card-color, #e58b43);
+}
+.toolcard-name { font-size: 19px; font-weight: 900; letter-spacing: -.02em; }
+.toolcard-idea { font-size: 14px; line-height: 1.4; font-weight: 700; color: #4f6762; }
+.toolcard-record {
+  margin-top: auto; width: 100%; box-sizing: border-box; padding: 6px 8px; border-radius: 10px;
+  background: #e8f4ef; color: #145c55; font-size: 13px; line-height: 1.35; font-weight: 800;
+}
+.toolcard-record b { display: block; font-size: 11px; color: #3d8a7f; }
+.toolcard.is-locked { justify-content: center; border-style: dashed; border-color: #cfc3a6; background: #f3eee2; box-shadow: none; color: #7b7464; }
+.toolcard-lock { display: grid; place-items: center; width: 76px; height: 76px; border-radius: 50%; background: #e4dccb; font-size: 40px; font-weight: 900; color: #a39a85; }
+.toolcard-where { font-size: 14px; font-weight: 800; line-height: 1.4; }
+
+/* Bag dialog: five slots fit 1024x768 without scrolling */
+.modal-card.toolbag-card { width: min(100%, 980px); max-height: min(94dvh, 720px); padding: 22px 26px 26px; }
+.toolbag-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.toolbag-heading h2 { margin: 0; }
+.toolbag-heading h2 small { font-size: 17px; color: #657b77; margin-left: 6px; }
+.toolbag-lead { margin: 6px 0 14px; color: #516c63; font-size: 16px; font-weight: 800; }
+.toolbag-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0 0 4px; list-style: none; }
+.toolbag-grid li { display: flex; min-height: 300px; }
+.toolbag-card.is-detail { width: min(100%, 520px); }
+.toolcard.is-large { height: auto; gap: 10px; padding: 22px 22px 18px; margin-top: 14px; }
+.toolcard.is-large .toolcard-art { width: 140px; height: 140px; padding: 16px; }
+.toolcard.is-large .toolcard-name { font-size: 28px; }
+.toolcard.is-large .toolcard-idea { font-size: 19px; }
+.toolcard.is-large .toolcard-record { font-size: 17px; padding: 10px 12px; }
+.toolcard.is-large .toolcard-record b { font-size: 13px; }
+.toolcard-from { font-size: 14px; font-weight: 800; color: #7b7464; }
+.toolbag-card .button { min-height: 52px; }
+
+/* Top bar bag button: earned count badge */
+.icon-button .toolbag-count {
+  position: absolute; right: -6px; top: -6px; min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box;
+  border-radius: 999px; background: #ef923e; color: #fff; border: 2px solid #fff;
+  font-size: 12px; font-weight: 900; line-height: 18px; text-align: center;
+}
+
+/* Result window: "new card" flips once */
+.toolcard-reveal {
+  display: flex; align-items: center; gap: 14px; margin: 12px auto 4px; padding: 10px 14px; max-width: 400px;
+  border-radius: 16px; background: #fff3d1; border: 2px solid #f0cf86; text-align: left;
+}
+.toolcard-flip { flex: none; width: 64px; height: 84px; perspective: 600px; }
+.toolcard-flip-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; animation: toolcard-flip .7s .45s cubic-bezier(.3, 1.3, .5, 1) both; }
+.toolcard-face { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 12px; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 3px solid #c9a46c; box-sizing: border-box; }
+.toolcard-back { transform: rotateY(180deg); background: repeating-linear-gradient(45deg, #0d7779 0 8px, #12898b 8px 16px); color: #fff; font-size: 32px; font-weight: 900; }
+.toolcard-face-front { padding: 8px; background: #fff4e6; background: color-mix(in srgb, var(--card-color, #e58b43) 22%, #fffdf6); border-color: var(--card-color, #e58b43); }
+.toolcard-reveal-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.toolcard-reveal-text strong { color: #a0560f; font-size: 16px; font-weight: 900; }
+.toolcard-reveal-name { font-size: 20px; font-weight: 900; color: #173d40; }
+.toolcard-reveal-text small { font-size: 13px; font-weight: 800; color: #145c55; word-break: keep-all; }
+@keyframes toolcard-flip { from { transform: rotateY(180deg) scale(.85); } to { transform: rotateY(0) scale(1); } }
+
+/* Complete screen row */
+.toolcard-row-card { margin: 18px auto 0; max-width: 1100px; padding: 18px 20px; border-radius: 24px; background: #fffaf0; border: 3px solid #f0dcb3; text-align: center; }
+.toolcard-row-card h2 { margin: 0 0 12px; color: #0d7073; font-size: 24px; }
+.toolcard-row-card h2 small { font-size: 16px; color: #657b77; }
+.toolcard-row { display: grid; grid-template-columns: repeat(5, minmax(0, 170px)); justify-content: center; gap: 12px; }
+.toolcard.is-mini { padding: 10px 8px 12px; }
+.toolcard.is-mini .toolcard-art { width: 60px; height: 60px; padding: 6px; }
+.toolcard.is-mini .toolcard-name { font-size: 17px; }
+.toolcard.is-mini .toolcard-idea { display: none; }
+
+@media (max-width: 760px) {
+  .toolbag-grid, .toolcard-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .toolbag-grid li { min-height: 0; }
+}
+@media (max-height: 560px) {
+  .toolbag-grid li { min-height: 0; }
+  .toolcard-art, .toolcard-lock { width: 56px; height: 56px; }
+  .toolcard-idea { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toolcard-flip-inner { animation: none; }
+  button.toolcard { transition: none; }
+}

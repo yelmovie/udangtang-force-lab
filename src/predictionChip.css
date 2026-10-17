@@ -1,0 +1,8 @@
+/* 예상 칩: 시작 때 고른 예상이 결과 옆으로 날아와 같음/다름 도장을 받는다 */
+.prediction-chip { position:absolute; top:14px; right:14px; z-index:30; display:grid; gap:2px; min-width:170px; max-width:min(300px, 44%); padding:10px 14px 12px; border:3px solid #e8b347; border-radius:16px; background:#fffaf0; box-shadow:0 8px 22px rgba(39,56,48,.28); color:#3a2f12; text-align:left; font:inherit; cursor:pointer; }
+.prediction-chip-label { font-size:13px; font-weight:800; color:#8a6418; }
+.prediction-chip strong { font-size:18px; line-height:1.3; word-break:keep-all; }
+.prediction-chip-stamp { justify-self:start; margin-top:6px; padding:4px 10px; border:2px solid currentColor; border-radius:10px; font-size:16px; font-weight:900; transform:rotate(-4deg); color:#1b6557; background:#e5f3ea; }
+.prediction-chip[data-matched="false"] .prediction-chip-stamp { color:#9a4d0c; background:#fff0d6; }
+.prediction-chip:focus-visible { outline:3px solid #1b6557; outline-offset:3px; }
+@media (max-width:700px) { .prediction-chip { max-width:60%; } .prediction-chip strong { font-size:16px; } }

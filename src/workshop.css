@@ -1,0 +1,210 @@
+/* Workshop owns its scene, design dock and observation board as one component. */
+.workshop-redesign { gap:12px; }
+.workshop-redesign .experiment-heading h1 { font-size:clamp(28px,2.6vw,42px); }
+.workshop-redesign .experiment-heading > div > p:not(.eyebrow) { font-size:18px; }
+.workshop-studio { flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:14px; }
+.workshop-stage { min-height:0; display:flex; flex-direction:column; overflow:hidden; border:3px solid #9c754c; border-radius:24px; background:#fff5dd; box-shadow:0 7px 20px #4c382222; }
+.workshop-drawer { display:flex; gap:8px; align-items:center; padding:8px 12px; background:#f8ead0; border-bottom:2px solid #b39162; }
+.workshop-drawer > button { min-height:48px; padding:8px 14px; border:2px solid #adbdab; border-radius:12px; color:#245955; background:#fffaf0; font-weight:850; font-size:17px; }
+.workshop-drawer > button[aria-pressed='true'] { background:#146f6d; color:#fff9e8; border-color:#0d5655; box-shadow:inset 0 -4px #073e402b; }
+.workshop-view { margin-left:auto; display:flex; gap:8px; }
+.workshop-redesign .camera-button { min-width:48px; min-height:48px; margin:0; }
+.workshop-world { position:relative; flex:1; min-height:260px; isolation:isolate; background:linear-gradient(#fff2d325,#fff2d340),url('/assets/backgrounds/workshop.webp') center 64% / cover; }
+.workshop-world::after { content:''; position:absolute; pointer-events:none; z-index:0; inset:22% 7% 5%; border-radius:50%; background:radial-gradient(ellipse,#fff0cdcc,#ecd3a475 54%,transparent 73%); }
+.workshop-redesign .workshop-canvas { position:absolute; z-index:1; inset:20px 0 0; width:100%; min-height:0; }
+.workshop-redesign .workshop-canvas canvas { width:100%; height:100%; display:block; }
+.workshop-scene-caption { position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:2; padding:7px 13px; border:1px solid #c3a779; border-radius:999px; background:#fff8e9ed; color:#315b51; font-size:16px; font-weight:800; white-space:nowrap; }
+.workshop-actor { position:absolute; z-index:2; pointer-events:none; left:3%; bottom:32px; width:clamp(135px,24%,205px); aspect-ratio: 4 / 5.2; }
+.workshop-actor img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:bottom; }
+.workshop-actor #workshop-actor-lift { opacity:0; }
+.workshop-actor #workshop-actor-main { transform-origin:87% 99.5%; }
+.workshop-world[data-tool='direct'] .workshop-actor { left:calc(50% - 120px); width:240px; bottom:24px; }
+.workshop-world[data-tool='ramp'] .workshop-actor { left:2%; bottom:24px; }
+.workshop-world[data-tool='lever'] .workshop-actor { width:clamp(145px,21%,195px); }
+.workshop-fulcrum-grip { position:absolute; z-index:5; width:88px; height:126px; transform:translate(-50%,-50%); padding:0; border:3px dashed #ffdf897d; border-radius:18px; background:transparent; box-shadow:none; cursor:ew-resize; touch-action:none; user-select:none; }
+.workshop-fulcrum-grip:hover:not(:disabled),.workshop-fulcrum-grip:focus-visible,.is-moving-fulcrum .workshop-fulcrum-grip { border-color:#ffd56a; background:#fff1b324; outline:none; box-shadow:0 0 0 3px #fff4c055; }
+.workshop-fulcrum-grip[hidden] { display:none; }
+.fulcrum-grab-label { position:absolute; top:calc(100% + 3px); left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:5px; padding:4px 8px; background:#fff2cbe8; color:#4b3b20; border:1px solid #bf975b; border-radius:9px; font-size:15px; font-weight:900; white-space:nowrap; pointer-events:none; }
+.fulcrum-grab-label svg { width:22px; height:25px; }
+.workshop-height-ruler { position:absolute; z-index:3; width:23px; pointer-events:none; color:#3d502d; }
+.workshop-height-ruler[hidden] { display:none; }
+.height-ruler-track { position:relative; width:23px; height:var(--height-span,100px); border:2px solid #75562c; border-radius:4px; background:repeating-linear-gradient(to top,transparent 0 10px,#78542c 10px 12px),linear-gradient(90deg,#ffdf86,#fff2bc); box-shadow:0 2px 4px #32251a33; }
+.height-goal-label,.height-start-label { position:absolute; left:28px; padding:4px 7px; background:#fff5d8e8; border:1px solid #c1985c; border-radius:7px; font-size:14px; font-weight:900; white-space:nowrap; }
+.height-goal-label { top:-12px; color:#76521d; }
+.height-start-label { bottom:-13px; }
+.height-current-marker { position:absolute; top:calc((1 - var(--height-progress,0))*100%); left:-8px; width:39px; height:4px; background:#167b6e; border:1px solid #f4fff3; transform:translateY(-50%); box-shadow:0 1px 4px #0a3a3255; }
+.height-current-marker::before { content:'▶'; position:absolute; right:calc(100% + 3px); top:-8px; font-size:17px; color:#167b6e; }
+.height-arrival { position:absolute; left:26px; top:calc(var(--height-span,100px) + 22px); padding:5px 7px; background:#d7f3d5; border:2px solid #22805b; border-radius:8px; font-size:14px; font-weight:900; white-space:nowrap; }
+.height-arrival[hidden] { display:none; }
+.has-arrived .height-ruler-track { box-shadow:0 0 0 4px #e4ffd38c; }
+.design-adjustment[hidden] { display:none; }
+.workshop-world[data-tool='lever'] + .workshop-design-dock { grid-template-columns:1fr; }
+.workshop-handle { position:absolute; z-index:4; left:25%; bottom:56px; width:68px; height:68px; border:3px solid #fff2c6; border-radius:50%; color:#fff9e6; background:#a94624; box-shadow:0 5px 0 #73331e,0 7px 18px #42251555; touch-action:none; user-select:none; cursor:grab; }
+.workshop-handle[data-tool='direct'] { left:calc(50% + 25px); bottom:62px; }
+.workshop-handle[data-tool='lever'] { top:39%; bottom:auto; left:27%; }
+.workshop-handle[data-tool='ramp'] { left:27%; bottom:58px; }
+.workshop-handle:active { cursor:grabbing; }
+.workshop-handle .handle-arrow { display:block; font-size:36px; line-height:1; pointer-events:none; }
+.workshop-handle .handle-label { position:absolute; top:14px; left:calc(100% + 8px); width:120px; padding:5px 7px; border-radius:8px; font-size:16px; font-weight:850; background:#fff8e7; color:#6d321c; text-align:left; pointer-events:none; box-shadow:0 2px 6px #46301a22; }
+.workshop-move-meter { position:absolute; z-index:4; right:12px; bottom:10px; width:min(255px,44%); padding:8px 10px; display:grid; gap:4px; border:1px solid #86b0a3; border-radius:12px; background:#f5ffefed; color:#205f57; font-size:14px; font-weight:800; }
+.workshop-move-meter span { font-size:13px; }
+.workshop-move-meter strong { font-size:15px; }
+.workshop-world:not([data-tool='direct']) .workshop-move-meter { display:none; }
+.workshop-travel { height:11px; border-radius:8px; background:#b5cbbb; overflow:hidden; }
+.workshop-travel i { display:block; height:100%; width:0; background:#198d80; }
+.workshop-design-dock { padding:10px 16px; background:#fcf6e8; border-top:2px solid #c0a477; display:grid; grid-template-columns:1fr 1.35fr; column-gap:18px; align-items:center; }
+.design-description { display:grid; gap:5px; color:#254e45; font-size:17px; }
+.design-description > span { color:#875024; font-size:16px; font-weight:750; }
+.design-adjustment input { width:100%; height:48px; margin:0; accent-color:#157c75; cursor:ew-resize; touch-action:pan-y; appearance:none; background:transparent; }
+.design-adjustment input::-webkit-slider-runnable-track { height:8px; background:#b3c0ac; border-radius:8px; }
+.design-adjustment input::-webkit-slider-thumb { appearance:none; width:44px; height:44px; margin-top:-18px; border:3px solid #fff6db; border-radius:50%; background:#176d61; box-shadow:0 2px 4px #35584944; }
+.design-adjustment input::-moz-range-track { height:8px; background:#b3c0ac; border-radius:8px; }
+.design-adjustment input::-moz-range-thumb { width:38px; height:38px; border:3px solid #fff6db; border-radius:50%; background:#176d61; }
+.design-stops { display:flex; justify-content:space-between; gap:10px; color:#466359; font-size:16px; font-weight:800; }
+.workshop-redesign .workshop-gesture-tip { grid-column:1/-1; font-size:16px; margin:9px 0 0; color:#53685c; }
+.workshop-notebook { min-height:0; overflow:auto; padding:17px; border-radius:22px; border:2px solid #c5b084; background:#fff9e9; box-shadow:0 6px 16px #43392215; }
+.notebook-heading { display:flex; justify-content:space-between; gap:10px; color:#255c51; align-items:center; font-size:22px; font-weight:900; }
+.notebook-heading strong { font-size:18px; color:#785128; }
+.workshop-notebook > p { margin:10px 0 14px; color:#426150; font-size:17px; line-height:1.45; }
+.workshop-records { display:grid; gap:9px; }
+.workshop-run { padding:10px 12px; background:#f0edd9; border:1px solid #d5c9a8; border-radius:12px; color:#365b4e; }
+.workshop-run-choice { width:100%; min-height:48px; text-align:left; border:2px solid #6e9c83; cursor:pointer; }
+.workshop-run-choice:hover { background:#e1f0dd; }
+.workshop-run strong { font-size:16px; display:block; }
+.workshop-run span { font-size:16px; display:block; margin-top:5px; }
+.workshop-metrics { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:8px; }
+.workshop-metric { min-width:0; display:grid; grid-template-rows:minmax(68px,auto) 12px auto; align-content:start; gap:6px; }
+.workshop-run .workshop-metric-label { margin:0; line-height:1.4; font-weight:800; word-break:keep-all; }
+.workshop-metric-label b { font-size:17px; }
+.workshop-run .workshop-metric-value { margin:0; line-height:1.35; word-break:keep-all; }
+.workshop-force, .workshop-distance { height:12px; border-radius:8px; background:#d5d6be; overflow:hidden; }
+.workshop-force i, .workshop-distance i { height:100%; display:block; background:#377966; border-radius:inherit; }
+.workshop-distance { background:#e1d3bb; }
+.workshop-distance i { background:#96643c; }
+.workshop-empty { color:#65705d; padding:16px 6px; font-size:16px; line-height:1.5; border-top:1px dashed #c6b895; border-bottom:1px dashed #c6b895; }
+.workshop-choice { display:grid; gap:8px; margin-top:12px; }
+.workshop-choice p { margin:0; font-size:16px; line-height:1.4; }
+.workshop-choice button { min-height:48px; padding:9px; border:2px solid #9ab7a2; border-radius:12px; font-size:16px; font-weight:800; color:#265d4f; background:#fffdf3; }
+.workshop-choice .finding-earned { font-size:18px; color:#176448; font-weight:900; }
+.workshop-notebook .workshop-model-note { font-size:16px; margin:16px 0 0; color:#65725e; }
+.workshop-quiz-prompt { padding:12px 10px; margin:12px 0; border:2px solid #d5a24f; border-radius:14px; background:#fff1bc; text-align:center; }
+.workshop-quiz-prompt .question-label { font-size:14px; padding:4px 9px; }
+.workshop-quiz-prompt h2 { font-size:20px; line-height:1.4; margin:9px 0; color:#16464b; word-break:keep-all; }
+.workshop-quiz-prompt .answer-label { margin:8px 0 0; font-size:16px; line-height:1.3; }
+.workshop-notebook.quiz-ready { border-color:#cf9a3d; box-shadow:0 0 0 3px #ffd77b70; }
+.workshop-notebook .workshop-run-choice { background:#fff7df; border:3px solid #bf974b; box-shadow:0 4px 0 #99723633; }
+.workshop-notebook .workshop-run-choice:hover:not(:disabled) { background:#fff0b6; border-color:#8a691f; }
+.workshop-run .workshop-answer-number { display:inline-block; margin:0 0 7px; padding:3px 10px; border-radius:999px; color:#674715; background:#ffd673; font-weight:900; }
+.workshop-run .workshop-pick-record { display:flex; align-items:center; justify-content:center; gap:5px; margin:10px -2px -2px; padding:7px; border-top:1px dashed #be9f61; color:#634415; font-size:16px; font-weight:900; }
+.workshop-pick-record svg { width:22px; height:25px; }
+.workshop-notebook.quiz-done .workshop-quiz-prompt { background:#e1f3df; border-color:#8ab793; }
+.workshop-redesign .experiment-footer { gap:12px; padding-top:0; }
+.workshop-redesign .feedback { font-size:17px; }
+@media (min-width:761px) and (max-width:1100px) {
+ .workshop-redesign { padding:12px 16px 16px; }
+ .workshop-studio { grid-template-columns:minmax(0,1fr) 224px; gap:10px; }
+ .workshop-notebook { padding:12px; }
+ .workshop-drawer { padding:6px 8px; gap:8px; }
+ .workshop-drawer > button { padding:8px 10px; font-size:16px; }
+ .workshop-design-dock { padding:8px 12px; gap:8px 12px; }
+ .workshop-view { gap:8px; }
+ .design-description { font-size:16px; }
+ .design-stops { font-size:16px; gap:4px; }
+ .workshop-redesign .workshop-gesture-tip { margin-top:3px; font-size:16px; }
+ .workshop-redesign .mission-tag { display:none; }
+ .workshop-metrics { grid-template-columns:1fr; }
+ .workshop-metric { grid-template-rows:auto 12px auto; }
+}
+@media (min-width:1600px) and (min-height:900px) {
+ .workshop-studio { grid-template-columns:minmax(0,1fr) 350px; gap:22px; }
+ .workshop-drawer > button, .workshop-choice button { min-height:60px; font-size:22px; }
+ .workshop-redesign .camera-button { min-height:60px; min-width:60px; }
+ .workshop-design-dock { padding:18px 26px; }
+ .design-description, .design-description > span, .workshop-notebook > p, .workshop-run strong, .workshop-redesign .feedback { font-size:21px; }
+ .design-stops, .workshop-redesign .workshop-gesture-tip, .workshop-scene-caption, .workshop-run span, .workshop-notebook .workshop-model-note { font-size:18px; }
+ .design-adjustment input { height:52px; }
+ .workshop-notebook { padding:24px; }
+ .workshop-run { padding:14px 16px; }
+ .workshop-world[data-tool='direct'] .workshop-actor { width:290px; left:calc(50% - 145px); }
+ .workshop-handle { width:76px; height:76px; }
+ .workshop-handle .handle-label { font-size:18px; width:140px; }
+ .workshop-choice p, .workshop-empty { font-size:20px; }
+}
+@media (max-height:600px) and (orientation:landscape) {
+ .workshop-redesign { min-height:730px; }
+ .workshop-world { min-height:300px; }
+}
+
+.workshop-choice .workshop-finding { padding:8px 10px; border-radius:10px; background:#e9f6e4; color:#1c5a43; font-weight:900; }
+
+/* 힘 화살표: 손잡이 옆에서 움직이는 방향을 가리키고, 설계에 필요한 힘이 클수록 길고 굵다 */
+.workshop-handle .handle-force { --dir:-90deg; --side:-50px; position:absolute; left:50%; top:50%; width:var(--force-len,60px); height:var(--force-width,10px); border-radius:999px 0 0 999px; background:#ffcf4a; box-shadow:0 0 0 3px #7a3a12, 0 0 0 6px #fff8e6; transform:translate(-50%,-50%) rotate(var(--dir)) translateY(var(--side)) scaleX(.2); opacity:0; pointer-events:none; transition:transform .25s ease-out, opacity .2s, width .25s, height .25s; z-index:1; }
+.workshop-handle .handle-force::after { content:''; position:absolute; right:-15px; top:50%; border:calc(var(--force-width,10px) / 2 + 7px) solid transparent; border-left:16px solid #ffcf4a; transform:translateY(-50%); filter:drop-shadow(1px 0 0 #7a3a12); }
+.workshop-handle[data-tool='lever'] .handle-force { --dir:90deg; --side:50px; }
+.workshop-handle[data-tool='ramp'] .handle-force { --dir:0deg; --side:-50px; }
+.workshop-handle[data-pushing='true'] .handle-force { opacity:1; transform:translate(-50%,-50%) rotate(var(--dir)) translateY(var(--side)) scaleX(1); }
+@media (prefers-reduced-motion: reduce) { .workshop-handle .handle-force { transition:none; } }
+
+/* L2 힘 예산: 콩이의 힘 막대. 앞 6칸이 쓸 수 있는 힘이고, 넘친 칸은 빨갛게 남아 얼마나 모자랐는지 보여 준다 */
+.workshop-budget { position:absolute; z-index:4; top:48px; right:12px; width:min(272px,46%); padding:8px 10px 9px; border:2px solid #b9894a; border-radius:14px; background:#fff8e6f2; color:#3b4b33; box-shadow:0 4px 12px #4c382226; pointer-events:none; }
+.workshop-budget[hidden] { display:none; }
+.budget-head { display:flex; align-items:center; gap:6px; font-size:16px; font-weight:900; }
+.budget-head img { width:34px; height:34px; object-fit:contain; }
+.budget-status { margin-left:auto; font-size:15px; font-weight:900; color:#6b5226; white-space:nowrap; }
+.workshop-budget[data-state='over'] .budget-status { color:#b2321f; }
+.workshop-budget[data-state='ok'] .budget-status { color:#1d6c4c; }
+.budget-cells { position:relative; display:grid; grid-template-columns:repeat(12,1fr); gap:3px; margin-top:6px; }
+.budget-cells i { height:18px; border-radius:4px; background:#ece5d2; border:1px dashed #c9b993; }
+.budget-cells i:nth-child(-n+6) { background:#fff3c4; border:1px solid #d6b25e; }
+.budget-cells::after { content:''; position:absolute; left:calc(50% - 2px); top:-5px; bottom:-5px; width:4px; border-radius:2px; background:#7a3a12; }
+.budget-cells i.is-fill { background:#2f8a6c; border:1px solid #1d6650; }
+.budget-cells i.is-over { background:#e0533b; border:1px solid #a5301d; animation:budget-over .35s ease-out both; }
+.budget-cells i.is-over:nth-child(8) { animation-delay:.05s; } .budget-cells i.is-over:nth-child(9) { animation-delay:.1s; } .budget-cells i.is-over:nth-child(n+10) { animation-delay:.15s; }
+@keyframes budget-over { from { transform:scaleY(.3); opacity:.2; } to { transform:none; opacity:1; } }
+.budget-scale { display:grid; grid-template-columns:1fr 1fr; margin-top:4px; font-size:14px; font-weight:850; color:#6e5a35; }
+.budget-scale .budget-more { padding-left:8px; color:#b2321f; }
+
+/* 손잡이 힘 화살표 옆 예산선: 화살표 끝이 점선을 넘으면 콩이의 힘보다 크다 */
+.workshop-handle .handle-budget { --dir:-90deg; --side:-50px; position:absolute; left:50%; top:50%; width:var(--budget-len,80px); height:calc(var(--force-width,10px) + 18px); border-right:4px dashed #7a3a12; transform:translate(-50%,-50%) rotate(var(--dir)) translateY(var(--side)); opacity:0; pointer-events:none; z-index:2; transition:opacity .2s; }
+.workshop-handle[data-tool='lever'] .handle-budget { --dir:90deg; --side:50px; }
+.workshop-handle[data-tool='ramp'] .handle-budget { --dir:0deg; --side:-50px; }
+.workshop-handle[data-budget='true'][data-pushing='true'] .handle-budget { opacity:1; }
+.workshop-handle[data-over='true'] .handle-force { background:#e0533b; }
+.workshop-handle[data-over='true'] .handle-force::after { border-left-color:#e0533b; }
+
+/* 의뢰 보드 */
+.workshop-request-invite { display:grid; grid-template-columns:56px 1fr; gap:6px 10px; align-items:center; padding:10px; border:3px solid #d5a24f; border-radius:14px; background:#fff1bc; }
+.workshop-request-invite img { width:56px; height:56px; object-fit:contain; }
+.workshop-choice .workshop-request-invite p { font-size:16px; line-height:1.4; }
+.workshop-request-invite strong { display:block; color:#16464b; }
+.workshop-request-invite button { grid-column:1/-1; }
+.workshop-notebook.is-request .workshop-quiz-prompt h2 { font-size:18px; }
+.workshop-cargo-card { display:grid; grid-template-columns:auto 1fr; gap:2px 10px; align-items:center; padding:9px 12px; border:2px solid #d5c9a8; border-radius:12px; background:#f0edd9; color:#365b4e; }
+.workshop-cargo-card strong { font-size:16px; }
+.workshop-cargo-card span { grid-column:2; font-size:15px; font-weight:800; }
+.workshop-cargo-card .cargo-weight { grid-row:1/3; width:calc(18px + var(--weight,1) * 14px); aspect-ratio:1; border-radius:5px; background:#267a78; box-shadow:inset 0 -5px #d8ae65, inset 0 5px #d8ae65; }
+.workshop-cargo-card[data-state='now'] { border-color:#cf9a3d; background:#fff4cf; box-shadow:0 0 0 3px #ffd77b70; }
+.workshop-cargo-card[data-state='done'] { border-color:#8ab793; background:#e1f3df; }
+.workshop-cargo-card[data-state='next'] { opacity:.65; }
+.workshop-trace-title { font-weight:900; color:#255c51; }
+.workshop-trace { display:grid; gap:4px; padding:8px 10px; border:1px solid #d5c9a8; border-radius:10px; background:#fffdf3; font-size:15px; }
+.workshop-trace[data-ok='true'] { border-color:#8ab793; background:#eef8ec; }
+.workshop-trace[data-age='1'] { opacity:.8; } .workshop-trace[data-age='2'] { opacity:.6; }
+.workshop-trace strong { font-size:15px; }
+.workshop-trace > span:last-child { font-weight:850; color:#7a3d22; }
+.workshop-trace[data-ok='true'] > span:last-child { color:#1d6c4c; }
+.trace-cells { position:relative; display:grid; grid-template-columns:repeat(12,1fr); gap:2px; }
+.trace-cells i { height:9px; border-radius:2px; background:#ece5d2; }
+.trace-cells i:nth-child(-n+6) { background:#fff3c4; }
+.trace-cells::after { content:''; position:absolute; left:calc(50% - 1px); top:-3px; bottom:-3px; width:2px; background:#7a3a12; }
+.trace-cells i.is-fill { background:#2f8a6c; }
+.trace-cells i.is-over { background:#e0533b; }
+@media (min-width:1600px) and (min-height:900px) {
+ .workshop-budget { width:min(330px,40%); }
+ .budget-head, .workshop-cargo-card strong, .workshop-trace, .workshop-trace strong { font-size:19px; }
+ .budget-cells i { height:22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .budget-cells i.is-over { animation:none; }
+ .workshop-handle .handle-budget { transition:none; }
+}

@@ -1,0 +1,14 @@
+.story-video-wrap { position:relative; background:#071f2d; }
+.story-video { display:block; width:100%; height:100%; aspect-ratio:16/9; object-fit:contain; background:#071f2d; }
+.story-play { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); min-width:150px; font-size:20px; box-shadow:0 6px 20px #021b1b99; }
+.story-play[hidden], .story-actions .button[hidden] { display:none; }
+.story-video-card .story-caption { min-height:3.2em; padding:10px 14px; border-radius:14px; background:#fff8e6; border:2px solid #d9cdb2; color:#1f4540; }
+.story-video-card .story-actions .button { min-width:160px; min-height:48px; font-size:18px; }
+.story-video-card :focus-visible { outline:4px solid #ffb21f; outline-offset:3px; }
+@media(max-height:700px) { .story-video-card .story-caption { min-height:0; font-size:18px; } .story-video { max-height:230px; } }
+@media(prefers-reduced-motion:reduce) { .story-video-card * { animation:none !important; transition:none !important; } }
+
+/* 영상이 끝나면 검은 화면 대신 마지막 장면을 보여 준다 */
+.story-video-wrap { position:relative; }
+.story-video-wrap .story-end-frame { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; }
+.story-video-wrap .story-end-frame[hidden] { display:none; }

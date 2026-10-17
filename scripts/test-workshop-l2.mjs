@@ -1,0 +1,105 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import test from 'node:test';
+import ts from 'typescript';
+
+// Import the actual TypeScript modules without producing build files or adding dependencies.
+const moduleUrls = new Map();
+function moduleUrl(filename) {
+  const absolute = path.resolve(filename);
+  if (moduleUrls.has(absolute)) return moduleUrls.get(absolute);
+  let source = ts.transpileModule(fs.readFileSync(absolute, 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  source = source.replace(/(from\s*|import\s*)(['"])(\.\.?\/[^'"]+)\2/g, (_match, prefix, quote, relative) => {
+    const dependency = path.resolve(path.dirname(absolute), relative);
+    return `${prefix}${quote}${moduleUrl(path.extname(dependency) ? dependency : `${dependency}.ts`)}${quote}`;
+  });
+  const url = `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
+  moduleUrls.set(absolute, url);
+  return url;
+}
+const model = await import(moduleUrl('src/workshopModel.ts'));
+const state = await import(moduleUrl('src/state.ts'));
+
+const designs = [['direct', 0], ['lever', 0], ['lever', 1], ['lever', 2], ['ramp', 0], ['ramp', 1]];
+const passing = cargo => designs.filter(([tool, setting]) => model.judgeWorkshopL2(cargo, tool, setting).success).map(([tool, setting]) => `${tool}:${setting}`);
+
+test('direct lifting never fits the budget', () => {
+  for (const [cargo] of model.workshopCargos.entries()) assert.equal(model.judgeWorkshopL2(cargo, 'direct', 0).success, false);
+});
+
+test('every cargo has a passing design, and heavier cargo leaves fewer', () => {
+  assert.deepEqual(passing(0), ['lever:0', 'ramp:0', 'ramp:1']);
+  assert.deepEqual(passing(1), ['lever:0', 'ramp:0', 'ramp:1']);
+  assert.deepEqual(passing(2), ['lever:0', 'ramp:1']);
+});
+
+test('heavy cargo passes only with the fulcrum near the cargo or the long ramp', () => {
+  assert.equal(model.judgeWorkshopL2(2, 'lever', 0).success, true);
+  assert.equal(model.judgeWorkshopL2(2, 'ramp', 1).success, true);
+  assert.equal(model.judgeWorkshopL2(2, 'ramp', 0).success, false);
+  assert.equal(model.judgeWorkshopL2(2, 'lever', 1).success, false);
+  assert.equal(model.judgeWorkshopL2(2, 'lever', 2).success, false);
+});
+
+test('force reuses getWorkshopDesign times the cargo weight', () => {
+  for (const [cargo, { weight }] of model.workshopCargos.entries()) {
+    assert.equal(model.workshopL2Force(cargo, 'lever', 0), model.getWorkshopDesign('lever', 0).force * weight);
+    assert.equal(model.workshopL2Force(cargo, 'ramp', 1), model.getWorkshopDesign('ramp', 1).force * weight);
+    assert.equal(model.workshopL2Force(cargo, 'direct', 0), 100 * weight);
+  }
+  assert.ok(model.workshopL2Force(2, 'ramp', 0) > model.workshopL2Force(1, 'ramp', 0));
+});
+
+test('a miss reports how many cells overflowed and stalls part way', () => {
+  const miss = model.judgeWorkshopL2(2, 'ramp', 0);
+  assert.equal(miss.budgetCells, 6);
+  assert.equal(miss.needCells, 9);
+  assert.equal(miss.overCells, 3);
+  assert.ok(miss.stallAt > 0 && miss.stallAt < 1);
+  assert.ok(model.judgeWorkshopL2(2, 'lever', 2).stallAt < miss.stallAt, 'a bigger overflow stops earlier');
+  const hit = model.judgeWorkshopL2(2, 'lever', 0);
+  assert.equal(hit.overCells, 0);
+  assert.ok(hit.needCells <= hit.budgetCells);
+  assert.equal(hit.stallAt, 1);
+});
+
+test('cargo is cleared in order and the record counts attempts', () => {
+  let record;
+  assert.equal(model.workshopL2Current(record), 0);
+  record = model.applyWorkshopL2Attempt(record, 0, false);
+  assert.deepEqual(record, { cleared: [], attempts: 1 });
+  record = model.applyWorkshopL2Attempt(record, 0, true);
+  assert.deepEqual(record, { cleared: [0], attempts: 2 });
+  assert.equal(model.workshopL2Current(record), 1);
+  record = model.applyWorkshopL2Attempt(record, 1, true);
+  assert.equal(model.workshopL2Complete(record), false);
+  record = model.applyWorkshopL2Attempt(record, 2, true);
+  assert.deepEqual(record, { cleared: [0, 1, 2], attempts: 4 });
+  assert.equal(model.workshopL2Complete(record), true);
+  assert.equal(model.workshopL2Current(record), 3);
+});
+
+test('the clue gets one step more specific every two misses', () => {
+  assert.deepEqual([0, 1, 2, 3, 4, 5, 6, 9].map(model.workshopL2HintLevel), [0, 0, 1, 1, 2, 2, 3, 3]);
+  const hints = [0, 1, 2, 3].map(level => model.workshopL2Hint(level, 'ramp'));
+  assert.equal(new Set(hints).size, 4);
+  assert.match(model.workshopL2Hint(2, 'lever'), /받침대/);
+  assert.match(model.workshopL2Hint(3, 'lever'), /화물 가까이/);
+  assert.match(model.workshopL2Hint(0, 'direct'), /지레나 빗면/);
+});
+
+test('saved workshop level records survive a reload as plain cleared/attempts', () => {
+  const kept = state.retainLevels({ workshop: { cleared: [2, 0, 0, 'x'], attempts: 7 } });
+  assert.deepEqual(kept.workshop, { cleared: [0, 2], attempts: 7 });
+  assert.equal(model.workshopL2Current(kept.workshop), 1);
+});
+
+test('level 1 finish rule is unchanged: level 2 never gates canFinishWorkshopExploration', () => {
+  const save = state.freshSave();
+  Object.assign(save.workshop, { direct: true, trials: model.retainWorkshopRuns([{ tool: 'lever', setting: 0 }, { tool: 'lever', setting: 1 }, { tool: 'ramp', setting: 0 }, { tool: 'ramp', setting: 1 }]) });
+  assert.equal(model.canFinishWorkshopExploration(save.workshop), true);
+  assert.equal(model.workshopL2Complete(save.levels?.workshop), false);
+});

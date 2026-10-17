@@ -1,0 +1,11 @@
+/* This game is designed for landscape tablets, interactive boards and wide web windows. */
+.orientation-hint { display:none; }
+@media (orientation:portrait) {
+  #app { min-height:100dvh; height:100dvh; }
+  #app > .topbar, #app > .screen { display:none; }
+  .orientation-hint { display:flex; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:36px; text-align:center; color:#175b5e; background:radial-gradient(ellipse at top,#fff9e8,#d8eae0); }
+  .orientation-hint > span { font-size:88px; color:#138585; }
+  .orientation-hint h2 { font-size:clamp(24px,4vw,36px); margin:0; line-height:1.4; }
+  .orientation-hint p { font-size:20px; line-height:1.7; margin:0; }
+  .orientation-hint small { font-size:16px; color:#587570; }
+}

@@ -1,0 +1,153 @@
+/* Central power hall: image environment, live 3D work area, restrained DOM controls. */
+#app .core-studio .rescue-stage[data-phase='0'] .rescue-companion { width:clamp(280px,31%,390px); left:14px; bottom:12px; z-index:2; }
+#app .core-studio .rescue-stage[data-phase='0'] .rescue-companion .game-companion { width:100%; --companion-height:clamp(220px,24vw,300px); }
+#app .core-studio .rescue-stage[data-phase='0'] .rescue-world { z-index:3; }
+#app .core-studio .rescue-stage[data-phase='0'] .rescue-corgi-tip { left:18px; top:18px; bottom:auto; max-width:min(300px,29%); z-index:4; font-size:18px; }
+#app .core-studio .rescue-stage[data-phase='1'] .game-companion-student { display:none; }
+#app .core-studio .rescue-stage[data-phase='1'] .rescue-companion { width:150px; bottom:18px; }
+#app .core-studio .rescue-stage[data-phase='1'] .game-companion-corgi { width:100%; height:100%; margin:0; }
+#app .core-studio .rescue-stage[data-phase='1'] .rescue-corgi-tip { left:18px; top:18px; bottom:auto; max-width:330px; }
+#rescue-scale-zero { cursor:pointer; }
+#rescue-scale-zero:focus-visible { outline:2px solid #ffe48b; outline-offset:3px; }
+#app:has(.core-studio) {
+  --core-ink:#ecf2e9; --core-muted:#a6bec0; --core-line:#6d929540;
+  --core-surface:#122f38; --core-accent:#e6bc75; --core-mint:#77d8c3;
+  --core-font:'Pretendard','Noto Sans KR','Malgun Gothic',sans-serif;
+  background:#0d252e; color:var(--core-ink);
+}
+#app:has(.core-studio) .topbar { min-height:64px; padding:8px 24px; border-bottom:1px solid var(--core-line); background:#102b33; box-shadow:none; grid-template-columns:auto 180px minmax(0,1fr) auto; gap:16px; }
+#app:has(.core-studio) .icon-button { width:44px; height:44px; border:1px solid #6d929559; border-radius:12px; background:#1b3941; color:#e3eade; box-shadow:none; }
+#app:has(.core-studio) .icon-button:hover { background:#2d5058; }
+#app:has(.core-studio) .brand { font:700 13px/1.15 var(--core-font); gap:8px; }
+#app:has(.core-studio) .brand strong { font-size:17px; color:#e6c58b; }
+#app:has(.core-studio) .brand-mark { width:38px; height:38px; border:1px solid #6d929559; border-radius:10px; transform:none; color:#a7dbcf; background:#1b3941; font-size:22px; }
+#app:has(.core-studio) .topbar-title strong { font:650 17px/1.3 var(--core-font); color:#d8e7e4; }
+#app:has(.core-studio) .topbar-title > span:last-child { display:none; }
+#app:has(.core-studio) .topbar .eyebrow { color:#a5bcb9; font:500 12px/1.4 var(--core-font); letter-spacing:.02em; }
+#app:has(.core-studio) .screen { overflow:hidden; }
+#app .core-studio { height:100%; min-height:0; max-width:none; padding:16px 24px; display:grid; grid-template-rows:auto minmax(0,1fr) auto; gap:12px; color:var(--core-ink); font-family:var(--core-font); }
+#app .core-studio h1, #app .core-studio h2, #app .core-studio button, #app .core-studio .mission-progress { font-family:var(--core-font); }
+#app .core-studio button { font-weight:650; letter-spacing:-.02em; transition:background .15s,border-color .15s,color .15s; }
+#app .core-studio button:not(:disabled):active { transform:none; filter:brightness(1.13); }
+#app .core-studio .experiment-heading { min-height:48px; gap:24px; align-items:center; }
+.core-title { display:flex; align-items:center; gap:16px; }
+.core-eyebrow { max-width:92px; color:#aec5c4; font-size:13px; line-height:1.5; word-break:keep-all; padding-right:16px; border-right:1px solid var(--core-line); }
+#app .core-studio .experiment-heading h1 { margin:0; font-size:28px; font-weight:750; letter-spacing:-.04em; color:#f0f0df; }
+#app .core-studio .mission-progress { width:auto; max-width:57%; min-width:0; padding:0; border:0; border-radius:0; background:none; box-shadow:none; }
+#app .core-studio .mission-progress-count, #app .core-studio .mission-progress-next { display:none; }
+#app .core-studio .mission-progress-steps { display:flex; flex-wrap:nowrap; gap:16px; }
+#app .core-studio .mission-progress-steps span { color:#9db2b4; background:none; padding:0; font-size:14px; font-weight:500; white-space:nowrap; }
+#app .core-studio .mission-progress-steps .done { color:#99d5bd; }
+#app .core-studio .rescue-stage { min-height:0; border:1px solid #65818580; border-radius:16px; overflow:hidden; background:#15333b; box-shadow:0 16px 40px #020b1330; }
+#app .core-studio .rescue-stage-head { min-height:48px; padding:4px 20px; gap:16px; color:#e5ece3; background:#17353ecf; border-radius:0; border-bottom:1px solid #83a6a12b; }
+#app .core-studio .rescue-stage-head > strong { font-size:17px; font-weight:650; }
+#app .core-studio .rescue-stage-head > span { font-size:14px; color:#b3cbc7; }
+#app .core-studio .rescue-notebook > summary { color:#b7cbc6; font-size:14px; font-weight:500; }
+#app .core-studio .rescue-notes-body { background:#183841; border:1px solid #567980; border-radius:12px; box-shadow:0 16px 32px #04151db3; color:#e7e7d9; }
+#app .core-studio .rescue-notes-body p { color:#c4d5d0; }
+#app .core-studio #rescue-clues button { background:#24454e; border:1px solid #597a7c; color:#e2ece3; border-radius:10px; }
+#app .core-studio .rescue-playfield { min-height:0; }
+#app .core-studio .rescue-playfield.is-core-3d { background:linear-gradient(180deg,#0b253022,#0b23300d 50%,#0b253036),url('/assets/backgrounds/core-hall-v2.webp') center 40% / cover; }
+#app .core-studio .core-scene-host { inset:0 248px 0 0; overflow:hidden; }
+#app .core-studio .core-loading { background:#13333b; color:#d5e3de; font-size:18px; }
+#app .core-studio .core-loading button { border:1px solid #6b9995; border-radius:10px; background:#284951; color:#edf1e9; }
+#app .core-studio .core-conditions { top:16px; left:20px; border:0; border-radius:0; padding:0; background:transparent; color:#ebefe1; font-size:14px; font-weight:550; text-shadow:0 2px 8px #09212ae6; display:flex; align-items:center; gap:8px; }
+.core-conditions i { width:6px; height:6px; border-radius:50%; background:#9ce2cc; box-shadow:0 0 12px #87e7c655; }
+#app .core-studio .core-grip { width:92px; height:92px; border:0; border-radius:50%; background:none; }
+#app .core-studio .core-grip:hover { background:#a5fce412; }
+#app .core-studio .core-grip span { top:auto; bottom:100%; margin-bottom:0; padding:5px 10px; border-radius:6px; font-size:13px; background:#102c39d9; color:#c8f0df; border:1px solid #9acfba66; }
+#app .core-studio .core-grip:focus-visible { outline:2px solid #ecce95; outline-offset:2px; }
+#app .core-studio .core-route-tag { min-height:44px; display:flex; gap:8px; align-items:center; transform:translate(-50%,-105%); border:1px solid #76978c77; border-radius:8px; background:#16343ddd; color:#bdecdc; font-size:13px; padding:6px 10px; pointer-events:auto; }
+#app .core-studio .core-route-tag span { font-size:14px; color:#e1e8de; }
+#app .core-studio .core-route-tag.short { color:#e4b977; border-color:#bd9d6880; }
+#app .core-studio .core-route-tag[aria-pressed='true'] { border-color:#95dbc1; background:#19483fe6; }
+#app .core-studio .core-route-tag.short[aria-pressed='true'] { border-color:#e6bd75; background:#4c4536e6; }
+.core-view-tools { position:absolute; z-index:3; bottom:16px; left:20px; display:flex; gap:4px; padding:4px; border:1px solid #87a7a14d; border-radius:12px; background:#102c38eb; }
+.core-view-tools button { min-width:44px; height:44px; padding:0 12px; border:0; border-radius:8px; color:#d3e3dd; background:transparent; font-size:22px; touch-action:manipulation; }
+.core-view-tools button[data-core-view='inspect'] { min-width:112px; font-size:15px; border-left:1px solid #87a7a12b; border-right:1px solid #87a7a12b; border-radius:0; }
+.core-view-tools button:hover, .core-view-tools button[aria-pressed='true'] { background:#355750; color:#e7f9ed; }
+.core-view-hint { position:absolute; z-index:2; bottom:20px; left:264px; max-width:220px; margin:0; color:#d0ddd7; font-size:13px; line-height:1.5; text-shadow:0 1px 6px #071d29; pointer-events:none; }
+#app .core-studio .core-loading:not([hidden]) ~ .core-route-tag, #app .core-studio .core-loading:not([hidden]) ~ .core-view-tools, #app .core-studio .core-loading:not([hidden]) ~ .core-view-hint { display:none; }
+#app .core-studio .is-inspecting .core-route-tag, #app .core-studio .is-docking .core-route-tag, #app .core-studio .is-docking .core-grip, #app .core-studio .is-docking .core-view-tools, #app .core-studio .is-docking .core-view-hint { display:none; }
+#app .core-studio .is-mounted .core-route-tag { display:none; }
+#app .core-studio .has-core-travel .core-route-tag { display:none; }
+#app .core-studio .core-records { width:212px; inset:20px 20px auto auto; max-height:calc(100% - 40px); padding:20px 16px; gap:0; border:1px solid #91aaa54a; border-radius:12px; background:#12313ceb; box-shadow:0 12px 24px #09202e33; overflow:auto; }
+.core-panel-kicker { color:#b8d0ca; font-size:13px; }
+.core-mass { display:flex; align-items:center; justify-content:space-between; padding:8px 0 16px; margin-bottom:16px; border-bottom:1px solid #6d969557; }
+.core-mass strong { color:#f1ebd6; font-size:38px; line-height:1; font-weight:650; letter-spacing:-.04em; }
+.core-mass small { font-size:18px; font-weight:500; margin-left:6px; }
+.core-mass > span { color:#9fb9b7; font-size:12px; line-height:1.5; }
+#app .core-studio .core-records h2 { margin:0 0 8px; color:#f0ead9; font-size:20px; font-weight:650; letter-spacing:-.03em; }
+#app .core-studio #core-force-note { margin:0 0 12px; padding:0; background:none; border-radius:0; color:#a7bdb8; font-size:13px; font-weight:500; }
+#app .core-studio #core-comparison { gap:0; }
+#app .core-studio .core-record-row { min-height:56px; display:flex; padding:12px 0; gap:8px; border:0; border-top:1px solid #77929138; border-radius:0; font-size:15px; color:#d9e5df; }
+#app .core-studio .core-record-row strong { font-weight:550; white-space:nowrap; }
+.core-record-row b { color:#e1b777; font-size:12px; margin-right:8px; font-weight:650; }
+.core-record-row.long b { color:#7bd7bf; }
+#app .core-studio .core-record-row span { color:#9fb7b6; font-size:14px; }
+#app .core-studio .core-record-row[data-result='success'] span { color:#a7efd0; }
+#app .core-studio .core-record-row[data-result='stopped'] span { color:#efc788; }
+#app .core-studio .core-record-help { margin:14px 0 0; padding-top:12px; border-top:1px solid #77929138; color:#a4bcb8; font-size:13px; line-height:1.65; }
+#app .core-studio .rescue-bottom { flex-shrink:0; min-height:80px; padding:12px 20px; gap:12px 16px; border-top:1px solid #65818573; border-radius:0; background:#122f38; }
+#app .core-studio .rescue-controls { gap:12px; }
+#app .core-studio .rescue-controls button, #app .core-studio .rescue-step-button { min-height:48px; padding:10px 16px; font-size:16px; border:1px solid #63818580; border-radius:10px; color:#dfeade; background:#1b3942; box-shadow:none; }
+#app .core-studio .rescue-controls button[aria-pressed='true'] { border-color:#7bbd9e; background:#305549; color:#eff2df; }
+#app .core-studio .rescue-controls button[data-route='short'][aria-pressed='true'] { border-color:#c5a36c; background:#504937; }
+#app .core-studio .rescue-route-controls { gap:8px; }
+.core-studio .rescue-route-controls button span { font-size:12px; font-weight:650; margin-right:8px; opacity:.65; }
+#app .core-studio .rescue-force-control { min-width:152px; max-width:240px; color:#afc6c2; font-size:13px; gap:0 12px; }
+#app .core-studio .rescue-force-control strong { color:#efe0bb; font-size:14px; font-weight:550; }
+#app .core-studio .rescue-force-control input { height:44px; min-height:44px; }
+#app .core-studio .rescue-force-control input::-webkit-slider-runnable-track { height:4px; background:#526967; }
+#app .core-studio .rescue-force-control input::-webkit-slider-thumb { width:24px; height:24px; margin-top:-10px; border:2px solid #f4dfae; background:#d3af72; box-shadow:0 0 0 5px #ddb87114; }
+#app .core-studio .rescue-force-control input::-moz-range-track { height:4px; background:#526967; }
+#app .core-studio .rescue-force-control input::-moz-range-thumb { width:22px; height:22px; border:2px solid #f4dfae; background:#d3af72; }
+#app .core-studio .rescue-controls button[data-rescue='retry'] { background:transparent; border-color:transparent; color:#bdcfc7; padding:10px 4px; }
+#app .core-studio .rescue-step-button { min-width:156px; color:#283a38; background:#dfc087; border-color:#e5cda0; font-weight:750; }
+#app .core-studio .experiment-footer { min-height:52px; padding:0; gap:16px; }
+#app .core-studio .feedback { min-height:48px; padding:4px 12px; background:transparent; border:0; border-left:2px solid #9abaac; border-radius:0; color:#bdcec9; font-size:15px; line-height:1.5; font-weight:500; }
+#app .core-studio #rescue-finish { min-width:212px; min-height:52px; padding:12px 24px; border:0; border-radius:10px; background:#e2b979; color:#263c37; font-size:17px; font-weight:750; box-shadow:none; gap:20px; }
+#app .core-studio #rescue-finish:disabled { background:#28454b; color:#90a8a7; opacity:.75; box-shadow:none !important; filter:none; }
+#app .core-studio .button::after { display:none; }
+@media (max-width:1100px) {
+  #app:has(.core-studio) .topbar { padding:8px 16px; grid-template-columns:auto 150px minmax(0,1fr) auto; gap:12px; }
+  #app .core-studio { padding:12px 16px; gap:8px; }
+  #app .core-studio .experiment-heading { min-height:44px; }
+  #app .core-studio .experiment-heading h1 { font-size:25px; }
+  #app .core-studio .mission-progress-steps { gap:10px; }
+  #app .core-studio .mission-progress-steps span { font-size:13px; }
+  #app .core-studio .core-scene-host { right:220px; }
+  #app .core-studio .core-records { right:12px; top:16px; width:192px; padding:16px 12px; max-height:calc(100% - 32px); }
+  #app .core-studio .rescue-stage[data-phase='2'] .rescue-stage-head > span { display:none; }
+  #app .core-studio .rescue-bottom { padding:10px 12px; gap:8px; }
+  #app .core-studio .rescue-controls { gap:8px; }
+  #app .core-studio .rescue-controls button { padding:10px 12px; font-size:15px; }
+  #app .core-studio .rescue-force-control { min-width:136px; }
+  #app .core-studio .core-conditions { left:16px; font-size:13px; }
+  .core-view-hint { display:none; }
+  #app .core-studio .core-route-tag span { font-size:13px; }
+}
+@media (max-height:760px) and (orientation:landscape) {
+  #app .core-studio { padding-top:8px; padding-bottom:8px; gap:8px; }
+  #app .core-studio .experiment-heading { min-height:40px; }
+  #app .core-studio .core-mass { padding-bottom:12px; margin-bottom:12px; }
+  #app .core-studio .core-records { padding-top:14px; padding-bottom:14px; }
+  #app .core-studio .core-record-help { font-size:12px; line-height:1.5; margin-top:8px; padding-top:8px; }
+  #app .core-studio .rescue-bottom { min-height:72px; padding-top:8px; padding-bottom:8px; }
+  #app .core-studio .rescue-stage-head { min-height:44px; }
+}
+@media (min-width:1600px) and (min-height:900px) {
+  #app:has(.core-studio) .topbar { min-height:76px; padding:12px 40px; grid-template-columns:auto 220px minmax(0,1fr) auto; }
+  #app .core-studio { padding:20px 40px; gap:16px; }
+  #app .core-studio .experiment-heading h1 { font-size:36px; }
+  #app .core-studio .core-eyebrow, #app .core-studio .mission-progress-steps span { font-size:17px; }
+  #app .core-studio .core-scene-host { right:304px; }
+  #app .core-studio .core-records { width:260px; right:24px; top:24px; padding:24px; }
+  #app .core-studio .core-records h2 { font-size:26px; }
+  #app .core-studio .core-record-row, #app .core-studio .core-record-row span { font-size:20px; }
+  #app .core-studio .core-conditions, #app .core-studio .core-route-tag span, #app .core-studio .core-record-help { font-size:18px; }
+  #app .core-studio .rescue-controls button, #app .core-studio .rescue-step-button, #app .core-studio #rescue-finish { font-size:21px; min-height:56px; }
+  #app .core-studio .feedback { font-size:19px; }
+}
+#app .core-studio .core-record-recent { margin:10px 0 0; color:#a7bdb8; font-size:13px; line-height:1.5; }
+#app .core-studio .core-record-row.is-fresh { animation:rescue-row-flash 1s ease-out; }

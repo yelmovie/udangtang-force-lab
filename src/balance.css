@@ -1,0 +1,192 @@
+/* Mission 02: one visible seesaw, equal-size material blocks, and a removable pivot pin. */
+.balance-screen .balance-goal {
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap; min-height:40px;
+  padding:5px 12px; border:2px solid #c6a369; border-radius:13px;
+  background:#fff8e7; color:#31574e; font-size:16px; font-weight:800;
+}
+.balance-screen .balance-goal > strong { color:#704520; white-space:nowrap; }
+.balance-screen .balance-goal > span { padding:3px 9px; border-radius:999px; background:#eee5d2; white-space:nowrap; }
+.balance-screen .balance-goal > span.done { background:#cceecb; color:#155947; }
+.balance-screen .balance-goal > em { margin-left:auto; font-style:normal; color:#236d68; }
+.instrument-screen.balance-screen .balance-field {
+  --board-top:25%; --board-height:182px; --axis-offset:137px;
+  background:linear-gradient(#1f42380c,#3f2b1118),url('/assets/backgrounds/balance-tilt.webp') center/cover;
+}
+.instrument-screen.balance-screen .balance-board {
+  width:70%; left:15%; top:var(--board-top); height:var(--board-height);
+  transform-origin:50% var(--axis-offset); z-index:3;
+}
+.instrument-screen.balance-screen .balance-beam {
+  top:calc(var(--axis-offset) - 11px); height:24px;
+  background:url('/assets/game/balance-beam.webp') center/100% 100% no-repeat;
+  border:0; box-shadow:0 8px 7px #3b2c1d5c;
+}
+.instrument-screen.balance-screen .balance-pan {
+  width:clamp(108px,15vw,168px); height:143px; top:0;
+  border:0; background:transparent url('/assets/game/balance-pan.webp') center bottom 4px/100% 49px no-repeat;
+  padding:0; display:block; color:#2f4f46; text-shadow:none;
+  filter:drop-shadow(0 7px 5px #34221250);
+}
+.instrument-screen.balance-screen .balance-pan.left { left:0; }
+.instrument-screen.balance-screen .balance-pan.right { right:0; }
+.instrument-screen.balance-screen .balance-pan::after { display:none; }
+.instrument-screen.balance-screen .balance-side {
+  position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+  padding:1px 8px; border-radius:7px; color:#503e27; background:#fff4d3ec;
+  font-size:15px; z-index:2; white-space:nowrap;
+}
+.instrument-screen.balance-screen .balance-pan-name {
+  position:absolute; top:-4px; left:50%; transform:translateX(-50%);
+  padding:2px 8px; border:1px solid #d5b780; border-radius:9px;
+  background:#fff9e9f5; color:#214d47; font-size:16px; white-space:nowrap;
+}
+.instrument-screen.balance-screen .balance-pan .pan-object {
+  position:absolute; left:0; right:0; top:26px; height:80px; margin:0;
+  display:grid; place-items:center; background:none; box-shadow:none;
+}
+.balance-screen .instrument-object {
+  width:63px!important; height:63px!important; flex:0 0 63px;
+  border:0!important; border-radius:0!important; background:none!important;
+  box-shadow:none!important; display:inline-grid!important; place-items:center;
+}
+.balance-screen .instrument-object::before { display:none; }
+.balance-screen .instrument-object img { width:100%; height:100%; display:block; object-fit:contain; filter:drop-shadow(0 4px 3px #382a2255); }
+.instrument-screen.balance-screen .balance-pan .instrument-object { width:88px!important; height:80px!important; }
+.instrument-screen.balance-screen .balance-pivot {
+  width:200px; height:118px; left:calc(50% - 100px);
+  top:calc(var(--board-top) + var(--axis-offset) - 46px);
+  border:0; background:url('/assets/game/balance-base.webp') center/contain no-repeat; z-index:2;
+  filter:drop-shadow(0 8px 8px #32201655);
+}
+.instrument-screen.balance-screen .balance-stand { display:none; }
+.instrument-screen.balance-screen .balance-lock {
+  position:absolute; left:50%; top:calc(var(--board-top) + var(--axis-offset));
+  width:150px; height:75px; transform:translate(-23px,-34px); z-index:6;
+}
+.balance-screen .balance-lock-socket {
+  position:absolute; left:8px; top:23px; width:29px; height:29px;
+  border:4px solid #dfbd76; border-radius:50%; background:#194d50;
+  box-shadow:inset 0 3px 4px #102c2a,0 2px 2px #1d292a6b;
+}
+.instrument-screen.balance-screen .balance-pin {
+  --pin-x:0px; position:absolute; left:0; top:7px; width:130px; height:63px;
+  min-height:63px; padding:0; border:0; border-radius:0;
+  background:transparent; box-shadow:none; transform:translateX(var(--pin-x));
+  touch-action:none; cursor:grab; filter:drop-shadow(0 5px 3px #182b2a88);
+}
+.instrument-screen.balance-screen .balance-pin:disabled { opacity:1; cursor:default; filter:grayscale(.3) drop-shadow(0 4px 3px #182b2a66); }
+.instrument-screen.balance-screen .balance-pin:not(:disabled):active { transform:translateX(var(--pin-x)); cursor:grabbing; }
+.balance-screen .balance-pin img { width:100%; height:100%; display:block; object-fit:contain; pointer-events:none; }
+.balance-screen .balance-lock.is-open .balance-pin { opacity:0!important; pointer-events:none; }
+.balance-screen .balance-lock-callout {
+  position:absolute; top:-26px; left:27px; padding:3px 8px;
+  border:2px solid #cfaa63; border-radius:10px; background:#fff8e8f5;
+  color:#244e46; font-size:16px; font-weight:900; white-space:nowrap;
+  pointer-events:none; box-shadow:0 3px 4px #30231530;
+}
+.balance-screen .balance-lock.is-ready .balance-lock-callout { background:#e3f6d9; border-color:#57a57d; }
+.instrument-screen.balance-screen .balance-result {
+  bottom:10px; left:18%; right:18%; min-height:48px;
+  background:#fff9e9f3; border:2px solid #c9a56f; font-size:17px; line-height:1.3;
+}
+.balance-screen .object-card { min-height:78px; background:#fff9e8cb; border:1px solid #d1ae76; }
+.balance-screen .object-card strong { color:#264e49; font-size:17px; }
+.balance-screen .object-card.selected { border:3px solid #15847b; }
+.balance-screen .pan-drop-hint { font-size:15px; padding:5px; }
+.balance-screen .object-card,.balance-screen .object-card *, .balance-screen .balance-pan { user-select:none; -webkit-user-select:none; touch-action:none; }
+.balance-screen .instrument-object img { pointer-events:none; }
+.balance-screen .balance-pan.is-drop-target { outline:4px dashed #ffd265; outline-offset:5px; background-color:#fff3a84d; border-radius:16px; }
+.balance-screen .balance-goal { flex:0 0 auto; justify-content:center; gap:6px; text-align:center; }
+.balance-screen .balance-goal > em { flex-basis:100%; width:fit-content; margin:3px auto 1px; padding:8px 18px; background:#16706b; color:#fff6cd; border-radius:12px; font-size:clamp(19px,1.8vw,24px); line-height:1.25; box-shadow:0 3px 0 #0c4e4930; }
+.balance-screen #balance-phase { background:#ffdf84; border-color:#b8822d; color:#513615; font-size:clamp(19px,1.8vw,23px); box-shadow:0 4px 0 #81552533; }
+.balance-screen .instrument-predictions .predict-options button { position:relative; min-height:52px; }
+.balance-screen .instrument-predictions { display:grid; grid-template-columns:auto 1fr; gap:7px; padding:8px 12px; }
+.balance-screen .instrument-predictions .question-label { align-self:center; }
+.balance-screen .instrument-predictions .question-prompt { align-self:center; font-size:19px; margin:0; }
+.balance-screen .instrument-predictions .predict-options,.balance-screen .instrument-predictions .instrument-text-button { grid-column:1/-1; }
+@media (min-width:1440px) {
+  .instrument-screen.balance-screen .balance-field { --board-top:27%; --board-height:215px; --axis-offset:162px; }
+  .instrument-screen.balance-screen .balance-pan { height:168px; }
+  .instrument-screen.balance-screen .balance-pan .pan-object { top:39px; height:90px; }
+  .instrument-screen.balance-screen .balance-pan .instrument-object { width:100px!important; height:92px!important; }
+  .instrument-screen.balance-screen .balance-pivot { width:220px; height:130px; left:calc(50% - 110px); top:calc(var(--board-top) + var(--axis-offset) - 50px); }
+}
+@media (max-width:1080px) {
+  .balance-screen .balance-goal { font-size:15px; gap:5px; }
+  .balance-screen .balance-goal > em { flex-basis:100%; margin-left:auto; }
+  .instrument-screen.balance-screen .balance-field { --board-top:27%; --axis-offset:129px; --board-height:174px; }
+  .instrument-screen.balance-screen .balance-board { width:72%; left:14%; }
+  .instrument-screen.balance-screen .balance-result { left:16%; right:16%; }
+}
+@media (max-width:800px), (max-height:600px) {
+  .balance-screen .balance-goal > em { flex-basis:auto; }
+  .instrument-screen.balance-screen .balance-field { --board-top:30%; --axis-offset:122px; --board-height:164px; }
+  .instrument-screen.balance-screen .balance-board { width:78%; left:11%; }
+  .instrument-screen.balance-screen .balance-pan { width:105px; height:129px; }
+  .instrument-screen.balance-screen .balance-pan .pan-object { top:27px; height:70px; }
+  .instrument-screen.balance-screen .balance-pan .instrument-object { width:70px!important; height:66px!important; }
+  .instrument-screen.balance-screen .balance-pivot { width:160px; height:100px; left:calc(50% - 80px); top:calc(var(--board-top) + var(--axis-offset) - 39px); }
+  .instrument-screen.balance-screen .balance-result { left:9%; right:9%; }
+  .balance-screen .balance-pan-name { font-size:14px!important; }
+}
+@media (prefers-reduced-motion:no-preference) {
+  .balance-screen .balance-lock.is-ready .balance-pin { animation:balance-pin-invite 1.9s ease-in-out infinite; }
+  @keyframes balance-pin-invite { 0%,75%,100% { translate:0 0; } 82% { translate:5px 0; } 90% { translate:0 0; } }
+}
+@media (prefers-reduced-motion:reduce) { .balance-screen .balance-lock.is-ready .balance-pin { animation:none; } }
+
+/* Level 2 mystery boxes: identical wrapped boxes, stacked record cards, and a pick row. */
+.balance-screen .instrument-dock > [hidden] { display:none!important; }
+.balance-screen .object-options.mystery-options { grid-template-columns:repeat(var(--count,3),minmax(0,1fr)); }
+.mystery-box .mystery-wrap {
+  position:relative; display:block; width:86%; height:76%; border-radius:7px;
+  background:
+    linear-gradient(90deg,transparent 44%,#c8413b 44% 56%,transparent 56%),
+    linear-gradient(transparent 40%,#c8413b 40% 52%,transparent 52%),
+    repeating-linear-gradient(45deg,#6fa9bd 0 7px,#86bccd 7px 14px);
+  box-shadow:inset 0 -5px 0 #00000022,0 4px 3px #382a2255;
+}
+.mystery-box .mystery-wrap b {
+  position:absolute; left:-6px; top:-8px; min-width:26px; height:26px; padding:0 4px;
+  display:grid; place-items:center; border:2px solid #8a6a3c; border-radius:50%;
+  background:#fffbe9; color:#3b2a14; font-size:15px; font-weight:900; line-height:1;
+}
+.balance-drag-ghost .mystery-box { width:100%; height:100%; display:grid; place-items:center; }
+.balance-screen .mystery-card.is-found { border:3px solid #e2a31b; background:#fff3c4; }
+.balance-screen .mystery-empty { grid-column:1/-1; margin:0; padding:12px; text-align:center; font-weight:900; color:#155947; }
+.balance-screen .mystery-panel { display:grid; gap:6px; padding:8px 12px; border:1px solid #d1ae76; border-radius:13px; background:#fff8e7cc; }
+.balance-screen .mystery-panel-head { display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; color:#523b23; font-size:16px; }
+.balance-screen .mystery-panel-head > span { color:#725332; font-weight:700; }
+.balance-screen .mystery-badge { padding:2px 10px; border:2px solid #c48b1d; border-radius:999px; background:#ffd769; color:#5a3a0c!important; font-weight:900!important; }
+.balance-screen .mystery-badge[hidden] { display:none; }
+.balance-screen .mystery-records { display:flex; flex-wrap:wrap; align-content:flex-start; gap:6px; min-height:40px; max-height:92px; overflow:auto; padding:2px; }
+.balance-screen .mystery-records p { margin:0; align-self:center; color:#725332; font-size:15px; }
+.balance-screen .mystery-record {
+  padding:4px 12px; border:2px solid #b9955c; border-radius:9px; background:#fffdf3;
+  color:#21463f; font-size:19px; font-weight:900; white-space:nowrap; box-shadow:0 2px 0 #7d5a2a33;
+}
+.balance-screen .mystery-record[data-actual="level"] { border-color:#57a57d; background:#ecf8e6; }
+.balance-screen .mystery-record.is-clue { border-color:#e07b1e; background:#fff0c4; outline:3px solid #ffbf4a; outline-offset:2px; }
+.balance-screen .mystery-pick { display:grid; gap:5px; }
+.balance-screen .mystery-pick > span { color:#523b23; font-size:16px; font-weight:900; }
+.balance-screen .mystery-picks { display:flex; gap:8px; }
+.balance-screen .mystery-picks button {
+  flex:1 1 0; min-height:52px; border:2px solid #b9955c; border-radius:11px;
+  background:#fff6e2; color:#21463f; font-size:19px; font-weight:900;
+}
+.balance-screen .mystery-picks button:disabled { opacity:.55; }
+.balance-screen .balance-request { display:grid; gap:6px; padding:10px 14px; border:3px solid #c48b1d; border-radius:14px; background:#fff3c9; box-shadow:0 4px 0 #81552533; }
+.balance-screen .balance-request-from { margin:0; color:#8a5a12; font-size:15px; font-weight:900; }
+.balance-screen .balance-request-text { margin:0; color:#2b4a40; font-size:18px; font-weight:800; line-height:1.35; }
+.balance-screen .balance-request .button { justify-self:end; min-height:48px; }
+@media (max-width:800px), (max-height:600px) {
+  .balance-screen .mystery-record { font-size:17px; padding:3px 9px; }
+  .balance-screen .mystery-records { max-height:72px; }
+  .balance-screen .balance-request-text { font-size:16px; }
+}
+@media (prefers-reduced-motion:no-preference) {
+  .balance-screen .mystery-record.is-clue { animation:mystery-clue .5s ease-out 2; }
+  .balance-screen .balance-request:not([hidden]) { animation:mystery-arrive .45s cubic-bezier(.2,.8,.3,1); }
+  @keyframes mystery-clue { 50% { transform:scale(1.1); } }
+  @keyframes mystery-arrive { from { transform:translateY(14px) scale(.96); opacity:0; } }
+}
