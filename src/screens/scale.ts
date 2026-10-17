@@ -1,4 +1,5 @@
 import type { AppContext } from '../appTypes';
+import { icons } from '../icons';
 import { scaleParts, targetWeight } from '../data';
 import { mountCompanion } from '../sprites';
 import { requestsEnabled } from '../state';
@@ -67,7 +68,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
         <div class="spring-stage">
           <div class="spring-view"><div class="spring-eye-marker" id="spring-eye-marker" aria-hidden="true">눈</div><div class="spring-scale" id="spring-scale"><div class="spring-ring"></div><div class="spring-dial"><div class="spring-marks" id="spring-marks">${Array.from({length:11},(_,i)=>`<span style="--g:${i*10}"><b>${i*10}</b></span>`).join('')}${Array.from({length:10},(_,i)=>`<i style="--g:${i*10+5}"></i>`).join('')}</div><div class="spring-pointer" id="spring-pointer"></div></div><div class="spring-hook" id="spring-hook"></div></div></div>
           <div class="spring-controls">
-            <div class="spring-group"><span>① 영점 나사</span><div class="spring-row"><button id="spring-screw-up" aria-label="영점 나사 왼쪽으로 돌리기">↺</button><strong id="spring-zero"></strong><button id="spring-screw-down" aria-label="영점 나사 오른쪽으로 돌리기">↻</button></div></div>
+            <div class="spring-group"><span>① 영점 나사</span><div class="spring-row"><button id="spring-screw-up" aria-label="영점 나사 왼쪽으로 돌리기">${icons.rotateLeft}</button><strong id="spring-zero"></strong><button id="spring-screw-down" aria-label="영점 나사 오른쪽으로 돌리기">${icons.rotateRight}</button></div></div>
             <div class="spring-group"><span>② 물체 걸기</span><div class="spring-row">${springObjects.map(id=>`<button data-hang="${id}">${props[id].name}</button>`).join('')}<button data-hang="">내리기</button></div></div>
             <div class="spring-group"><span>③ 흔들림</span><strong id="spring-swing"></strong></div>
             <div class="spring-group"><span>④ 눈높이</span><div class="spring-row spring-eye-wrap"><input type="range" id="spring-eye" min="0" max="2" step="1" value="1" aria-label="눈높이: 위, 정면, 아래"><div class="spring-eye-labels" aria-hidden="true"><span>위</span><span>정면</span><span>아래</span></div></div></div>

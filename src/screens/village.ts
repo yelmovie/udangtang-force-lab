@@ -1,4 +1,5 @@
 import type { AppContext } from '../appTypes';
+import { icons } from '../icons';
 import type { StageId } from '../data';
 import { stageIsOpen } from '../state';
 import { getVillageStory, villageRewards } from '../villageStory';
@@ -254,7 +255,8 @@ export const requesterSpots: Record<RequestStage, Point & { bubble: Point; sign:
   scale: { x: 600, y: 700, bubble: { x: 662, y: 625 }, sign: { x: 300, y: 680 } },
   workshop: { x: 1410, y: 770, bubble: { x: 1340, y: 718 }, sign: { x: 1560, y: 692 } },
 };
-const clientHeight = 70;
+/** Every adult on the map is drawn this tall so they match the student (83px frames with a shorter head-to-toe). */
+const clientHeight = 84;
 
 /** Korean particle after a name: 주인과/친구와, 주인이/친구가. */
 export function withParticle(name: string, batchim: string, plain: string): string {
@@ -471,7 +473,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     for(const building of map.buildings){if(story.next===building.id){ctx.fillStyle='#ffe68799';ctx.beginPath();ctx.ellipse(building.entry.x,building.entry.y+8,26,11,0,0,Math.PI*2);ctx.fill();}}
     const layers:{y:number;draw:()=>void}[]=map.buildings.map(building=>({y:building.y+(metadata.get(building.asset)?.pivot?.y??images.get(building.asset)!.naturalHeight)/images.get(building.asset)!.naturalHeight*building.height,draw:()=>ctx.drawImage(images.get(building.asset)!,building.x,building.y,building.width,building.height)}));
     for(const id of story.changes){const p=rewardPoint(id),building=map.buildings.find(b=>b.id===id);const depth=id==='balance'?p.y:Math.max(p.y,(building?.y??0)+(building?.height??0)+1);layers.push({y:depth,draw:()=>drawRewards(id,id===revealStage&&!reduced.matches?Math.min(1,revealTime/1.1):1)});}
-    for(const npc of map.npcs)layers.push({y:npc.y,draw:()=>{ctx.save();ctx.translate(npc.x*2,0);ctx.scale(-1,1);sprite(npc.asset,npc,83);ctx.restore();}});
+    for(const npc of map.npcs)layers.push({y:npc.y,draw:()=>{ctx.save();ctx.translate(npc.x*2,0);ctx.scale(-1,1);sprite(npc.asset,npc,clientHeight);ctx.restore();}});
     layers.push({y:requestBoardSpot.y,draw:drawBoard});
     for(const stage of solved){const at=clientAt(stage);if(at)layers.push({y:at.y,draw:()=>drawClient(stage,at)});}
     const studentHeight=Math.max(...directions.flatMap(direction=>[1,2,3,4].map(i=>visibleHeight(`student/${direction}-${i}.webp`))));
@@ -545,7 +547,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     const boardLabel=document.createElement('button');boardLabel.className='village-board-label';boardLabel.style.left=`${requestBoardSpot.x/map!.width*100}%`;boardLabel.style.top=`${(requestBoardSpot.y+6)/map!.height*100}%`;
     boardLabel.textContent='의뢰 게시판';if(open){const count=document.createElement('span');count.className='village-board-count';count.textContent=String(open);boardLabel.append(count);}
     boardLabel.setAttribute('aria-label',`의뢰 게시판 열기${open?`, 도와줄 수 있는 의뢰 ${open}개`:''}`);boardLabel.addEventListener('click',openBoard,{signal:events.signal});labels.append(boardLabel);
-    for(const stage of solved){const {bubble}=requesterSpots[stage],button=document.createElement('button');button.className='village-client-bubble';button.dataset.client=stage;button.style.left=`${bubble.x/map!.width*100}%`;button.style.top=`${bubble.y/map!.height*100}%`;button.textContent='💬';button.setAttribute('aria-label',`${villageRequests[stage].client}의 인사 듣기`);button.classList.toggle('is-waiting',!arrivalShown&&arriving.includes(stage));button.addEventListener('click',()=>openClient(stage),{signal:events.signal});labels.append(button);}
+    for(const stage of solved){const {bubble}=requesterSpots[stage],button=document.createElement('button');button.className='village-client-bubble';button.dataset.client=stage;button.style.left=`${bubble.x/map!.width*100}%`;button.style.top=`${bubble.y/map!.height*100}%`;button.innerHTML=icons.speech;button.setAttribute('aria-label',`${villageRequests[stage].client}의 인사 듣기`);button.classList.toggle('is-waiting',!arrivalShown&&arriving.includes(stage));button.addEventListener('click',()=>openClient(stage),{signal:events.signal});labels.append(button);}
   }
   function openBoard() {
     if(!map||paused())return;
@@ -714,7 +716,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if(!arrivalShown&&revealTime>=arrivalStart+arrivalTime){
       arrivalShown=true;
       labels.querySelectorAll('.village-client-bubble.is-waiting').forEach(bubble=>{bubble.classList.remove('is-waiting');bubble.classList.add('is-arrived');});
-      hint.textContent=`${withParticle(villageRequests[arriving[0]].client,'이','가')} 가게 앞에 돌아왔어! 💬를 누르면 인사를 들을 수 있어.`;
+      hint.textContent=`${withParticle(villageRequests[arriving[0]].client,'이','가')} 가게 앞에 돌아왔어! 말풍선을 누르면 인사를 들을 수 있어.`;
     }
     updateNearby();
     if(arrived&&!entered)hint.textContent=restHint();

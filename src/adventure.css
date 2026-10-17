@@ -5,27 +5,12 @@ button:active:not(:disabled) { transform: translateY(2px); }
 .icon-button, .camera-button, .settings-close { min-width:48px; min-height:48px; }
 .title-screen { background: url('/assets/backgrounds/lab.webp') center / cover; }
 .title-screen::before { background:linear-gradient(0deg,#28200b22,transparent 65%); opacity:1; }
-.title-window, .lab-shelf, .title-floor { display:none; }
 .title-panel { background:#fff8e8ed; border-color:#fff2d2; backdrop-filter:blur(4px); }
-.illustrated-title { width:122%; line-height:0!important; }
+.illustrated-title { width:122%; line-height:0; }
 .illustrated-title img { width:100%; height:auto; display:block; }
 .assembly-chip { width:100%; min-height:48px; color:#265f58; text-align:left; }
 .title-student, .title-corgi { animation: companion-breathe 5s ease-in-out infinite; }
 .title-corgi { animation-delay:-2s; }
-.map-screen { gap:16px; }
-.map-panel { display:block; min-height:350px; background:url('/assets/backgrounds/islands.webp') center / cover; border-width:7px; }
-.map-route { display:none; }
-.map-panel .map-node { position:absolute; width:24%; min-height:108px; padding:12px 14px 12px 38px; gap:5px; border-radius:16px; background:#fff9e9f2; box-shadow:0 5px 0 #80592ec4,0 10px 16px #18362c55; }
-.map-node[data-stage="cargo"] { left:4%; top:7%; }
-.map-node[data-stage="balance"] { right:4%; top:7%; }
-.map-node[data-stage="scale"] { left:4%; bottom:6%; }
-.map-node[data-stage="workshop"] { right:4%; bottom:6%; }
-.map-node[data-stage="rescue"] { left:38%; top:36%; }
-.map-node .map-number { position:absolute; top:-14px; left:-12px; width:36px; height:36px; border:3px solid #fff4d5; }
-.map-node .map-icon { position:absolute; left:4px; top:40%; width:38px; height:40px; object-fit:contain; filter:drop-shadow(0 3px 2px #31594630); }
-.map-panel .map-node.done { background:#e2f6e5f2; }
-.map-panel .map-node.locked { opacity:.9; background:#dddacfee; }
-.map-node.done::after { content:'✦'; position:absolute; right:12px; top:8px; color:#147563; font-size:25px; }
 .cargo-field { background:url('/assets/backgrounds/cargo.webp') center / cover; }
 .cargo-field::before, .cargo-field::after { display:none; }
 .balance-field { background:linear-gradient(#dceee350,#e8c79740),url('/assets/backgrounds/balance.webp') center / cover; }
@@ -83,7 +68,7 @@ button:active:not(:disabled) { transform: translateY(2px); }
 .rescue-notebook summary { cursor:pointer; color:#1c7972; min-height:48px; font-weight:700; }
 .rescue-notebook details p { font-size:14px; }
 .rescue-notebook .result-list { min-height:0; }
-.gesture-tip { margin-top:20px!important; }
+.gesture-tip { margin-top:20px; }
 .ending-world { position:relative; min-height:470px; width:100%; border-radius:30px; background:url('/assets/story/final-03.webp') center / cover; overflow:hidden; box-shadow:0 10px 30px #58432833; }
 .ending-world::after { content:''; position:absolute; inset:0; background:#041b29; opacity:.9; pointer-events:none; }
 .ending-world.lit::after { animation:power-on 4s ease-out forwards; }
@@ -111,9 +96,6 @@ button:active:not(:disabled) { transform: translateY(2px); }
  .side-panel p { font-size:15px; }
  .rescue-readout { font-size:14px; }
  .rescue-phase { font-size:13px; }
- .map-panel { min-height:360px; }
- .map-panel .map-node { width:26%; }
- .map-node[data-stage="rescue"] { left:37%; }
 }
 @media(max-width:760px), (orientation:portrait) {
  .rescue-layout { display:flex; flex-direction:column; }
@@ -122,11 +104,6 @@ button:active:not(:disabled) { transform: translateY(2px); }
  .rescue-notebook { order:1; }
  .rescue-controls .button { width:auto; margin-right:10px; min-width:130px; }
  .route-options { grid-template-columns:1fr 1fr; }
- .map-panel { min-height:570px; }
- .map-panel .map-node { width:42%; min-height:135px; }
- .map-node[data-stage="cargo"],.map-node[data-stage="balance"] { top:4%; }
- .map-node[data-stage="rescue"] { left:29%; top:38%; }
- .map-node[data-stage="scale"],.map-node[data-stage="workshop"] { bottom:4%; }
  .feedback { font-size:16px; }
  .ending-student,.ending-corgi { width:130px; }
  .ending-title h1 { font-size:27px; }
@@ -142,13 +119,12 @@ button:active:not(:disabled) { transform: translateY(2px); }
 @media (min-width: 761px) and (orientation: landscape) {
  .topbar .eyebrow { font-size:16px; letter-spacing:.02em; }
  .topbar-title > span:last-child { font-size:16px; }
- .map-concept, .map-status, .small-note, .progress-card small { font-size:16px; }
- .map-panel .map-node { min-height:112px; }
+ .small-note, .progress-card small { font-size:16px; }
  .experiment-heading > div > p:not(.eyebrow), .cargo-instruction, .balance-hint, .feedback { font-size:18px; }
  .side-panel p { font-size:16px; }
  .workshop-screen .side-panel p { font-size:16px; }
  .side-panel .small-note { font-size:14px; }
- .map-concept, .small-note, .progress-card small { color:#50665e; }
+ .small-note, .progress-card small { color:#50665e; }
 }
 
 /* Classroom boards: readable at a distance without separating the experiment. */
@@ -164,17 +140,12 @@ button:active:not(:disabled) { transform: translateY(2px); }
  .icon-button, .camera-button, .settings-close { min-width:60px; min-height:60px; }
  .icon-button svg { width:32px; height:32px; }
  .eyebrow, .experiment-heading p.eyebrow { font-size:18px; }
- .small-note, .side-panel .small-note, .progress-card small, .map-concept, .map-status, .evidence-chip { font-size:18px; }
+ .small-note, .side-panel .small-note, .progress-card small, .evidence-chip { font-size:18px; }
  .button, .footer-actions .button, .workshop-tools .button, .result-panel > .button, .rescue-controls .button, .settings-card .button { font-size:22px; }
- .map-screen { padding:28px 40px; gap:22px; }
- .map-intro h1, .experiment-heading h1 { font-size:44px; }
- .map-intro p, .experiment-heading > div > p:not(.eyebrow), .side-panel p, .workshop-screen .side-panel p { font-size:20px; line-height:1.45; }
+ .experiment-heading h1 { font-size:44px; }
+ .experiment-heading > div > p:not(.eyebrow), .side-panel p, .workshop-screen .side-panel p { font-size:20px; line-height:1.45; }
  .progress-card { width:280px; flex-basis:280px; padding:18px 22px; font-size:20px; }
  .progress-card strong { font-size:32px; }
- .map-panel .map-node { min-height:142px; padding:16px 24px 16px 52px; gap:8px; }
- .map-node strong { font-size:27px; }
- .map-node .map-number { width:46px; height:46px; font-size:21px; }
- .map-node .map-icon { width:52px; height:54px; left:4px; }
  .evidence-strip { gap:10px; font-size:20px; }
  .evidence-chip { padding:11px 14px; }
  .experiment-screen { padding:24px 36px; gap:20px; }
@@ -219,6 +190,5 @@ button:active:not(:disabled) { transform: translateY(2px); }
  .screen { overflow:visible; flex:none; }
  .experiment-screen { height:auto; min-height:680px; }
  .experiment-layout, .workshop-layout { min-height:460px; }
- .map-screen { min-height:680px; }
  .title-screen { min-height:580px; }
 }

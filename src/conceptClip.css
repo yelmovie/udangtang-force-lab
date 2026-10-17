@@ -26,4 +26,4 @@
   .concept-caption { font-size:17px; min-height:0; margin-top:8px; }
   .concept-actions .button { min-height:46px; margin-top:8px; }
 }
-@media (prefers-reduced-motion:reduce) { .concept-clip-button, .concept-card, .concept-layer { animation:none !important; transition:none !important; } }
+@media (prefers-reduced-motion:reduce) { .concept-clip-button, .concept-card, .concept-layer { animation:none; transition:none; } }

@@ -45,13 +45,13 @@
   display:grid; place-items:center; background:none; box-shadow:none;
 }
 .balance-screen .instrument-object {
-  width:63px!important; height:63px!important; flex:0 0 63px;
-  border:0!important; border-radius:0!important; background:none!important;
-  box-shadow:none!important; display:inline-grid!important; place-items:center;
+  width:63px; height:63px; flex:0 0 63px;
+  border:0; border-radius:0; background:none;
+  box-shadow:none; display:inline-grid; place-items:center;
 }
 .balance-screen .instrument-object::before { display:none; }
 .balance-screen .instrument-object img { width:100%; height:100%; display:block; object-fit:contain; filter:drop-shadow(0 4px 3px #382a2255); }
-.instrument-screen.balance-screen .balance-pan .instrument-object { width:88px!important; height:80px!important; }
+.instrument-screen.balance-screen .balance-pan .instrument-object { width:88px; height:80px; }
 .instrument-screen.balance-screen .balance-pivot {
   width:200px; height:118px; left:calc(50% - 100px);
   top:calc(var(--board-top) + var(--axis-offset) - 46px);
@@ -77,7 +77,7 @@
 .instrument-screen.balance-screen .balance-pin:disabled { opacity:1; cursor:default; filter:grayscale(.3) drop-shadow(0 4px 3px #182b2a66); }
 .instrument-screen.balance-screen .balance-pin:not(:disabled):active { transform:translateX(var(--pin-x)); cursor:grabbing; }
 .balance-screen .balance-pin img { width:100%; height:100%; display:block; object-fit:contain; pointer-events:none; }
-.balance-screen .balance-lock.is-open .balance-pin { opacity:0!important; pointer-events:none; }
+.instrument-screen.balance-screen .balance-lock.is-open .balance-pin { opacity:0; pointer-events:none; }
 .balance-screen .balance-lock-callout {
   position:absolute; top:-26px; left:27px; padding:3px 8px;
   border:2px solid #cfaa63; border-radius:10px; background:#fff8e8f5;
@@ -108,7 +108,7 @@
   .instrument-screen.balance-screen .balance-field { --board-top:27%; --board-height:215px; --axis-offset:162px; }
   .instrument-screen.balance-screen .balance-pan { height:168px; }
   .instrument-screen.balance-screen .balance-pan .pan-object { top:39px; height:90px; }
-  .instrument-screen.balance-screen .balance-pan .instrument-object { width:100px!important; height:92px!important; }
+  .instrument-screen.balance-screen .balance-pan .instrument-object { width:100px; height:92px; }
   .instrument-screen.balance-screen .balance-pivot { width:220px; height:130px; left:calc(50% - 110px); top:calc(var(--board-top) + var(--axis-offset) - 50px); }
 }
 @media (max-width:1080px) {
@@ -124,19 +124,35 @@
   .instrument-screen.balance-screen .balance-board { width:78%; left:11%; }
   .instrument-screen.balance-screen .balance-pan { width:105px; height:129px; }
   .instrument-screen.balance-screen .balance-pan .pan-object { top:27px; height:70px; }
-  .instrument-screen.balance-screen .balance-pan .instrument-object { width:70px!important; height:66px!important; }
+  .instrument-screen.balance-screen .balance-pan .instrument-object { width:70px; height:66px; }
   .instrument-screen.balance-screen .balance-pivot { width:160px; height:100px; left:calc(50% - 80px); top:calc(var(--board-top) + var(--axis-offset) - 39px); }
   .instrument-screen.balance-screen .balance-result { left:9%; right:9%; }
-  .balance-screen .balance-pan-name { font-size:14px!important; }
+  .instrument-screen.balance-screen .balance-pan-name { font-size:14px; }
 }
 @media (prefers-reduced-motion:no-preference) {
   .balance-screen .balance-lock.is-ready .balance-pin { animation:balance-pin-invite 1.9s ease-in-out infinite; }
   @keyframes balance-pin-invite { 0%,75%,100% { translate:0 0; } 82% { translate:5px 0; } 90% { translate:0 0; } }
 }
 @media (prefers-reduced-motion:reduce) { .balance-screen .balance-lock.is-ready .balance-pin { animation:none; } }
+/* Pin hint: the shared finger icon, enlarged and tapping on the pin's ring (the button itself is 130x63). */
+.balance-screen .balance-pin .tap-hint-icon {
+  right:-2px; top:-18px; bottom:auto; width:46px; height:52px; z-index:7;
+  filter:drop-shadow(0 3px 3px #2a1c0c66); animation:balance-finger-tap 1.1s ease-in-out infinite;
+}
+@keyframes balance-finger-tap { 0%,100% { transform:translate(0,0) rotate(-12deg); } 45%,60% { transform:translate(-3px,10px) rotate(-4deg) scale(.94); } }
+@media (prefers-reduced-motion:reduce) { .balance-screen .balance-pin .tap-hint-icon { animation:none; transform:translate(-3px,10px) rotate(-6deg); } }
+/* Companion at twice the shared size on this stage only (student and corgi compare weights by hand). */
+.instrument-screen.balance-screen .instrument-companion { left:1%; bottom:2%; width:34%; }
+.instrument-screen.balance-screen .instrument-companion .game-companion { --companion-height:calc(2 * clamp(86px,10vw,138px)); width:min(100%,456px); margin-inline:0; }
+.instrument-screen.balance-screen .instrument-companion .game-companion-student { width:60%; }
+.instrument-screen.balance-screen .instrument-companion .game-companion-corgi { width:40%; height:66%; margin-left:-9%; }
+@media (min-width:1600px) and (min-height:900px) { .instrument-screen.balance-screen .instrument-companion .game-companion { --companion-height:320px; } }
+/* Result box: as wide as its words, centred under the beam. */
+.instrument-screen.balance-screen .balance-result { left:50%; right:auto; width:max-content; max-width:60%; transform:translateX(-50%); }
 
 /* Level 2 mystery boxes: identical wrapped boxes, stacked record cards, and a pick row. */
-.balance-screen .instrument-dock > [hidden] { display:none!important; }
+/* (0,4,0): outranks the later .balance-screen .balance-dock .instrument-tools { display:grid }. */
+.instrument-screen.balance-screen .instrument-dock > [hidden] { display:none; }
 .balance-screen .object-options.mystery-options { grid-template-columns:repeat(var(--count,3),minmax(0,1fr)); }
 .mystery-box .mystery-wrap {
   position:relative; display:block; width:86%; height:76%; border-radius:7px;
@@ -157,7 +173,7 @@
 .balance-screen .mystery-panel { display:grid; gap:6px; padding:8px 12px; border:1px solid #d1ae76; border-radius:13px; background:#fff8e7cc; }
 .balance-screen .mystery-panel-head { display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; color:#523b23; font-size:16px; }
 .balance-screen .mystery-panel-head > span { color:#725332; font-weight:700; }
-.balance-screen .mystery-badge { padding:2px 10px; border:2px solid #c48b1d; border-radius:999px; background:#ffd769; color:#5a3a0c!important; font-weight:900!important; }
+.balance-screen .mystery-badge, .balance-screen .mystery-panel-head > .mystery-badge { padding:2px 10px; border:2px solid #c48b1d; border-radius:999px; background:#ffd769; color:#5a3a0c; font-weight:900; }
 .balance-screen .mystery-badge[hidden] { display:none; }
 .balance-screen .mystery-records { display:flex; flex-wrap:wrap; align-content:flex-start; gap:6px; min-height:40px; max-height:92px; overflow:auto; padding:2px; }
 .balance-screen .mystery-records p { margin:0; align-self:center; color:#725332; font-size:15px; }
@@ -171,10 +187,14 @@
 .balance-screen .mystery-pick > span { color:#523b23; font-size:16px; font-weight:900; }
 .balance-screen .mystery-picks { display:flex; gap:8px; }
 .balance-screen .mystery-picks button {
-  flex:1 1 0; min-height:52px; border:2px solid #b9955c; border-radius:11px;
+  flex:1 1 0; min-height:52px; border:2px solid #b9955c; border-radius:12px;
   background:#fff6e2; color:#21463f; font-size:19px; font-weight:900;
+  box-shadow:0 4px 0 #b9955c; transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
 }
-.balance-screen .mystery-picks button:disabled { opacity:.55; }
+.balance-screen .mystery-picks button:not(:disabled):hover { background:#fffdf3; }
+.balance-screen .mystery-picks button:not(:disabled):active { transform:translateY(3px); box-shadow:0 1px 0 #b9955c; }
+.balance-screen .mystery-picks button:focus-visible { outline:3px solid #ffc247; outline-offset:3px; }
+.balance-screen .mystery-picks button:disabled { opacity:.55; box-shadow:none; }
 .balance-screen .balance-request { display:grid; gap:6px; padding:10px 14px; border:3px solid #c48b1d; border-radius:14px; background:#fff3c9; box-shadow:0 4px 0 #81552533; }
 .balance-screen .balance-request-from { margin:0; color:#8a5a12; font-size:15px; font-weight:900; }
 .balance-screen .balance-request-text { margin:0; color:#2b4a40; font-size:18px; font-weight:800; line-height:1.35; }
@@ -199,7 +219,7 @@
   flex:1 1 auto; justify-content:flex-start; gap:6px; min-height:0; padding:0;
   border:0; background:none; font-size:16px;
 }
-.balance-screen .balance-goal > span[hidden], .balance-screen .balance-top-tools > [hidden] { display:none!important; }
+.balance-screen .balance-goal > span[hidden], .balance-screen .balance-top-tools > [hidden] { display:none; }
 .balance-screen .balance-top-tools { display:flex; align-items:center; gap:8px; margin-left:auto; }
 .balance-screen .balance-top-tools .button { min-height:48px; min-width:0; padding:8px 18px; font-size:17px; }
 .balance-screen .balance-record-button {
@@ -247,3 +267,10 @@
 .balance-popup .mystery-record { font-size:24px; padding:4px 14px; }
 .balance-popup .mystery-pick > span { font-size:22px; }
 .balance-popup .mystery-picks button { min-height:60px; font-size:26px; }
+/* Level 2 adds the uses chip; keep the top row on one line beside the record button at laptop widths. */
+@media (max-width:1440px) {
+  .balance-screen .balance-topbar .balance-goal { font-size:15px; gap:4px; }
+  .balance-screen .balance-goal > span { padding:3px 6px; }
+  .balance-screen .balance-record-button { padding:6px 10px; gap:5px; }
+  .balance-screen .balance-topbar { gap:6px 8px; }
+}

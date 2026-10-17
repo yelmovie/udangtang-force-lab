@@ -1,5 +1,5 @@
 /* Student-facing density: one action cue, visible experiment, reachable controls. */
-.modal-layer[hidden] { display:none!important; }
+.modal-layer[hidden] { display:none; }
 .mission-card .mission-purpose { margin:8px 0 16px; font-size:20px; line-height:1.4; }
 .mission-card .mission-prediction { margin:8px 0 16px; }
 .mission-card .mission-answer-grid button { min-height:56px; }
@@ -72,7 +72,7 @@
   .instrument-screen.balance-screen .balance-field { --board-top:16%; --axis-offset:125px; }
   .instrument-screen.balance-screen .balance-pan { height:133px; }
   .instrument-screen.balance-screen .balance-pan .pan-object { top:26px; height:70px; }
-  .instrument-screen.balance-screen .balance-pan .instrument-object { width:72px!important; height:68px!important; }
+  .instrument-screen.balance-screen .balance-pan .instrument-object { width:72px; height:68px; }
   .instrument-screen.balance-screen .balance-result { bottom:6px; min-height:38px; padding:6px 10px; }
   .instrument-screen.balance-screen .instrument-phase { top:6px; font-size:18px; }
   .instrument-screen .object-card { min-height:70px; }

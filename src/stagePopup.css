@@ -3,7 +3,8 @@
    화면 정중앙, 폭·높이는 내용에 맞춤, 넘치면 .stage-popup-body 만 스크롤. */
 .stage-popup { position:fixed; inset:0; margin:auto; width:max-content; max-width:min(860px, calc(100vw - 48px)); height:fit-content; max-height:calc(100dvh - 32px); padding:0; border:0; background:transparent; overflow:visible; color:#2b3f33; }
 .stage-popup::backdrop { background:radial-gradient(ellipse at 50% 40%, #1d4b4bb3, #0c2a2ad9 75%); }
-.stage-popup-card { position:relative; box-sizing:border-box; display:flex; flex-direction:column; max-width:min(860px, calc(100vw - 48px)); max-height:calc(100dvh - 32px); overflow:hidden; padding:16px 22px 18px; color:#2b3f33; background:linear-gradient(#fffdf6,#fff6e4); border:4px solid #8a6a3c; border-radius:32px; box-shadow:0 8px 0 #4a3a22, 0 24px 48px #0006; font-size:24px; line-height:1.4; word-break:keep-all; overflow-wrap:break-word; animation:stage-popup-in .32s cubic-bezier(.2,.8,.3,1) both; }
+.stage-popup-card { position:relative; box-sizing:border-box; display:flex; flex-direction:column; max-width:min(860px, calc(100vw - 48px)); max-height:calc(100dvh - 32px); overflow:hidden; padding:22px 22px 18px; color:#2b3f33; background:linear-gradient(#fffdf6,#fff6e4); border:6px solid var(--modal-frame); outline:3px solid var(--modal-line); border-radius:32px; box-shadow:inset 0 0 0 2px #fff, inset 0 -18px 30px rgba(178,128,74,.08), 0 30px 70px rgba(6,30,30,.45); font-size:24px; line-height:1.4; word-break:keep-all; overflow-wrap:break-word; animation:stage-popup-in .32s cubic-bezier(.2,.8,.3,1) both; }
+.stage-popup-card::before { content:''; position:absolute; left:0; right:0; top:0; height:9px; background:var(--modal-strip); }
 .stage-popup-label { display:block; flex:none; margin:0; padding-right:60px; font-size:18px; font-weight:800; color:#6b5f45; }
 .stage-popup h2 { flex:none; margin:2px 60px 0 0; font-size:32px; line-height:1.25; color:#2b3f33; word-break:keep-all; }
 .stage-popup-close { position:absolute; top:12px; right:12px; width:52px; height:52px; padding:0; border:2px solid #c5b084; border-radius:50%; background:#fff9e9; color:#6b5f45; font-size:28px; font-weight:900; line-height:1; cursor:pointer; }
@@ -15,4 +16,10 @@
 .stage-popup-actions .button { min-height:56px; font-size:22px; }
 .stage-popup button:focus-visible { outline:4px solid #ec9e24; outline-offset:3px; }
 @keyframes stage-popup-in { from { transform:translateY(28px) scale(.94); opacity:0; } }
-@media (prefers-reduced-motion: reduce) { .stage-popup-card { animation:none !important; } }
+@media (min-width:1600px) and (min-height:900px) {
+  .stage-popup h2 { font-size:38px; }
+  .stage-popup-card, .stage-popup-body, .stage-popup-lead { font-size:28px; }
+  .stage-popup-label { font-size:22px; }
+  .stage-popup-actions .button { min-height:60px; font-size:24px; }
+}
+@media (prefers-reduced-motion: reduce) { .stage-popup-card { animation:none; } }

@@ -23,13 +23,14 @@
 .instrument-screen .object-card { min-height:68px; border:2px solid transparent; background:#fff6e280; border-radius:11px; padding:4px 8px; display:flex; flex-direction:row; align-items:center; justify-content:center; gap:7px; touch-action:none; color:#314e43; }
 .instrument-screen .object-card.selected { border-color:#197d73; background:#f8ffe7; }
 .instrument-screen .object-card strong { font-size:16px; line-height:1.25; }
-.instrument-object { display:inline-block!important; position:relative; width:54px!important; height:52px!important; flex:0 0 54px; background:linear-gradient(140deg,#e6b66e,#ba7134)!important; border-radius:9px!important; border:2px solid #7d4a26; box-shadow:inset -8px -7px #0002,0 4px 5px #33241740!important; transform-origin:center bottom; }
+/* .instrument-screen prefix outranks style.css .object-card span (0,1,1) without !important. */
+.instrument-screen .instrument-object { display:inline-block; position:relative; width:54px; height:52px; flex:0 0 54px; background:linear-gradient(140deg,#e6b66e,#ba7134); border-radius:9px; border:2px solid #7d4a26; box-shadow:inset -8px -7px #0002,0 4px 5px #33241740; transform-origin:center bottom; }
 .instrument-object::before { content:''; position:absolute; inset:5px; border:2px solid #ffffff50; border-radius:4px; }
 .instrument-object b { position:absolute; inset:auto 1px 1px auto; width:25px; height:27px; display:grid; place-items:center; border:1px solid #9b8359; border-radius:6px; background:#fff7dc; font-size:24px; font-weight:900; color:#243f35; text-shadow:none; }
-.instrument-object.object-A { background:url('/assets/game/wood-block.webp') center/contain no-repeat!important; border:0; box-shadow:none!important; }
+.instrument-object.object-A { background:url('/assets/game/wood-block.webp') center/contain no-repeat; border:0; box-shadow:none; }
 .instrument-object.object-A::before { display:none; }
-.instrument-object.object-B { background:linear-gradient(130deg,#d4e9e7,#558583 60%,#a9c5c3)!important; border-color:#4c716f; }
-.instrument-object.object-C { background:linear-gradient(140deg,#eee8f5,#a696b7)!important; border-color:#8b77a3; }
+.instrument-object.object-B { background:linear-gradient(130deg,#d4e9e7,#558583 60%,#a9c5c3); border-color:#4c716f; }
+.instrument-object.object-C { background:linear-gradient(140deg,#eee8f5,#a696b7); border-color:#8b77a3; }
 .instrument-screen .predict-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
 .instrument-screen .predict-options button { min-height:48px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:25px; border-radius:10px; }
 .instrument-screen .predict-options button span { font-size:17px; }
@@ -48,7 +49,7 @@
 .instrument-screen.balance-screen .balance-pan > span:first-child { padding:2px 8px; border-radius:8px; color:#3d4b35; background:#fff7dc; text-shadow:none; }
 .instrument-screen.balance-screen .balance-pan:not(:disabled):active { transform:none; }
 .instrument-screen.balance-screen .balance-pan .pan-object { background:none; box-shadow:none; width:100%; height:65px; margin:0; border-radius:0; }
-.instrument-screen.balance-screen .balance-pan .instrument-object { width:68px!important; height:65px!important; }
+.instrument-screen.balance-screen .balance-pan .instrument-object { width:68px; height:65px; }
 .instrument-screen .pan-drop-hint { width:auto; height:auto; padding:7px; background:#fff7daeb; border-radius:10px; color:#775d34; font-size:16px; text-shadow:none; }
 .instrument-screen.balance-screen .balance-beam { top:74%; height:20px; background:url('/assets/game/balance-beam.webp') center/100% 100%; border:0; }
 .instrument-screen.balance-screen .balance-pivot { left:calc(50% - 77px); width:154px; height:106px; top:calc(20% + 130px); border:0; background:url('/assets/game/balance-base.webp') center/contain no-repeat; z-index:2; }
@@ -120,14 +121,14 @@
   .instrument-screen .instrument-notebook p,
   .instrument-screen .instrument-notebook .result-list,
   .instrument-screen .instrument-notebook .result-row { font-size:20px; }
-  .instrument-screen .instrument-object { width:70px!important; height:68px!important; flex-basis:70px; }
+  .instrument-screen .instrument-object { width:70px; height:68px; flex-basis:70px; }
   .instrument-screen .instrument-object b { font-size:28px; width:31px; height:33px; }
   .instrument-screen .predict-options button { min-height:60px; font-size:30px; }
   .instrument-screen .predict-options button span { font-size:22px; }
   .instrument-screen .instrument-text-button { min-height:48px; font-size:20px; }
   .instrument-screen.balance-screen .balance-pan { font-size:20px; }
   .instrument-screen .pan-drop-hint { font-size:20px; }
-  .instrument-screen.balance-screen .balance-pan .instrument-object { width:84px!important; height:80px!important; }
+  .instrument-screen.balance-screen .balance-pan .instrument-object { width:84px; height:80px; }
   .instrument-screen .balance-pin-track { width:344px; height:72px; bottom:83px; font-size:20px; }
   .instrument-screen .balance-pin { width:182px; flex-basis:182px; min-height:56px; }
   .instrument-screen .balance-pin strong { font-size:20px; }
@@ -158,7 +159,7 @@
   .instrument-screen .instrument-stage { min-height:315px; }
   .instrument-screen .instrument-dock { gap:12px; padding:7px 10px; }
   .instrument-screen .object-card { padding:4px; }
-  .instrument-screen .instrument-object { width:43px!important; height:44px!important; flex-basis:43px; }
+  .instrument-screen .instrument-object { width:43px; height:44px; flex-basis:43px; }
   .instrument-screen.scale-screen { --device-width:330px; }
   .instrument-screen .scale-part { grid-template-columns:45px 1fr; padding:4px; }
   .instrument-screen .scale-part img { width:45px; height:55px; }

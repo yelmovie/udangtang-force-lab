@@ -3,7 +3,7 @@
 .settings-layer .settings-heading { position: sticky; top: -32px; background: #fff9e9; padding-block: 8px; z-index: 1; }
 .settings-layer .settings-heading h2 { font-size: clamp(26px,2.5vw,34px); }
 .settings-layer .settings-close { min-width: 48px; height: 48px; }
-.settings-layer .settings-links { grid-template-columns: 1fr 1fr; }
+.settings-layer .settings-links { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
 .settings-layer .settings-links button { min-height: 54px; font-size: clamp(18px,1.6vw,22px); }
 .settings-layer .settings-links button small { font-size: 16px; }
 .settings-reading { font-size: clamp(18px,1.65vw,22px); line-height: 1.65; color: #315652; word-break: keep-all; overflow-wrap: anywhere; }

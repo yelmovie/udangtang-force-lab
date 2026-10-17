@@ -1,4 +1,5 @@
 import type { AppContext } from '../appTypes';
+import { icons } from '../icons';
 import { canLift, comparisonHint, comparisonSummary, coreWeight, firstFairComparison, forceNames, hasFairComparison, rescueReady, retainRescueRuns, routeNames } from '../rescueModel';
 import type { RescueRun } from '../state';
 import { mountCompanion } from '../sprites';
@@ -46,7 +47,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
           <button id="core-grip" class="core-grip" aria-label="코어 움직이기. 빗면을 따라 끌거나 Enter를 누르고 있기" hidden><span>끌어서 운반</span></button>
           <div class="core-conditions"><i aria-hidden="true"></i>같은 코어 · 같은 힘 · 같은 도착 높이</div>
           <button class="core-route-tag long" id="core-long-tag" data-scene-route="long">B <span>길고 완만한 빗면</span></button><button class="core-route-tag short" id="core-short-tag" data-scene-route="short">A <span>짧고 가파른 빗면</span></button>
-          <div class="core-view-tools" aria-label="3D 시점"><button data-core-view="left" aria-label="시점 왼쪽으로 돌리기">↶</button><button data-core-view="inspect" aria-pressed="false">코어 확대</button><button data-core-view="right" aria-label="시점 오른쪽으로 돌리기">↷</button></div>
+          <div class="core-view-tools" aria-label="3D 시점"><button data-core-view="left" aria-label="시점 왼쪽으로 돌리기">${icons.rotateLeft}</button><button data-core-view="inspect" aria-pressed="false">코어 확대</button><button data-core-view="right" aria-label="시점 오른쪽으로 돌리기">${icons.rotateRight}</button></div>
           <p class="core-view-hint">시점을 돌려 두 빗면을 살펴보세요.</p>
         </div><aside id="core-records" class="core-records" hidden><span class="core-panel-kicker">운반할 코어</span><div class="core-mass"><strong>${coreWeight}<small>g</small></strong><span>영점 확인<br>측정 완료</span></div><h2>비교 기록</h2><p id="core-force-note"></p><div id="core-comparison"></div><p id="core-recent" class="core-record-recent" hidden></p><p class="core-record-help">같은 힘으로 두 길을 시험하고<br>도착 여부를 비교하세요.</p></aside>
         <div id="rescue-companion" class="rescue-companion" aria-hidden="true"></div><div class="rescue-corgi-tip" id="rescue-corgi-tip" role="status"></div><div id="rescue-stop-mark" class="rescue-stop-mark" aria-hidden="true" hidden>멈춤!</div><div class="rescue-progress-track" aria-hidden="true"><i id="rescue-progress"></i></div><div class="rescue-world-note">같은 코어 · 같은 도착 높이</div>

@@ -19,7 +19,7 @@ export function offlinePlugin() {
     async closeBundle() {
       if (!built) return;
       const paths = (await filesIn(outputDirectory))
-        .filter(path => /\.(?:html|css|js|json|webp|ogg|svg|woff2?|glb)$/i.test(path) && !path.endsWith(`${sep}sw.js`)).sort();
+        .filter(path => /\.(?:html|css|js|json|webmanifest|webp|png|ogg|svg|woff2?|glb)$/i.test(path) && !path.endsWith(`${sep}sw.js`)).sort();
       const hash = createHash('sha256');
       const urls = [];
       for (const path of paths) {
@@ -28,16 +28,20 @@ export function offlinePlugin() {
         urls.push(name);
       }
       const version = hash.digest('hex').slice(0, 16);
+      // First-screen set only: everything else is cached the first time a screen asks for it.
+      const core = urls.filter(name => /^(?:index\.html|manifest\.webmanifest|favicon\.svg|icons\/.*|assets\/index-[^/]+\.(?:js|css)|assets\/fonts\/.*\.woff2|assets\/ui\/title\.webp|assets\/backgrounds\/lab\.webp|assets\/characters\/.*\.webp)$/.test(name));
+      const runtimePattern = '/\\.(?:html|css|js|json|webmanifest|webp|png|ogg|svg|woff2?|glb)$/i';
       const code = `// Generated from this production build. Do not edit by hand.
 const ROOT = new URL('./', self.location.href);
 const PREFIX = 'udangtang-force-lab:' + ROOT.href + ':';
 const CACHE = PREFIX + '${version}';
-const FILES = ${JSON.stringify(urls)}.map(file => new URL(file, ROOT).href);
-const ALLOWED = new Set(FILES);
+const CORE = ${JSON.stringify(core)}.map(file => new URL(file, ROOT).href);
+const ALLOWED = new Set(${JSON.stringify(urls)}.map(file => new URL(file, ROOT).href));
+const RUNTIME = ${runtimePattern};
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
-    try { await cache.addAll(FILES.map(url => new Request(url, {cache: 'reload'}))); }
+    try { await cache.addAll(CORE.map(url => new Request(url, {cache: 'reload'}))); }
     catch (error) { await caches.delete(CACHE); throw error; }
   })());
 });
@@ -50,20 +54,25 @@ self.addEventListener('activate', event => {
 });
 self.addEventListener('fetch', event => {
   const request = event.request;
-  if (request.method !== 'GET') return;
+  if (request.method !== 'GET' || request.headers.has('range')) return;
   const url = new URL(request.url);
   if (url.origin !== ROOT.origin) return;
   const isStart = request.mode === 'navigate' && (url.pathname === ROOT.pathname || url.pathname === ROOT.pathname + 'index.html');
   const lookup = isStart ? new URL('index.html', ROOT).href : url.origin + url.pathname;
-  if (!ALLOWED.has(lookup)) return;
+  // Only files that exist in this build are cached, so a stale URL never shadows a newer deploy.
+  if (!ALLOWED.has(lookup) || !RUNTIME.test(lookup)) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    return await cache.match(lookup) || fetch(request);
+    const hit = await cache.match(lookup);
+    if (hit) return hit;
+    const response = await fetch(request);
+    if (response.ok && response.type === 'basic') void cache.put(lookup, response.clone()).catch(() => {});
+    return response;
   })());
 });
 `;
       await writeFile(join(outputDirectory, 'sw.js'), code);
-      console.log(`Offline precache: ${urls.length} files; ${version}`);
+      console.log(`Offline precache: ${core.length} of ${urls.length} files; ${version}`);
     },
   };
 }

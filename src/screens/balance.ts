@@ -1,4 +1,5 @@
 import type { AppContext } from '../appTypes';
+import { icons } from '../icons';
 import { balanceObjects } from '../data';
 import type { BalanceRun } from '../state';
 import { requestsEnabled } from '../state';
@@ -95,7 +96,8 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   let popup: HTMLDialogElement | null = null;
   let popupKind: 'predict' | 'record' = 'record';
   let popupTimer = 0;
-  const companion = mountCompanion(root.querySelector<HTMLElement>('#balance-companion')!);
+  // Weighing pose (one object in each hand) instead of the scale-holding art the other stages use.
+  const companion = mountCompanion(root.querySelector<HTMLElement>('#balance-companion')!, 'idle', { student: 'balance-student', corgi: 'balance-corgi' });
   const tilt = (outcome: BalanceRun['actual'] | null) => outcome === 'left' ? -9 : outcome === 'right' ? 9 : 0;
   function reason(run: BalanceRun) {
     return run.actual === 'level' ? `${objectName(run.left)}과 ${objectName(run.right)}의 무게가 같아서 수평이에요.` : `${objectName(run.actual === 'left' ? run.left : run.right)}이 더 무거워서 그쪽이 내려갔어요.`;
@@ -174,7 +176,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       return {
         label: '예상하기', title: '어느 쪽이 내려갈까?',
         lead: `왼쪽 ${objectName(state.left!)} · 오른쪽 ${objectName(state.right!)}. 잠금핀을 뽑기 전에 골라요.`,
-        body: `<div class="predict-options balance-popup-predict">${(['left','level','right'] as const).map(id => `<button data-predict="${id}" aria-pressed="${id === state.prediction}" aria-label="${names[id]} 예상"${off ? ' disabled' : ''}>${id === 'left' ? '↙' : id === 'right' ? '↘' : '═'} <span>${id === 'left' ? '왼쪽' : id === 'right' ? '오른쪽' : '수평'}</span></button>`).join('')}</div><button class="instrument-text-button" id="balance-swap"${off ? ' disabled' : ''}>⇄ 두 물체 자리 바꾸기</button>`,
+        body: `<div class="predict-options balance-popup-predict">${(['left','level','right'] as const).map(id => `<button data-predict="${id}" aria-pressed="${id === state.prediction}" aria-label="${names[id]} 예상"${off ? ' disabled' : ''}>${id === 'left' ? icons.arrowDownLeft : id === 'right' ? icons.arrowDownRight : '═'} <span>${id === 'left' ? '왼쪽' : id === 'right' ? '오른쪽' : '수평'}</span></button>`).join('')}</div><button class="instrument-text-button" id="balance-swap"${off ? ' disabled' : ''}>${icons.swap} 두 물체 자리 바꾸기</button>`,
         actions: '<button class="button button-secondary" id="balance-popup-close">물체 다시 고르기</button>',
       };
     }

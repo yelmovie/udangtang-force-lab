@@ -3,18 +3,9 @@ import { stages, type StageId } from './data';
 import type { SaveData } from './state';
 import { toolCards, type ToolCard } from './toolCards';
 
-const stroke = 'fill="none" stroke="#173d40" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"';
-/** Simple inline drawings, no image files. */
-const icons: Record<StageId, string> = {
-  cargo: `<path d="M18 52V30c0-3 4-3 4 0v-12c0-3 4-3 4 0v-4c0-3 4-3 4 0v4c0-3 4-3 4 0v6c0-3 4-3 4 0v14l5-6c2-2 5 0 4 2l-9 14c-2 3-4 4-8 4H24c-4 0-6-2-6-6z" fill="#f5b26b" ${stroke}/><path d="M18 46h22" ${stroke}/><path d="M48 18h10m-4-4 4 4-4 4" ${stroke}/>`,
-  balance: `<path d="M32 30 22 54h20z" fill="#9cc58a" ${stroke}/><path d="M8 28h48" ${stroke} stroke-width="4"/><rect x="10" y="14" width="14" height="14" rx="2" fill="#dc9755" stroke="#173d40" stroke-width="3"/><rect x="40" y="14" width="14" height="14" rx="2" fill="#a794c6" stroke="#173d40" stroke-width="3"/><path d="M14 58h36" ${stroke}/>`,
-  scale: `<rect x="10" y="30" width="44" height="24" rx="5" fill="#8cc4cf" ${stroke}/><path d="M14 26h36" ${stroke} stroke-width="4"/><path d="M32 26v4" ${stroke}/><rect x="18" y="36" width="28" height="11" rx="2" fill="#173d40"/><text x="32" y="45" text-anchor="middle" font-size="9" font-weight="800" fill="#9ff0c9" font-family="sans-serif">0 g</text><circle cx="32" cy="16" r="7" fill="#e8665a" stroke="#173d40" stroke-width="3"/><path d="M32 9c1-3 3-4 5-4" ${stroke}/>`,
-  workshop: `<path d="M6 54h52L58 34z" fill="#d6c0e2" ${stroke}/><path d="M8 30 40 20" ${stroke} stroke-width="4"/><path d="M18 27 14 38h10z" fill="#ad86c0" ${stroke}/><rect x="6" y="18" width="10" height="9" rx="2" fill="#f5b26b" stroke="#173d40" stroke-width="3" transform="rotate(-17 11 22)"/><path d="M40 20v-8m-3 3 3-3 3 3" ${stroke}/>`,
-  rescue: `<path d="M4 56h56V24z" fill="#f1d08a" ${stroke}/><circle cx="34" cy="34" r="9" fill="#ffd34d" stroke="#173d40" stroke-width="3"/><path d="M34 28v12m-6-6h12" stroke="#d98a1c" stroke-width="3" stroke-linecap="round"/><path d="M10 18l4 4m4-10v6m10-4-3 5" stroke="#d99b35" stroke-width="3" stroke-linecap="round"/>`,
-};
-
+/** Generated card art: public/assets/game/toolcard-{stage}.webp (256x256, transparent). */
 export function toolCardIcon(stage: StageId): string {
-  return `<svg class="toolcard-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">${icons[stage]}</svg>`;
+  return `<img class="toolcard-icon" src="${import.meta.env.BASE_URL}assets/game/toolcard-${stage}.webp" alt="" draggable="false">`;
 }
 
 const htmlEntities: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
@@ -66,7 +57,7 @@ export function openToolBag(options: BagOptions): () => void {
   const heading = (id: string, title: string) => `<div class="toolbag-heading"><h2 id="${id}">${title}</h2><button type="button" class="settings-close" data-bag="close" aria-label="도구 가방 닫기">×</button></div>`;
   const slot = (card: ToolCard) => card.earned
     ? `<button type="button" class="toolcard" data-toolcard="${card.stage}" aria-label="${card.name} 카드 크게 보기">${toolCardFront(card)}</button>`
-    : `<div class="toolcard is-locked"><span class="toolcard-lock" aria-hidden="true">?</span><span class="toolcard-where">${card.mission} 미션을 마치면 받아요</span></div>`;
+    : `<div class="toolcard is-locked"><span class="toolcard-art">${toolCardIcon(card.stage)}<span class="toolcard-lock" aria-hidden="true">?</span></span><span class="toolcard-where">${card.mission} 미션을 마치면 받아요</span></div>`;
   const showGrid = (focus?: StageId) => {
     detail = null;
     const count = cards.filter(card => card.earned).length;

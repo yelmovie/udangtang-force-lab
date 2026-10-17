@@ -6,7 +6,7 @@
 .rescue-stage-head > strong { font-size:19px; }
 .rescue-stage-head > span { font-size:16px; }
 .rescue-redesign .rescue-notebook { margin-left:auto; padding:0; font-size:16px; }
-.rescue-redesign .rescue-notebook > summary { min-height:44px; display:flex; align-items:center; white-space:nowrap; color:#286257; cursor:pointer; font-weight:850; }
+.rescue-redesign .rescue-notebook > summary { min-height:48px; display:flex; align-items:center; white-space:nowrap; color:#286257; cursor:pointer; font-weight:850; }
 .rescue-notes-body { position:absolute; top:calc(100% - 3px); right:0; width:320px; max-height:min(470px,42vh); overflow:auto; padding:18px; background:#fff9e9; border:2px solid #ac9469; border-radius:0 0 18px 18px; box-shadow:0 14px 28px #2d301b40; }
 .rescue-notes-body p { color:#45614e; font-size:16px; line-height:1.5; }
 #rescue-clues { display:grid; gap:9px; }
@@ -36,9 +36,13 @@
 .rescue-bottom { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 14px; padding:10px 16px; border-top:2px solid #a88e60; background:#fcf6e8; border-radius:0 0 20px 20px; }
 .rescue-redesign .rescue-controls { display:flex; align-items:center; flex-wrap:wrap; gap:9px; }
 .rescue-controls > span { font-size:17px; color:#46634f; }
-.rescue-controls button, .rescue-step-button { min-height:48px; border:2px solid #a3beaa; border-radius:12px; padding:8px 14px; background:#fffdf4; color:#285e50; font-size:17px; font-weight:850; }
+.rescue-controls button, .rescue-step-button { min-height:48px; border:2px solid #a3beaa; border-radius:12px; padding:8px 14px; background:#fffdf4; color:#285e50; font-size:17px; font-weight:850; box-shadow:0 4px 0 #7f9a86; transition:transform .12s ease, box-shadow .12s ease, background .12s ease; }
+.rescue-controls button:not(:disabled):hover, .rescue-step-button:not(:disabled):hover { background:#fff; }
+.rescue-controls button:not(:disabled):active, .rescue-step-button:not(:disabled):active { transform:translateY(3px); box-shadow:0 1px 0 #7f9a86; }
+.rescue-controls button:focus-visible, .rescue-step-button:focus-visible { outline:3px solid #ffc247; outline-offset:3px; }
+.rescue-controls button:disabled, .rescue-step-button:disabled { opacity:.55; box-shadow:none; }
 .rescue-controls button[aria-pressed='true'] { background:#1c7367; color:#fff9e8; border-color:#13564b; }
-.rescue-controls .rescue-primary, .rescue-step-button { background:#95602d; color:#fff8e5; border-color:#744d27; }
+.rescue-controls .rescue-primary, .rescue-step-button { background:#95602d; color:#fff8e5; border-color:#744d27; box-shadow:0 4px 0 #5a3a1c; }
 .rescue-bottom > p { grid-column:1/-1; margin:0; font-size:16px; color:#52654e; }
 .rescue-route-controls { display:flex; gap:8px; }
 .rescue-force-control { display:grid; grid-template-columns:1fr auto; gap:0 8px; min-width:180px; flex:1; max-width:270px; color:#345b4c; font-size:16px; }

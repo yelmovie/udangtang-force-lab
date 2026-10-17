@@ -4,13 +4,16 @@
 .screen:has(.village-screen) { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 .village-screen { position: relative; width: 100%; flex: 1; min-height: 0; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; overflow: hidden; background: #284c3e; color: #253b2d; }
 .village-frame { position: relative; flex: none; max-width: 100%; max-height: 100%; overflow: hidden; isolation: isolate; background: #578447; }
-.village-canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; touch-action: none; outline-offset: -4px !important; }
-.village-screen button { min-width: 48px; min-height: 48px; border: 2px solid #715737; border-radius: 7px; color: #3b2c1e; background: #fff4d7; box-shadow: 0 3px 0 #614c32; padding: 9px 14px; font-size: 16px; font-weight: 800; line-height: 1.25; touch-action: manipulation; word-break: keep-all; }
+.village-canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; touch-action: none; }
+.village-screen .village-frame .village-canvas:focus-visible { outline-offset: -4px; }
+/* Shared button tone (radius 12, 4px edge, 4 states); the sign/pad/action variants below only change colour and size. */
+.village-screen button { min-width: 48px; min-height: 48px; border: 2px solid #715737; border-radius: 12px; color: #3b2c1e; background: #fff4d7; box-shadow: 0 4px 0 #614c32, 0 8px 14px rgba(6, 30, 30, .28); padding: 9px 14px; font-size: 16px; font-weight: 800; line-height: 1.25; touch-action: manipulation; word-break: keep-all; transition: transform .12s ease, box-shadow .12s ease, background .12s ease; }
+.village-screen button:not(:disabled):active { transform: translateY(3px); box-shadow: 0 1px 0 #614c32; }
 #app .village-labels button { min-width: 48px; min-height: 48px; }
 #app .village-actions > button { min-width: 48px; }
 .village-screen button:hover:not(:disabled) { background: #fffbed; }
 .village-screen button:focus-visible { outline: 4px solid #075668; outline-offset: 3px; box-shadow: 0 0 0 6px #fff8df; }
-.village-screen button:disabled { opacity: 1; background: #e8e5d5; color: #595d50; border-color: #7c806e; }
+.village-screen button:disabled { opacity: 1; background: #e8e5d5; color: #595d50; border-color: #7c806e; box-shadow: none; }
 .village-hud { position: absolute; inset: 12px 16px auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; pointer-events: none; }
 .village-objective { display: grid; gap: 3px; padding: 10px 15px; background: #fffae8f5; border: 2px solid #715737; border-radius: 7px; box-shadow: 0 3px 0 #3c5337; max-width: 65%; }
 .village-objective > span { font-size: 16px; color: #585039; font-weight: 700; }
@@ -30,11 +33,11 @@
 .village-arrival { fill: none; stroke: #fff4b4; stroke-width: 6; opacity: 0; animation: village-arrival 1s ease-out both; }
 @keyframes village-arrival { 0% { opacity: 0; transform: scale(.4); } 1% { opacity: 1; } 100% { opacity: 0; transform: scale(2.6); } }
 .village-labels { position: absolute; inset: 0; pointer-events: none; }
-.village-labels button { position: absolute; transform: translateX(-50%); pointer-events: auto; white-space: nowrap; padding: 7px 13px; min-height: 48px; box-shadow: 0 3px 0 #594931; }
+.village-labels button { position: absolute; transform: translateX(-50%); pointer-events: auto; white-space: nowrap; padding: 7px 13px; min-height: 48px; box-shadow: 0 4px 0 #594931, 0 6px 12px rgba(6, 30, 30, .25); }
 .village-labels button:not(:disabled):active { transform: translateX(-50%) translateY(2px); }
 .village-labels button.is-current { background: #ffda7b; border-color: #754717; box-shadow: 0 3px 0 #754717, 0 0 0 3px #fff2b2; }
 .village-labels button.is-complete { color: #234839; background: #edfae0; border-color: #456c48; }
-.village-labels button.is-locked { color: #4d4b40; background: #e7e5d8; }
+.village-labels button.is-locked { color: #3a3930; background: #e7e5d8; }
 .village-labels button.village-npc-label { background: #f8fbe7; color: #34513a; border-color: #45694a; transform: translate(-50%, -100%); }
 .village-labels button.village-npc-label:not(:disabled):active { transform: translate(-50%, -100%) translateY(2px); }
 .village-bottom { position: absolute; left: 16px; right: 16px; bottom: 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; pointer-events: none; }
@@ -68,7 +71,7 @@
 @keyframes village-reveal-shrink { from { transform: translateX(-50%) scale(1.06); } }
 @keyframes village-results-call { 50% { transform: translateY(-3px) scale(1.04); } }
 @media (prefers-reduced-motion: reduce) {
-  .village-lights * { animation: none !important; }
+  .village-lights * { animation: none; }
   .village-flow, .village-arrival, .village-spark { display: none; }
 }
 .village-loading { position: absolute; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 35px; color: #fff9df; background: #294d3fee; text-align: center; }
@@ -86,7 +89,8 @@
 .village-dialog-heading button { font-size: 26px; }
 .village-dialog #village-dialog-line { margin: 20px 0 24px; font-size: 22px; line-height: 1.65; word-break: keep-all; min-height: 72px; }
 .village-dialog-bottom { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.village-dialog-bottom button { font-size: 18px; background: #245b46; color: #fffbe3; }
+.village-dialog-bottom button { font-size: 18px; background: #245b46; color: #fffbe3; border-color: #f4dfa3; box-shadow: 0 4px 0 #15382a; }
+.village-dialog-bottom button:not(:disabled):active { box-shadow: 0 1px 0 #15382a; }
 @media (min-width: 1500px) and (min-height: 850px) {
   #app .village-labels button { min-height: 56px; }
   .village-screen button, .village-hint, .village-objective > span { font-size: 20px; }
@@ -158,7 +162,7 @@
 }
 @keyframes village-bubble-pop { from { opacity: 0; transform: translate(-50%, -50%) scale(.3); } }
 .village-sign-plate { fill: #ffe9a6; stroke: #8a5a1c; stroke-width: 4; }
-.village-sign-text { fill: #5a3510; font: 800 22px/1 system-ui, sans-serif; text-anchor: middle; }
+.village-sign-text { fill: #5a3510; font: 400 22px/1 'Jua', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; text-anchor: middle; }
 .village-board { width: min(820px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 18px 20px 20px; overflow: auto; color: #283d30; background: #f6e7c4; border: 4px solid #6b4a26; border-radius: 10px; box-shadow: 0 8px 0 #3b2c1a; }
 .village-board::backdrop { background: #163c33a8; }
 .village-board-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }

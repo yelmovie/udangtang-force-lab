@@ -8,7 +8,8 @@
 .rail-start,.rail-end{position:absolute;bottom:-45px;padding:5px 12px;background:#fef4d9;font-size:16px;font-weight:900;border-radius:8px}
 .rail-start{left:9%}.rail-end{right:3%}
 .cargo-object{--worker-width:clamp(130px,17vw,200px);position:absolute;left:17%;bottom:-8px;width:var(--crate-size);height:var(--crate-size);z-index:4;filter:drop-shadow(0 9px 3px #402e3340);transform-origin:center bottom}
-.cargo-worker-grip{position:absolute;bottom:-4px;right:calc(100% - 29px);width:var(--worker-width);aspect-ratio:800/670;padding:0;border:0;background:transparent;box-shadow:none;z-index:4;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;transform:none!important}
+.cargo-worker-grip{position:absolute;bottom:-4px;right:calc(100% - 29px);width:var(--worker-width);aspect-ratio:800/670;padding:0;border:0;background:transparent;box-shadow:none;z-index:4;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;transform:none}
+.cargo-scene .cargo-object .cargo-worker-grip:active{transform:none}
 .cargo-worker-grip:hover:not(:disabled){background:transparent;filter:drop-shadow(0 0 7px #fff3b8)}
 .cargo-worker-grip:active:not(:disabled){cursor:grabbing}
 .cargo-worker-grip:disabled{opacity:1;cursor:default}
@@ -34,7 +35,7 @@
 @keyframes cargo-worker-cheer{0%,100%{transform:none}40%{transform:translateY(-9px) rotate(-3deg)}70%{transform:translateY(0) rotate(2deg)}}
 @keyframes cargo-dust{from{opacity:.8;transform:translateX(0)}to{opacity:0;transform:translate(-15px,-5px)}}
 @keyframes cargo-finger-tap{0%,60%,100%{transform:translateY(0) rotate(-9deg)}30%{transform:translateY(4px) rotate(3deg)}}
-@media(prefers-reduced-motion:reduce){.cargo-object .cargo-worker,.cargo-object::after,.cargo-grab-cue svg,.cargo-choice-finger,.cargo-order-card[data-state="now"]{animation:none!important}.cargo-force-arrow{transition:none}}
+@media(prefers-reduced-motion:reduce){.cargo-object .cargo-worker,.cargo-object::after,.cargo-grab-cue svg,.cargo-choice-finger,.cargo-order-card[data-state="now"]{animation:none}.cargo-force-arrow{transition:none}}
 .cargo-box-art{position:absolute;inset:8% 0 0;width:100%;height:90%;object-fit:contain;z-index:2;pointer-events:none}
 .cargo-contents{position:absolute;inset:0 5% 25%;z-index:3;pointer-events:none}
 .cargo-contents img{position:absolute;width:42%;left:calc(8% + var(--part)*9%);bottom:calc(30% + var(--part)*5%);transform:rotate(calc(var(--part)*8deg - 12deg));filter:drop-shadow(0 3px 2px #0d424655)}
@@ -87,7 +88,11 @@
 .cargo-direction{color:#3d5f4a;font-weight:700}
 .cargo-dock [hidden],.rail-end[hidden]{display:none}
 .cargo-trace{display:grid;grid-template-columns:3em 1fr 4.2em;align-items:center;gap:10px;font-size:18px;font-weight:800;white-space:nowrap;margin:8px 0}.cargo-trace b{height:16px;border-radius:8px;background:#ece2cc;overflow:hidden}.cargo-trace i{display:block;height:100%;border-radius:8px;background:var(--trace)}
-.cargo-discovery>div{display:flex;gap:8px;margin-top:8px}.cargo-discovery button{min-height:52px;min-width:120px;font-size:18px;cursor:pointer;border:2px solid #8eb8a6;background:#e6f4e7;color:#164c49;border-radius:10px;padding:8px 12px;font:inherit;font-weight:700}
+.cargo-discovery>div{display:flex;gap:8px;margin-top:8px}.cargo-discovery button{min-height:52px;min-width:120px;font-size:18px;cursor:pointer;border:2px solid #8eb8a6;background:#e6f4e7;color:#164c49;border-radius:12px;padding:8px 12px;font:inherit;font-weight:700;box-shadow:0 4px 0 #6f9d8f;transition:transform .12s ease,box-shadow .12s ease,background .12s ease}
+.cargo-discovery button:not(:disabled):hover{background:#f3fbf3}
+.cargo-discovery button:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 #6f9d8f}
+.cargo-discovery button:focus-visible{outline:3px solid #ffc247;outline-offset:3px}
+.cargo-discovery button:disabled{opacity:.55;box-shadow:none}
 .cargo-load-ghost{position:fixed;z-index:1500;width:90px;pointer-events:none;transform:translate(-50%,-50%);text-align:center;background:#fff7ddbd;border-radius:14px;padding:5px;color:#184945}
 .cargo-load-ghost img{width:70px;display:block}.cargo-load-ghost b{font-size:18px}
 @media(max-width:1280px){.cargo-dock{gap:12px;padding:10px 12px}.cargo-inventory,.cargo-method{gap:8px}.cargo-inventory>strong,.cargo-method>strong,.cargo-orders>strong,.cargo-force>strong{display:none}.cargo-order-card{min-width:70px}}
@@ -103,9 +108,10 @@
 .cargo-expedition .experiment-heading{gap:12px}
 .cargo-expedition .experiment-heading>div:first-child{flex:0 0 auto}.cargo-expedition .experiment-heading h1{white-space:nowrap}
 .cargo-tools{display:flex;align-items:center;gap:10px;margin-right:auto}
-.cargo-record-open{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:6px 14px;border:2px solid #1e6664;border-radius:12px;background:#fffaf0;color:#1e6664;font-size:16px;font-weight:800;white-space:nowrap;cursor:pointer}
+.cargo-record-open{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:6px 14px;border:2px solid #1e6664;border-radius:12px;background:#fffaf0;color:#1e6664;font-size:16px;font-weight:800;white-space:nowrap;cursor:pointer;box-shadow:0 4px 0 #1e6664;transition:transform .12s ease,box-shadow .12s ease}
+.cargo-record-open:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 #1e6664}
 .cargo-record-open span{min-width:26px;padding:2px 7px;border-radius:999px;background:#f5ce74;color:#264846;text-align:center}
-.cargo-record-open:disabled{opacity:.5;cursor:default}
+.cargo-record-open:disabled{opacity:.5;cursor:default;box-shadow:none}
 .cargo-tools .cargo-bakery-open{min-height:48px;min-width:0;padding:6px 18px;font-size:17px;white-space:nowrap}
 .cargo-tools [hidden]{display:none}
 .cargo-dock{justify-content:center}.cargo-dock>div>strong{max-width:none;white-space:nowrap}.cargo-method .segmented button,.cargo-force .segmented button{white-space:nowrap}
@@ -118,7 +124,7 @@
 .cargo-popup .cargo-direction{font-size:22px}
 .cargo-popup .cargo-discovery{margin-top:10px;padding:10px 16px;border-radius:20px;background:#eef7f0;border:2px solid #8eb8a6}
 .cargo-popup .cargo-discovery>strong{font-size:24px;color:#174b4c}
-.cargo-popup .cargo-discovery button{min-height:56px;min-width:140px;font-size:22px;border-radius:14px}
+.cargo-popup .cargo-discovery button{min-height:56px;min-width:140px;font-size:22px}
 .cargo-popup .cargo-finding{font-size:22px;font-weight:800;color:#136e70}
 .cargo-popup-next{padding:6px 14px;border-radius:16px;background:#fff1cf;border:2px solid #f2c45a;color:#4b3405;font-size:22px}
 .cargo-popup-orders{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
@@ -131,3 +137,13 @@
 .cargo-load-options button img{height:44px;width:72px}
 .cargo-ghost[data-current="true"] img{display:none}
 .cargo-ghost[data-current="true"] span{border-style:solid;background:#fff2c8;color:#3e3420}
+/* Level 2: until a force is picked the force buttons glow, and grabbing the child too early shakes them. */
+.cargo-force[data-waiting] [data-force]{border-color:#be8c38;box-shadow:0 0 0 3px #ffe0a4;animation:cargo-force-glow 1.4s ease-in-out infinite}
+.cargo-force[data-waiting]>strong::after{content:' ← 먼저 골라요';color:#b2321f}
+.cargo-force.cargo-force-nudge{animation:cargo-force-shake .5s ease-in-out}
+@keyframes cargo-force-glow{50%{box-shadow:0 0 0 7px #ffd27a66}}
+@keyframes cargo-force-shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@media(prefers-reduced-motion:reduce){.cargo-force[data-waiting] [data-force],.cargo-force.cargo-force-nudge{animation:none}}
+/* Finger cue sits on the child's shoulder, not above the empty corner of the grip box. */
+.cargo-worker-grip .cargo-grab-cue{bottom:auto;top:36%;left:64%;transform:translateX(-50%)}
+.cargo-worker-grip .cargo-grab-cue::after{left:50%;margin-left:-8px}

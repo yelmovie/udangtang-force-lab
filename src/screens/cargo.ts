@@ -123,6 +123,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             if (!suggest) b.querySelector('.cargo-choice-finger')?.remove();
         });
         root.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(b => { b.classList.toggle('selected', b.dataset.action === state.action); b.setAttribute('aria-pressed', String(b.dataset.action === state.action)); b.disabled = locked; });
+        root.querySelector<HTMLElement>('.cargo-force')?.toggleAttribute('data-waiting', level === 2 && force === null && !deliveredAll());
         root.querySelectorAll<HTMLButtonElement>('[data-force]').forEach(b => { const f = Number(b.dataset.force); b.classList.toggle('selected', f === force); b.setAttribute('aria-pressed', String(f === force)); b.disabled = locked || deliveredAll(); });
         root.querySelectorAll<HTMLElement>('.cargo-dock [data-level]').forEach(part => { part.hidden = Number(part.dataset.level) !== level; });
         const cards = cargoOrders.map((order, i) => {
@@ -288,7 +289,16 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         if (busy || waiting || drag || event.button !== 0)
             return;
         const source = (event.target as Element).closest<HTMLButtonElement>('[data-parts],.cargo-worker-grip');
-        if (!source || source.disabled)
+        if (!source)
+            return;
+        // Grabbing the child before a force is picked points the student at the force buttons instead of doing nothing.
+        if (source === handle && source.disabled && level === 2 && force === null && !deliveredAll()) {
+            const row = root.querySelector<HTMLElement>('.cargo-force')!;
+            row.classList.remove('cargo-force-nudge'); void row.offsetWidth; row.classList.add('cargo-force-nudge');
+            feedback = '먼저 아래에서 힘(작은 힘 · 중간 힘 · 큰 힘)을 골라요. 그다음 아이를 잡고 옮겨요.'; context.sound(300); update(); step.textContent = '먼저 아래에서 힘을 골라요 ↓';
+            return;
+        }
+        if (source.disabled)
             return;
         drag = { pointer: event.pointerId, source, type: source === handle ? 'force' : 'card', x: event.clientX, y: event.clientY, travel: travel(), moved: false, ghost: null };
         source.setPointerCapture(event.pointerId);

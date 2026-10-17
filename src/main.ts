@@ -31,6 +31,7 @@ import { inquiryPlans, predictionRecap, predictionVerdict, type PredictionRecap 
 import { earnedToolCards, toolCardInfo, toolCards, toolCardsText } from './toolCards';
 import { bagIcon, openToolBag, toolCardRevealMarkup, toolCardRowMarkup } from './toolBag';
 import './studentUx.css';
+import { icons } from './icons';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 let save: SaveData = readSave() ?? freshSave();
@@ -54,6 +55,14 @@ function tone(frequency = 520) {
   if (!save.soundOn) return;
   setVolume(save.soundVolume ?? 0.3);
   playSound(frequency >= 680 ? 'success' : frequency < 400 ? 'bump' : 'click');
+}
+
+/** Confetti burst: 28 pieces with their own drift, delay and colour. Skipped under reduced motion. */
+function confetti(host: HTMLElement) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const burst = document.createElement('div'); burst.className = 'story-confetti'; burst.setAttribute('aria-hidden', 'true');
+  for (let n = 0; n < 28; n++) { const bit = document.createElement('i'); bit.style.setProperty('--x', `${Math.random() * 100}%`); bit.style.setProperty('--d', `${(Math.random() * 1.2).toFixed(2)}s`); bit.style.setProperty('--r', `${Math.round(Math.random() * 720 - 360)}deg`); bit.style.setProperty('--c', ['#ffd27a', '#ff8a65', '#7fd7c4', '#fff6d8', '#ffb3c7'][n % 5]); burst.append(bit); }
+  host.append(burst);
 }
 
 function toast(message: string) {
@@ -116,7 +125,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
   }
   if (!adminUnlocked && !completeStage(save, stageId, summary)) toast('기록을 저장하지 못했어요. 브라우저 저장 설정을 확인해 주세요.');
   if (firstCompletion && activeSave.completed.includes(stageId)) villageCelebration = stageId;
-  tone(710);
+  tone(710); window.setTimeout(() => tone(780), 200);
   const stage = stages.find(item => item.id === stageId)!;
   const challenge = challenges(activeSave).find(item => item.id === stageId)!;
   // A tool card is shown only the first time a mission is completed; it is recomputed, never stored.
@@ -124,7 +133,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
   const modal = document.createElement('div');
   modal.className = 'modal-layer';
   modal.innerHTML = `<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="world-title">
-      <div class="modal-emblem">✦</div>
+      <div class="modal-emblem">${icons.sparkle}</div>
       <p class="eyebrow">${adminUnlocked ? '관리자 미리보기 · 실험 결과' : '새로운 발견 · 실험실 복구!'}</p>
       <h2 id="world-title">${stage.evidence}</h2>${starRow(stageStars(activeSave, stageId), true)}
       ${newCard ? toolCardRevealMarkup(newCard) : ''}
@@ -134,6 +143,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
       <button class="button button-primary" id="world-continue">${stageId === 'rescue' ? '마을 점등식 보러 가기 ✦' : '달라진 마을 보러 가기'}</button>
     </div>`;
   document.body.append(modal);
+  confetti(modal.querySelector<HTMLElement>('.modal-card')!);
   const appWasInert = app.inert;
   app.inert = true;
   const next = modal.querySelector<HTMLButtonElement>('#world-continue')!;
@@ -238,7 +248,7 @@ function openStoryModal(options: StoryOptions) {
       <div class="story-scene cinematic-scene story-video-wrap">
         <video class="story-video" playsinline controls preload="auto" ${video.poster ? `poster="${video.poster}"` : ''} aria-label="${options.scenes ? '엔딩 영상' : '프롤로그 영상'}" src="${video.src}"></video>
         <img class="story-end-frame" src="${options.scenes?.at(-1) ?? `/assets/story/intro-0${options.lines.length}.webp`}" alt="" hidden>
-        <button type="button" class="button button-primary story-play" data-story="play" hidden>▶ 영상 재생</button>
+        <button type="button" class="button button-primary story-play" data-story="play" hidden>${icons.play} 영상 재생</button>
       </div>
       <div class="story-finish-banner" aria-hidden="true"><span>★</span>${options.scenes ? '마을에 불이 켜졌어!' : '출발 준비 완료!'}<span>★</span></div>
       <p class="eyebrow" id="story-title"></p>
@@ -266,10 +276,8 @@ function openStoryModal(options: StoryOptions) {
     if (options.scenes) card.classList.add('is-ending');
     // Confetti burst for the finish: 28 pieces with their own drift, delay and colour.
     const celebrate = () => {
+      confetti(card);
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      const burst = document.createElement('div'); burst.className = 'story-confetti'; burst.setAttribute('aria-hidden', 'true');
-      for (let n = 0; n < 28; n++) { const bit = document.createElement('i'); bit.style.setProperty('--x', `${Math.random() * 100}%`); bit.style.setProperty('--d', `${(Math.random() * 1.2).toFixed(2)}s`); bit.style.setProperty('--r', `${Math.round(Math.random() * 720 - 360)}deg`); bit.style.setProperty('--c', ['#ffd27a', '#ff8a65', '#7fd7c4', '#fff6d8', '#ffb3c7'][n % 5]); burst.append(bit); }
-      card.append(burst);
       [0, 160, 320].forEach((ms, k) => window.setTimeout(() => tone(680 + k * 60), ms));
     };
     const sync = () => showCue(storyCueIndex(video.cues, el.currentTime));
@@ -441,8 +449,8 @@ function renderTitle(root: HTMLElement) {
       <button class="icon-button" data-top="sound" aria-label="소리 ${save.soundOn ? '끄기' : '켜기'}" aria-pressed="${save.soundOn}">${soundIcon()}</button>
       <button class="icon-button" data-top="settings" aria-label="설정 열기" aria-haspopup="dialog" title="설정">${settingsIcon()}</button>
     </div>
-    <div class="character title-student" role="img" aria-label="청록 고글과 멜빵바지를 입은 학생 탐구자"></div>
-    <div class="character title-corgi" role="img" aria-label="청록 스카프를 두른 코기 실험 파트너"></div>
+    <div class="character" data-pose="title-student" role="img" aria-label="청록 고글과 멜빵바지를 입은 학생 탐구자"></div>
+    <div class="character" data-pose="title-corgi" role="img" aria-label="청록 스카프를 두른 코기 실험 파트너"></div>
     <div class="title-panel">
       <h1 class="illustrated-title"><img src="/assets/ui/title.webp" alt="우당탕 힘 실험실" width="1000" height="375"></h1>
     </div>
@@ -450,8 +458,12 @@ function renderTitle(root: HTMLElement) {
       <button class="button button-primary" id="new-start">${readSave() ? '새로 시작' : '시작하기'}</button>
       <button class="button button-secondary" id="continue" ${hasSave ? '' : 'disabled'}>이어하기</button>
     </div>
-    <div class="character title-squirrel" role="img" aria-label="기록판을 든 다람쥐 연구 기록관"></div>
+    <div class="character" data-pose="title-squirrel" role="img" aria-label="기록판을 든 다람쥐 연구 기록관"></div>
   </section>`;
+  // The three pose sheets (~1MB) take their class — and start downloading — only after the title logo and buttons have painted.
+  const reveal = () => root.querySelectorAll<HTMLElement>('[data-pose]').forEach(node => node.classList.add(node.dataset.pose!));
+  if (document.readyState === 'complete') requestAnimationFrame(reveal);
+  else window.addEventListener('load', () => window.setTimeout(reveal, 250), { once: true });
   bindHeader();
   root.querySelector<HTMLButtonElement>('#new-start')?.addEventListener('click', () => {
     if (hasSave && !window.confirm('기존 탐구 기록을 지우고 새로 시작할까요?')) return;
@@ -491,7 +503,7 @@ function renderComplete(root: HTMLElement) {
     </details><details class="complete-details"><summary>스스로 돌아보기 · 더 탐구하기 (선택)</summary><div class="ability-card"><h2>나는 이제 할 수 있어요!</h2><p>할 수 있게 된 것을 눌러 골라 봐. 연구 기록에 함께 저장돼.</p><div class="ability-list">${abilityStatements.map((text, i) => `<button class="ability-item" data-ability="${i}" aria-pressed="${(save.abilities ?? []).includes(i)}"><span>${(save.abilities ?? []).includes(i) ? '✓' : ''}</span>${text}</button>`).join('')}</div></div>
     <div class="challenge-card"><h2>도전 과제 <small id="challenge-count"></small></h2><p>실험실로 돌아가서 더 시험해 보면 배지가 켜져.</p><div class="challenge-list">${challenges(save).map(item => `<div class="challenge-item ${item.done ? 'done' : ''}"><span>${item.done ? '★' : '☆'}</span><div><strong>${item.label}</strong><small>${item.hint}</small></div></div>`).join('')}</div></div>
     </details>${toolCardRowMarkup(save)}<div class="transfer-card"><h2>내가 찾은 생활 속 도구</h2><p>${save.lifeObservation ? escapeHtml(save.lifeObservation.object) + ' · ' + escapeHtml(save.lifeObservation.use) : '주변에서 지레나 빗면을 찾아 어떻게 쓰이는지 살펴봐요.'}</p><p>이 기록을 보며 친구에게 도구의 쓰임을 설명해요.</p></div>
-    <div class="complete-footer"><p>${adminUnlocked ? '관리자 미리보기 결과는 학생의 기록에 반영되지 않아요.' : '이 기록을 가지고 교실에서 실제 도구도 관찰해 보세요.'}</p><button class="button button-secondary" id="download-report" ${adminUnlocked ? 'disabled' : ''}>내 연구 기록 저장 ↓</button><button class="button button-secondary" id="back-map">작전 지도로</button></div>
+    <div class="complete-footer"><p>${adminUnlocked ? '관리자 미리보기 결과는 학생의 기록에 반영되지 않아요.' : '이 기록을 가지고 교실에서 실제 도구도 관찰해 보세요.'}</p><button class="button button-secondary" id="download-report" ${adminUnlocked ? 'disabled' : ''}>내 연구 기록 저장 ${icons.download}</button><button class="button button-secondary" id="back-map">작전 지도로</button></div>
   </section>`;
   root.querySelector<HTMLButtonElement>('#back-map')?.addEventListener('click', () => navigate('map'));
   root.querySelectorAll<HTMLButtonElement>('[data-toolcard]').forEach(button => button.addEventListener('click', () => {
@@ -538,14 +550,14 @@ function openSettings() {
     let content: string;
     if (section === 'menu') {
       content = `<div class="settings-links">
-        <button data-settings="home"><span>⌂</span> 메인 화면</button>
-        <button data-settings="help"><span>?</span> 학생 가이드</button><button data-settings="save"><span>✓</span> 지금 저장</button></div><details class="teacher-tools"><summary>선생님 도구 · 정보</summary><div class="settings-links"><button data-settings="teacher"><span>▤</span> 교사 가이드</button>
-        <button data-settings="curriculum"><span>◎</span> 교육과정</button><button data-settings="info"><span>ⓘ</span> 정보와 출처</button>
-        <button data-settings="requests" aria-pressed="${requestsEnabled(save)}"><span>★</span> ${requestsLabel()}</button>
-        <button data-settings="admin"><span>⚙</span> 관리자 해금 <small>${adminUnlocked ? '사용 중' : ''}</small></button>
-        <button data-settings="prologue"><span>▶</span> 프롤로그 다시 보기</button>
-        ${save.completed.length === stages.length || adminUnlocked ? '<button data-settings="ending"><span>✦</span> 점등식 다시 보기</button>' : ''}
-        <button class="settings-danger" data-settings="reset"><span>↺</span> 기록 초기화</button></div></details>
+        <button data-settings="home"><span>${icons.home}</span> 메인 화면</button>
+        <button data-settings="help"><span>?</span> 학생 가이드</button><button data-settings="save"><span>${icons.check}</span> 지금 저장</button></div><details class="teacher-tools"><summary>선생님 도구 · 정보</summary><div class="settings-links"><button data-settings="teacher"><span>${icons.book}</span> 교사 가이드</button>
+        <button data-settings="curriculum"><span>${icons.target}</span> 교육과정</button><button data-settings="info"><span>${icons.info}</span> 정보와 출처</button>
+        <button data-settings="requests" aria-pressed="${requestsEnabled(save)}"><span>${icons.star}</span> ${requestsLabel()}</button>
+        <button data-settings="admin"><span>${icons.gear}</span> 관리자 해금 <small>${adminUnlocked ? '사용 중' : ''}</small></button>
+        <button data-settings="prologue"><span>${icons.play}</span> 프롤로그 다시 보기</button>
+        ${save.completed.length === stages.length || adminUnlocked ? '<button data-settings="ending"><span>${icons.sparkle}</span> 점등식 다시 보기</button>' : ''}
+        <button class="settings-danger" data-settings="reset"><span>${icons.reset}</span> 기록 초기화</button></div></details>
         <div class="settings-audio"><button class="button button-secondary" data-settings="sound" aria-pressed="${save.soundOn}">효과음 ${save.soundOn ? '켜짐 · 끄기' : '꺼짐 · 켜기'}</button><label for="sound-volume">효과음 크기 <output id="volume-value">${Math.round((save.soundVolume ?? 0.3) * 100)}%</output></label><input id="sound-volume" type="range" min="0" max="100" step="5" value="${Math.round((save.soundVolume ?? 0.3) * 100)}" aria-label="효과음 크기"></div>
         <p class="settings-offline" id="offline-status" role="status">${offlineMessage()}</p>`;
     } else if (section === 'admin') {
@@ -593,7 +605,7 @@ function openSettings() {
       if (adminSave) adminSave.teacherOptions = { requests };
       persist();
       button.setAttribute('aria-pressed', String(requests));
-      button.innerHTML = `<span>★</span> ${requestsLabel()}`;
+      button.innerHTML = `<span>${icons.star}</span> ${requestsLabel()}`;
       toast(requests ? '의뢰 레벨을 마쳐야 다음 미션이 끝나요.' : '의뢰 레벨은 선택이에요. 실험만 마쳐도 미션을 끝낼 수 있어요.');
       render();
     }
@@ -653,7 +665,7 @@ function render() {
   if (stage) { title = stage.title; subtitle = `MISSION 0${stage.mission} · ${stage.concept}`; }
   if (viewPage === 'map') { title = '우당탕 과학 마을'; subtitle = '실험을 마치면 마을이 달라져요'; }
   if (viewPage === 'complete') { title = '나의 탐구 결과'; subtitle = '실험실 복구 완료'; }
-  app.innerHTML = `${viewPage === 'title' ? '' : header(title, subtitle)}<main id="screen" class="screen"></main><aside class="orientation-hint" role="status"><span aria-hidden="true">↶ ▱</span><h2>가로로 펼치면 실험실이 보여요!</h2><p>태블릿은 가로로 돌리고,<br>웹에서는 창을 가로로 넓혀 주세요.</p><small>진행 중인 실험은 그대로 이어져요.</small></aside>`;
+  app.innerHTML = `${viewPage === 'title' ? '' : header(title, subtitle)}<main id="screen" class="screen"></main><aside class="orientation-hint" role="status"><span aria-hidden="true">${icons.rotateLeft}${icons.landscape}</span><h2>가로로 펼치면 실험실이 보여요!</h2><p>태블릿은 가로로 돌리고,<br>웹에서는 창을 가로로 넓혀 주세요.</p><small>진행 중인 실험은 그대로 이어져요.</small></aside>`;
   bindHeader();
   const screen = app.querySelector<HTMLElement>('#screen')!;
   switch (viewPage) {
@@ -672,9 +684,46 @@ function render() {
   }
   const entered = stages.find(item => item.id === viewPage);
   if (entered && !missionCardShown.has(entered.id)) { missionCardShown.add(entered.id); openMissionCard(entered.id); }
+  if (entered) watchFinish(screen, entered.id);
 }
+
+/* The stage's own finish button is hidden; when it unlocks, a centred "다 했어요!" popup offers the same action. */
+function watchFinish(screen: HTMLElement, stageId: StageId) {
+  const button = screen.querySelector<HTMLButtonElement>('.experiment-footer .button');
+  if (!button) return;
+  let shown = false;
+  const show = () => {
+    if (shown || button.disabled || !button.isConnected) return;
+    // Wait for the stage's own result popup or a letter to close so the two never stack.
+    if (document.querySelector('dialog[open], .modal-layer')) { window.setTimeout(show, 400); return; }
+    shown = true;
+    const dialog = document.createElement('dialog');
+    dialog.className = 'stage-popup stage-finish';
+    dialog.innerHTML = `<div class="stage-popup-card"><span class="stage-popup-label">MISSION 0${stages.find(item => item.id === stageId)!.mission} 완료</span><span class="stage-stamp" aria-hidden="true">★ 완료</span><h2>다 했어요! 멋져요 ★</h2><button class="stage-popup-close" aria-label="닫기">×</button><div class="stage-popup-body"><p>${finishLines[stageId]}</p></div><div class="stage-popup-actions"><button class="stage-finish-later">조금 더 실험할래요</button><button class="button button-primary stage-finish-go">${button.textContent}</button></div></div>`;
+    dialog.querySelector('.stage-popup-close')!.addEventListener('click', () => dialog.close());
+    dialog.querySelector('.stage-finish-later')!.addEventListener('click', () => dialog.close());
+    dialog.querySelector('.stage-finish-go')!.addEventListener('click', () => { dialog.close(); button.click(); });
+    dialog.addEventListener('close', () => { dialog.remove(); button.classList.add('is-ready'); });
+    document.body.append(dialog); dialog.showModal(); tone(700); window.setTimeout(() => tone(760), 160);
+    window.setTimeout(() => dialog.querySelector('.stage-stamp')?.classList.add('is-stamped'), 60);
+  };
+  const observer = new MutationObserver(show);
+  observer.observe(button, { attributes: true, attributeFilter: ['disabled'] });
+  const stop = () => { observer.disconnect(); };
+  const previous = cleanup; cleanup = () => { stop(); previous?.(); };
+  show();
+}
+const finishLines: Record<StageId, string> = {
+  cargo: '빵집 주문을 다 배달했어요. 이제 운반 레일을 고칠 수 있어요!',
+  balance: '어느 쪽이 무거운지 수평대로 알아냈어요. 발견을 저장해요!',
+  scale: '저울로 무게를 비교했어요. 비교 기록을 저장해요!',
+  workshop: '지레와 빗면으로 힘을 줄이는 법을 찾았어요. 생활 속 도구를 찾으러 가요!',
+  rescue: '코어를 옮길 준비가 끝났어요. 코어를 장착해요!',
+};
 
 render();
 performance.mark('force-lab-ready');
-prepareOffline();
+// The offline worker installs after the title has settled so its precache never competes with the first paint.
+const startOffline = () => { if ('requestIdleCallback' in window) window.requestIdleCallback(prepareOffline, { timeout: 3000 }); else prepareOffline(); };
+window.addEventListener('load', () => window.setTimeout(startOffline, 3000), { once: true });
 
