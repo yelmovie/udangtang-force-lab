@@ -153,11 +153,11 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     const dialog = recordDialog = document.createElement('dialog');
     dialog.className = 'stage-popup workshop-record-popup';
     dialog.setAttribute('aria-labelledby', 'workshop-record-title');
-    dialog.innerHTML = `<div class="stage-popup-card"><button class="stage-popup-x" aria-label="닫기">×</button><span class="stage-popup-label"></span><h2 id="workshop-record-title">${level === 2 ? '공방 친구의 의뢰' : '힘 막대 기록'}</h2><div class="stage-popup-body"><p class="stage-popup-lead"></p>${tryMarkup ? `<div class="workshop-record-try">${tryMarkup}</div>` : ''}<div class="workshop-record-slot"></div></div><div class="stage-popup-actions"><button class="button button-primary" id="workshop-record-close">계속 실험하기</button></div></div>`;
+    dialog.innerHTML = `<div class="stage-popup-card"><button class="stage-popup-close" aria-label="닫기">×</button><span class="stage-popup-label"></span><h2 id="workshop-record-title">${level === 2 ? '공방 친구의 의뢰' : '힘 막대 기록'}</h2><div class="stage-popup-body"><p class="stage-popup-lead"></p>${tryMarkup ? `<div class="workshop-record-try">${tryMarkup}</div>` : ''}<div class="workshop-record-slot"></div></div><div class="stage-popup-actions"><button class="button button-primary" id="workshop-record-close">계속 실험하기</button></div></div>`;
     dialog.querySelector('.stage-popup-label')!.textContent = label;
     dialog.querySelector('.stage-popup-lead')!.textContent = lead;
     dialog.querySelector('.workshop-record-slot')!.replaceWith(notebookBoard);
-    dialog.querySelectorAll('.stage-popup-x, #workshop-record-close').forEach(button => button.addEventListener('click', () => dialog.close()));
+    dialog.querySelectorAll('.stage-popup-close, #workshop-record-close').forEach(button => button.addEventListener('click', () => dialog.close()));
     dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
     dialog.addEventListener('close', () => { notebookStore.append(notebookBoard); dialog.remove(); if (recordDialog === dialog) recordDialog = null; });
     root.querySelector('.workshop-redesign')!.append(dialog);

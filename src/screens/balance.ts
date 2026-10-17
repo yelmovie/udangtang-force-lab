@@ -211,7 +211,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     const kind = popupKind === 'predict' && predictPending() ? 'predict' : 'record';
     const content = popupContent(kind);
     popup.dataset.kind = kind;
-    popup.innerHTML = `<div class="stage-popup-card"><button class="stage-popup-x" aria-label="닫기">×</button><span class="stage-popup-label">${content.label}</span><h2 id="balance-popup-title">${content.title}</h2><div class="stage-popup-body"><p class="stage-popup-lead">${content.lead}</p>${content.body}</div><div class="stage-popup-actions">${content.actions}</div></div>`;
+    popup.innerHTML = `<div class="stage-popup-card"><button class="stage-popup-close" aria-label="닫기">×</button><span class="stage-popup-label">${content.label}</span><h2 id="balance-popup-title">${content.title}</h2><div class="stage-popup-body"><p class="stage-popup-lead">${content.lead}</p>${content.body}</div><div class="stage-popup-actions">${content.actions}</div></div>`;
     if (focusKey) popup.querySelector<HTMLElement>(focusKey)?.focus();
   }
   function openPopup(kind: 'predict' | 'record') {
@@ -223,7 +223,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       const dialog = popup = document.createElement('dialog');
       dialog.className = 'stage-popup balance-popup';
       dialog.setAttribute('aria-labelledby', 'balance-popup-title');
-      dialog.addEventListener('click', event => { if (event.target === dialog || (event.target as Element).closest('.stage-popup-x, #balance-popup-close')) dialog.close(); });
+      dialog.addEventListener('click', event => { if (event.target === dialog || (event.target as Element).closest('.stage-popup-close, #balance-popup-close')) dialog.close(); });
       dialog.addEventListener('close', () => { dialog.remove(); if (popup === dialog) popup = null; });
       root.querySelector('.balance-screen')!.append(dialog);
       renderPopup();

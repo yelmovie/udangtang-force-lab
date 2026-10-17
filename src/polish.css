@@ -530,3 +530,5 @@ button.button:not(:disabled):active {
 @media (min-width: 1600px) and (min-height: 900px) and (orientation: landscape) { #app .experiment-screen > .experiment-heading { right: 460px; } }
 /* While the doctor's bubble is up, his name sign steps aside so the two never overlap. */
 #app .village-labels:has(.village-npc-bubble:not([hidden])) .village-npc-label { opacity: 0; pointer-events: none; }
+/* The flask logo had no job once the title text went; only back/home stay on the left. */
+#app > .topbar .brand { display: none; }

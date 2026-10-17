@@ -7,6 +7,7 @@ import './learning.css';
 import './missionProgress.css';
 import './questionUI.css';
 import './storyVideo.css';
+import './stagePopup.css';
 import { openLifeObservation } from './lifeObservation';
 import { stages, type PageId, type StageId } from './data';
 import { completeStage, freshSave, readSave, requestsEnabled, stageIsOpen, writeSave, type SaveData } from './state';

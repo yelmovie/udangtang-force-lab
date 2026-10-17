@@ -42,7 +42,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
       <div class="cargo-scene-caption"><span class="instrument-phase cargo-step" id="cargo-step" tabindex="-1"></span></div>
       <div class="cargo-rail"><span class="rail-start">출발</span><span class="rail-end">어디까지 갈까?</span><i class="rail-ticks"></i><div class="cargo-target-zone" hidden><span>빵집 문 앞</span></div><div class="cargo-ghosts" aria-hidden="true"></div><div class="cargo-gesture-guide" aria-hidden="true"><span class="cargo-gesture-arrow">→</span><span class="cargo-gesture-target">같은 힘</span></div><div class="cargo-object" data-mood="idle" aria-label="부품을 담는 상자"><span class="cargo-pull-strap" aria-hidden="true"></span><span class="cargo-force-arrow" aria-hidden="true"><b>같은 힘</b></span><button class="cargo-worker-grip"><img class="cargo-worker cargo-worker-push" src="${imagePath('student-cargo-push')}" alt="" draggable="false"><img class="cargo-worker cargo-worker-pull" src="${imagePath('student-cargo-pull')}" alt="" draggable="false"><span class="cargo-grab-cue">${fingerIcon}</span></button><img class="cargo-box-art" src="${imagePath('crate-empty')}" alt="나무 운반 상자" draggable="false"><div class="cargo-contents"></div><span class="cargo-load-tag"></span></div></div>
       <div class="cargo-distance" role="status"></div>
-    </div><div class="cargo-dock"><div class="cargo-inventory" data-level="1"><strong>① 부품을 담아요</strong><div class="cargo-load-options">${[1, 3, 5].map(n => `<button data-parts="${n}" aria-label="같은 금속 부품 ${n}개 담기"><img src="${imagePath('cargo-metal')}" alt="" draggable="false"><span>${n}개</span></button>`).join('')}</div></div><div class="cargo-method" data-level="1"><strong>② 힘을 주는 쪽</strong><div class="segmented"><button data-action="push">뒤에서 밀기 →</button><button data-action="pull">앞에서 당기기 →</button></div></div><div class="cargo-orders" data-level="2"><strong>빵집 주문서</strong><div class="cargo-order-cards"></div></div><div class="cargo-force" data-level="2"><strong>힘 단계</strong><div class="segmented">${([1, 2, 3] as const).map(f => `<button data-force="${f}"><i class="cargo-step-arrow" style="--step:${f}" aria-hidden="true"></i>${cargoForceNames[f - 1]}</button>`).join('')}</div></div></div></div>
+    </div><div class="cargo-dock"><div class="cargo-inventory" data-level="1"><strong>① 상자에 담을 부품</strong><div class="cargo-load-options">${[1, 3, 5].map(n => `<button data-parts="${n}" aria-label="같은 금속 부품 ${n}개 담기"><img src="${imagePath(`cargo-parts-${n}`)}" alt="" draggable="false"><span>부품 ${n}개</span></button>`).join('')}</div></div><div class="cargo-method" data-level="1"><strong>② 힘을 주는 쪽</strong><div class="segmented"><button data-action="push">뒤에서 밀기 →</button><button data-action="pull">앞에서 당기기 →</button></div></div><div class="cargo-orders" data-level="2"><strong>빵집 주문서</strong><div class="cargo-order-cards"></div></div><div class="cargo-force" data-level="2"><strong>힘 단계</strong><div class="segmented">${([1, 2, 3] as const).map(f => `<button data-force="${f}"><i class="cargo-step-arrow" style="--step:${f}" aria-hidden="true"></i>${cargoForceNames[f - 1]}</button>`).join('')}</div></div></div></div>
     <div class="experiment-footer"><span class="feedback" id="cargo-feedback" role="status"></span><button class="button button-primary" id="cargo-finish" disabled>운반 레일 복구하기 →</button></div></section>`;
     const field = root.querySelector<HTMLElement>('.cargo-scene')!;
     const crate = root.querySelector<HTMLElement>('.cargo-object')!;
@@ -103,15 +103,17 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         // Level 1: where every other load stopped, so 1·3·5 can be compared side by side on the rail.
         const items = level === 2
             ? ghosts.map((g, i) => ({ distance: g.distance, label: `${i === ghosts.length - 1 ? '지난번' : '그 전'} · ${forceName(g.force)}`, age: ghosts.length - 1 - i, parts: 0 }))
-            : [1, 3, 5].filter(n => n !== state.parts).flatMap(n => { const run = latestRun(n); return run ? [{ distance: run.distance, label: `${n}개 도착`, age: 0, parts: n }] : []; });
-        root.querySelector('.cargo-ghosts')!.innerHTML = items.map(g => `<div class="cargo-ghost" data-age="${g.age}" data-parts="${g.parts}" style="left:${endPosition(g.distance)}"><img src="${imagePath('crate-empty')}" alt="" draggable="false"><span>${g.label}</span></div>`).join('');
+            : [1, 3, 5].flatMap(n => { const run = latestRun(n, state.action); return run ? [{ distance: run.distance, label: `${n}개 상자가 멈춘 곳`, age: 0, parts: n, current: n === state.parts }] : []; });
+        // The crate the student is pushing right now keeps its own picture; only its arrival sign is drawn.
+        root.querySelector('.cargo-ghosts')!.innerHTML = items.map(g => `<div class="cargo-ghost" data-age="${g.age}" data-parts="${g.parts}" data-current="${'current' in g && g.current}" style="left:${endPosition(g.distance)}"><img src="${imagePath('crate-empty')}" alt="" draggable="false"><span>${g.label}</span></div>`).join('');
     }
     function update() {
         setMissionProgress(root, [weightCompared(), directionCompared(), finding, deliveredAll()], '');
         const parts = shownParts(), locked = busy || waiting;
-        root.querySelector('.cargo-load-tag')!.textContent = `부품 ${parts}개`;
+        root.querySelector('.cargo-load-tag')!.textContent = `부품 ${parts}개 상자`;
         const contents = root.querySelector<HTMLElement>('.cargo-contents')!;
-        if (contents.childElementCount !== parts) contents.innerHTML = Array.from({ length: parts }, (_, i) => `<img src="${imagePath('cargo-metal')}" alt="" draggable="false" style="--part:${i}">`).join('');
+        contents.dataset.count = String(parts);
+        if (contents.childElementCount !== parts) contents.innerHTML = Array.from({ length: parts }, (_, i) => `<img src="${imagePath('cargo-part')}" alt="" draggable="false" style="--part:${i}">`).join('');
         buttons.forEach(b => {
             const n = Number(b.dataset.parts), selected = n === state.parts;
             const suggest = !locked && state.parts === 1 && n !== 1;
@@ -313,7 +315,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         if (!drag.ghost) {
             drag.ghost = document.createElement('div');
             drag.ghost.className = 'cargo-load-ghost';
-            drag.ghost.innerHTML = `<img src="${imagePath('cargo-metal')}" alt="" draggable="false"><b>${drag.source.dataset.parts}개</b>`;
+            drag.ghost.innerHTML = `<img src="${imagePath(`cargo-parts-${drag.source.dataset.parts}`)}" alt="" draggable="false"><b>${drag.source.dataset.parts}개</b>`;
             document.body.append(drag.ghost);
         }
         drag.ghost.style.left = `${event.clientX}px`;

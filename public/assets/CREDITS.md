@@ -13,6 +13,7 @@
 | 운반 공방 지레 표정 변형 | `game/workshop-lever-press-{0,1,2}-hard.webp`, `game/workshop-lever-press-{3,4}-easy.webp` | 2026-10-18 Higgsfield GPT Image 2.5로 기존 자세 그림의 표정만 편집한 뒤, 원본 윤곽(투명도)에 머리 부분만 합성 | 프로젝트를 위해 생성한 이미지 |
 | 운반 공방 배경·나무 결 | `backgrounds/workshop-clear.webp`, `textures/workshop-wood.webp` | 2026-10-18 생성형 AI로 기존 공방 배경에서 시소·지렛대 그림을 지우고 새로 만든 나무 결 텍스처 | 프로젝트를 위해 생성한 이미지 |
 | 운반 공방 받침대·화물 3D | `models/workshop/fulcrum.glb`, `crate.glb` | 2026-10-18 컨셉 그림을 Meshy image-to-3D로 변환 후 블렌더로 삼각형 2,500개·텍스처 512로 축소 | Meshy 계정의 생성·이용 조건은 별도 확인. CC0 등 별도 라이선스를 추정하지 않음 |
+| 배송소 금속 부품(1·3·5개) | `game/cargo-part.webp`, `game/cargo-parts-{1,3,5}.webp` | 2026-10-18 Higgsfield GPT Image 2.5로 너트·볼트 한 개를 투명 배경으로 생성한 뒤 PIL로 1·3·5개 배치 합성 | 프로젝트를 위해 생성한 이미지 |
 | 제목 로고 | `ui/title.webp` | 생성형 AI 제작 | 앱 제작자 보유 |
 | 중앙 동력실 실내 배경 | `backgrounds/core-hall-v2.webp` | 2026-10-08 내장 이미지 생성 도구로 제작. 원본·프롬프트는 `references/design/core-studio-v2/`에 보관 | 프로젝트를 위해 생성한 이미지. 조작 모델과 UI는 별도로 구현 |
 | 코어·빈 중앙 장치 3D | `models/core/*.glb` | 사용자가 Meshy로 생성해 전달한 GLB를 폴리곤·텍스처 최적화 | Meshy 계정의 생성·이용 조건은 별도 확인. CC0 등 별도 라이선스를 추정하지 않음 |

@@ -110,20 +110,7 @@
 .cargo-tools [hidden]{display:none}
 .cargo-dock{justify-content:center}.cargo-dock>div>strong{max-width:none;white-space:nowrap}.cargo-method .segmented button,.cargo-force .segmented button{white-space:nowrap}
 
-/* Shared stage popup (same values on every stage). */
-.stage-popup{inset:0;margin:auto;padding:0;border:0;background:transparent;max-width:none;max-height:none;overflow:visible;color:#2b3f33}
-.stage-popup::backdrop{background:radial-gradient(ellipse at 50% 40%,#1d4b4bb3,#0c2a2ad9 75%)}
-.stage-popup-card{position:relative;box-sizing:border-box;display:flex;flex-direction:column;width:max-content;max-width:min(860px,calc(100vw - 48px));max-height:calc(100vh - 48px);padding:16px 22px 18px;background:linear-gradient(#fffdf6,#fff6e4);border:4px solid #8a6a3c;border-radius:32px;box-shadow:0 8px 0 #4a3a22,0 24px 48px #0006;font-size:24px;line-height:1.4;word-break:keep-all;overflow-wrap:break-word;animation:stage-popup-in .32s cubic-bezier(.2,.8,.3,1)}
-.stage-popup-label{margin:0 60px 0 0;font-size:18px;font-weight:800;color:#6b5f45}
-.stage-popup h2{margin:0 60px 8px 0;font-size:32px;line-height:1.25;color:#2b3f33;word-break:keep-all}
-.stage-popup-close{position:absolute;top:10px;right:10px;width:52px;height:52px;padding:0;border:0;border-radius:50%;background:#f3e6c8;color:#5a4320;font-size:32px;line-height:1;cursor:pointer}
-.stage-popup-close:hover{background:#ead6a8}
-.stage-popup-body{min-height:0;overflow:auto}
-.stage-popup-body p{margin:6px 0}
-.stage-popup-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:12px}
-.stage-popup-actions .button{min-height:56px;font-size:22px}
-@keyframes stage-popup-in{from{opacity:0;transform:translateY(28px) scale(.94)}to{opacity:1;transform:none}}
-@media(prefers-reduced-motion:reduce){.stage-popup-card{animation:none}}
+/* 공통 팝업 규격은 src/stagePopup.css (dialog.stage-popup). 여기엔 이 스테이지 고유 내용만. */
 
 /* Cargo popup contents: record text stays at 20px or more. */
 .cargo-popup .cargo-traces{display:grid;gap:2px}
@@ -137,3 +124,10 @@
 .cargo-popup-orders{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
 .cargo-popup-orders span{padding:6px 14px;border-radius:14px;border:2px dashed #cdbb98;background:#fffdf7;color:#7b6a4c;font-size:20px;font-weight:800;white-space:nowrap}
 .cargo-popup-orders span[data-state="done"]{border:2px solid #4c9a5a;background:#e6f4e7;color:#1c5a43}
+/* Real part count inside the crate: one big part, three medium, five small — each row laid out so none hide behind the box front. */
+.cargo-contents[data-count="1"] img{width:46%;left:27%;bottom:34%;transform:rotate(-8deg)}
+.cargo-contents[data-count="3"] img{width:34%;left:calc(6% + var(--part)*22%);bottom:calc(32% + (var(--part) - 1)*(var(--part) - 1)*-6%);transform:rotate(calc(var(--part)*10deg - 10deg))}
+.cargo-contents[data-count="5"] img{width:27%;left:calc(2% + var(--part)*15%);bottom:calc(30% + (var(--part) - 2)*(var(--part) - 2)*-3%);transform:rotate(calc(var(--part)*8deg - 16deg))}
+.cargo-load-options button img{height:44px;width:72px}
+.cargo-ghost[data-current="true"] img{display:none}
+.cargo-ghost[data-current="true"] span{border-style:solid;background:#fff2c8;color:#3e3420}
