@@ -7,14 +7,14 @@ import { canFinishWorkshopExploration, workshopCargos, workshopL2Complete } from
 export type RequestStage = 'cargo' | 'balance' | 'scale' | 'workshop';
 /** locked: the mission's level 1 is not done yet · open: the request can be played · solved: level 2 finished. */
 export type RequestStatus = 'locked' | 'open' | 'solved';
-export type RequestPose = 'wave' | 'think' | 'point' | 'guide' | 'baker';
+export type RequestPose = 'wave' | 'think' | 'point' | 'guide' | 'baker' | 'inspector' | 'clerk' | 'crafter';
 export type VillageRequest = {
   client: string;
   /** One line on the board, in the client's own words. */
   quote: string;
   /** Lit shop sign once the client is back (village restoration step 2). */
   sign: string;
-  /** Reused doctor pose, tinted so each client reads as a different person. */
+  /** Portrait under npc/: the client's own drawing (hue 0), or a doctor pose tinted by `hue` as a fallback. */
   pose: RequestPose;
   hue: number;
 };
@@ -23,9 +23,9 @@ export const requestStages: readonly RequestStage[] = ['cargo', 'balance', 'scal
 
 export const villageRequests: Record<RequestStage, VillageRequest> = {
   cargo: { client: '빵집 주인', quote: '오븐이 고장 났어요! 수리 부품 상자를 가게 문 앞 노란 칸에 딱 멈춰 줄래요?', sign: '빵집 배달', pose: 'baker', hue: 0 },
-  balance: { client: '다리 점검원', quote: '똑같이 생긴 상자 중에 진짜 무거운 기둥 부품이 섞였어요. 찾아 주세요!', sign: '점검 완료', pose: 'point', hue: 150 },
-  scale: { client: '보급소 직원', quote: '부품 하나가 가짜래요. 눈으로는 모르겠어요.', sign: '부품 검사', pose: 'think', hue: 200 },
-  workshop: { client: '공방 친구', quote: '콩이 힘으로는 이 화물을 못 들어요. 장치를 바꿔 볼까요?', sign: '공방 영업', pose: 'guide', hue: 285 },
+  balance: { client: '다리 점검원', quote: '똑같이 생긴 상자 중에 진짜 무거운 기둥 부품이 섞였어요. 찾아 주세요!', sign: '점검 완료', pose: 'inspector', hue: 0 },
+  scale: { client: '보급소 직원', quote: '부품 하나가 가짜래요. 눈으로는 모르겠어요.', sign: '부품 검사', pose: 'clerk', hue: 0 },
+  workshop: { client: '공방 친구', quote: '콩이 힘으로는 이 화물을 못 들어요. 장치를 바꿔 볼까요?', sign: '공방 영업', pose: 'crafter', hue: 0 },
 };
 
 /** Level 2 finished, read from the same records the mission screens save. */

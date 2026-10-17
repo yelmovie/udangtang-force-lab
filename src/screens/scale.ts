@@ -5,6 +5,7 @@ import { requestsEnabled } from '../state';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { canCompleteScale, comparisonParts, emptyScaleReading, fakeHint, fakeLabels, fakeLayout, fakeRequestComplete, fakeRounds, fakeSummary, judgeFakePick, nextFakeRound, recordFakePick, recordScaleRun, scaleComparison, recordSpringRead, springDone, springEyeLabels, springHint, springObjects, springParallax, springReading, springStartOffset, springSummary, turnSpringScrew, type EyeLevel } from '../scaleModel';
 import { showPredictionChip } from '../predictionChip';
+import { letterOnce } from '../requestLetter';
 import '../instruments.css';
 import '../scalePolish.css';
 
@@ -123,6 +124,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     const bar=level===1&&!canCompleteScale(state) ? comparisonParts.map(id=>{const run=compared.find(run=>run.parts[0]===id);return `<span>${props[id].name} <strong>${run ? run.reading+' g ✓' : '아직 안 쟀어요'}</strong></span>`;}).join('') : requestBar();
     // Re-render only on change so a focused button (의뢰 받기, 손으로 들어 보기) keeps focus.
     if(bar!==requestMarkup) root.querySelector('#scale-comparison')!.innerHTML=requestMarkup=bar;
+    if(level===1&&!busy&&!record()&&canCompleteScale(state)) letterOnce(root,'scale',openRequest);
     root.querySelector('#scale-comparison')!.setAttribute('aria-label',level===2 ? '보급소 의뢰' : '두 모형의 측정 결과');
     root.querySelectorAll<HTMLElement>('.scale-dock [data-level]').forEach(part=>{part.hidden=Number(part.dataset.level)!==level;});
     if(level===2) renderFakeDock();

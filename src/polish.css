@@ -300,6 +300,9 @@ button.button:not(:disabled):active {
 .experiment-heading > div > p, .experiment-heading .eyebrow, .mission-tag, .instrument-reward { display: none !important; }
 .experiment-heading h1, .instrument-screen .experiment-heading h1, .workshop-redesign .experiment-heading h1, .rescue-redesign .experiment-heading h1 { font-size: clamp(22px, 2vw, 30px); margin: 0; }
 .experiment-screen { padding-top: 10px; gap: 10px; }
+/* Wide-but-short windows stretched every mission stage to ~5:1; cap the width by the viewport height
+   so the stage keeps roughly the 3.4:1 shape it was designed at. */
+.experiment-screen { max-width: min(var(--content-max-width), 160vh); }
 .cargo-scene-caption { justify-content: center; }
 .cargo-scene-caption > .cargo-step { position: static; transform: none; max-width: 70%; background: #fff9e9f2; border: 2px solid #e5c792; border-radius: 18px; padding: 8px 16px; font-weight: 900; color: #244d47; }
 .workshop-notebook .workshop-model-note { display: none; }
@@ -404,3 +407,42 @@ button.button:not(:disabled):active {
 @keyframes star-pop { from { transform:scale(0) rotate(-40deg); } to { transform:none; } }
 .ending-stars { margin:6px 0 0; font-size:22px; font-weight:900; color:#ffd766; text-shadow:0 2px 0 #6b4510; }
 @media (prefers-reduced-motion: reduce) { .star-row.is-celebrating li.is-done span { animation:none; } }
+
+/* Game-style talk: the speaker stands big at the left, outside the card, and the words sit in a speech bubble on the right. */
+.village-screen .village-dialog { position: relative; width: min(820px, calc(100vw - 32px)); margin-left: auto; margin-right: auto; padding: 0 0 0 250px; background: transparent; border: 0; outline: 0; box-shadow: none; animation: none; overflow: visible; }
+.village-screen .village-dialog::before { content: ''; position: absolute; inset: 0 0 0 250px; z-index: -1; background: #fff9e6; border: 4px solid #6b5939; border-radius: 22px; box-shadow: 0 8px 0 #3b3c2a, 0 24px 48px #0006; }
+.village-screen .village-dialog::after { content: ''; position: absolute; left: 228px; top: 50%; width: 28px; height: 28px; margin-top: -14px; z-index: -1; background: #fff9e6; border-left: 4px solid #6b5939; border-bottom: 4px solid #6b5939; transform: rotate(45deg); }
+.village-screen .village-dialog-heading { padding: 20px 22px 0; }
+.village-screen .village-dialog #village-dialog-line { margin: 14px 22px 18px; }
+.village-screen .village-dialog-bottom { padding: 0 22px 20px; }
+.village-screen .village-portrait { position: absolute; left: -16px; bottom: -14px; width: 270px; height: 340px; object-fit: contain; object-position: bottom center; image-rendering: auto; filter: drop-shadow(0 10px 6px #0008); animation: talker-in .4s cubic-bezier(.2, .8, .3, 1) both; z-index: 1; }
+@keyframes talker-in { from { transform: translateX(-30px) translateY(16px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .village-screen .village-portrait { animation: none; } }
+@media (max-width: 760px) {
+  .village-screen .village-dialog { padding-left: 150px; }
+  .village-screen .village-dialog::before { left: 150px; }
+  .village-screen .village-dialog::after { left: 128px; }
+  .village-screen .village-portrait { width: 170px; height: 220px; left: -10px; }
+}
+
+/* Request board cards as talk panels: the client stands big at the left, their words in a speech bubble; locked clients stay a "?" silhouette. */
+.village-screen .village-board { width: min(980px, calc(100vw - 32px)); }
+.village-screen .village-board-cards { gap: 18px 16px; }
+.village-screen .village-board-card { position: relative; grid-template: "face text" 1fr "face go" auto / 128px minmax(0, 1fr); gap: 10px 14px; padding: 14px 16px 14px 10px; overflow: visible; border-radius: 16px; }
+.village-screen .village-board-portrait { width: 128px; height: 160px; align-self: end; margin: -34px 0 -8px; object-fit: contain; object-position: bottom center; image-rendering: auto; filter: drop-shadow(0 6px 4px #0006); }
+.village-screen .village-board-text { position: relative; padding: 12px 14px; background: #fff; border: 2px solid #c9a86a; border-radius: 14px; gap: 6px; }
+.village-screen .village-board-text::before { content: ''; position: absolute; left: -11px; top: 26px; width: 16px; height: 16px; background: #fff; border-left: 2px solid #c9a86a; border-bottom: 2px solid #c9a86a; transform: rotate(45deg); }
+.village-screen .village-board-text strong { font-size: 20px; }
+.village-screen .village-board-text p { font-size: 18px; line-height: 1.5; }
+.village-screen .village-board-status { font-size: 16px; }
+.village-screen .village-board-card > button { font-size: 18px; min-height: 48px; }
+.village-screen .village-board-card.is-locked .village-board-portrait.is-mystery { opacity: 1; filter: brightness(0) saturate(0) opacity(.45); }
+.village-screen .village-board-mark { position: absolute; left: 44px; bottom: 60px; font-family: var(--font-display); font-size: 54px; line-height: 1; color: #fff6d8; text-shadow: 0 3px 0 #5a4a2a, 0 0 12px #000a; animation: board-mark-bob 1.6s ease-in-out infinite alternate; pointer-events: none; }
+@keyframes board-mark-bob { to { transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) { .village-screen .village-board-mark { animation: none; } }
+@media (max-width: 760px) {
+  .village-screen .village-board-card { grid-template-columns: 76px minmax(0, 1fr); padding: 10px 10px 10px 6px; }
+  .village-screen .village-board-portrait { width: 76px; height: 100px; margin: -18px 0 -4px; }
+  .village-screen .village-board-mark { left: 24px; bottom: 40px; font-size: 36px; }
+  .village-screen .village-board-text strong { font-size: 17px; } .village-screen .village-board-text p { font-size: 16px; }
+}

@@ -5,6 +5,7 @@ import { applyWorkshopL2Attempt, canFinishWorkshopExploration, workshopFinishSte
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { fingerIcon } from '../interactionHints';
 import { showPredictionChip } from '../predictionChip';
+import { letterOnce } from '../requestLetter';
 import '../workshop.css';
 
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -29,16 +30,16 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   const savedCargo = () => Math.min(workshopCargos.length - 1, workshopL2Current(levelRecord()));
   let cargo = savedCargo();
   const cargoIndex = () => cargo;
-  let feedback = level === 2 ? '콩이의 힘 막대를 보며 화물을 올려 봐요. 넘친 칸이 빨갛게 남아요.' : state.direct ? '설계를 바꾸고 손잡이를 움직여 필요한 힘을 비교해 봐요.' : '먼저 화물을 직접 들어 봐요. 손잡이를 위로 끌면 화물이 따라 올라와요.';
+  let feedback = level === 2 ? '콩이의 힘 막대를 보며 화물을 올려 봐요. 넘친 칸이 빨갛게 남아요.' : state.direct ? '설계를 바꾸고 필요한 힘을 비교해 봐요.' : '먼저 화물을 직접 들어 봐요.';
   root.innerHTML = `<section class="experiment-screen workshop-screen workshop-redesign">
-    <div class="experiment-heading"><div><p class="eyebrow">04 · 운반 공방</p><h1>내 손으로 바꾸는 도구</h1><p>같은 화물을 움직여 보고, 힘이 더 적게 드는 설계를 찾아요.</p></div>${missionProgressMarkup('workshop',['직접 들기','지레 두 위치 비교','빗면 두 길이 비교'])}</div>
+    <div class="experiment-heading"><div><p class="eyebrow">04 · 운반 공방</p><h1>내 손으로 바꾸는 도구</h1></div>${missionProgressMarkup('workshop',['직접 들기','지레 비교','빗면 비교'])}</div>
     <div class="workshop-studio">
       <div class="workshop-stage">
-        <div class="workshop-drawer" role="group" aria-label="실험 도구"><button data-tool="direct">① 직접 들기</button><button data-tool="lever">② 지레</button><button data-tool="ramp">③ 빗면</button><div class="workshop-view"><button class="camera-button" id="turn-left" aria-label="시점 왼쪽">↶</button><button class="camera-button" id="turn-right" aria-label="시점 오른쪽">↷</button></div></div>
-        <div class="workshop-world" data-tool="direct"><div class="workshop-scene-caption" id="workshop-caption"></div><div class="workshop-budget" id="workshop-budget" role="img" hidden><div class="budget-head"><img src="/assets/game/corgi-effort.webp" alt="" draggable="false"><strong>콩이의 힘</strong><span class="budget-status"></span></div><div class="budget-cells">${'<i></i>'.repeat(budgetCellCount)}</div><div class="budget-scale"><span>작은 힘까지</span><span class="budget-more"></span></div></div><div id="workshop-canvas" class="workshop-canvas"><div class="scene-loading">작업대 준비 중…</div></div><button id="workshop-fulcrum" class="workshop-fulcrum-grip" aria-label="그림의 받침대. 잡고 좌우로 옮기기. 방향키로도 위치 변경" hidden><span class="fulcrum-grab-label">${fingerIcon} 받침대 잡고 ↔</span></button><div class="workshop-actor" id="workshop-actor" role="img" aria-label="아이가 직접 화물을 들어 올려요"><img id="workshop-actor-main" src="/assets/game/workshop-direct-start.webp" alt="" draggable="false"><img id="workshop-actor-lift" src="/assets/game/workshop-direct-lift.webp" alt="" draggable="false"></div><button id="workshop-handle" class="workshop-handle" aria-label="손잡이를 움직여 실험하기"><i class="handle-force" aria-hidden="true"></i><i class="handle-budget" aria-hidden="true"></i><span class="handle-arrow">↑</span><span class="handle-label">상자를 잡고 위로</span></button><div class="workshop-height-ruler" aria-label="출발 높이와 같은 목표 높이를 비교하는 눈금자"><strong class="height-goal-label">같은 목표 높이</strong><div class="height-ruler-track"><i class="height-current-marker"></i></div><span class="height-start-label">출발 높이</span><span class="height-arrival" hidden>✓ 목표 도착</span></div><div class="workshop-move-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="목표 지점까지 이동"><span>출발</span><div class="workshop-travel"><i id="workshop-progress"></i></div><strong id="workshop-move-text">목표까지 0%</strong></div></div>
-        <div class="workshop-design-dock"><div class="design-description"><strong id="design-label"></strong><span id="design-value"></span></div><div class="design-adjustment" id="design-adjustment"><input type="range" id="workshop-design" min="0" max="2" step="1" value="1" aria-label="받침대 위치 조절"><div class="design-stops" id="design-stops"></div></div><p id="workshop-gesture-tip" class="workshop-gesture-tip"></p></div>
+        <div class="workshop-drawer" role="group" aria-label="실험 도구"><button data-tool="direct">① 직접 들기</button><button data-tool="lever">② 지레</button><button data-tool="ramp">③ 빗면</button><p class="workshop-instruction" id="workshop-instruction">${fingerIcon}<span></span></p><div class="workshop-view"><button class="camera-button" id="turn-left" aria-label="시점 왼쪽">↶</button><button class="camera-button" id="turn-right" aria-label="시점 오른쪽">↷</button></div></div>
+        <div class="workshop-world" data-tool="direct"><div class="workshop-budget" id="workshop-budget" role="img" hidden><div class="budget-head"><img src="/assets/game/corgi-effort.webp" alt="" draggable="false"><strong>콩이의 힘</strong><span class="budget-status"></span></div><div class="budget-cells">${'<i></i>'.repeat(budgetCellCount)}</div><div class="budget-scale"><span>작은 힘까지</span><span class="budget-more"></span></div></div><div id="workshop-canvas" class="workshop-canvas"><div class="scene-loading">작업대 준비 중…</div></div><button id="workshop-fulcrum" class="workshop-fulcrum-grip" aria-label="그림의 받침대. 잡고 좌우로 옮기기. 방향키로도 위치 변경" hidden><span class="fulcrum-grab-label">${fingerIcon} 받침대 옮기기</span></button><div class="workshop-actor" id="workshop-actor" role="img" aria-label="아이가 직접 화물을 들어 올려요"><img id="workshop-actor-main" src="/assets/game/workshop-direct-start.webp" alt="" draggable="false"><img id="workshop-actor-lift" src="/assets/game/workshop-direct-lift.webp" alt="" draggable="false"><div class="workshop-effort" aria-hidden="true"><span class="effort-face"><i></i><i></i></span><b class="effort-word"></b></div></div><button id="workshop-handle" class="workshop-handle" aria-label="손잡이를 움직여 실험하기"><i class="handle-force" aria-hidden="true"></i><i class="handle-budget" aria-hidden="true"></i><span class="handle-arrow">↑</span><span class="handle-label">상자를 잡고 위로</span></button><div class="workshop-height-ruler" aria-label="화물이 올라갈 높이 눈금자"><div class="height-ruler-track"><i class="height-current-marker"></i></div><span class="height-arrival" hidden>✓ 도착</span></div><div class="workshop-move-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="목표 지점까지 이동"><div class="workshop-travel"><i id="workshop-progress"></i></div><strong id="workshop-move-text">0%</strong></div></div>
+        <div class="workshop-design-dock" id="design-adjustment"><span class="design-stop-label">짧고 가파르게</span><input type="range" id="workshop-design" min="0" max="1" step="1" value="0" aria-label="빗면 길이 조절"><span class="design-stop-label">길고 완만하게</span></div>
       </div>
-      <aside class="workshop-notebook"><div class="notebook-heading"><span>직접 들 때와 비교해요</span><strong id="workshop-evidence-count">0 / 2</strong></div><div class="workshop-quiz-prompt"><h2 id="workshop-observation-help"></h2><p id="workshop-answer-help" class="answer-label"></p></div><div class="workshop-records" id="workshop-records"></div><div id="workshop-choice" class="workshop-choice"></div><p class="workshop-model-note">힘은 힘끼리, 길은 길끼리 비교해요. 화면 속 힘이며 손가락의 누르는 세기를 재는 것은 아니에요.</p></aside>
+      <aside class="workshop-notebook"><div class="notebook-heading"><span>필요한 힘</span><strong id="workshop-evidence-count">0 / 2</strong></div><div class="workshop-quiz-prompt" hidden><h2 id="workshop-observation-help"></h2><p id="workshop-answer-help" class="answer-label"></p></div><div class="workshop-records" id="workshop-records"></div><div id="workshop-choice" class="workshop-choice"></div><p class="workshop-model-note" hidden></p></aside>
     </div><div class="experiment-footer"><span id="workshop-feedback" class="feedback" role="status"></span><button id="workshop-finish" class="button button-primary" disabled>생활 속 도구 찾기 →</button></div>
   </section>`;
   const canvas = root.querySelector<HTMLElement>('#workshop-canvas')!;
@@ -51,7 +52,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   const actorWrap = root.querySelector<HTMLElement>('#workshop-actor')!;
   const fulcrum = root.querySelector<HTMLButtonElement>('#workshop-fulcrum')!;
   const heightRuler = root.querySelector<HTMLElement>('.workshop-height-ruler')!;
-  for(let index=0;index<5;index++) { const image=new Image();image.src=`/assets/game/workshop-lever-press-${index}.webp`; }
+  for(let index=0;index<5;index++) { const image=new Image();image.src=`/assets/game/workshop-lever-press-${index}.webp`; const face=new Image();face.src=`/assets/game/workshop-lever-press-${index}${index<3?'-hard':'-easy'}.webp`; }
   const signal = events.signal;
   const currentSetting = () => tool === 'lever' ? state.fulcrumPosition : state.rampLength;
   const judge = () => judgeWorkshopL2(cargoIndex(), tool, currentSetting());
@@ -95,7 +96,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     const travel = travelPixels() * progress;
     handle.style.transform = tool === 'lever' ? '' : tool === 'direct' ? `translateY(${-travel}px)` : `translateX(${travel}px)`;
     root.querySelector<HTMLElement>('#workshop-progress')!.style.width = `${progress * 100}%`;
-    root.querySelector<HTMLElement>('#workshop-move-text')!.textContent = `목표까지 ${Math.round(progress * 100)}%`;
+    root.querySelector<HTMLElement>('#workshop-move-text')!.textContent = `${Math.round(progress * 100)}%`;
     root.querySelector<HTMLElement>('.workshop-move-meter')!.setAttribute('aria-valuenow', String(Math.round(progress * 100)));
     actorLift.style.opacity = tool === 'direct' ? String(Math.min(1, progress * 1.7)) : '0';
     scene?.setProgress(progress);
@@ -108,7 +109,9 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
         const handY=.995-(layout.actorFloor.y-layout.effort.y)/h;
         const poses=[.385,.59,.665,.755,.90];
         const pose=poses.reduce((best,y,i)=>Math.abs(y-handY)<Math.abs(poses[best]-handY)?i:best,0);
-        const source=`/assets/game/workshop-lever-press-${pose}.webp`;
+        // Same pose, face swapped to match the design's force (pose alone follows the hand).
+        const effort=effortLevel(), face=effort==='hard'&&pose<3?'-hard':effort==='easy'&&pose>=3?'-easy':'';
+        const source=`/assets/game/workshop-lever-press-${pose}${face}.webp`;
         if(!actor.src.endsWith(source)) actor.src=source;
         actorWrap.style.width=`${h}px`; actorWrap.style.height=`${h}px`;
         actorWrap.style.left=`${layout.effort.x-h*.87}px`; actorWrap.style.top=`${layout.actorFloor.y+yOffset-h*.995}px`; actorWrap.style.bottom='auto';
@@ -133,6 +136,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     handle.dataset.pushing = String(heldPointer!==null||keyHeld||progress>0);
     renderBudget();
   }
+  function effortLevel() { const force = toolForce(); return level === 2 ? (force > workshopBudget ? 'hard' : 'easy') : force >= 100 ? 'hard' : force >= 50 ? 'mid' : 'easy'; }
   function setFeedback(message: string) { feedback = message; root.querySelector<HTMLElement>('#workshop-feedback')!.textContent = feedback; }
   function resetGesture() {
     cancelAnimationFrame(frame); cancelAnimationFrame(slideFrame); keyHeld = false; sliding = false; stalled = false;
@@ -156,45 +160,40 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     handle.querySelector('.handle-label')!.textContent = tool === 'lever' ? '아래로 누르기' : tool === 'ramp' ? '오른쪽으로 밀기' : '위로 들기';
     handle.setAttribute('aria-label', `${tool === 'lever' ? '지레 손잡이를 아래로 누르기' : tool === 'ramp' ? '빗면을 따라 화물을 오른쪽으로 밀기' : '화물을 위로 들기'}. 손잡이를 움직이거나 키보드는 Enter 또는 스페이스를 누르고 있기`);
     root.querySelector<HTMLElement>('#design-adjustment')!.hidden = tool !== 'ramp';
-    const label = root.querySelector<HTMLElement>('#design-label')!;
-    const value = root.querySelector<HTMLElement>('#design-value')!;
-    const stops = root.querySelector<HTMLElement>('#design-stops')!;
-    if (tool === 'direct') { label.textContent = '도구 없이 들어 보기'; value.textContent = state.direct ? '직접 든 힘을 기억했어요 ✓' : '위쪽 표시까지 올려요'; }
-    else {
-      label.textContent = tool === 'lever' ? '그림 속 받침대를 잡고 좌우로 옮겨요' : '도착 높이는 그대로, 길이만 바꿔요';
-      const designLabel = getWorkshopDesign(tool, currentSetting()).label;
-      value.textContent = '지금 설계: ' + designLabel;
-      slider.max = '1'; slider.value = String(state.rampLength);
-      slider.setAttribute('aria-label', '빗면 길이 조절');
-      slider.setAttribute('aria-valuetext', designLabel);
-      stops.innerHTML = '<span>짧고 가파르게</span><span>길고 완만하게</span>';
-    }
-    root.querySelector<HTMLElement>('#workshop-caption')!.textContent = level === 2 ? `${workshopCargos[cargoIndex()].label} · 같은 높이까지 올려요` : tool === 'direct' ? '이 화물을 도구로도 움직일 거예요' : tool === 'lever' ? '같은 화물 · 같은 높이까지 들어요' : '같은 화물 · 같은 높이까지 올려요';
-    root.querySelector<HTMLElement>('#workshop-gesture-tip')!.textContent = tool==='lever' ? '받침대를 옮긴 뒤 손잡이를 아래로 끝까지 움직여요' : '손잡이를 화살표 방향으로 끝까지 움직여요';
+    if (tool === 'ramp') { slider.value = String(state.rampLength); slider.setAttribute('aria-valuetext', getWorkshopDesign('ramp', state.rampLength).label); }
+    // Face, sweat and word follow the design's force only, never how far the hand travels.
+    const effort = effortLevel();
+    actorWrap.dataset.effort = effort;
+    actorWrap.querySelector('.effort-word')!.textContent = effort === 'hard' ? '끙! 힘들어' : effort === 'mid' ? '으쌰!' : '가뿐해!';
+    actorWrap.setAttribute('aria-label', `${actorWrap.getAttribute('aria-label')} · ${effort === 'hard' ? '힘이 많이 들어요' : effort === 'mid' ? '힘이 조금 들어요' : '힘이 적게 들어요'}`);
+    root.querySelector<HTMLElement>('#workshop-instruction span')!.textContent = instruction();
     const steps = workshopFinishSteps(state);
     const notebook=root.querySelector<HTMLElement>('.workshop-notebook')!;
+    const quiz=root.querySelector<HTMLElement>('.workshop-quiz-prompt')!;
+    const note=root.querySelector<HTMLElement>('.workshop-model-note')!;
     notebook.classList.toggle('is-request', level === 2);
-    root.querySelector<HTMLElement>('.notebook-heading span')!.textContent = level === 2 ? '공방 친구의 의뢰' : '직접 들 때와 비교해요';
-    root.querySelector<HTMLElement>('.workshop-model-note')!.textContent = level === 2 ? '힘 막대 한 칸은 화면 속 힘의 단계예요. 실제 무게나 단위가 아니에요.' : '힘은 힘끼리, 길은 길끼리 비교해요. 화면 속 힘이며 손가락의 누르는 세기를 재는 것은 아니에요.';
-    if (level === 2) { renderRequest(); notebook.classList.remove('quiz-ready', 'quiz-done'); } else {
+    root.querySelector<HTMLElement>('.notebook-heading span')!.textContent = level === 2 ? '공방 친구의 의뢰' : '필요한 힘';
+    note.textContent = level === 2 ? '힘 막대 한 칸은 화면 속 힘의 단계예요. 실제 무게나 단위가 아니에요.' : '화면 속 힘이에요. 손가락으로 누르는 세기와는 달라요.';
+    if (level === 2) { quiz.hidden = false; note.hidden = false; renderRequest(); notebook.classList.remove('quiz-ready', 'quiz-done'); } else {
     root.querySelector<HTMLElement>('#workshop-evidence-count')!.textContent = `${Number(steps.lever) + Number(steps.ramp)} / 2`;
     const entries = state.trials.filter(run => run.tool === tool);
-    const help = root.querySelector<HTMLElement>('#workshop-observation-help')!;
-    help.textContent = tool === 'direct' ? '도구 없이 들 때의 힘을 살펴봐요' : entries.length === 0 ? '도구를 쓰면 힘이 어떻게 달라질까요?' : entries.length === 1 ? '다른 설계로 한 번 더 하면 어떻게 달라질까요?' : '두 설계의 힘과 움직인 길을 비교해요';
     const forceScale = Math.max(100, ...entries.map(run => run.force));
     const distanceScale = Math.max(Number.EPSILON, ...entries.map(run => run.distance));
-    const shortestDistance = Math.min(...entries.map(run => run.distance));
     const distanceLabel = tool === 'lever' ? '손잡이가 움직인 길' : '화물이 움직인 길';
     const finding = tool === 'lever' ? state.leverFinding : state.rampFinding;
     const choosing = tool !== 'direct' && hasWorkshopComparison(state.trials, tool) && !finding;
+    // While experimenting the board is only force bars; the question waits for two records.
+    quiz.hidden = !choosing; note.hidden = !finding || tool === 'direct';
+    root.querySelector<HTMLElement>('#workshop-observation-help')!.textContent = '어느 쪽이 힘이 덜 들었나요?';
+    root.querySelector<HTMLElement>('#workshop-answer-help')!.textContent = '짧은 막대를 눌러요';
     notebook.classList.toggle('quiz-ready',choosing); notebook.classList.toggle('quiz-done',tool!=='direct'&&finding);
-    root.querySelector<HTMLElement>('#workshop-answer-help')!.innerHTML=choosing?'더 탐구하기 (선택): 작은 힘이 든 기록 고르기':finding?'✓ 추가 비교를 설명했어요':'같은 화물 · 같은 높이에서 비교해요';
-    root.querySelector<HTMLElement>('#workshop-records')!.innerHTML = (state.direct ? `<article class="workshop-run baseline-run"><strong>도구 없이 직접 들기</strong><div class="workshop-force"><i style="width:${100/forceScale*100}%"></i></div><span>기준이 되는 힘</span></article>` : '') + entries.map((run,index) => {
-      const distanceWord = entries.length < 2 ? '관찰한 길' : run.distance === shortestDistance ? '더 짧게' : run.distance === distanceScale ? '더 멀리' : '두 길 사이';
-      const content = `<strong>${getWorkshopDesign(run.tool, run.setting).label}</strong><div class="workshop-metrics"><div class="workshop-metric"><span class="workshop-metric-label"><b aria-hidden="true">✋</b> 필요한 힘</span><div class="workshop-force" aria-hidden="true"><i style="width:${run.force / forceScale * 100}%"></i></div><span class="workshop-metric-value">${forceWord(run.force)}</span></div><details class="workshop-distance-detail"${entries.length>=2?' open':''}><summary>움직인 길도 보기 (선택)</summary><div class="workshop-metric"><span class="workshop-metric-label"><b aria-hidden="true">↔</b> ${distanceLabel}</span><div class="workshop-distance" aria-hidden="true"><i style="width:${run.distance / distanceScale * 100}%"></i></div><span class="workshop-metric-value">${distanceWord}</span></div></details></div>`;
-      return `<article class="workshop-run">${content}${choosing ? `<button class="workshop-run-choice" data-finding="${run.setting}" ${busy ? 'disabled' : ''}><span class="workshop-answer-number">${index+1}</span><span class="workshop-pick-record">${fingerIcon} 작은 힘이 든 기록으로 고르기</span></button>` : ''}</article>`;
-    }).join('') || '<div class="workshop-empty">설계를 바꾸고 실험하면<br>힘과 움직인 길이 남아요.</div>';
-    root.querySelector<HTMLElement>('#workshop-choice')!.innerHTML = tool !== 'direct' && hasWorkshopComparison(state.trials, tool) ? `<p class="workshop-finding">발견: ${tool === 'lever' ? '받침대가 화물에 가까울수록 힘은 작게 들고, 손잡이가 움직인 길은 길어져요.' : '빗면이 길고 완만할수록 힘은 작게 들고, 화물이 움직인 길은 길어져요.'}</p>` + (finding ? `<p class="finding-earned">✓ 작은 힘, 더 먼 길!</p><p>두 기록의 막대를 비교해요. 작은 힘이 든 설계에서는 ${distanceLabel}도 더 길어요.</p>` : '<p>작은 힘이 든 기록을 눌러요. 움직인 길의 막대도 함께 살펴봐요.</p>') : '';
+    const bar = (force: number) => `<div class="workshop-force" aria-hidden="true"><i style="width:${force / forceScale * 100}%"></i></div>`;
+    root.querySelector<HTMLElement>('#workshop-records')!.innerHTML = (state.direct ? `<article class="workshop-run baseline-run"><strong>직접 들기</strong>${bar(100)}<span>${forceWord(100)}</span></article>` : '') + entries.map((run,index) => {
+      const content = `<strong>${getWorkshopDesign(run.tool, run.setting).label}</strong>${bar(run.force)}<span>${forceWord(run.force)}</span>${finding ? `<span class="workshop-metric-label">${distanceLabel}</span><div class="workshop-distance" aria-hidden="true"><i style="width:${run.distance / distanceScale * 100}%"></i></div>` : ''}`;
+      return choosing ? `<button class="workshop-run workshop-run-choice" data-finding="${run.setting}" ${busy ? 'disabled' : ''}><span class="workshop-answer-number">${index+1}</span>${content}</button>` : `<article class="workshop-run">${content}</article>`;
+    }).join('') || (state.direct ? '' : '<div class="workshop-empty">직접 들면<br>힘 막대가 생겨요</div>');
+    root.querySelector<HTMLElement>('#workshop-choice')!.innerHTML = finding && tool !== 'direct' ? `<p class="finding-earned">✓ 작은 힘, 더 먼 길!</p><p class="workshop-finding">${tool === 'lever' ? '받침대가 화물에 가까울수록 힘은 작게 들고, 손잡이는 더 멀리 움직여요.' : '빗면이 길고 완만할수록 힘은 작게 들고, 화물은 더 먼 길을 가요.'}</p>` : '';
+    if (canFinishWorkshopExploration(state) && !busy && !workshopL2Complete(levelRecord())) letterOnce(root, 'workshop', enterRequest);
     if (canFinishWorkshopExploration(state)) root.querySelector<HTMLElement>('#workshop-choice')!.insertAdjacentHTML('beforeend', workshopL2Complete(levelRecord()) ? '<p class="finding-earned">✓ 공방 친구의 의뢰도 끝냈어요</p>' : `<div class="workshop-request-invite"><img src="/assets/game/corgi-observe.webp" alt="" draggable="false"><p><strong>공방 친구의 의뢰가 왔어요!</strong>콩이 힘으로 화물 3개를 올려 줄래요?</p><button id="workshop-open-request" class="button button-primary" ${busy ? 'disabled' : ''}>의뢰 받기 →</button></div>`);
     }
     finish.disabled = busy || !canFinishWorkshopExploration(state) || !(workshopL2Complete(levelRecord()) || !requestsEnabled(context.save));
@@ -270,17 +269,28 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     resetGesture(); tool = next; toolChangedAt = performance.now(); scene?.configure(tool, currentSetting());
     scene?.setCargoWeight(level === 2 ? workshopCargos[cargoIndex()].weight : 1);
     if (level === 2) { setFeedback(tool === 'direct' ? '콩이 혼자 들어 볼까요? 손잡이를 위로 움직여요.' : tool === 'lever' ? '받침대를 옮기고 손잡이를 아래로 눌러요. 힘 막대를 지켜봐요.' : '빗면 길이를 고르고 오른쪽으로 밀어요. 힘 막대를 지켜봐요.'); update(); return; }
-    setFeedback(tool === 'direct' ? '손잡이를 위로 움직여 화물을 들어 봐요.' : tool === 'lever' ? '받침대를 옮긴 뒤 손잡이를 아래로 눌러 봐요. 화물과 손잡이가 얼마나 움직일까요?' : '빗면 길이를 바꾼 뒤 오른쪽으로 끌어 봐요. 도착하는 높이는 같아요.');
+    setFeedback(tool === 'direct' ? '손잡이를 위로 움직여 화물을 들어 봐요.' : tool === 'lever' ? '받침대 위치에 따라 힘이 어떻게 달라질까요?' : '빗면 길이에 따라 힘이 어떻게 달라질까요?');
     update();
+  }
+  /** One line telling the student the next physical action. */
+  function instruction() {
+    if (level === 2) return tool === 'direct' ? '지레나 빗면을 골라요' : tool === 'lever' ? '받침대를 옮기고, 손잡이를 아래로 눌러요' : '길이를 고르고, 손잡이를 오른쪽으로 밀어요';
+    const steps = workshopFinishSteps(state);
+    if (tool === 'direct') return state.direct ? '② 지레를 눌러 이어서 해요' : '손잡이를 위로 끝까지 끌어요';
+    const tried = state.trials.some(run => run.tool === tool && run.setting === currentSetting());
+    const finding = tool === 'lever' ? state.leverFinding : state.rampFinding;
+    if (hasWorkshopComparison(state.trials, tool) && !finding) return '오른쪽 질문에 답해요';
+    if (tool === 'lever') return steps.lever && tried ? (steps.ramp ? '모두 했어요!' : '③ 빗면을 눌러 이어서 해요') : tried ? '받침대를 다른 곳으로 옮겨요' : '손잡이를 아래로 끝까지 눌러요';
+    return steps.ramp && tried ? (steps.lever ? '모두 했어요!' : '② 지레로 돌아가 비교해요') : tried ? '아래에서 빗면 길이를 바꿔요' : '손잡이를 오른쪽 끝까지 밀어요';
   }
   function nextHint() {
     const steps = workshopFinishSteps(state);
     if (tool === 'lever' && !hasWorkshopComparison(state.trials, 'lever')) return '받침대를 다른 곳으로 옮겨 한 번 더 들어 봐요.';
     if (tool === 'lever' && !steps.lever) return '직접 들 때보다 힘이 작게 드는 받침대 위치를 더 찾아봐요.';
     if (tool === 'ramp' && !steps.ramp) return '이번엔 길이를 바꿔 같은 높이까지 올려 봐요.';
-    if (!steps.lever) return '관찰 보드에서 발견을 확인하고, 지레도 두 위치에서 비교해 봐요.';
-    if (!steps.ramp) return '관찰 보드에서 발견을 확인하고, 빗면도 두 길이로 올려 봐요.';
-    return '세 발견을 모두 했어요! 관찰 보드에서 공방 친구의 의뢰를 받아요.';
+    if (!steps.lever) return '지레도 두 위치에서 비교해 봐요.';
+    if (!steps.ramp) return '빗면도 두 길이로 올려 봐요.';
+    return '세 발견을 모두 했어요! 공방 친구의 의뢰를 받아요.';
   }
   function completeGesture() {
     if (completedGesture || !active) return;
@@ -295,7 +305,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
       const needsNewChoice = recordWorkshopTrial(state, tool, setting);
       if (!easierBefore && design.force < 100) showPredictionChip(world, context.save, 'workshop');
       state.fulcrumSnapped = state.plankSnapped = state.rampSnapped = true;
-      setFeedback(`'${design.label}' 설계로 움직였어요. ${forceWord(design.force)}이 들었어요. ${needsNewChoice ? '더 작은 힘이 드는 새 설계를 발견했어요! 관찰 보드에서 다시 골라요.' : nextHint()}`);
+      setFeedback(`'${design.label}' 설계로 움직였어요. ${forceWord(design.force)}이 들었어요. ${needsNewChoice ? '더 작은 힘이 드는 새 설계를 발견했어요! 오른쪽에서 다시 골라요.' : nextHint()}`);
     }
     context.commit(); update();
   }
@@ -346,12 +356,12 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     resetGesture();
     state.rampLength = Number(slider.value) as RampSetting;
     scene?.configure(tool, currentSetting());
-    setFeedback('설계가 바뀌었어요. 손잡이를 다시 움직여 힘과 이동하는 길을 비교해요.'); context.commit(); update();
+    setFeedback(`빗면: ${getWorkshopDesign('ramp',state.rampLength).label}`); context.commit(); update();
   }, { signal });
   function changeFulcrum(next:LeverSetting) {
     if(next===state.fulcrumPosition) return;
     state.fulcrumPosition=next; progress=0; completedGesture=false; scene?.configure('lever',next);
-    setFeedback(`받침대를 ${getWorkshopDesign('lever',next).label}에 놓았어요. 이제 아이 곁에서 지레를 아래로 눌러 봐요.`); update();
+    setFeedback(`받침대: ${getWorkshopDesign('lever',next).label}`); update();
   }
   function endDesign(cancelled:boolean) {
     if(designPointer===null) return;

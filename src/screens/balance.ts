@@ -4,6 +4,7 @@ import type { BalanceRun } from '../state';
 import { requestsEnabled } from '../state';
 import { mountCompanion } from '../sprites';
 import { setTapHint } from '../interactionHints';
+import { letterOnce } from '../requestLetter';
 import { showPredictionChip } from '../predictionChip';
 import { isThrifty, judgePick, mysteryComplete, mysteryRound, mysteryRoundCount, nextMysteryRound, pickHint, relationText, thriftyBudget, weigh, type MysteryRecord, type MysteryRound } from '../balanceModel';
 import '../instruments.css';
@@ -139,6 +140,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     root.querySelectorAll<HTMLElement>('.instrument-dock > [data-level]').forEach(part => { part.hidden = Number(part.dataset.level) !== level; });
     root.querySelector<HTMLElement>('#balance-predictions')!.hidden = level !== 1 || requestOpen();
     root.querySelector<HTMLElement>('#balance-request')!.hidden = !requestOpen();
+    if (requestOpen() && !busy) letterOnce(root, 'balance', enterMystery);
     requestButton.disabled = busy;
     setTapHint(requestButton, requestOpen() && !busy);
     finish.disabled = busy || waiting || !canFinish() || !(mysteryDone() || !requestsEnabled(context.save));

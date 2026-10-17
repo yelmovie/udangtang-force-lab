@@ -13,7 +13,6 @@
 .workshop-world::after { content:''; position:absolute; pointer-events:none; z-index:0; inset:22% 7% 5%; border-radius:50%; background:radial-gradient(ellipse,#fff0cdcc,#ecd3a475 54%,transparent 73%); }
 .workshop-redesign .workshop-canvas { position:absolute; z-index:1; inset:20px 0 0; width:100%; min-height:0; }
 .workshop-redesign .workshop-canvas canvas { width:100%; height:100%; display:block; }
-.workshop-scene-caption { position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:2; padding:7px 13px; border:1px solid #c3a779; border-radius:999px; background:#fff8e9ed; color:#315b51; font-size:16px; font-weight:800; white-space:nowrap; }
 .workshop-actor { position:absolute; z-index:2; pointer-events:none; left:3%; bottom:32px; width:clamp(135px,24%,205px); aspect-ratio: 4 / 5.2; }
 .workshop-actor img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; object-position:bottom; }
 .workshop-actor #workshop-actor-lift { opacity:0; }
@@ -29,16 +28,12 @@
 .workshop-height-ruler { position:absolute; z-index:3; width:23px; pointer-events:none; color:#3d502d; }
 .workshop-height-ruler[hidden] { display:none; }
 .height-ruler-track { position:relative; width:23px; height:var(--height-span,100px); border:2px solid #75562c; border-radius:4px; background:repeating-linear-gradient(to top,transparent 0 10px,#78542c 10px 12px),linear-gradient(90deg,#ffdf86,#fff2bc); box-shadow:0 2px 4px #32251a33; }
-.height-goal-label,.height-start-label { position:absolute; left:28px; padding:4px 7px; background:#fff5d8e8; border:1px solid #c1985c; border-radius:7px; font-size:14px; font-weight:900; white-space:nowrap; }
-.height-goal-label { top:-12px; color:#76521d; }
-.height-start-label { bottom:-13px; }
 .height-current-marker { position:absolute; top:calc((1 - var(--height-progress,0))*100%); left:-8px; width:39px; height:4px; background:#167b6e; border:1px solid #f4fff3; transform:translateY(-50%); box-shadow:0 1px 4px #0a3a3255; }
 .height-current-marker::before { content:'▶'; position:absolute; right:calc(100% + 3px); top:-8px; font-size:17px; color:#167b6e; }
 .height-arrival { position:absolute; left:26px; top:calc(var(--height-span,100px) + 22px); padding:5px 7px; background:#d7f3d5; border:2px solid #22805b; border-radius:8px; font-size:14px; font-weight:900; white-space:nowrap; }
 .height-arrival[hidden] { display:none; }
 .has-arrived .height-ruler-track { box-shadow:0 0 0 4px #e4ffd38c; }
-.design-adjustment[hidden] { display:none; }
-.workshop-world[data-tool='lever'] + .workshop-design-dock { grid-template-columns:1fr; }
+
 .workshop-handle { position:absolute; z-index:4; left:25%; bottom:56px; width:68px; height:68px; border:3px solid #fff2c6; border-radius:50%; color:#fff9e6; background:#a94624; box-shadow:0 5px 0 #73331e,0 7px 18px #42251555; touch-action:none; user-select:none; cursor:grab; }
 .workshop-handle[data-tool='direct'] { left:calc(50% + 25px); bottom:62px; }
 .workshop-handle[data-tool='lever'] { top:39%; bottom:auto; left:27%; }
@@ -47,21 +42,15 @@
 .workshop-handle .handle-arrow { display:block; font-size:36px; line-height:1; pointer-events:none; }
 .workshop-handle .handle-label { position:absolute; top:14px; left:calc(100% + 8px); width:120px; padding:5px 7px; border-radius:8px; font-size:16px; font-weight:850; background:#fff8e7; color:#6d321c; text-align:left; pointer-events:none; box-shadow:0 2px 6px #46301a22; }
 .workshop-move-meter { position:absolute; z-index:4; right:12px; bottom:10px; width:min(255px,44%); padding:8px 10px; display:grid; gap:4px; border:1px solid #86b0a3; border-radius:12px; background:#f5ffefed; color:#205f57; font-size:14px; font-weight:800; }
-.workshop-move-meter span { font-size:13px; }
 .workshop-move-meter strong { font-size:15px; }
 .workshop-world:not([data-tool='direct']) .workshop-move-meter { display:none; }
 .workshop-travel { height:11px; border-radius:8px; background:#b5cbbb; overflow:hidden; }
 .workshop-travel i { display:block; height:100%; width:0; background:#198d80; }
-.workshop-design-dock { padding:10px 16px; background:#fcf6e8; border-top:2px solid #c0a477; display:grid; grid-template-columns:1fr 1.35fr; column-gap:18px; align-items:center; }
-.design-description { display:grid; gap:5px; color:#254e45; font-size:17px; }
-.design-description > span { color:#875024; font-size:16px; font-weight:750; }
-.design-adjustment input { width:100%; height:48px; margin:0; accent-color:#157c75; cursor:ew-resize; touch-action:pan-y; appearance:none; background:transparent; }
-.design-adjustment input::-webkit-slider-runnable-track { height:8px; background:#b3c0ac; border-radius:8px; }
-.design-adjustment input::-webkit-slider-thumb { appearance:none; width:44px; height:44px; margin-top:-18px; border:3px solid #fff6db; border-radius:50%; background:#176d61; box-shadow:0 2px 4px #35584944; }
-.design-adjustment input::-moz-range-track { height:8px; background:#b3c0ac; border-radius:8px; }
-.design-adjustment input::-moz-range-thumb { width:38px; height:38px; border:3px solid #fff6db; border-radius:50%; background:#176d61; }
-.design-stops { display:flex; justify-content:space-between; gap:10px; color:#466359; font-size:16px; font-weight:800; }
-.workshop-redesign .workshop-gesture-tip { grid-column:1/-1; font-size:16px; margin:9px 0 0; color:#53685c; }
+.workshop-design-dock input { width:100%; height:48px; margin:0; accent-color:#157c75; cursor:ew-resize; touch-action:pan-y; appearance:none; background:transparent; }
+.workshop-design-dock input::-webkit-slider-runnable-track { height:8px; background:#b3c0ac; border-radius:8px; }
+.workshop-design-dock input::-webkit-slider-thumb { appearance:none; width:44px; height:44px; margin-top:-18px; border:3px solid #fff6db; border-radius:50%; background:#176d61; box-shadow:0 2px 4px #35584944; }
+.workshop-design-dock input::-moz-range-track { height:8px; background:#b3c0ac; border-radius:8px; }
+.workshop-design-dock input::-moz-range-thumb { width:38px; height:38px; border:3px solid #fff6db; border-radius:50%; background:#176d61; }
 .workshop-notebook { min-height:0; overflow:auto; padding:17px; border-radius:22px; border:2px solid #c5b084; background:#fff9e9; box-shadow:0 6px 16px #43392215; }
 .notebook-heading { display:flex; justify-content:space-between; gap:10px; color:#255c51; align-items:center; font-size:22px; font-weight:900; }
 .notebook-heading strong { font-size:18px; color:#785128; }
@@ -106,11 +95,7 @@
  .workshop-notebook { padding:12px; }
  .workshop-drawer { padding:6px 8px; gap:8px; }
  .workshop-drawer > button { padding:8px 10px; font-size:16px; }
- .workshop-design-dock { padding:8px 12px; gap:8px 12px; }
  .workshop-view { gap:8px; }
- .design-description { font-size:16px; }
- .design-stops { font-size:16px; gap:4px; }
- .workshop-redesign .workshop-gesture-tip { margin-top:3px; font-size:16px; }
  .workshop-redesign .mission-tag { display:none; }
  .workshop-metrics { grid-template-columns:1fr; }
  .workshop-metric { grid-template-rows:auto 12px auto; }
@@ -119,10 +104,9 @@
  .workshop-studio { grid-template-columns:minmax(0,1fr) 350px; gap:22px; }
  .workshop-drawer > button, .workshop-choice button { min-height:60px; font-size:22px; }
  .workshop-redesign .camera-button { min-height:60px; min-width:60px; }
- .workshop-design-dock { padding:18px 26px; }
- .design-description, .design-description > span, .workshop-notebook > p, .workshop-run strong, .workshop-redesign .feedback { font-size:21px; }
- .design-stops, .workshop-redesign .workshop-gesture-tip, .workshop-scene-caption, .workshop-run span, .workshop-notebook .workshop-model-note { font-size:18px; }
- .design-adjustment input { height:52px; }
+ .workshop-notebook > p, .workshop-run strong { font-size:21px; }
+ .workshop-run span, .workshop-notebook .workshop-model-note { font-size:18px; }
+ .workshop-design-dock input { height:52px; }
  .workshop-notebook { padding:24px; }
  .workshop-run { padding:14px 16px; }
  .workshop-world[data-tool='direct'] .workshop-actor { width:290px; left:calc(50% - 145px); }
@@ -207,4 +191,115 @@
 @media (prefers-reduced-motion: reduce) {
  .budget-cells i.is-over { animation:none; }
  .workshop-handle .handle-budget { transition:none; }
+}
+
+/* 3학년용 단순화: 캔버스가 화면 대부분을 차지하고, 한 줄 지시·표정·힘 막대만 남긴다 */
+.workshop-redesign { gap:8px; }
+.workshop-redesign .experiment-heading h1 { font-size:clamp(20px,1.7vw,26px); }
+.workshop-redesign .mission-progress { display:flex; align-items:center; gap:8px; padding:4px 10px; min-height:0; }
+.workshop-redesign .mission-progress-steps { display:flex; flex-wrap:nowrap; gap:6px; }
+.workshop-redesign .mission-progress-steps span { white-space:nowrap; }
+.workshop-redesign .mission-progress-next { display:none !important; }
+.workshop-studio { grid-template-columns:minmax(0,1fr) 196px; gap:10px; }
+.workshop-drawer { padding:6px 10px; }
+.workshop-drawer > button { min-height:46px; padding:6px 12px; }
+.workshop-instruction { flex:1; min-width:0; margin:0 4px; display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:12px; background:#fff3c4; border:2px solid #e0b44f; color:#5a3d0e; font-size:18px; font-weight:900; word-break:keep-all; }
+.workshop-instruction svg { flex:0 0 auto; width:24px; height:28px; animation:instruction-tap 1.4s ease-in-out infinite; }
+@keyframes instruction-tap { 50% { transform:translateY(3px); } }
+/* 배경은 판자·받침대를 지운 그림(workshop-clear)이라 조작용 지레만 보인다 */
+.workshop-world { overflow:hidden; background:linear-gradient(#fff4dc30,#fff4dc55),url('/assets/backgrounds/workshop-clear.webp') center 70% / cover; }
+.workshop-world::after { inset:30% 4% 2%; }
+.workshop-redesign .workshop-canvas { inset:0; }
+.height-ruler-track::before { content:''; position:absolute; left:calc(100% + 2px); top:-16px; border-left:16px solid #e0533b; border-top:8px solid transparent; border-bottom:8px solid transparent; }
+.height-arrival { top:calc(var(--height-span,100px) + 8px); }
+.workshop-move-meter { width:min(160px,30%); grid-template-columns:1fr auto; align-items:center; }
+.workshop-design-dock { display:flex; align-items:center; gap:12px; padding:6px 16px; background:#fcf6e8; border-top:2px solid #c0a477; }
+.workshop-design-dock[hidden] { display:none; }
+.workshop-design-dock input { flex:1; }
+.design-stop-label { color:#466359; font-size:16px; font-weight:850; white-space:nowrap; }
+.workshop-handle[data-pushing='false']:not(:disabled) { animation:handle-ready 1.6s ease-in-out infinite; }
+@keyframes handle-ready { 50% { box-shadow:0 5px 0 #73331e,0 0 0 10px #ffd56a88; } }
+/* 표정 말풍선: 힘이 클수록 찡그린 얼굴·땀·흔들림, 작을수록 웃는 얼굴 */
+.workshop-effort { position:absolute; left:58%; top:-6%; display:flex; align-items:center; gap:4px; pointer-events:none; z-index:3; }
+.effort-face { position:relative; width:64px; height:64px; flex:0 0 auto; border-radius:50%; border:3px solid #fff8e6; box-shadow:0 3px 8px #4c382244; background:#fff5dc url('/assets/game/workshop-lever-easy.webp') 32% 4% / 175% auto no-repeat; }
+.workshop-actor[data-effort='hard'] .effort-face, .workshop-actor[data-effort='mid'] .effort-face { background-image:url('/assets/game/workshop-lever-hard.webp'); }
+.workshop-actor[data-effort='hard'] .effort-face { border-color:#ffb4a3; }
+.effort-word { padding:4px 9px; border-radius:10px; background:#fff8e6; border:2px solid #9ab7a2; color:#1d6c4c; font-size:16px; font-weight:900; white-space:nowrap; box-shadow:0 2px 6px #4c382233; }
+.workshop-actor[data-effort='hard'] .effort-word { border-color:#e0533b; color:#b2321f; font-size:18px; }
+.workshop-actor[data-effort='mid'] .effort-word { border-color:#d6a24f; color:#8a5a12; }
+.effort-face i { display:none; position:absolute; width:11px; height:15px; border-radius:50% 50% 50% 50% / 60% 60% 40% 40%; background:#7fd0f0; border:2px solid #fff; }
+.effort-face i:first-child { right:-8px; top:6px; }
+.effort-face i:last-child { right:-2px; top:30px; width:8px; height:11px; }
+.workshop-actor[data-effort='hard'] .effort-face i { display:block; }
+.workshop-actor[data-effort='hard'][data-active='true'] .effort-face i { animation:sweat .7s ease-in infinite; }
+.workshop-actor[data-effort='hard'][data-active='true'] img { animation:effort-shake .18s linear infinite; }
+@keyframes sweat { to { transform:translateY(10px); opacity:.2; } }
+@keyframes effort-shake { 25% { translate:-2px 0; } 75% { translate:2px 0; } }
+.workshop-world[data-tool='direct'] .workshop-effort { left:62%; top:2%; }
+/* 관찰 보드: 실험 중엔 힘 막대만, 질문은 두 기록이 생긴 뒤에 */
+.workshop-notebook { padding:12px; }
+.notebook-heading { font-size:19px; }
+.notebook-heading strong { font-size:16px; }
+.workshop-quiz-prompt[hidden], .workshop-model-note[hidden] { display:none; }
+.workshop-quiz-prompt { margin:10px 0; padding:10px 8px; }
+.workshop-quiz-prompt h2 { font-size:18px; margin:0; }
+.workshop-records { margin-top:10px; }
+.workshop-run { display:grid; gap:5px; padding:9px 10px; font:inherit; }
+.workshop-run > span { margin-top:0; font-size:15px; font-weight:800; }
+.workshop-run .workshop-force { height:16px; }
+.workshop-run .workshop-metric-label { font-size:14px; margin-top:4px; }
+.workshop-notebook .workshop-run-choice { text-align:left; }
+.workshop-run .workshop-answer-number { justify-self:start; margin:0; }
+.workshop-redesign .experiment-footer { min-height:0; }
+.workshop-redesign .feedback { min-height:42px; padding:7px 14px; font-size:15px; }
+.workshop-redesign #workshop-finish { min-height:46px; padding-block:8px; }
+@media (min-width:1600px) and (min-height:900px) {
+ .workshop-studio { grid-template-columns:minmax(0,1fr) 260px; gap:14px; }
+ .workshop-instruction { font-size:22px; }
+ .effort-face { width:80px; height:80px; }
+ .effort-word { font-size:20px; }
+ .workshop-redesign .feedback { font-size:18px; min-height:50px; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .workshop-instruction svg, .workshop-handle, .effort-face i, .workshop-actor img { animation:none !important; }
+}
+.workshop-handle .handle-label { width:auto; white-space:nowrap; }
+.workshop-notebook.quiz-ready .baseline-run { display:none; }
+/* 의뢰 보드(레벨 2) 압축: 196px 패널 안에 제목·화물 3장·안내 문장이 스크롤 없이 들어가게. 큰 화면(1600x900 이상)은 기존 규칙 유지 */
+.notebook-heading span { word-break:keep-all; }
+.notebook-heading strong { white-space:nowrap; flex:none; }
+.workshop-notebook.is-request p, .workshop-notebook.is-request h2, .workshop-cargo-card strong { word-break:keep-all; }
+@media (max-width:1599px), (max-height:899px) {
+ .workshop-notebook.is-request .notebook-heading { gap:6px; font-size:17px; }
+ .workshop-notebook.is-request .notebook-heading strong { font-size:15px; }
+ .workshop-notebook.is-request .workshop-quiz-prompt { margin:8px 0; padding:7px 6px; }
+ .workshop-notebook.is-request .workshop-quiz-prompt h2 { font-size:16px; line-height:1.35; }
+ .workshop-notebook.is-request .answer-label { margin:5px 0 0; font-size:15px; line-height:1.35; }
+ .workshop-notebook.is-request .workshop-records { gap:6px; margin-top:8px; }
+ .workshop-cargo-card { gap:0 8px; padding:6px 9px; }
+ .workshop-cargo-card strong { line-height:1.3; }
+ .workshop-cargo-card span { font-size:14px; line-height:1.3; }
+ .workshop-cargo-card .cargo-weight { width:calc(14px + var(--weight,1) * 9px); box-shadow:inset 0 -4px #d8ae65, inset 0 4px #d8ae65; }
+ .workshop-notebook.is-request .workshop-choice { margin-top:8px; }
+ .workshop-notebook.is-request .workshop-choice > p { margin:0; font-size:15px; line-height:1.4; }
+}
+/* 레벨 1 완료 후 의뢰 초대: 보드가 길어져도 초대 상자·버튼이 보드 아래쪽에 붙어 보이게(sticky). 위 기록은 그 뒤로 스크롤 */
+.workshop-notebook .workshop-choice:has(.workshop-request-invite) { display:contents; }
+.workshop-notebook .workshop-choice:has(.workshop-request-invite) > * { margin-top:8px; }
+.workshop-notebook .workshop-request-invite { position:sticky; bottom:-12px; z-index:2; box-shadow:0 -8px 12px #fff9e9, 0 12px 0 #fff9e9; }
+.workshop-choice .workshop-request-invite p { word-break:keep-all; }
+@media (max-width:1599px), (max-height:899px) {
+ .workshop-notebook .workshop-request-invite { display:block; padding:7px 8px 8px; }
+ .workshop-notebook .workshop-request-invite img { float:left; width:36px; height:36px; margin:0 6px 0 0; }
+ .workshop-choice .workshop-request-invite p { font-size:15px; line-height:1.35; }
+ .workshop-notebook .workshop-request-invite button { display:block; clear:both; width:100%; margin-top:6px; }
+ /* 초대가 떠 있는 동안 질문·기록을 압축해 질문 상태에선 스크롤 없이 다 들어가게 */
+ .workshop-notebook:has(.workshop-request-invite) .workshop-quiz-prompt { margin:8px 0; padding:6px; }
+ .workshop-notebook:has(.workshop-request-invite) .workshop-quiz-prompt h2 { font-size:16px; line-height:1.3; word-break:keep-all; }
+ .workshop-notebook:has(.workshop-request-invite) .answer-label { margin:4px 0 0; font-size:15px; }
+ .workshop-notebook:has(.workshop-request-invite) .workshop-records { gap:6px; margin-top:8px; }
+ .workshop-notebook:has(.workshop-request-invite) .workshop-run { gap:3px; padding:6px 8px; }
+ .workshop-notebook:has(.workshop-request-invite) .workshop-run-choice { grid-template-columns:auto 1fr; column-gap:8px; min-height:0; }
+ .workshop-notebook:has(.workshop-request-invite) .workshop-run-choice > * { grid-column:2; }
+ .workshop-notebook:has(.workshop-request-invite) .workshop-run-choice > .workshop-answer-number { grid-column:1; grid-row:1 / span 3; align-self:center; }
 }

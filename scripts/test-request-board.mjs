@@ -45,8 +45,8 @@ test('the board lists the four clients in mission order with the planned lines',
   assert.deepEqual(cards.map(card => card.client), ['빵집 주인', '다리 점검원', '보급소 직원', '공방 친구']);
   assert.equal(cards[0].quote, '오븐이 고장 났어요! 수리 부품 상자를 가게 문 앞 노란 칸에 딱 멈춰 줄래요?');
   assert.equal(cards[2].quote, '부품 하나가 가짜래요. 눈으로는 모르겠어요.');
-  assert.equal(new Set(cards.map(card => card.pose)).size, 4, 'each client reuses a different pose');
-  assert.equal(new Set(cards.map(card => card.hue)).size, 4, 'each client gets its own colour');
+  assert.equal(new Set(cards.map(card => card.pose)).size, 4, 'each client has their own drawing');
+  assert.ok(cards.every(card => card.hue === 0), 'own drawings are shown untinted');
 });
 
 test('a fresh save has every request locked until its level 1', () => {

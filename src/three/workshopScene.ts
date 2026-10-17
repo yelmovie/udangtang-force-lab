@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getWorkshopDesign, type WorkshopTool, type LeverSetting } from '../workshopModel';
 
 export interface WorkshopScene {
@@ -27,7 +28,9 @@ export function createWorkshopScene(host: HTMLElement): WorkshopScene {
   const sunlight = new THREE.DirectionalLight('#ffedd0', 2.8);
   sunlight.position.set(-3, 7, 5); scene.add(sunlight);
   const material = (color: string, metalness = .03) => new THREE.MeshStandardMaterial({ color, metalness, roughness: .7 });
-  const wood = material('#c58c50'), edge = material('#83502d'), teal = material('#267a78');
+  const woodMap = new THREE.TextureLoader().load('/assets/textures/workshop-wood.webp', () => draw());
+  woodMap.colorSpace = THREE.SRGBColorSpace; woodMap.wrapS = woodMap.wrapT = THREE.RepeatWrapping; woodMap.repeat.set(.32, .32);
+  const wood = new THREE.MeshStandardMaterial({ color: '#f4d3a4', map: woodMap, roughness: .72 }), edge = material('#83502d'), teal = material('#267a78');
   const brass = material('#d8ae65', .3), light = material('#fff0b5'), coral = material('#ba582e');
   const floor = new THREE.Mesh(new THREE.CircleGeometry(3.9, 48), new THREE.MeshBasicMaterial({ color: '#38200f', transparent: true, opacity: .17, depthWrite: false }));
   floor.rotation.x = -Math.PI / 2; floor.scale.y = .54; floor.position.y = -.025; scene.add(floor);
@@ -55,7 +58,7 @@ export function createWorkshopScene(host: HTMLElement): WorkshopScene {
   const support = new THREE.Group(); lever.add(support);
   const supportMesh = new THREE.Mesh(new THREE.ConeGeometry(.49, 1.5, 4), teal);
   supportMesh.rotation.y = Math.PI / 4; supportMesh.position.y = .8; support.add(supportMesh);
-  box(1.1, .13, .9, edge, 0, .075, 0, support);
+  const supportBase = box(1.1, .13, .9, edge, 0, .075, 0, support);
   const bearing = new THREE.Mesh(new THREE.CylinderGeometry(.16, .16, .75, 12), brass);
   bearing.rotation.x = Math.PI / 2; bearing.position.y = 1.65; support.add(bearing);
   const leverBeam = new THREE.Group(); lever.add(leverBeam);
@@ -71,6 +74,26 @@ export function createWorkshopScene(host: HTMLElement): WorkshopScene {
   const topFlag = box(.52, .32, .045, brass, 0, 1.91, -.56, ramp);
   const bottomPost = box(.12, .3, .12, edge, 0, .15, -.56, ramp);
   function draw() { if (!disposed) renderer.render(scene, camera); }
+  /** Stretch a bottom-centred model into the box the procedural part used to fill. */
+  function fit(model: THREE.Object3D, width: number, height: number | null, depth: number) {
+    const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3()), scale = width / size.x;
+    model.scale.set(scale, height ? height / size.y : scale, depth / size.z); return model;
+  }
+  // Meshy models replace the stand-in boxes once loaded; if loading fails the boxes stay.
+  const loader = new GLTFLoader();
+  loader.loadAsync('/assets/models/workshop/fulcrum.glb').then(({ scene: model }) => {
+    if (disposed) return;
+    supportMesh.visible = supportBase.visible = bearing.visible = false;
+    support.add(fit(model, 1.15, 1.6, .95)); draw();
+  }).catch(() => {});
+  loader.loadAsync('/assets/models/workshop/crate.glb').then(({ scene: model }) => {
+    if (disposed) return;
+    for (const group of [leverCargo, rampCargo]) {
+      group.children.forEach(child => { child.visible = false; });
+      const crate = fit(model.clone(), .66, null, .66); crate.position.y = -.31; group.add(crate);
+    }
+    draw();
+  }).catch(() => {});
   function setPose() {
     lever.visible = tool === 'lever'; ramp.visible = tool === 'ramp';
     if (tool === 'lever') {
@@ -144,7 +167,7 @@ export function createWorkshopScene(host: HTMLElement): WorkshopScene {
     dispose() {
       disposed = true; observer.disconnect(); const materials = new Set<THREE.Material>();
       scene.traverse(object => { if (object instanceof THREE.Mesh) { object.geometry.dispose(); (Array.isArray(object.material) ? object.material : [object.material]).forEach(item => materials.add(item)); } });
-      materials.forEach(item => item.dispose()); renderer.dispose(); renderer.domElement.remove();
+      materials.forEach(item => { (item as THREE.MeshStandardMaterial).map?.dispose(); item.dispose(); }); renderer.dispose(); renderer.domElement.remove();
     },
   };
 }

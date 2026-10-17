@@ -544,8 +544,11 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       const item=document.createElement('li');item.className=`village-board-card is-${card.status}`;
       const face=document.createElement('img');face.className='village-board-portrait';face.alt='';face.src=assetURL(`npc/${card.pose}.webp`);face.style.filter=clientFilter(card.stage);
       const text=document.createElement('div');text.className='village-board-text';
-      const from=document.createElement('strong');from.textContent=`${card.client} · ${villageRewards[card.stage].name}`;
-      const quote=document.createElement('p');quote.textContent=`“${card.quote}”`;
+      const locked=card.status==='locked';
+      // A locked request keeps its client a secret: a dark silhouette with a question mark until level 1 is done.
+      if(locked){face.classList.add('is-mystery');const mark=document.createElement('span');mark.className='village-board-mark';mark.textContent='?';mark.setAttribute('aria-hidden','true');item.append(mark);}
+      const from=document.createElement('strong');from.textContent=locked?`??? · ${villageRewards[card.stage].name}`:`${card.client} · ${villageRewards[card.stage].name}`;
+      const quote=document.createElement('p');quote.textContent=locked?'누가 부탁할지는 아직 비밀이에요. 실험 1단계를 마치면 편지가 와요.':`“${card.quote}”`;
       const status=document.createElement('span');status.className='village-board-status';status.textContent=card.statusText;
       if(card.optional){const tag=document.createElement('span');tag.className='village-board-tag';tag.textContent='선택 의뢰';status.prepend(tag);}
       text.append(from,quote,status);
@@ -718,7 +721,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       const candidate=validateMap(await responses[0].json());const manifest=await responses[1].json() as {outputs:AssetMeta[]};
       if(!alive||token!==generation)return;if(!ctx)throw new Error('canvas');
       if(!Array.isArray(manifest.outputs))throw new Error('manifest');metadata=new Map(manifest.outputs.map(item=>[item.file,item]));
-      const files=[...new Set(['terrain.webp',...candidate.buildings.map(b=>b.asset),...candidate.npcs.map(n=>n.asset),...['guide','wave','think','point','baker'].map(pose=>`npc/${pose}.webp`),...['student','corgi'].flatMap(person=>directions.flatMap(direction=>[1,2,3,4].map(i=>`${person}/${direction}-${i}.webp`))),...[1,4,5,9,10,11,12].map(i=>`props/prop-${String(i).padStart(2,'0')}.webp`)])];
+      const files=[...new Set(['terrain.webp',...candidate.buildings.map(b=>b.asset),...candidate.npcs.map(n=>n.asset),...['guide','wave','think','point','baker','inspector','clerk','crafter'].map(pose=>`npc/${pose}.webp`),...['student','corgi'].flatMap(person=>directions.flatMap(direction=>[1,2,3,4].map(i=>`${person}/${direction}-${i}.webp`))),...[1,4,5,9,10,11,12].map(i=>`props/prop-${String(i).padStart(2,'0')}.webp`)])];
       let count=0;
       const loaded=await Promise.all(files.map(async file=>{const image=await loadImage(file);if(alive&&token===generation){count++;progress.value=Math.round(count/files.length*95);detail.textContent=`마을 그림 ${count} / ${files.length}장 준비`;}return [file,image] as const;}));
       if(!alive||token!==generation)return;

@@ -1,6 +1,7 @@
 import type { AppContext } from '../appTypes';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { showPredictionChip } from '../predictionChip';
+import { letterOnce } from '../requestLetter';
 import { cargoDistance, cargoForceNames, cargoOrders, orderHint, orderResult, ordersComplete, type ForceLevel } from '../cargoModel';
 import type { CargoRun } from '../state';
 import { requestsEnabled } from '../state';
@@ -149,6 +150,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         root.querySelector('#cargo-direction')!.textContent = directionText();
         if (!finding && !findingTried) root.querySelector('#cargo-finding')!.textContent = findingMessage(false);
         root.querySelector<HTMLElement>('#cargo-bakery-call')!.hidden = !finding || level === 2;
+        if (finding && level === 1 && !busy && !deliveredAll()) letterOnce(root, 'cargo', enterOrders);
         positionGuide();
         renderGhosts();
         finish.disabled = locked || !ready() || !finding || !(deliveredAll() || !requestsEnabled(context.save));

@@ -1966,6 +1966,87 @@
         "x": 313.0,
         "y": 574
       }
+    },
+    {
+      "source": "higgsfield/gpt_image_2_5/a5345c58-3d9e-4d45-a335-5f118e9c423c",
+      "file": "npc/inspector.webp",
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 627,
+        "height": 627
+      },
+      "width": 627,
+      "height": 627,
+      "bytes": 162848,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 150,
+        "top": 25,
+        "width": 327,
+        "height": 549
+      },
+      "pivot": {
+        "x": 313.5,
+        "y": 574
+      }
+    },
+    {
+      "source": "higgsfield/gpt_image_2_5/a5345c58-3d9e-4d45-a335-5f118e9c423c",
+      "file": "npc/clerk.webp",
+      "index": 1,
+      "row": 0,
+      "column": 1,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 627,
+        "height": 627
+      },
+      "width": 627,
+      "height": 627,
+      "bytes": 134688,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 176,
+        "top": 53,
+        "width": 276,
+        "height": 521
+      },
+      "pivot": {
+        "x": 314.0,
+        "y": 574
+      }
+    },
+    {
+      "source": "higgsfield/gpt_image_2_5/a5345c58-3d9e-4d45-a335-5f118e9c423c",
+      "file": "npc/crafter.webp",
+      "index": 2,
+      "row": 0,
+      "column": 2,
+      "crop": {
+        "left": 0,
+        "top": 0,
+        "width": 627,
+        "height": 627
+      },
+      "width": 627,
+      "height": 627,
+      "bytes": 143578,
+      "alphaThreshold": 128,
+      "alphaBounds": {
+        "left": 157,
+        "top": 91,
+        "width": 313,
+        "height": 483
+      },
+      "pivot": {
+        "x": 313.5,
+        "y": 574
+      }
     }
   ],
   "warnings": [
