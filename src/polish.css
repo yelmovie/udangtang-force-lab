@@ -428,21 +428,105 @@ button.button:not(:disabled):active {
 /* Request board cards as talk panels: the client stands big at the left, their words in a speech bubble; locked clients stay a "?" silhouette. */
 .village-screen .village-board { width: min(980px, calc(100vw - 32px)); }
 .village-screen .village-board-cards { gap: 18px 16px; }
-.village-screen .village-board-card { position: relative; grid-template: "face text" 1fr "face go" auto / 128px minmax(0, 1fr); gap: 10px 14px; padding: 14px 16px 14px 10px; overflow: visible; border-radius: 16px; }
-.village-screen .village-board-portrait { width: 128px; height: 160px; align-self: end; margin: -34px 0 -8px; object-fit: contain; object-position: bottom center; image-rendering: auto; filter: drop-shadow(0 6px 4px #0006); }
+.village-screen .village-board-card { position: relative; grid-template: "face text" auto "face go" 1fr / 150px minmax(0, 1fr); gap: 10px 14px; padding: 14px 16px 14px 8px; overflow: visible; border-radius: 16px; }
+/* Portrait 1.5x and raised so the face sits beside the bubble tail; transparent side margins of the 627px cell overlap the gutter. */
+.village-screen .village-board-portrait { grid-area: face; width: 196px; height: 196px; align-self: start; margin: -14px -23px 0; object-fit: contain; object-position: top center; image-rendering: auto; filter: drop-shadow(0 6px 4px #0006); }
 .village-screen .village-board-text { position: relative; padding: 12px 14px; background: #fff; border: 2px solid #c9a86a; border-radius: 14px; gap: 6px; }
-.village-screen .village-board-text::before { content: ''; position: absolute; left: -11px; top: 26px; width: 16px; height: 16px; background: #fff; border-left: 2px solid #c9a86a; border-bottom: 2px solid #c9a86a; transform: rotate(45deg); }
+.village-screen .village-board-text::before { content: ''; position: absolute; left: -11px; top: 46px; width: 16px; height: 16px; background: #fff; border-left: 2px solid #c9a86a; border-bottom: 2px solid #c9a86a; transform: rotate(45deg); }
 .village-screen .village-board-text strong { font-size: 20px; }
 .village-screen .village-board-text p { font-size: 18px; line-height: 1.5; }
 .village-screen .village-board-status { font-size: 16px; }
-.village-screen .village-board-card > button { font-size: 18px; min-height: 48px; }
-.village-screen .village-board-card.is-locked .village-board-portrait.is-mystery { opacity: 1; filter: brightness(0) saturate(0) opacity(.45); }
-.village-screen .village-board-mark { position: absolute; left: 44px; bottom: 60px; font-family: var(--font-display); font-size: 54px; line-height: 1; color: #fff6d8; text-shadow: 0 3px 0 #5a4a2a, 0 0 12px #000a; animation: board-mark-bob 1.6s ease-in-out infinite alternate; pointer-events: none; }
+.village-screen .village-board-card > button { align-self: end; font-size: 18px; min-height: 48px; }
+.village-screen .village-board-card.is-locked .village-board-portrait.is-mystery { opacity: 1; filter: brightness(0) saturate(0) opacity(.5); }
+/* Big "?" centred on the silhouette's body. */
+.village-screen .village-board-mark { position: absolute; left: 8px; top: 0; width: 150px; height: 196px; display: grid; place-items: center; padding-top: 34px; font-family: var(--font-display); font-size: 96px; line-height: 1; color: #fff6d8; text-shadow: 0 4px 0 #5a4a2a, 0 0 16px #000c; animation: board-mark-bob 1.6s ease-in-out infinite alternate; pointer-events: none; z-index: 1; }
 @keyframes board-mark-bob { to { transform: translateY(-6px); } }
 @media (prefers-reduced-motion: reduce) { .village-screen .village-board-mark { animation: none; } }
 @media (max-width: 760px) {
-  .village-screen .village-board-card { grid-template-columns: 76px minmax(0, 1fr); padding: 10px 10px 10px 6px; }
-  .village-screen .village-board-portrait { width: 76px; height: 100px; margin: -18px 0 -4px; }
-  .village-screen .village-board-mark { left: 24px; bottom: 40px; font-size: 36px; }
+  .village-screen .village-board-card { grid-template-columns: 90px minmax(0, 1fr); padding: 10px 10px 10px 6px; }
+  .village-screen .village-board-portrait { width: 118px; height: 118px; margin: -18px -14px 0; }
+  .village-screen .village-board-text::before { top: 22px; }
+  .village-screen .village-board-mark { left: 6px; top: -18px; width: 90px; height: 118px; padding-top: 20px; font-size: 58px; }
   .village-screen .village-board-text strong { font-size: 17px; } .village-screen .village-board-text p { font-size: 16px; }
 }
+
+/* Experiment screens use the full width with minimal side gutters; side boards moved into stage popups (stagePopup.ts). */
+#app .experiment-screen { max-width: none; padding-left: 12px; padding-right: 12px; }
+
+/* Village map covers the screen; JS (follow) translates the frame so the student stays in view. HUD sits on the screen, not the map. */
+#app .screen .village-frame { position: absolute; left: 0; top: 0; max-width: none; max-height: none; will-change: transform; }
+
+/* Village "change" notice: centred on the screen, big words, snug padding, round frame. */
+#app .village-reveal { top: 50%; bottom: auto; left: 50%; transform: translate(-50%, -50%); width: max-content; max-width: min(860px, calc(100% - 48px)); padding: 18px 34px; border-radius: 32px; border-width: 4px; font-size: 30px; line-height: 1.4; box-shadow: 0 6px 0 #614c32, 0 18px 40px #0006; }
+#app .village-reveal strong { font-size: 42px; line-height: 1.25; }
+#app .village-reveal span { display: block; margin-top: 6px; }
+#app .village-reveal.is-compact { padding: 14px 30px; }
+#app .village-reveal.is-compact span { display: none; }
+#app .village-reveal.is-compact strong { font-size: 38px; }
+@media (prefers-reduced-motion: no-preference) {
+  #app .village-reveal:not([hidden]) { animation: village-reveal-center-in .45s cubic-bezier(.2, .8, .3, 1) both; }
+  #app .village-reveal.is-compact { animation: village-reveal-center-shrink .35s ease-out both; }
+}
+@keyframes village-reveal-center-in { from { opacity: 0; transform: translate(-50%, -50%) scale(.85); } }
+@keyframes village-reveal-center-shrink { from { transform: translate(-50%, -50%) scale(1.06); } }
+@media (max-width: 760px) { #app .village-reveal { font-size: 20px; padding: 12px 20px; } #app .village-reveal strong, #app .village-reveal.is-compact strong { font-size: 28px; } }
+
+/* ===== Top bar: icons only, floating over the screen (no title text, no green band) ===== */
+#app { position: relative; }
+#app > .topbar { position: absolute; top: 0; left: 0; right: 0; z-index: var(--z-hud); min-height: 0; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: none; border: 0; box-shadow: none; backdrop-filter: none; pointer-events: none; }
+#app > .topbar > * { pointer-events: auto; }
+#app > .topbar .top-nav { order: 0; }
+#app > .topbar .brand { order: 1; margin-right: auto; }
+#app > .topbar .top-actions { order: 3; }
+#app > .topbar .brand > span:last-child { display: none; }
+/* Keep the page title for screen readers only. */
+#app > .topbar .topbar-title { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+#app:has(.village-screen) > .topbar { background: none; backdrop-filter: none; box-shadow: none; }
+/* Screens start at the very top; their first row sits between the left and right icon groups. */
+#app .experiment-screen { padding-top: 8px; }
+#app .experiment-screen > .experiment-heading { min-height: 56px; padding-left: 196px; padding-right: 176px; align-items: center; }
+#app .village-screen .village-hud { top: 8px; left: 196px; right: 176px; }
+#app > .screen:not(:has(.village-screen)):not(:has(.experiment-screen)):not(:has(.title-screen)) { padding-top: 64px; }
+@media (min-width: 1600px) and (min-height: 900px) and (orientation: landscape) {
+  #app .experiment-screen > .experiment-heading { padding-left: 230px; padding-right: 200px; }
+  #app .village-screen .village-hud { left: 230px; right: 200px; }
+}
+@media (max-width: 760px), (orientation: portrait) {
+  #app .experiment-screen > .experiment-heading { padding-left: 0; padding-right: 0; margin-top: 56px; }
+  #app .village-screen .village-hud { top: 64px; left: 10px; right: 10px; }
+}
+
+/* Village HUD: only the star count and the next-step button stay; objective box, repair count and hint line are gone. */
+#app .village-screen .village-objective, #app .village-screen .village-count, #app .village-screen .village-hint { display: none !important; }
+
+/* Doctor's passing-by greeting: a speech bubble above him, tail at the bottom-left, pops in. */
+#app .village-labels button.village-npc-bubble { position: absolute; transform: translate(-100%, -100%); max-width: 360px; min-height: 0; padding: 12px 18px; border-radius: 20px; border: 3px solid #0d7779; background: #fffdf2f2; color: #1f4540; font-size: 20px; font-weight: 800; line-height: 1.4; text-align: left; white-space: normal; word-break: keep-all; box-shadow: 0 6px 0 #0d777966, 0 10px 24px #0007; animation: npc-bubble-in .35s cubic-bezier(.2, 1.3, .3, 1) both; }
+#app .village-labels button.village-npc-bubble::after { content: ''; position: absolute; right: 22px; bottom: -14px; width: 22px; height: 22px; background: #fffdf2; border-right: 3px solid #0d7779; border-bottom: 3px solid #0d7779; transform: rotate(45deg) skew(10deg, 10deg); }
+#app .village-labels button.village-npc-bubble:not(:disabled):active { transform: translate(-100%, -100%) translateY(2px); }
+@keyframes npc-bubble-in { from { opacity: 0; transform: translate(-100%, -100%) scale(.7); } }
+@media (prefers-reduced-motion: reduce) { #app .village-labels button.village-npc-bubble { animation: none; } }
+
+/* ===== Experiment screens: the scene takes the whole page; title, progress chips and feedback line are gone, next button floats top-right ===== */
+#app .experiment-screen { position: relative; padding-top: 0; padding-bottom: 8px; gap: 8px; }
+#app .experiment-screen > .experiment-heading { position: absolute; top: 8px; left: 196px; right: 176px; z-index: 6; min-height: 0; padding: 0; margin: 0; pointer-events: none; align-items: flex-start; }
+#app .experiment-screen > .experiment-heading > * { pointer-events: auto; }
+#app .experiment-heading h1, #app .experiment-heading .eyebrow, #app .experiment-heading .mission-progress, #app .experiment-heading > div > p:not(.eyebrow) { display: none !important; }
+#app .experiment-screen > .experiment-footer { position: absolute; top: 8px; right: 176px; z-index: 6; margin: 0; padding: 0; background: none; border: 0; box-shadow: none; }
+#app .experiment-footer .feedback { display: none !important; }
+#app .experiment-footer .footer-actions { width: auto; }
+@media (min-width: 1600px) and (min-height: 900px) and (orientation: landscape) { #app .experiment-screen > .experiment-heading { left: 230px; right: 200px; } #app .experiment-screen > .experiment-footer { right: 200px; } }
+@media (max-width: 760px), (orientation: portrait) { #app .experiment-screen > .experiment-heading { position: static; margin-top: 56px; pointer-events: auto; } #app .experiment-screen > .experiment-footer { position: static; } }
+
+/* Title: no top gap, bigger logo. */
+#app > .screen:has(.title-screen) { padding: 0; }
+#app .title-screen { min-height: var(--app-height); }
+#app .title-screen .illustrated-title { width: min(78vw, 1150px); margin: 0 0 clamp(70px, 12vh, 130px); }
+
+/* A 60px strip at the top holds the icons, record buttons and the next button; the scene starts right below it. */
+#app .experiment-screen { padding-top: 60px; }
+#app .experiment-screen > .experiment-heading { top: 6px; left: 196px; right: 420px; }
+#app .experiment-screen > .experiment-footer { top: 6px; }
+#app .experiment-screen > .experiment-heading .button, #app .experiment-screen > .experiment-heading button, #app .experiment-footer .button { min-height: 48px; }
+@media (min-width: 1600px) and (min-height: 900px) and (orientation: landscape) { #app .experiment-screen > .experiment-heading { right: 460px; } }
+/* While the doctor's bubble is up, his name sign steps aside so the two never overlap. */
+#app .village-labels:has(.village-npc-bubble:not([hidden])) .village-npc-label { opacity: 0; pointer-events: none; }

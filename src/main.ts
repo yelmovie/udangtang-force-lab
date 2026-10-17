@@ -239,6 +239,7 @@ function openStoryModal(options: StoryOptions) {
         <img class="story-end-frame" src="${options.scenes?.at(-1) ?? `/assets/story/intro-0${options.lines.length}.webp`}" alt="" hidden>
         <button type="button" class="button button-primary story-play" data-story="play" hidden>▶ 영상 재생</button>
       </div>
+      <div class="story-finish-banner" aria-hidden="true"><span>★</span>${options.scenes ? '마을에 불이 켜졌어!' : '출발 준비 완료!'}<span>★</span></div>
       <p class="eyebrow" id="story-title"></p>
       <p class="story-text story-caption" id="story-caption" role="status" aria-live="polite"></p>
       <div class="story-dots" aria-hidden="true">${dots}</div>
@@ -256,11 +257,23 @@ function openStoryModal(options: StoryOptions) {
     const showCue = (i: number) => {
       if (i === shown) return; shown = i;
       who.textContent = options.lines[i].who; caption.textContent = options.lines[i].text;
+      // Replay the pop-in so each new line jumps out like a comic caption.
+      for (const node of [who, caption]) { node.classList.remove('is-new'); void node.offsetWidth; node.classList.add('is-new'); }
       dotNodes.forEach((dot, n) => dot.classList.toggle('on', n === i));
+    };
+    const card = modal.querySelector<HTMLElement>('.story-video-card')!;
+    if (options.scenes) card.classList.add('is-ending');
+    // Confetti burst for the finish: 28 pieces with their own drift, delay and colour.
+    const celebrate = () => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const burst = document.createElement('div'); burst.className = 'story-confetti'; burst.setAttribute('aria-hidden', 'true');
+      for (let n = 0; n < 28; n++) { const bit = document.createElement('i'); bit.style.setProperty('--x', `${Math.random() * 100}%`); bit.style.setProperty('--d', `${(Math.random() * 1.2).toFixed(2)}s`); bit.style.setProperty('--r', `${Math.round(Math.random() * 720 - 360)}deg`); bit.style.setProperty('--c', ['#ffd27a', '#ff8a65', '#7fd7c4', '#fff6d8', '#ffb3c7'][n % 5]); burst.append(bit); }
+      card.append(burst);
+      [0, 160, 320].forEach((ms, k) => window.setTimeout(() => tone(680 + k * 60), ms));
     };
     const sync = () => showCue(storyCueIndex(video.cues, el.currentTime));
     const endFrame = modal.querySelector<HTMLImageElement>('.story-end-frame')!;
-    const finishUi = () => { el.controls = false; endFrame.hidden = false; showCue(options.lines.length - 1); skipBtn.hidden = true; doneBtn.hidden = false; playBtn.hidden = true; doneBtn.focus(); };
+    const finishUi = () => { el.controls = false; endFrame.hidden = false; showCue(options.lines.length - 1); skipBtn.hidden = true; doneBtn.hidden = false; playBtn.hidden = true; card.classList.add('is-finished'); celebrate(); doneBtn.focus(); };
     const tryPlay = () => {
       const result = el.play();
       if (result && typeof result.then === 'function') result.then(() => { playBtn.hidden = true; }).catch(() => { if (!closed) { playBtn.hidden = false; playBtn.focus(); } });

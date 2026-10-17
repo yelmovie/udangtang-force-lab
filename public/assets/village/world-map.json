@@ -1572,8 +1572,8 @@
     {
       "id": "guide",
       "name": "도토리 박사",
-      "x": 1030,
-      "y": 485,
+      "x": 850,
+      "y": 720,
       "asset": "npc/guide.webp",
       "portrait": "npc/wave.webp",
       "lines": [

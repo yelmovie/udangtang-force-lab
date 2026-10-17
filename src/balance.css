@@ -190,3 +190,72 @@
   @keyframes mystery-clue { 50% { transform:scale(1.1); } }
   @keyframes mystery-arrive { from { transform:translateY(14px) scale(.96); opacity:0; } }
 }
+
+/* Full-width bench: one top row (title · progress chips · request · record), a one-row tool dock,
+   and no side boards. Results, records and questions open in the shared stage popup. */
+#app .instrument-screen.balance-screen.experiment-screen { padding-left:12px; padding-right:12px; }
+.balance-screen .balance-topbar { flex-wrap:wrap; justify-content:flex-start; gap:6px 14px; }
+.balance-screen .balance-topbar .balance-goal {
+  flex:1 1 auto; justify-content:flex-start; gap:6px; min-height:0; padding:0;
+  border:0; background:none; font-size:16px;
+}
+.balance-screen .balance-goal > span[hidden], .balance-screen .balance-top-tools > [hidden] { display:none!important; }
+.balance-screen .balance-top-tools { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.balance-screen .balance-top-tools .button { min-height:48px; min-width:0; padding:8px 18px; font-size:17px; }
+.balance-screen .balance-record-button {
+  min-height:48px; display:inline-flex; align-items:center; gap:8px; padding:6px 14px;
+  border:2px solid #c7a267; border-radius:12px; background:#fff5d9; color:#294d43;
+  font-size:17px; font-weight:900; white-space:nowrap; box-shadow:0 4px 0 #604a2720; cursor:pointer;
+}
+.balance-screen .balance-record-button::before { content:'▤'; font-size:21px; line-height:1; }
+.balance-screen .balance-record-button b {
+  display:inline-grid; place-items:center; min-width:26px; height:26px; padding:0 4px;
+  border-radius:999px; background:#21776e; color:#fff; font-size:15px;
+}
+.balance-screen .balance-dock { grid-template-columns:1fr; padding:6px 12px; }
+.balance-screen .balance-dock .instrument-tools { display:grid; grid-template-columns:auto 1fr; align-items:center; gap:14px; }
+.balance-screen .balance-dock .dock-label { margin:0; flex-direction:column; align-items:flex-start; gap:2px; max-width:190px; word-break:keep-all; }
+.balance-screen .balance-dock .dock-label small { font-size:15px; }
+.balance-screen .balance-dock .object-card { min-height:66px; }
+@media (min-width:1440px) { .balance-screen .balance-dock .object-card { min-height:78px; } }
+@media (max-width:800px) {
+  .balance-screen .balance-top-tools { margin-left:0; }
+  .balance-screen .balance-dock .instrument-tools { grid-template-columns:1fr; gap:6px; }
+}
+
+/* Shared stage popup (same spec as the other missions): centred, sized to its content, only the body scrolls. */
+.stage-popup { position:fixed; inset:0; margin:auto; width:max-content; max-width:min(860px, calc(100vw - 48px)); height:fit-content; max-height:calc(100dvh - 32px); padding:0; border:0; background:transparent; overflow:visible; }
+.stage-popup::backdrop { background:radial-gradient(ellipse at 50% 40%, #1d4b4bb3, #0c2a2ad9 75%); }
+.stage-popup-card { position:relative; display:flex; flex-direction:column; max-height:calc(100dvh - 32px); overflow:hidden; padding:16px 22px 18px; color:#2b3f33; background:linear-gradient(#fffdf6,#fff6e4); border:4px solid #8a6a3c; border-radius:32px; box-shadow:0 8px 0 #4a3a22, 0 24px 48px #0006; animation:stage-popup-in .32s cubic-bezier(.2,.8,.3,1) both; word-break:keep-all; }
+.stage-popup-label { display:block; padding-right:60px; font-size:18px; font-weight:800; color:#6b5f45; }
+.stage-popup h2 { margin:2px 60px 0 0; font-size:32px; line-height:1.25; color:#2b3f33; }
+.stage-popup-x { position:absolute; top:12px; right:12px; width:52px; height:52px; border:2px solid #c5b084; border-radius:50%; background:#fff9e9; color:#6b5f45; font-size:28px; font-weight:900; line-height:1; cursor:pointer; }
+.stage-popup-body { min-height:0; overflow:auto; font-size:24px; line-height:1.4; }
+.stage-popup-lead { margin:8px 0 0; font-size:24px; line-height:1.4; font-weight:800; word-break:keep-all; }
+.stage-popup-actions { flex:0 0 auto; display:flex; justify-content:flex-end; gap:10px; margin-top:14px; }
+.stage-popup-actions .button { min-height:56px; font-size:22px; }
+@keyframes stage-popup-in { from { transform:translateY(28px) scale(.94); opacity:0; } }
+@media (prefers-reduced-motion: reduce) { .stage-popup-card { animation:none !important; } }
+
+/* Balance popup content: prediction answers, my findings, mystery record cards and picks (all text >= 20px). */
+.balance-popup .predict-options { margin-top:12px; gap:10px; }
+.balance-popup .predict-options button { min-height:72px; min-width:150px; font-size:30px; gap:4px; }
+.balance-popup .predict-options button span { font-size:22px; }
+.balance-popup .instrument-text-button { margin-top:6px; font-size:20px; }
+.balance-popup-runs { margin-top:12px; padding:6px 14px; border:2px solid #dcc697; border-radius:18px; background:#fffaf0; }
+.balance-popup-runs > strong { font-size:20px; color:#6b5f45; }
+.balance-popup .result-list { min-height:0; gap:0; }
+.balance-popup .result-row { gap:24px; padding:6px 2px; font-size:22px; color:#3c5a52; }
+.balance-popup .result-row:last-child { border-bottom:0; }
+.balance-popup .result-list p { margin:4px 0; font-size:20px; }
+.balance-popup-next { margin:10px 0 0; color:#1c6760; font-size:24px; font-weight:900; line-height:1.4; }
+.balance-popup .balance-request { margin-top:10px; border-radius:18px; }
+.balance-popup .balance-request-from { font-size:20px; }
+.balance-popup .balance-request-text { font-size:22px; }
+.balance-popup .mystery-panel { margin-top:12px; gap:8px; padding:10px 14px; border-radius:18px; }
+.balance-popup .mystery-panel-head { font-size:20px; }
+.balance-popup .mystery-records { max-height:none; overflow:visible; }
+.balance-popup .mystery-records p { font-size:20px; }
+.balance-popup .mystery-record { font-size:24px; padding:4px 14px; }
+.balance-popup .mystery-pick > span { font-size:22px; }
+.balance-popup .mystery-picks button { min-height:60px; font-size:26px; }

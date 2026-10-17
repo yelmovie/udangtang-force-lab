@@ -245,7 +245,7 @@ const glowStops: Record<VillageLight['kind'], [string, string][]> = {
 };
 
 /** Request board on the plaza beside the doctor: foot of its posts (map pixels). */
-export const requestBoardSpot: Point = { x: 985, y: 580 };
+export const requestBoardSpot: Point = { x: 935, y: 640 };
 /** A solved request's client stands here, clear of the door and the return spot, with a speech
  * bubble beside the head and a lit shop sign on the building, away from labels and the bottom bar. */
 export const requesterSpots: Record<RequestStage, Point & { bubble: Point; sign: Point }> = {
@@ -291,7 +291,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   const events = new AbortController();
   const base = `${import.meta.env.BASE_URL}assets/village/`;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  root.innerHTML = `<section class="village-screen"><div class="village-frame"><canvas class="village-canvas" tabindex="0" aria-label="힘 마을. 방향키나 WASD로 걷고, 땅이나 건물 이름을 누르면 길을 따라 이동해요. 열린 문에 닿으면 자동 입장해요. Enter로 안내원과 대화하거나 가까운 문에 들어갈 수도 있어요."></canvas><svg class="village-lights" aria-hidden="true" focusable="false"></svg><div class="village-labels"></div><header class="village-hud"><div class="village-objective"><span>우리의 힘 마을</span><strong id="village-goal"></strong></div><div class="village-tally"><span class="village-stars" id="village-stars" role="img"></span><span class="village-count" id="village-count"></span></div></header><div class="village-reveal" role="status" hidden></div><div class="village-bottom"><div class="village-pad" role="group" aria-label="이동 방향판"><button data-direction="up" aria-label="위로 걷기">↑</button><button data-direction="left" aria-label="왼쪽으로 걷기">←</button><button data-direction="down" aria-label="아래로 걷기">↓</button><button data-direction="right" aria-label="오른쪽으로 걷기">→</button></div><p class="village-hint" id="village-hint" role="status">길을 누르거나 방향판으로 걸어가 봐!</p><div class="village-actions"><button id="village-results" hidden>내 발견 모아 보기</button><button id="village-action" disabled>건물 이름을 눌러요</button></div></div><div class="village-loading"><strong>마을로 가는 길을 준비해요…</strong><progress max="100" value="0" aria-label="마을 그림 준비"></progress><span id="village-loading-detail">마을 지도를 읽는 중이에요</span><button id="village-retry" hidden>다시 불러오기</button></div></div><dialog class="village-dialog" aria-labelledby="village-dialog-title"><div class="village-dialog-heading"><img class="village-portrait" alt=""><div><span id="village-dialog-role">마을의 안내원</span><h2 id="village-dialog-title"></h2></div><button id="village-dialog-close" aria-label="대화 닫기">×</button></div><p id="village-dialog-line"></p><div class="village-dialog-bottom"><span id="village-dialog-page"></span><button id="village-dialog-next">이야기 더 듣기 →</button></div></dialog><dialog class="village-board" aria-labelledby="village-board-title"><div class="village-board-heading"><h2 id="village-board-title">의뢰 게시판</h2><button id="village-board-close" aria-label="게시판 닫기">×</button></div><p class="village-board-lead"></p><ul class="village-board-cards"></ul></dialog></section>`;
+  root.innerHTML = `<section class="village-screen"><div class="village-frame"><canvas class="village-canvas" tabindex="0" aria-label="힘 마을. 방향키나 WASD로 걷고, 땅이나 건물 이름을 누르면 길을 따라 이동해요. 열린 문에 닿으면 자동 입장해요. Enter로 안내원과 대화하거나 가까운 문에 들어갈 수도 있어요."></canvas><svg class="village-lights" aria-hidden="true" focusable="false"></svg><div class="village-labels"></div></div><header class="village-hud"><div class="village-objective"><span>우리의 힘 마을</span><strong id="village-goal"></strong></div><div class="village-tally"><span class="village-stars" id="village-stars" role="img"></span><span class="village-count" id="village-count"></span></div></header><div class="village-reveal" role="status" hidden></div><div class="village-bottom"><div class="village-pad" role="group" aria-label="이동 방향판"><button data-direction="up" aria-label="위로 걷기">↑</button><button data-direction="left" aria-label="왼쪽으로 걷기">←</button><button data-direction="down" aria-label="아래로 걷기">↓</button><button data-direction="right" aria-label="오른쪽으로 걷기">→</button></div><p class="village-hint" id="village-hint" role="status">길을 누르거나 방향판으로 걸어가 봐!</p><div class="village-actions"><button id="village-results" hidden>내 발견 모아 보기</button><button id="village-action" disabled>건물 이름을 눌러요</button></div></div><div class="village-loading"><strong>마을로 가는 길을 준비해요…</strong><progress max="100" value="0" aria-label="마을 그림 준비"></progress><span id="village-loading-detail">마을 지도를 읽는 중이에요</span><button id="village-retry" hidden>다시 불러오기</button></div><dialog class="village-dialog" aria-labelledby="village-dialog-title"><div class="village-dialog-heading"><img class="village-portrait" alt=""><div><span id="village-dialog-role">마을의 안내원</span><h2 id="village-dialog-title"></h2></div><button id="village-dialog-close" aria-label="대화 닫기">×</button></div><p id="village-dialog-line"></p><div class="village-dialog-bottom"><span id="village-dialog-page"></span><button id="village-dialog-next">이야기 더 듣기 →</button></div></dialog><dialog class="village-board" aria-labelledby="village-board-title"><div class="village-board-heading"><h2 id="village-board-title">의뢰 게시판</h2><button id="village-board-close" aria-label="게시판 닫기">×</button></div><p class="village-board-lead"></p><ul class="village-board-cards"></ul></dialog></section>`;
   const shell = root.querySelector<HTMLElement>('.village-screen')!, frame = root.querySelector<HTMLElement>('.village-frame')!;
   const canvas = root.querySelector<HTMLCanvasElement>('.village-canvas')!;
   const ctx = canvas.getContext('2d')!;
@@ -464,13 +464,14 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   }
   function draw(moving = false, dogMoving = false) {
     if(!alive||!map||!images.has('terrain.webp'))return;
+    follow();
     ctx.setTransform(canvas.width/map.width,0,0,canvas.height/map.height,0,0);ctx.imageSmoothingEnabled=false;
     ctx.clearRect(0,0,map.width,map.height);ctx.drawImage(images.get('terrain.webp')!,0,0,map.width,map.height);
     if(destination){ctx.strokeStyle='#fff5b1';ctx.lineWidth=4;ctx.setLineDash([5,5]);ctx.beginPath();ctx.ellipse(destination.x,destination.y,15,8,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
     for(const building of map.buildings){if(story.next===building.id){ctx.fillStyle='#ffe68799';ctx.beginPath();ctx.ellipse(building.entry.x,building.entry.y+8,26,11,0,0,Math.PI*2);ctx.fill();}}
     const layers:{y:number;draw:()=>void}[]=map.buildings.map(building=>({y:building.y+(metadata.get(building.asset)?.pivot?.y??images.get(building.asset)!.naturalHeight)/images.get(building.asset)!.naturalHeight*building.height,draw:()=>ctx.drawImage(images.get(building.asset)!,building.x,building.y,building.width,building.height)}));
     for(const id of story.changes){const p=rewardPoint(id),building=map.buildings.find(b=>b.id===id);const depth=id==='balance'?p.y:Math.max(p.y,(building?.y??0)+(building?.height??0)+1);layers.push({y:depth,draw:()=>drawRewards(id,id===revealStage&&!reduced.matches?Math.min(1,revealTime/1.1):1)});}
-    for(const npc of map.npcs)layers.push({y:npc.y,draw:()=>sprite(npc.asset,npc,83)});
+    for(const npc of map.npcs)layers.push({y:npc.y,draw:()=>{ctx.save();ctx.translate(npc.x*2,0);ctx.scale(-1,1);sprite(npc.asset,npc,83);ctx.restore();}});
     layers.push({y:requestBoardSpot.y,draw:drawBoard});
     for(const stage of solved){const at=clientAt(stage);if(at)layers.push({y:at.y,draw:()=>drawClient(stage,at)});}
     const studentHeight=Math.max(...directions.flatMap(direction=>[1,2,3,4].map(i=>visibleHeight(`student/${direction}-${i}.webp`))));
@@ -482,17 +483,25 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     drawVillageLight();
     if(revealStage && revealTime<2.4 && !reduced.matches){const p=rewardPoint(revealStage);ctx.save();ctx.globalAlpha=Math.max(0,1-revealTime/2.4);ctx.strokeStyle='#fff4b4';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(p.x,p.y-22,20+revealTime*48,12+revealTime*23,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
   }
+  // The map fills the screen (cover, up to 2x the fit size) and the camera follows the student over the overflow.
+  let frameWidth=1,frameHeight=1;
+  function follow() {
+    const sw=shell.clientWidth,sh=shell.clientHeight,mw=map?.width??16,mh=map?.height??9;
+    const axis=(view:number,size:number,at:number)=>size<=view?(view-size)/2:Math.min(0,Math.max(view-size,view/2-at));
+    frame.style.transform=`translate(${axis(sw,frameWidth,actor.x/mw*frameWidth)}px,${axis(sh,frameHeight,actor.y/mh*frameHeight)}px)`;
+  }
   function resize() {
-    const ratio=map?map.width/map.height:16/9;
-    const width=Math.max(1,Math.min(shell.clientWidth,shell.clientHeight*ratio)),height=width/ratio;
-    frame.style.width=`${width}px`;frame.style.height=`${height}px`;
-    const density=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(width*density);canvas.height=Math.round(height*density);draw();
+    const mw=map?.width??16,mh=map?.height??9,sw=Math.max(1,shell.clientWidth),sh=Math.max(1,shell.clientHeight);
+    const fit=Math.min(sw/mw,sh/mh),scale=Math.min(Math.max(sw/mw,sh/mh),fit*2);
+    frameWidth=mw*scale;frameHeight=mh*scale;
+    frame.style.width=`${frameWidth}px`;frame.style.height=`${frameHeight}px`;
+    const density=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(frameWidth*density);canvas.height=Math.round(frameHeight*density);draw();
   }
   const observer=new ResizeObserver(resize);observer.observe(shell);resize();
   function updateNearby() {
     if(!map)return;
     nearestBuilding=map.buildings.filter(building=>distance(actor,building.entry)<=building.entry.radius+11).sort((a,b)=>distance(actor,a.entry)-distance(actor,b.entry))[0];
-    nearestNpc=map.npcs.filter(npc=>distance(actor,npc)<=65).sort((a,b)=>distance(actor,a)-distance(actor,b))[0];
+    nearestNpc=map.npcs.filter(npc=>distance(actor,npc)<=120).sort((a,b)=>distance(actor,a)-distance(actor,b))[0];
     nearestClient=nearestNpc?undefined:visibleClients().filter(stage=>distance(actor,requesterSpots[stage])<=48).sort((a,b)=>distance(actor,requesterSpots[a])-distance(actor,requesterSpots[b]))[0];
     nearBoard=!nearestNpc&&!nearestClient&&distance(actor,requestBoardSpot)<=80;
     const spot=!!nearestNpc||!!nearestClient||nearBoard;
@@ -501,6 +510,9 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     action.disabled=!nearestBuilding&&!spot&&!guide;
     const next=nearestNpc?`${nearestNpc.name}와 이야기` : nearestClient?`${withParticle(villageRequests[nearestClient].client,'과','와')} 이야기` : nearBoard?'의뢰 게시판 보기' : guide?`다음: ${withDirectionParticle(villageRewards[story.next!].name)} 가기` : nearestBuilding?`${villageRewards[nearestBuilding.id].name} ${options.adminUnlocked||stageIsOpen(context.save,nearestBuilding.id)?'들어가기':'살펴보기'}`:'건물 이름을 눌러요';
     if(action.textContent!==next)action.textContent=next;
+    // Walking past the doctor shows his greeting as a bubble; the button still opens the full talk.
+    const bubble=labels.querySelector<HTMLElement>('.village-npc-bubble');
+    if(bubble){const show=!!nearestNpc&&!dialog.open;if(show&&bubble.hidden){bubble.textContent=story.lines[0];}bubble.hidden=!show;}
   }
   function restHint() {
     if(nearestNpc)return `${nearestNpc.name} 곁이야. 오른쪽 아래 버튼을 누르면 이야기를 들을 수 있어!`;
@@ -528,7 +540,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   function setupLabels() {
     labels.replaceChildren();
     for(const building of map!.buildings){const button=document.createElement('button');button.className='village-building-label';button.dataset.stage=building.id;button.style.left=`${(building.x+building.width/2)/map!.width*100}%`;button.style.top=`${(building.y+building.height*0.42)/map!.height*100}%`;const name=document.createElement('span');name.textContent=`${story.changes.includes(building.id)?'✓ ':''}${villageRewards[building.id].name}`;button.append(name,starRow(building.id));button.classList.toggle('is-current',story.next===building.id);button.classList.toggle('is-complete',story.changes.includes(building.id));button.classList.toggle('is-locked',!options.adminUnlocked&&!stageIsOpen(context.save,building.id));button.setAttribute('aria-label',`${villageRewards[building.id].name} 문 앞으로 걷기, ${starText(building.id)}`);button.addEventListener('click',()=>goTo(building.entry,villageRewards[building.id].name),{signal:events.signal});labels.append(button);}
-    for(const npc of map!.npcs){const button=document.createElement('button');button.className='village-npc-label';button.style.left=`${npc.x/map!.width*100}%`;button.style.top=`${(npc.y-100)/map!.height*100}%`;button.textContent='도토리 박사';button.setAttribute('aria-label',`${npc.name}에게 걸어가기`);button.addEventListener('click',()=>goTo({x:npc.x-27,y:npc.y+30},npc.name),{signal:events.signal});labels.append(button);}
+    for(const npc of map!.npcs){const button=document.createElement('button');button.className='village-npc-label';button.style.left=`${npc.x/map!.width*100}%`;button.style.top=`${(npc.y-100)/map!.height*100}%`;button.textContent='도토리 박사';button.setAttribute('aria-label',`${npc.name}에게 걸어가기`);button.addEventListener('click',()=>goTo({x:npc.x-72,y:npc.y+6},npc.name),{signal:events.signal});labels.append(button);const bubble=document.createElement('button');bubble.className='village-npc-bubble';bubble.hidden=true;bubble.style.left=`${(npc.x-30)/map!.width*100}%`;bubble.style.top=`${(npc.y-112)/map!.height*100}%`;bubble.setAttribute('aria-label',`${npc.name}의 이야기 더 듣기`);bubble.addEventListener('click',()=>interact(),{signal:events.signal});labels.append(bubble);}
     const open=cards.filter(card=>card.status==='open').length;
     const boardLabel=document.createElement('button');boardLabel.className='village-board-label';boardLabel.style.left=`${requestBoardSpot.x/map!.width*100}%`;boardLabel.style.top=`${(requestBoardSpot.y+6)/map!.height*100}%`;
     boardLabel.textContent='의뢰 게시판';if(open){const count=document.createElement('span');count.className='village-board-count';count.textContent=String(open);boardLabel.append(count);}
@@ -542,13 +554,15 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     const list=board.querySelector('.village-board-cards')!;list.replaceChildren();
     for(const card of cards){
       const item=document.createElement('li');item.className=`village-board-card is-${card.status}`;
-      const face=document.createElement('img');face.className='village-board-portrait';face.alt='';face.src=assetURL(`npc/${card.pose}.webp`);face.style.filter=clientFilter(card.stage);
+      const face=document.createElement('img');face.className='village-board-portrait';face.alt='';face.src=assetURL(`npc/${card.pose}.webp`);
       const text=document.createElement('div');text.className='village-board-text';
       const locked=card.status==='locked';
+      // Inline filters would override the CSS silhouette, so only tint an unlocked fallback pose.
+      if(!locked&&villageRequests[card.stage].hue)face.style.filter=clientFilter(card.stage);
       // A locked request keeps its client a secret: a dark silhouette with a question mark until level 1 is done.
       if(locked){face.classList.add('is-mystery');const mark=document.createElement('span');mark.className='village-board-mark';mark.textContent='?';mark.setAttribute('aria-hidden','true');item.append(mark);}
       const from=document.createElement('strong');from.textContent=locked?`??? · ${villageRewards[card.stage].name}`:`${card.client} · ${villageRewards[card.stage].name}`;
-      const quote=document.createElement('p');quote.textContent=locked?'누가 부탁할지는 아직 비밀이에요. 실험 1단계를 마치면 편지가 와요.':`“${card.quote}”`;
+      const quote=document.createElement('p');quote.textContent=locked?'누가 부탁할지는 아직 비밀이에요.':`“${card.quote}”`;
       const status=document.createElement('span');status.className='village-board-status';status.textContent=card.statusText;
       if(card.optional){const tag=document.createElement('span');tag.className='village-board-tag';tag.textContent='선택 의뢰';status.prepend(tag);}
       text.append(from,quote,status);
@@ -754,7 +768,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     event.preventDefault();const bounds=canvas.getBoundingClientRect(),p={x:(event.clientX-bounds.left)/bounds.width*map.width,y:(event.clientY-bounds.top)/bounds.height*map.height};
     if(Math.abs(p.x-requestBoardSpot.x)<50&&p.y>requestBoardSpot.y-98&&p.y<requestBoardSpot.y+10){openBoard();return;}
     const client=visibleClients().find(stage=>{const c=requesterSpots[stage];return Math.abs(p.x-c.x)<30&&p.y>c.y-clientHeight-5&&p.y<c.y+8;});if(client){openClient(client);return;}
-    const npc=map.npcs.find(n=>distance(n,p)<55);if(npc){goTo({x:npc.x-27,y:npc.y+30},npc.name);return;}
+    const npc=map.npcs.find(n=>distance(n,p)<55);if(npc){goTo({x:npc.x-72,y:npc.y+6},npc.name);return;}
     const building=map.buildings.find(b=>p.x>b.x&&p.x<b.x+b.width&&p.y>b.y&&p.y<b.y+b.height);if(building){goTo(building.entry,villageRewards[building.id].name);return;}
     goTo(p);
   },{signal:events.signal});
