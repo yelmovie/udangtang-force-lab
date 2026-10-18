@@ -25,7 +25,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   let inspecting = false, mounted3D = false;
   let corePointer: number | null = null, suppressGripClick = false, coreStart = { x: 0, y: 0 }, projection: CoreProjection | undefined;
   root.innerHTML = `<section class="experiment-screen rescue-screen rescue-redesign core-studio">
-    <div class="experiment-heading"><div class="core-title"><span class="core-eyebrow">마을 복구 · 마지막 작전</span><h1>중앙 코어</h1></div>${missionProgressMarkup('rescue',['무게 확인','길 열기','같은 힘 비교','코어 도착'])}</div>
+    <div class="experiment-heading"><div class="core-title"><span class="core-eyebrow">배터리 재장착 · 마지막 작전</span><h1>중앙 코어</h1></div>${missionProgressMarkup('rescue',['무게 확인','길 열기','같은 힘 비교','코어 도착'])}</div>
     <div class="rescue-stage"><div class="rescue-stage-head"><strong id="rescue-phase"></strong><span id="rescue-readout"></span><details class="rescue-notebook"><summary>내 발견 꺼내 쓰기 ▾</summary><div class="rescue-notes-body"><div id="rescue-clues"></div><p id="rescue-used-clue"></p><div id="rescue-checks" class="rescue-checks"></div><div id="rescue-runs" class="result-list"></div><p id="rescue-insight"></p></div></details></div>
       <div class="rescue-playfield">
         <svg class="rescue-world" viewBox="0 90 720 350" aria-label="코어와 장애물을 직접 움직이는 운반 작업대">
@@ -53,7 +53,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
         <div id="rescue-companion" class="rescue-companion" aria-hidden="true"></div><div class="rescue-corgi-tip" id="rescue-corgi-tip" role="status"></div><div id="rescue-stop-mark" class="rescue-stop-mark" aria-hidden="true" hidden>멈춤!</div><div class="rescue-progress-track" aria-hidden="true"><i id="rescue-progress"></i></div><div class="rescue-world-note">같은 코어 · 같은 도착 높이</div>
       </div>
       <div class="rescue-bottom"><div id="rescue-controls" class="rescue-controls"></div><button class="rescue-step-button" id="core-handle">상자 조금 움직이기 →</button><p id="rescue-gesture-help"></p></div>
-    </div><div class="experiment-footer"><span class="feedback" id="rescue-feedback" role="status"></span><button class="button button-primary" id="rescue-finish" disabled>코어 장착하기 <span aria-hidden="true">→</span></button></div></section>`;
+    </div><div class="experiment-footer"><span class="feedback" id="rescue-feedback" role="status"></span><button class="button button-primary" id="rescue-finish" disabled>코어 다시 장착하기 <span aria-hidden="true">→</span></button></div></section>`;
   const svg = root.querySelector<SVGSVGElement>('.rescue-world')!;
   const art = root.querySelector<SVGGElement>('#core-art')!;
   const gate = root.querySelector<SVGGElement>('#gate-crate')!;
@@ -98,11 +98,11 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     sceneHost.classList.toggle('is-inspecting', inspecting);
     sceneHost.classList.toggle('is-mounted', mounted3D);
     grip.hidden = inspecting || mounted3D || phase() !== 2 || use2D || !scene || sceneFailed;
-    finish.innerHTML = `${mounted3D ? '내 발견 설명하기' : '코어 장착하기'} <span aria-hidden="true">→</span>`;
+    finish.innerHTML = `${mounted3D ? '내 발견 설명하기' : '코어 다시 장착하기'} <span aria-hidden="true">→</span>`;
     const button = viewTools.querySelector<HTMLButtonElement>('[data-core-view="inspect"]')!;
     button.textContent = inspecting ? '전체 보기' : '코어 확대'; button.setAttribute('aria-pressed', String(inspecting));
     viewTools.inert = busy || !scene;
-    root.querySelector('.core-view-hint')!.textContent = inspecting ? '좌우로 돌려 코어의 모양을 관찰하세요.' : mounted3D ? '코어 장착 완료 · 다섯 구역 연결' : '시점을 돌려 두 빗면을 살펴보세요.';
+    root.querySelector('.core-view-hint')!.textContent = inspecting ? '좌우로 돌려 코어의 모양을 관찰하세요.' : mounted3D ? '코어 재장착 완료 · 마을 전원 복구' : '시점을 돌려 두 빗면을 살펴보세요.';
   }
   function overview() { inspecting = false; scene?.setView('overview'); syncView(); }
   sceneHost.addEventListener('click', event => {
@@ -175,7 +175,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     root.querySelector<HTMLElement>('#core-records')!.hidden = !coreMode;
     syncView();
     grip.querySelector('span')!.textContent = state.delivered ? '장착 준비' : '끌어서 운반';
-    grip.setAttribute('aria-label', state.delivered && rescueReady(state) ? '코어 장착하기' : '코어 움직이기. 빗면을 따라 끌거나 Enter를 누르고 있기');
+    grip.setAttribute('aria-label', state.delivered && rescueReady(state) ? '코어 다시 장착하기' : '코어 움직이기. 빗면을 따라 끌거나 Enter를 누르고 있기');
     renderRecords();
     for (const route of ['long', 'short']) root.querySelector(`#core-${route}-tag`)!.setAttribute('aria-pressed', String(state.route === route));
     if (coreMode && !sceneTried) prepareScene();
@@ -255,7 +255,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     state.runs = retainRescueRuns([...state.runs,{ route:state.route, force:state.force, success }]); state.delivered = success; flashRecord = true;
     restProgress = success ? 1 : .32;
     const found = !knew && hasFairComparison(state.runs), hint = comparisonHint(state.runs, state.force);
-    if (success) tell(found ? `코어 도착! ${hint} 이제 코어를 장착해요!` : knew ? '코어 도착! 이제 코어를 장착해요!' : `도착했어요! ${hint}`);
+    if (success) tell(found ? `코어 도착! ${hint} 이제 중앙 장치에 코어를 다시 끼워요!` : knew ? '코어 도착! 이제 중앙 장치에 코어를 다시 끼워요!' : `도착했어요! ${hint}`);
     else tell(found ? `멈춰서 미끄러졌어요! ${hint} 이제 도착하는 길로 옮겨요.` : knew ? '멈춰서 미끄러졌어요. 도착하는 길로 코어를 옮겨요.' : `멈춰서 미끄러졌어요. 손가락을 더 세게 누를 필요는 없어요. ${hint}`);
     companion.setMood(success ? 'success' : 'observe'); context.sound(success ? 740 : 350);
     if (!success) { showStopMark(); slideBack(); }
@@ -425,17 +425,17 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
       inspecting = false; syncView();
       busy = true; controls.inert = true; finish.disabled = true; handle.disabled = true;
       viewTools.inert = true; sceneHost.classList.add('is-docking');
-      tell('코어를 중앙 장치에 넣고 다섯 구역을 연결하고 있어요…');
+      tell('배터리 코어를 중앙 장치에 다시 끼워 마을의 전원을 연결하고 있어요…');
       const mounted = scene ? await scene.dock() : true;
       if (!active || !mounted) return;
       busy = false; controls.inert = false; finish.disabled = false; mounted3D = true;
       sceneHost.classList.remove('is-docking'); syncView();
-      tell('코어 장착 완료! 두 길의 비교 기록으로 발견을 설명해요.');
+      tell('코어 재장착 완료! 마을에 전기가 돌아왔어요. 두 길의 비교 기록으로 발견을 설명해요.');
       context.sound(840);
     }
-    context.finish('rescue', `영점을 맞춰 코어 ${coreWeight} g을 확인하고 상자를 내 쪽으로 당겨 길을 열었어요. ${state.runs.length}번 운반을 시험했어요. ${comparisonSummary(state.runs)} ${routeNames[state.route]}에서 ${forceNames[state.force-1]}으로 운반하고 중앙 장치에 코어를 장착했어요.${usedClue ? ` ${usedClue}` : ''}`);
+    context.finish('rescue', `영점을 맞춰 코어 ${coreWeight} g을 확인하고 상자를 내 쪽으로 당겨 길을 열었어요. ${state.runs.length}번 운반을 시험했어요. ${comparisonSummary(state.runs)} ${routeNames[state.route]}에서 ${forceNames[state.force-1]}으로 운반하고 중앙 장치에 배터리 코어를 다시 장착해 마을의 전기를 되찾았어요.${usedClue ? ` ${usedClue}` : ''}`);
   }, { signal });
-  tell(state.delivered ? '코어가 도착했어요. 비교 기록을 확인하고 코어를 장착해요.' : state.gate ? '같은 힘으로 두 빗면을 비교해요. 길을 고른 뒤 코어를 직접 끌어 보세요.' : state.measured ? '코어는 180 g! 벽 옆 상자를 직접 움직여 길을 열어요.' : '빈 저울의 숫자를 0으로 맞춘 뒤 코어를 올려요.');
+  tell(state.delivered ? '코어가 도착했어요. 비교 기록을 확인하고 중앙 장치에 다시 끼워요.' : state.gate ? '같은 힘으로 두 빗면을 비교해요. 길을 고른 뒤 코어를 직접 끌어 보세요.' : state.measured ? '코어는 180 g! 벽 옆 상자를 직접 움직여 길을 열어요.' : '분리된 배터리 코어를 다시 장착할 거예요. 먼저 빈 저울을 0으로 맞추고 코어의 무게를 재요.');
   renderClues(); update();
   return () => { active = false; cancelAnimationFrame(frame); cancelAnimationFrame(buttonFrame); cancelAnimationFrame(slideFrame); clearTimeout(stageTimer); clearTimeout(stopTimer); events.abort(); scene?.dispose(); companion.dispose(); };
 }

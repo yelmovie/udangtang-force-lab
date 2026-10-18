@@ -199,9 +199,9 @@ function escapeHtml(value: string): string {
 
 
 const prologueLines = [
-  { who: '도토리 박사', text: '큰일이야! 실험실의 동력이 멈춰서 마을의 불이 다 꺼졌어.' },
-  { who: '도토리 박사', text: '다섯 건물에서 힘의 증거를 모아 줘. 그 기록으로 마지막 코어를 옮길 길을 찾을 수 있어.' },
-  { who: '코기 콩이', text: '킁킁! 내가 실험 단서를 찾아줄게. 너는 먼저 예상하고, 직접 움직인 뒤 결과를 비교해 줘!' },
+  { who: '도토리 박사', text: '우당탕 마을에 전기 전원이 모두 나갔어! 무슨 일이 생긴 걸까?' },
+  { who: '도토리 박사', text: '원인을 찾았어! 마을의 배터리 ‘코어’가 중앙 장치에서 분리돼 있어. 다시 끼워야 전기가 돌아와.' },
+  { who: '코기 콩이', text: '그런데 코어가 너무 무거워! 네 건물에서 밀고 당기기, 무게 비교, 도구 쓰는 법을 익혀서 다시 장착할 방법을 찾자!' },
 ];
 type StoryVideo = { src: string; cues: number[]; duration: number; poster?: string };
 type StoryOptions = { lines: { who: string; text: string }[]; finishLabel: string; onDone?: () => void; skippable?: boolean; scenes?: string[]; video?: StoryVideo };
@@ -250,7 +250,7 @@ function openStoryModal(options: StoryOptions) {
         <img class="story-end-frame" src="${options.scenes?.at(-1) ?? `/assets/story/intro-0${options.lines.length}.webp`}" alt="" hidden>
         <button type="button" class="button button-primary story-play" data-story="play" hidden>${icons.play} 영상 재생</button>
       </div>
-      <div class="story-finish-banner" aria-hidden="true"><span>★</span>${options.scenes ? '마을에 불이 켜졌어!' : '출발 준비 완료!'}<span>★</span></div>
+      <div class="story-finish-banner" aria-hidden="true"><span>★</span>${options.scenes ? '마을에 불이 켜졌어!' : '코어를 옮길 방법을 찾자!'}<span>★</span></div>
       <p class="eyebrow" id="story-title"></p>
       <p class="story-text story-caption" id="story-caption" role="status" aria-live="polite"></p>
       <div class="story-dots" aria-hidden="true">${dots}</div>
@@ -342,9 +342,9 @@ function openEndingCeremony() {
     video: endingVideo,
     scenes:[1,2,3].map(i=>`/assets/story/final-0${i}.webp`),
     lines:[
-      {who:'코기 콩이',text:'딸깍! 네가 직접 재고, 당기고, 비교해서 옮긴 코어가 마을의 동력이 됐어!'},
-      {who:'도토리 박사',text:'배송소의 물자, 균형 다리, 재료 보급소, 운반 공방, 중앙 코어까지. 네 다섯 발견이 모두 연결됐어.'},
-      {who:'코기 콩이',text:'봐, 마을 전체에 불이 켜졌어! 네 예상과 실험으로 우리가 사는 마을을 살린 거야. 정말 뿌듯해!'},
+      {who:'코기 콩이',text:'딸깍! 떨어져 있던 배터리 코어를 중앙 장치에 다시 끼웠어!'},
+      {who:'도토리 박사',text:'무게를 확인하고, 막힌 길을 열고, 도구를 비교했지. 네 건물에서 배운 방법으로 무거운 코어를 옮긴 거야.'},
+      {who:'코기 콩이',text:'와, 코어가 다시 연결되니까 마을 전체에 전기가 돌아왔어! 우리가 힘을 모아 우당탕 마을을 다시 밝혔네!'},
     ],finishLabel:'내가 살린 마을 둘러보기 ✦',onDone:()=>navigate('map'),
   });
 }
@@ -353,7 +353,7 @@ const missionLearn: Record<StageId, string> = {
   balance: '수평대에서 어느 쪽이 더 무거운지 알아내는 법',
   scale: '겉모습으로 헷갈리는 무게를 저울로 비교해요.',
   workshop: '지레와 빗면을 쓰면 필요한 힘이 어떻게 달라지는지',
-  rescue: '지금까지 배운 것을 모두 써서 코어를 옮기는 법',
+  rescue: '배운 방법으로 배터리 코어를 옮겨 중앙 장치에 다시 끼우기',
 };
 const missionCardShown = new Set<StageId>();
 function openMissionCard(stageId: StageId) {
@@ -493,7 +493,7 @@ function renderComplete(root: HTMLElement) {
   const completed = save.completed.length;
   const progress = completed * 20;
   root.innerHTML = `<section class="complete-screen">
-    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '복구 작전 성공 · 다섯 발견이 마을을 밝혔어'}</span><h1>네가 마을을 살렸어!</h1>${(({ earned, max }) => `<p class="ending-stars" aria-label="모은 별 ${earned}개, 전체 ${max}개">★ ${earned} / ${max}</p>`)(totalStars(save))}<p>직접 움직이고, 재고, 비교한 네 다섯 발견으로<br>마을 전체에 다시 불이 켜졌어.</p><button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button></div></div>
+    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리 재장착 성공 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1>${(({ earned, max }) => `<p class="ending-stars" aria-label="모은 별 ${earned}개, 전체 ${max}개">★ ${earned} / ${max}</p>`)(totalStars(save))}<p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 장착했어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button></div></div>
     <details class="complete-details"><summary>내 실험과 발견 살펴보기 · ${completed} / 5</summary>
     <div class="report-grid">${stages.map(stage => {
       const task = learningTask(save, stage.id), record = save.learning?.[stage.id];
@@ -718,7 +718,7 @@ const finishLines: Record<StageId, string> = {
   balance: '어느 쪽이 무거운지 수평대로 알아냈어요. 발견을 저장해요!',
   scale: '저울로 무게를 비교했어요. 비교 기록을 저장해요!',
   workshop: '지레와 빗면으로 힘을 줄이는 법을 찾았어요. 생활 속 도구를 찾으러 가요!',
-  rescue: '코어를 옮길 준비가 끝났어요. 코어를 장착해요!',
+  rescue: '코어가 중앙 장치에 도착했어요. 다시 장착해 마을의 전기를 되찾아요!',
 };
 
 render();

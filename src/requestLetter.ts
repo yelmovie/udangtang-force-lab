@@ -10,9 +10,9 @@ export function showRequestLetter(root: HTMLElement, stage: RequestStage, accept
   const dialog = document.createElement('dialog');
   dialog.className = 'request-letter';
   dialog.setAttribute('aria-labelledby', 'request-letter-title');
-  dialog.innerHTML = `<div class="request-letter-paper">
+  dialog.innerHTML = `<img class="request-letter-portrait" alt="" draggable="false"><div class="request-letter-paper">
     <span class="request-letter-stamp" aria-hidden="true">의뢰</span>
-    <div class="request-letter-heading"><img class="request-letter-portrait" alt="" draggable="false"><div><span class="request-letter-role">${villageRewards[stage].name} 의뢰인</span><h2 id="request-letter-title">${withParticle(request.client, '이', '가')} 보낸 편지</h2></div></div>
+    <div class="request-letter-heading"><div><span class="request-letter-role">${villageRewards[stage].name} 의뢰인</span><h2 id="request-letter-title">${withParticle(request.client, '이', '가')} 보낸 편지</h2></div></div>
     <p class="request-letter-body">${request.quote}</p>
     <p class="request-letter-sign">— ${request.client}</p>
     <div class="request-letter-actions"><button class="request-letter-later" id="request-letter-later">나중에 볼게요</button><button class="button button-primary" id="request-letter-accept">의뢰 받기 →</button></div>

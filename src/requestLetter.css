@@ -5,7 +5,7 @@
 .request-letter-paper::after { content: ''; position: absolute; left: -18px; top: 50%; width: 28px; height: 28px; margin-top: -14px; background: #fff8e4; border-left: 4px solid #8a6a3c; border-bottom: 4px solid #8a6a3c; transform: rotate(45deg); }
 .request-letter-stamp { position: absolute; top: -14px; right: 22px; padding: 6px 14px; border: 3px solid #b23b2a; border-radius: 8px; color: #b23b2a; background: #fff8e4; font-size: 16px; font-weight: 900; letter-spacing: .1em; transform: rotate(8deg); }
 .request-letter-heading { display: flex; align-items: center; gap: 16px; }
-.request-letter-portrait { position: absolute; left: -266px; bottom: -14px; width: 270px; height: 340px; object-fit: contain; object-position: bottom center; image-rendering: auto; filter: drop-shadow(0 10px 6px #0008); animation: request-talker-in .4s cubic-bezier(.2, .8, .3, 1) both; z-index: 1; }
+.request-letter-portrait { position: absolute; left: -16px; bottom: -14px; width: 270px; height: 340px; object-fit: contain; object-position: bottom center; image-rendering: auto; scale: -1 1; filter: drop-shadow(0 10px 6px #0008); animation: request-talker-in .4s cubic-bezier(.2, .8, .3, 1) both; z-index: 1; pointer-events: none; }
 .request-letter-role { font-size: 15px; color: #6b5f45; }
 .request-letter-heading h2 { margin: 4px 0 0; font-size: 24px; color: #2b3f33; line-height: 1.25; }
 .request-letter-body { margin: 18px 0 6px; font-size: 21px; line-height: 1.6; font-weight: 800; word-break: keep-all; min-height: 60px; }
@@ -20,6 +20,6 @@
   .request-letter { padding-left: 150px; }
   .request-letter-paper { padding: 20px 18px 16px; }
   .request-letter-paper::after { display: none; }
-  .request-letter-portrait { width: 170px; height: 220px; left: -160px; }
+  .request-letter-portrait { width: 170px; height: 220px; left: -10px; }
   .request-letter-body { font-size: 18px; } .request-letter-heading h2 { font-size: 20px; }
 }

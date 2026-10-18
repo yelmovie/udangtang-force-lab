@@ -255,8 +255,8 @@ export const requesterSpots: Record<RequestStage, Point & { bubble: Point; sign:
   scale: { x: 600, y: 700, bubble: { x: 662, y: 625 }, sign: { x: 300, y: 680 } },
   workshop: { x: 1410, y: 770, bubble: { x: 1340, y: 718 }, sign: { x: 1560, y: 692 } },
 };
-/** Every adult on the map is drawn this tall so they match the student (83px frames with a shorter head-to-toe). */
-const clientHeight = 84;
+/** NPC silhouettes use the same scale and standing height as the student. */
+const mapCharacterHeight = 83;
 
 /** Korean particle after a name: 주인과/친구와, 주인이/친구가. */
 export function withParticle(name: string, batchim: string, plain: string): string {
@@ -293,7 +293,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   const events = new AbortController();
   const base = `${import.meta.env.BASE_URL}assets/village/`;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  root.innerHTML = `<section class="village-screen"><div class="village-frame"><canvas class="village-canvas" tabindex="0" aria-label="힘 마을. 방향키나 WASD로 걷고, 땅이나 건물 이름을 누르면 길을 따라 이동해요. 열린 문에 닿으면 자동 입장해요. Enter로 안내원과 대화하거나 가까운 문에 들어갈 수도 있어요."></canvas><svg class="village-lights" aria-hidden="true" focusable="false"></svg><div class="village-labels"></div></div><header class="village-hud"><div class="village-objective"><span>우리의 힘 마을</span><strong id="village-goal"></strong></div><div class="village-tally"><span class="village-stars" id="village-stars" role="img"></span><span class="village-count" id="village-count"></span></div></header><div class="village-reveal" role="status" hidden></div><div class="village-bottom"><div class="village-pad" role="group" aria-label="이동 방향판"><button data-direction="up" aria-label="위로 걷기">↑</button><button data-direction="left" aria-label="왼쪽으로 걷기">←</button><button data-direction="down" aria-label="아래로 걷기">↓</button><button data-direction="right" aria-label="오른쪽으로 걷기">→</button></div><p class="village-hint" id="village-hint" role="status">길을 누르거나 방향판으로 걸어가 봐!</p><div class="village-actions"><button id="village-results" hidden>내 발견 모아 보기</button><button id="village-action" disabled>건물 이름을 눌러요</button></div></div><div class="village-loading"><strong>마을로 가는 길을 준비해요…</strong><progress max="100" value="0" aria-label="마을 그림 준비"></progress><span id="village-loading-detail">마을 지도를 읽는 중이에요</span><button id="village-retry" hidden>다시 불러오기</button></div><dialog class="village-dialog" aria-labelledby="village-dialog-title"><div class="village-dialog-heading"><img class="village-portrait" alt=""><div><span id="village-dialog-role">마을의 안내원</span><h2 id="village-dialog-title"></h2></div><button id="village-dialog-close" aria-label="대화 닫기">×</button></div><p id="village-dialog-line"></p><div class="village-dialog-bottom"><span id="village-dialog-page"></span><button id="village-dialog-next">이야기 더 듣기 →</button></div></dialog><dialog class="village-board" aria-labelledby="village-board-title"><div class="village-board-heading"><h2 id="village-board-title">의뢰 게시판</h2><button id="village-board-close" aria-label="게시판 닫기">×</button></div><p class="village-board-lead"></p><ul class="village-board-cards"></ul></dialog></section>`;
+  root.innerHTML = `<section class="village-screen"><div class="village-frame"><canvas class="village-canvas" tabindex="0" aria-label="힘 마을. 방향키나 WASD로 걷고, 땅이나 건물 이름을 누르면 길을 따라 이동해요. 열린 문에 닿으면 자동 입장해요. Enter로 안내원과 대화하거나 가까운 문에 들어갈 수도 있어요."></canvas><svg class="village-lights" aria-hidden="true" focusable="false"></svg><div class="village-labels"></div></div><header class="village-hud"><div class="village-objective"><span>우리의 힘 마을</span><strong id="village-goal"></strong></div><div class="village-tally"><span class="village-stars" id="village-stars" role="img"></span><span class="village-count" id="village-count"></span></div></header><div class="village-reveal" role="status" hidden></div><div class="village-bottom"><div class="village-pad" role="group" aria-label="이동 방향판"><button data-direction="up" aria-label="위로 걷기">↑</button><button data-direction="left" aria-label="왼쪽으로 걷기">←</button><button data-direction="down" aria-label="아래로 걷기">↓</button><button data-direction="right" aria-label="오른쪽으로 걷기">→</button></div><p class="village-hint" id="village-hint" role="status">길을 누르거나 방향판으로 걸어가 봐!</p><div class="village-actions"><button id="village-results" hidden>내 발견 모아 보기</button><button id="village-action" disabled>건물 이름을 눌러요</button></div></div><div class="village-loading"><strong>마을로 가는 길을 준비해요…</strong><progress max="100" value="0" aria-label="마을 그림 준비"></progress><span id="village-loading-detail">마을 지도를 읽는 중이에요</span><button id="village-retry" hidden>다시 불러오기</button></div><dialog class="village-dialog" aria-labelledby="village-dialog-title"><img class="village-portrait" alt=""><div class="village-dialog-heading"><div><span id="village-dialog-role">마을의 안내원</span><h2 id="village-dialog-title"></h2></div><button id="village-dialog-close" aria-label="대화 닫기">×</button></div><p id="village-dialog-line"></p><div class="village-dialog-bottom"><span id="village-dialog-page"></span><button id="village-dialog-next">이야기 더 듣기 →</button></div></dialog><dialog class="village-board" aria-labelledby="village-board-title"><div class="village-board-heading"><h2 id="village-board-title">의뢰 게시판</h2><button id="village-board-close" aria-label="게시판 닫기">×</button></div><p class="village-board-lead"></p><ul class="village-board-cards"></ul></dialog></section>`;
   const shell = root.querySelector<HTMLElement>('.village-screen')!, frame = root.querySelector<HTMLElement>('.village-frame')!;
   const canvas = root.querySelector<HTMLCanvasElement>('.village-canvas')!;
   const ctx = canvas.getContext('2d')!;
@@ -371,6 +371,10 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   }
   function pivot(file: string, image: HTMLImageElement) { return metadata.get(file)?.pivot ?? { x:image.naturalWidth/2,y:image.naturalHeight }; }
   function visibleHeight(file: string) { return metadata.get(file)?.alphaBounds?.height || images.get(file)?.naturalHeight || 1; }
+  function npcHeight() {
+    const studentFamilyHeight = Math.max(...directions.flatMap(direction => [1, 2, 3, 4].map(i => visibleHeight(`student/${direction}-${i}.webp`))));
+    return mapCharacterHeight * visibleHeight('student/down-1.webp') / studentFamilyHeight;
+  }
   function sprite(file: string, p: Point, height: number, familyHeight?: number) {
     const image = images.get(file); if(!image)return;
     const scale = height/(familyHeight||visibleHeight(file)), anchor=pivot(file,image);
@@ -406,7 +410,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   function visibleClients() { return solved.filter(stage => arrivalShown || !arriving.includes(stage)); }
   function drawClient(stage: RequestStage, p: Point & { alpha: number }) {
     const file = `npc/${villageRequests[stage].pose}.webp`, image = images.get(file), sheet = tintedClient(stage); if (!image || !sheet) return;
-    const scale = clientHeight / visibleHeight(file), anchor = pivot(file, image);
+    const scale = npcHeight() / visibleHeight(file), anchor = pivot(file, image);
     ctx.save(); ctx.globalAlpha = p.alpha;
     ctx.fillStyle = '#1d362c55'; ctx.beginPath(); ctx.ellipse(p.x, p.y, 15, 6, 0, 0, Math.PI * 2); ctx.fill();
     ctx.drawImage(sheet, Math.round(p.x - anchor.x * scale), Math.round(p.y - anchor.y * scale), Math.round(image.naturalWidth * scale), Math.round(image.naturalHeight * scale));
@@ -473,14 +477,14 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     for(const building of map.buildings){if(story.next===building.id){ctx.fillStyle='#ffe68799';ctx.beginPath();ctx.ellipse(building.entry.x,building.entry.y+8,26,11,0,0,Math.PI*2);ctx.fill();}}
     const layers:{y:number;draw:()=>void}[]=map.buildings.map(building=>({y:building.y+(metadata.get(building.asset)?.pivot?.y??images.get(building.asset)!.naturalHeight)/images.get(building.asset)!.naturalHeight*building.height,draw:()=>ctx.drawImage(images.get(building.asset)!,building.x,building.y,building.width,building.height)}));
     for(const id of story.changes){const p=rewardPoint(id),building=map.buildings.find(b=>b.id===id);const depth=id==='balance'?p.y:Math.max(p.y,(building?.y??0)+(building?.height??0)+1);layers.push({y:depth,draw:()=>drawRewards(id,id===revealStage&&!reduced.matches?Math.min(1,revealTime/1.1):1)});}
-    for(const npc of map.npcs)layers.push({y:npc.y,draw:()=>{ctx.save();ctx.translate(npc.x*2,0);ctx.scale(-1,1);sprite(npc.asset,npc,clientHeight);ctx.restore();}});
+    for(const npc of map.npcs)layers.push({y:npc.y,draw:()=>{ctx.save();ctx.translate(npc.x*2,0);ctx.scale(-1,1);sprite(npc.asset,npc,npcHeight());ctx.restore();}});
     layers.push({y:requestBoardSpot.y,draw:drawBoard});
     for(const stage of solved){const at=clientAt(stage);if(at)layers.push({y:at.y,draw:()=>drawClient(stage,at)});}
     const studentHeight=Math.max(...directions.flatMap(direction=>[1,2,3,4].map(i=>visibleHeight(`student/${direction}-${i}.webp`))));
     const corgiHeight=Math.max(...directions.flatMap(direction=>[1,2,3,4].map(i=>visibleHeight(`corgi/${direction}-${i}.webp`))));
     const studentFrame=moving&&!reduced.matches?Math.floor(walkingTime*8)%4+1:1, dogFrame=dogMoving&&!reduced.matches?Math.floor(dogTime*8)%4+1:1;
     layers.push({y:dog.y,draw:()=>sprite(`corgi/${dog.direction}-${dogFrame}.webp`,dog,43,corgiHeight)});
-    layers.push({y:actor.y,draw:()=>{ctx.fillStyle='#1d362c55';ctx.beginPath();ctx.ellipse(actor.x,actor.y,17,7,0,0,Math.PI*2);ctx.fill();sprite(`student/${actor.direction}-${studentFrame}.webp`,actor,83,studentHeight);}});
+    layers.push({y:actor.y,draw:()=>{ctx.fillStyle='#1d362c55';ctx.beginPath();ctx.ellipse(actor.x,actor.y,17,7,0,0,Math.PI*2);ctx.fill();sprite(`student/${actor.direction}-${studentFrame}.webp`,actor,mapCharacterHeight,studentHeight);}});
     layers.sort((a,b)=>a.y-b.y).forEach(layer=>layer.draw());
     drawVillageLight();
     if(revealStage && revealTime<2.4 && !reduced.matches){const p=rewardPoint(revealStage);ctx.save();ctx.globalAlpha=Math.max(0,1-revealTime/2.4);ctx.strokeStyle='#fff4b4';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(p.x,p.y-22,20+revealTime*48,12+revealTime*23,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
@@ -769,7 +773,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if(!map||paused()||(event.pointerType==='mouse'&&event.button!==0))return;
     event.preventDefault();const bounds=canvas.getBoundingClientRect(),p={x:(event.clientX-bounds.left)/bounds.width*map.width,y:(event.clientY-bounds.top)/bounds.height*map.height};
     if(Math.abs(p.x-requestBoardSpot.x)<50&&p.y>requestBoardSpot.y-98&&p.y<requestBoardSpot.y+10){openBoard();return;}
-    const client=visibleClients().find(stage=>{const c=requesterSpots[stage];return Math.abs(p.x-c.x)<30&&p.y>c.y-clientHeight-5&&p.y<c.y+8;});if(client){openClient(client);return;}
+    const client=visibleClients().find(stage=>{const c=requesterSpots[stage];return Math.abs(p.x-c.x)<30&&p.y>c.y-npcHeight()-5&&p.y<c.y+8;});if(client){openClient(client);return;}
     const npc=map.npcs.find(n=>distance(n,p)<55);if(npc){goTo({x:npc.x-72,y:npc.y+6},npc.name);return;}
     const building=map.buildings.find(b=>p.x>b.x&&p.x<b.x+b.width&&p.y>b.y&&p.y<b.y+b.height);if(building){goTo(building.entry,villageRewards[building.id].name);return;}
     goTo(p);

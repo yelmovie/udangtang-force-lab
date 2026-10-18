@@ -175,7 +175,7 @@ button.button:not(:disabled):active {
 .village-screen .village-dialog-heading::before { content: ''; position: absolute; left: 12px; right: 12px; top: 5px; height: 9px; border-radius: 0 0 6px 6px; background: var(--modal-strip); }
 .village-screen .village-dialog #village-dialog-line { margin: 14px 22px 18px; }
 .village-screen .village-dialog-bottom { padding: 0 22px 20px; }
-.village-screen .village-portrait { position: absolute; left: -16px; bottom: -14px; width: 270px; height: 340px; object-fit: contain; object-position: bottom center; image-rendering: auto; filter: drop-shadow(0 10px 6px #0008); animation: talker-in .4s cubic-bezier(.2, .8, .3, 1) both; z-index: 1; }
+.village-screen .village-portrait { position: absolute; left: -16px; bottom: -14px; width: 270px; height: 340px; object-fit: contain; object-position: bottom center; image-rendering: auto; scale: -1 1; filter: drop-shadow(0 10px 6px #0008); animation: talker-in .4s cubic-bezier(.2, .8, .3, 1) both; z-index: 1; pointer-events: none; }
 @keyframes talker-in { from { transform: translateX(-30px) translateY(16px); opacity: 0; } }
 @media (max-width: 760px) {
   .village-screen .village-dialog { padding-left: 150px; }

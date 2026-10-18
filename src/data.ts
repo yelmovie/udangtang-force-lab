@@ -11,11 +11,11 @@ export const stages: {
   restore: string;
   color: string;
 }[] = [
-  { id: 'cargo', page: 3, mission: 1, title: '물자 배송소', concept: '밀기·당기기', evidence: '밀고 당긴 기록', restore: '힘 배송실의 운반 레일이 켜졌어요.', color: '#e58b43' },
-  { id: 'balance', page: 5, mission: 2, title: '균형 다리', concept: '수평잡기', evidence: '무게를 비교한 기록', restore: '균형 실험실의 표시등이 켜졌어요.', color: '#7eaf67' },
-  { id: 'scale', page: 7, mission: 3, title: '재료 보급소', concept: '전자저울', evidence: '저울로 비교한 기록', restore: '무게 측정실의 전원이 돌아왔어요.', color: '#5b9fb0' },
-  { id: 'workshop', page: 9, mission: 4, title: '운반 공방', concept: '지레·빗면', evidence: '도구 활용 설계도', restore: '힘 절약 공방의 동력선이 이어졌어요.', color: '#ad86c0' },
-  { id: 'rescue', page: 11, mission: 5, title: '중앙 코어', concept: '긴급 운반 작전', evidence: '나의 코어 운반 기록', restore: '네가 옮긴 코어로 실험실 전체에 불이 켜졌어요!', color: '#d99b35' },
+  { id: 'cargo', page: 3, mission: 1, title: '물자 배송소', concept: '밀기·당기기', evidence: '밀고 당긴 기록', restore: '코어를 옮길 준비에 쓸 수리 재료가 도착했어요.', color: '#e58b43' },
+  { id: 'balance', page: 5, mission: 2, title: '균형 다리', concept: '수평잡기', evidence: '무게를 비교한 기록', restore: '코어 운반을 위한 다리 점검을 마쳤어요.', color: '#7eaf67' },
+  { id: 'scale', page: 7, mission: 3, title: '재료 보급소', concept: '전자저울', evidence: '저울로 비교한 기록', restore: '코어의 무게를 정확히 잴 준비가 됐어요.', color: '#5b9fb0' },
+  { id: 'workshop', page: 9, mission: 4, title: '운반 공방', concept: '지레·빗면', evidence: '도구 활용 설계도', restore: '코어를 옮길 지레와 빗면이 준비됐어요.', color: '#ad86c0' },
+  { id: 'rescue', page: 11, mission: 5, title: '중앙 코어', concept: '긴급 운반 작전', evidence: '나의 코어 운반 기록', restore: '배터리 코어를 다시 장착해 마을 전체에 전기가 돌아왔어요!', color: '#d99b35' },
 ];
 
 export const balanceObjects = [
