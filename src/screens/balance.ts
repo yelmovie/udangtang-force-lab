@@ -70,7 +70,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       <div class="balance-top-tools"><button class="button button-primary" id="balance-request-open" hidden>의뢰 받기 →</button><button class="balance-record-button" id="balance-record" aria-haspopup="dialog"><span id="balance-record-label">기록 보기</span><b id="balance-count">0</b></button></div>
     </div>
     <div class="instrument-stage game-panel balance-field">
-      <div class="instrument-phase" id="balance-phase"></div>
+      <div class="instrument-phase" id="balance-phase" role="status"></div>
       <div class="balance-apparatus"><div class="balance-board" id="balance-board">
         <button class="balance-pan left" data-pan="left" aria-label="왼쪽 자리"><span class="balance-side">왼쪽</span><div class="pan-object" id="left-object"></div><strong class="balance-pan-name" id="left-name">물체 놓기</strong></button>
         <div class="balance-beam"></div>
@@ -153,6 +153,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     setTapHint(recordButton, !busy && predictPending());
     finish.disabled = !canSave();
     root.querySelector('#balance-phase')!.textContent = phaseText();
+    root.querySelectorAll<HTMLElement>('.balance-dock .dock-label').forEach(label => { label.textContent = phaseText(); });
     result.textContent = resultText();
     root.querySelector('#balance-tilt-goal')!.textContent = `${hasTilt() ? '✓' : '○'} 기울기 발견`;
     root.querySelector('#balance-level-goal')!.textContent = `${hasLevel() ? '✓' : '○'} 수평 발견`;
@@ -174,7 +175,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     if (kind === 'predict') {
       const off = busy || !state.left || !state.right;
       return {
-        label: '예상하기', title: '어느 쪽이 내려갈까?',
+        label: '이번 비교 예상', title: '어느 쪽이 내려갈까?',
         lead: `왼쪽 ${objectName(state.left!)} · 오른쪽 ${objectName(state.right!)}. 잠금핀을 뽑기 전에 골라요.`,
         body: `<div class="predict-options balance-popup-predict">${(['left','level','right'] as const).map(id => `<button data-predict="${id}" aria-pressed="${id === state.prediction}" aria-label="${names[id]} 예상"${off ? ' disabled' : ''}>${id === 'left' ? icons.arrowDownLeft : id === 'right' ? icons.arrowDownRight : '═'} <span>${id === 'left' ? '왼쪽' : id === 'right' ? '오른쪽' : '수평'}</span></button>`).join('')}</div><button class="instrument-text-button" id="balance-swap"${off ? ' disabled' : ''}>${icons.swap} 두 물체 자리 바꾸기</button>`,
         actions: '<button class="button button-secondary" id="balance-popup-close">물체 다시 고르기</button>',
@@ -188,8 +189,8 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       const rows = state.runs.slice(-5).reverse().map(item => `<div class="result-row"><span>${objectName(item.left)} : ${objectName(item.right)}</span><strong>${names[item.actual]}</strong></div>`).join('') || '<p>첫 발견을 기다리고 있어요.</p>';
       const request = requestOpen() ? '<div class="balance-request"><p class="balance-request-from">다리 점검원의 의뢰</p><p class="balance-request-text">똑같이 생긴 상자 중에 진짜 무거운 기둥 부품이 섞였어요. 찾아 주세요!</p></div>' : '';
       return {
-        label: run ? '실험 결과' : '나의 발견',
-        title: run ? run.prediction === run.actual ? '예상과 같아요!' : '예상과 달라도 괜찮아요!' : '지금까지의 발견',
+        label: run ? '이번 비교 결과' : '나의 발견',
+        title: run ? run.prediction === run.actual ? '이번 비교 예상과 같아요!' : '이번 비교 예상과 달라도 괜찮아요!' : '지금까지의 발견',
         lead: run ? `예상 ${names[run.prediction]} → 관찰 ${names[run.actual]}. ${reason(run)}` : phaseText(),
         body: `<div class="balance-popup-runs"><strong>나의 발견 ${state.runs.length}</strong><div class="result-list">${rows}</div></div><p class="balance-popup-next">${next}</p>${request}`,
         actions: requestOpen() ? `${keepGoing(false)}<button class="button button-primary" id="balance-popup-request"${busy ? ' disabled' : ''}>의뢰 받기 →</button>` : `${save ? keepGoing(false) : keepGoing(true)}${save}`,

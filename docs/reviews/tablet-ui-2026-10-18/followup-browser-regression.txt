@@ -1,0 +1,27 @@
+PASS webgl: failure → retry → map, saved progress unchanged
+PASS asset: failure → retry → map, saved progress unchanged
+PASS context-lost → retry recovers interaction
+PASS context-lost during an open result exposes recovery without losing the result
+PASS balance pointercancel: outside drag cancels, tap placement still works
+PASS scale pointercancel: outside drag cancels, next measurement works
+PASS cargo pointercancel: outside drag cancels without experiment
+PASS workshop pointercancel: cancellation restores controls
+PASS rescue pointercancel: initial SVG drag restores controls
+PASS balance resize: outside drag cancels, tap placement still works
+PASS scale resize: outside drag cancels, next measurement works
+PASS cargo resize: outside drag cancels without experiment
+PASS workshop resize: cancellation restores controls
+PASS rescue resize: initial SVG drag restores controls
+PASS balance blur: outside drag cancels, tap placement still works
+PASS scale blur: outside drag cancels, next measurement works
+PASS cargo blur: outside drag cancels without experiment
+PASS workshop blur: cancellation restores controls
+PASS rescue blur: initial SVG drag restores controls
+PASS cargo: completed comparisons reopen the question and award a request only after the finding
+PASS village: locked buildings explain the prerequisite without changing progress
+PASS scale round 2: unmeasured submission explains why without awarding progress
+PASS scale: a previously measured part can be submitted after another part and resize
+PASS balance: automatic prediction popup can close and reopen without input lock
+PASS leaving a screen cancels its pending request letter
+
+Synthetic pointer events only; physical touch/iPad Safari not tested.

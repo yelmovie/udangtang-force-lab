@@ -1,0 +1,155 @@
+[
+  {
+    "label": "cargo-record",
+    "modal": {
+      "clientHeight": 511,
+      "h": 510.765625,
+      "scrollHeight": 511,
+      "w": 789.546875,
+      "x": 117.21875,
+      "y": 128.609375
+    },
+    "outside": [],
+    "small": [],
+    "viewport": [
+      1024,
+      768
+    ]
+  },
+  {
+    "label": "cargo-record",
+    "modal": {
+      "clientHeight": 511,
+      "h": 510.765625,
+      "scrollHeight": 511,
+      "w": 789.546875,
+      "x": 195.21875,
+      "y": 154.609375
+    },
+    "outside": [],
+    "small": [],
+    "viewport": [
+      1180,
+      820
+    ]
+  },
+  {
+    "label": "cargo-record",
+    "modal": {
+      "clientHeight": 511,
+      "h": 510.765625,
+      "scrollHeight": 511,
+      "w": 789.546875,
+      "x": 245.21875,
+      "y": 144.609375
+    },
+    "outside": [],
+    "small": [],
+    "viewport": [
+      1280,
+      800
+    ]
+  },
+  {
+    "label": "completion",
+    "modal": {
+      "clientHeight": 453,
+      "h": 464.6875,
+      "scrollHeight": 453,
+      "w": 760,
+      "x": 132,
+      "y": 151.65625
+    },
+    "outside": [],
+    "small": [],
+    "viewport": [
+      1024,
+      768
+    ]
+  },
+  {
+    "label": "completion",
+    "modal": {
+      "clientHeight": 453,
+      "h": 464.6875,
+      "scrollHeight": 453,
+      "w": 760,
+      "x": 210,
+      "y": 177.65625
+    },
+    "outside": [],
+    "small": [],
+    "viewport": [
+      1180,
+      820
+    ]
+  },
+  {
+    "label": "completion",
+    "modal": {
+      "clientHeight": 453,
+      "h": 464.6875,
+      "scrollHeight": 453,
+      "w": 760,
+      "x": 260,
+      "y": 167.65625
+    },
+    "outside": [],
+    "small": [],
+    "viewport": [
+      1280,
+      800
+    ]
+  },
+  {
+    "label": "scale-record",
+    "modal": {
+      "clientHeight": 345,
+      "h": 344.78125,
+      "scrollHeight": 345,
+      "w": 860,
+      "x": 82,
+      "y": 211.609375
+    },
+    "outside": [],
+    "small": [],
+    "viewport": [
+      1024,
+      768
+    ]
+  },
+  {
+    "label": "scale-record",
+    "modal": {
+      "clientHeight": 345,
+      "h": 344.78125,
+      "scrollHeight": 345,
+      "w": 860,
+      "x": 160,
+      "y": 237.609375
+    },
+    "outside": [],
+    "small": [],
+    "viewport": [
+      1180,
+      820
+    ]
+  },
+  {
+    "label": "scale-record",
+    "modal": {
+      "clientHeight": 345,
+      "h": 344.78125,
+      "scrollHeight": 345,
+      "w": 860,
+      "x": 210,
+      "y": 227.609375
+    },
+    "outside": [],
+    "small": [],
+    "viewport": [
+      1280,
+      800
+    ]
+  }
+]

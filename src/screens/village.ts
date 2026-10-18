@@ -529,6 +529,8 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   }
   function goTo(target: Point, name?: string) {
     if(!navigation||paused())return;
+    const building = map?.buildings.find(building => distance(target, building.entry) < 1);
+    if (building && explainLockedBuilding(building)) return;
     const next=navigation.route(actor,target);
     if(!next){hint.textContent='그곳까지 갈 길이 없어. 흙길이나 다리를 눌러 봐!';destination=null;path=[];draw();return;}
     clearInput();path=next;destination=next.at(-1)??null;hint.textContent=name?`${name} 앞까지 길을 따라 걸어갈게.`:'길을 따라 가는 중… 방향판을 누르면 직접 걸을 수 있어.';canvas.focus();draw();
@@ -672,13 +674,17 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     talk=next;line=0;path=[];destination=null;clearInput();showLine();dialog.showModal();nextLine.focus();draw();
   }
   function closeDialogue() { if(!dialog.open)return;dialog.close();talk=null;clearInput();canvas.focus();last=performance.now();draw(); }
+  function explainLockedBuilding(building: Building) {
+    if (options.adminUnlocked || stageIsOpen(context.save, building.id)) return false;
+    const mission = story.next ? villageRewards[story.next].name : '먼저 열린 실험실';
+    const message = `먼저 ${mission} 미션을 끝내고 와 줘! 실험과 의뢰를 마치고 복구하면 다음 건물에 들어갈 수 있어.`;
+    hint.textContent = message;
+    openTalk({ name: villageRewards[building.id].name, role: '아직 들어갈 수 없어요', lines: [message], portrait: () => 'npc/point.webp', tint: '', done: '미션을 끝내고 올게!' });
+    return true;
+  }
   function enterBuilding(building: Building) {
     if (entering || !alive || paused()) return false;
-    if (!options.adminUnlocked && !stageIsOpen(context.save, building.id)) {
-      path = []; destination = null;
-      hint.textContent = `아직 준비 중이야. ${story.next ? villageRewards[story.next].name : '먼저 열린 실험실'}에서 발견을 모아 와 줘!`;
-      return false;
-    }
+    if (explainLockedBuilding(building)) return false;
     entering = true;
     clearInput(); path = []; destination = null;
     context.navigate(building.id);

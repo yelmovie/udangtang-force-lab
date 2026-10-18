@@ -1,0 +1,22 @@
+
+> udangtang-force-lab-mvp@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 71 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                          1.81 kB │ gzip:   0.92 kB
+dist/assets/index-DQr1Dekj.css         252.17 kB │ gzip:  50.97 kB
+dist/assets/workshopScene-fC86OYXk.js    5.74 kB │ gzip:   2.78 kB
+dist/assets/coreScene-68_POyAH.js       12.68 kB │ gzip:   5.57 kB
+dist/assets/index-BKkKuNbk.js          297.07 kB │ gzip:  97.92 kB
+dist/assets/GLTFLoader-D2yk_eFr.js     608.60 kB │ gzip: 156.29 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 9.97s
+Offline precache: 14 of 164 files; 1ab739438399b698

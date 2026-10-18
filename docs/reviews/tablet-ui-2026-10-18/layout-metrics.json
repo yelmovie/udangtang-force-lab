@@ -1,0 +1,107 @@
+[
+  {
+    "stage": "cargo",
+    "width": 1024,
+    "height": 768,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "cargo",
+    "width": 1180,
+    "height": 820,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "cargo",
+    "width": 1280,
+    "height": 800,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "balance",
+    "width": 1024,
+    "height": 768,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "balance",
+    "width": 1180,
+    "height": 820,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "balance",
+    "width": 1280,
+    "height": 800,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "scale",
+    "width": 1024,
+    "height": 768,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "scale",
+    "width": 1180,
+    "height": 820,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "scale",
+    "width": 1280,
+    "height": 800,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "rescue",
+    "width": 1024,
+    "height": 768,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "rescue",
+    "width": 1180,
+    "height": 820,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "rescue",
+    "width": 1280,
+    "height": 800,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "workshop",
+    "width": 1024,
+    "height": 768,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "workshop",
+    "width": 1180,
+    "height": 820,
+    "outside": [],
+    "small": []
+  },
+  {
+    "stage": "workshop",
+    "width": 1280,
+    "height": 800,
+    "outside": [],
+    "small": []
+  }
+]

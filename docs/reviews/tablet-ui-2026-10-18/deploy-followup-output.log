@@ -1,0 +1,12 @@
+
+ ⛅️ wrangler 4.151.1
+────────────────────
+🌀 Building list of assets...
+✨ Read 82 files from the assets directory D:\iscreammedia_sc34\1udangtangtang\dist
+🌀 Starting asset upload...
+No updated asset files to upload. Proceeding with deployment...
+Total Upload: 0.34 KiB / gzip: 0.24 KiB
+Uploaded udangtang-force-lab (3.84 sec)
+Deployed udangtang-force-lab triggers (0.60 sec)
+  https://udangtang-force-lab.yelsam.workers.dev
+Current Version ID: 01fe2ff0-4c72-4ce8-8326-4fff15ea1c75

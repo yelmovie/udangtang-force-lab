@@ -149,7 +149,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     dialog.className='stage-popup scale-popup';
     dialog.setAttribute('aria-labelledby','scale-popup-title');
     const render=()=>{
-      dialog.innerHTML=`<div class="stage-popup-card"><button class="stage-popup-close" type="button" aria-label="닫기">×</button><p class="stage-popup-label">${label}</p><h2 id="scale-popup-title">${result ? result.title : '나의 측정 기록'}</h2><div class="stage-popup-body">${result ? `<p class="scale-pop-text">${result.text}</p>` : ''}${result?.records ?? recordsMarkup()}${result?.question ? questionMarkup(result.question,result.answer) : ''}</div><div class="stage-popup-actions"><button class="button button-primary stage-popup-continue" type="button">계속 실험하기</button></div></div>`;
+      dialog.innerHTML=`<div class="stage-popup-card"><button class="stage-popup-close" type="button" aria-label="닫기">×</button><p class="stage-popup-label">${label}</p><h2 id="scale-popup-title">${result ? result.title : '나의 측정 기록'}</h2><div class="stage-popup-body">${result ? `<p class="scale-pop-text">${result.text}</p>` : ''}${result?.records ?? recordsMarkup()}${result?.question ? questionMarkup(result.question,result.answer) : ''}</div><div class="stage-popup-actions">${canFinish() ? '<button class="button button-primary stage-result-finish" type="button">비교 기록 저장 →</button>' : '<button class="button button-primary stage-popup-continue" type="button">계속 실험하기</button>'}</div></div>`;
     };
     render();
     dialog.addEventListener('click',event=>{
@@ -157,6 +157,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
       const button=(event.target as Element).closest<HTMLButtonElement>('button');
       if(!button||button.disabled) return;
       if(button.matches('.stage-popup-close, .stage-popup-continue')) { dialog.close(); return; }
+      if(button.matches('.stage-result-finish')) { if(canFinish()) { dialog.close(); finish.click(); } return; }
       if(button.dataset.answer&&result?.question) {
         result.answer=button.dataset.answer;
         const right=result.answer===result.question.correct;
@@ -221,6 +222,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
         const pick=slot.querySelector<HTMLButtonElement>('[data-pick]')!;
         pick.disabled=busy||waiting||done;
         pick.textContent=found===i ? '가짜 ✓' : '가짜예요';
+        pick.removeAttribute('aria-describedby');
       });
       const heft=root.querySelector<HTMLButtonElement>('#scale-heft');
       if(heft) heft.disabled=busy||waiting;
@@ -313,7 +315,16 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   function pick(slot:number) {
     if(busy||waiting||level!==2||requestDone()) return;
     const current=round(), result=judgeFakePick(current,fakeSeed,slot,[...measured.keys()]);
-    if(result==='unmeasured') { feedback=`${fakeLabels[slot]} 부품은 아직 안 쟀어요. 가짜인지 알려면 먼저 저울에 올려 재 봐요.`; context.sound(340); update(); return; }
+    if(result==='unmeasured') {
+      feedback=`${fakeLabels[slot]} 부품은 아직 안 쟀어요. 먼저 이 부품을 저울에 올려 무게를 재 봐요.`;
+      context.toast(feedback); context.sound(340); update();
+      // Keep the next action visible after the short toast has disappeared.
+      root.querySelector('#scale-difference')!.textContent=feedback;
+      const pickButton = root.querySelector<HTMLButtonElement>(`[data-pick="${slot}"]`)!;
+      pickButton.textContent='아직 안 쟀어요 · 먼저 재요';
+      pickButton.setAttribute('aria-describedby','scale-difference');
+      return;
+    }
     context.save.levels!.scale=recordFakePick(record()!,current,result);
     context.commit();
     if(result==='real') {
@@ -463,6 +474,8 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   },{signal:events.signal});
   root.addEventListener('pointercancel',endDrag,{signal:events.signal});
   root.addEventListener('lostpointercapture',endDrag,{signal:events.signal});
+  window.addEventListener('blur',endDrag,{signal:events.signal});
+  window.addEventListener('resize',endDrag,{signal:events.signal});
   update(); if(level===1&&state.parts.length) weigh();
   return()=>{active=false;popup?.remove();clearTimeout(timer);clearTimeout(springTimer);endDrag();events.abort();cancelAnimationFrame(frame);motions.forEach(motion=>motion.cancel());companion.dispose();};
 }

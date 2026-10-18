@@ -31,6 +31,7 @@ import { inquiryPlans, predictionRecap, predictionVerdict, type PredictionRecap 
 import { earnedToolCards, toolCardInfo, toolCards, toolCardsText } from './toolCards';
 import { bagIcon, openToolBag, toolCardRevealMarkup, toolCardRowMarkup } from './toolBag';
 import './studentUx.css';
+import './tabletUx.css';
 import { icons } from './icons';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -102,7 +103,7 @@ function navigate(page: PageId) {
 }
 
 function finish(stageId: StageId, summary: string) {
-  if (closeLearningReview) return;
+  if (closeLearningReview || document.querySelector('#world-title, #life-title')) return;
   if (stageId === 'workshop') {
     const activeSave = adminSave ?? save;
     openLifeObservation({ app, value: activeSave.lifeObservation,
@@ -177,13 +178,13 @@ function setAdminMode(enabled: boolean) {
 /** One line for the completion modal: the student's guess and whether the records agreed. */
 function guessMarkup(recap: PredictionRecap): string {
   if (!recap.predicted) return '';
-  return `<p class="discovery-guess" data-matched="${recap.matched}"><span class="prediction-tag">내 예상</span>${escapeHtml(recap.predicted)}<b>${recap.matched ? '✓ 맞았어!' : '실험으로 새로 알았어!'}</b></p>`;
+  return `<p class="discovery-guess" data-matched="${recap.matched}"><span class="prediction-tag">처음 생각</span>${escapeHtml(recap.predicted)}<b>${recap.matched ? '✓ 처음 생각과 같아요!' : '실험으로 새로 알았어!'}</b></p>`;
 }
 
 /** First thought, what the records showed, and whether they matched — never a score. */
 function predictionMarkup(recap: PredictionRecap, className = 'discovery-prediction'): string {
   const verdict = predictionVerdict(recap);
-  return `<div class="${className} prediction-recap" data-matched="${recap.matched ?? 'none'}"><p><span class="prediction-tag">내 예상</span>${escapeHtml(recap.predicted ?? '기록된 예상이 없어')}</p><p><span class="prediction-tag is-result">실제 결과</span>${escapeHtml(recap.result)}</p>${verdict ? `<strong class="prediction-verdict">${verdict}</strong>` : ''}</div>`;
+  return `<div class="${className} prediction-recap" data-matched="${recap.matched ?? 'none'}"><p><span class="prediction-tag">처음 생각</span>${escapeHtml(recap.predicted ?? '기록된 예상이 없어')}</p><p><span class="prediction-tag is-result">실제 결과</span>${escapeHtml(recap.result)}</p>${verdict ? `<strong class="prediction-verdict">${verdict}</strong>` : ''}</div>`;
 }
 /** Teacher-facing label: requests (level 2) are required by default and can be made optional for short lessons. */
 function requestsLabel(): string {
@@ -365,21 +366,24 @@ function openMissionCard(stageId: StageId) {
   modal.className = 'modal-layer story-layer';
   const appWasInert = app.inert; app.inert = true;
   modal.innerHTML = `<div class="modal-card mission-card" role="dialog" aria-modal="true" aria-labelledby="mission-title">
-    
+
     <p class="eyebrow">MISSION 0${stage.mission} · ${stage.concept}</p>
     <h2 id="mission-title">${stage.title}</h2>
     <p class="mission-purpose">${missionLearn[stageId]}</p>
-    
-    <section class="mission-prediction question-zone" aria-labelledby="mission-question"><span class="question-label">먼저 예상해요 (선택)</span><h3 class="question-prompt" id="mission-question">${plan.prompt}</h3><div class="mission-answer-grid" style="--answer-count:${plan.choices.length}">${plan.choices.map((choice,index) => `<button type="button" data-plan="${choice.id}" aria-pressed="${selected === choice.id}"><span class="answer-number" aria-hidden="true">${index+1}</span><span>${choice.label}</span></button>`).join('')}</div></section>
-    
+
+    <section class="mission-prediction question-zone" aria-labelledby="mission-question"><span class="question-label">실험 전 처음 생각 (선택)</span><h3 class="question-prompt" id="mission-question">${plan.prompt}</h3><div class="mission-answer-grid" style="--answer-count:${plan.choices.length}">${plan.choices.map((choice,index) => `<button type="button" data-plan="${choice.id}" aria-pressed="${selected === choice.id}"><span class="answer-number" aria-hidden="true">${index+1}</span><span>${choice.label}</span></button>`).join('')}</div></section>
+
+    <p class="mission-orientation" role="status">시작하기 전에 태블릿을 가로로 돌려요. 고른 처음 생각은 그대로 있어요.</p>
     <button class="button button-primary" id="mission-start">실험 시작 →</button>
   </div>`;
   const start = modal.querySelector<HTMLButtonElement>('#mission-start')!;
-  const close = () => { app.inert = appWasInert; modal.remove(); };
+  const orientation = matchMedia('(orientation: portrait)');
+  const syncOrientation = () => { start.disabled = orientation.matches; };
+  orientation.addEventListener('change', syncOrientation); syncOrientation();
+  const close = () => { orientation.removeEventListener('change', syncOrientation); app.inert = appWasInert; modal.remove(); };
   modal.querySelectorAll<HTMLButtonElement>('[data-plan]').forEach(button => button.addEventListener('click', () => {
     selected = button.dataset.plan!;
     modal.querySelectorAll<HTMLButtonElement>('[data-plan]').forEach(choice => choice.setAttribute('aria-pressed', String(choice === button)));
-    start.disabled = false;
     tone(470);
   }));
   start.addEventListener('click', () => {
@@ -691,13 +695,16 @@ function render() {
 function watchFinish(screen: HTMLElement, stageId: StageId) {
   const button = screen.querySelector<HTMLButtonElement>('.experiment-footer .button');
   if (!button) return;
-  let shown = false;
+  let shown = false, stopped = false, retryTimer = 0;
+  let finishDialog: HTMLDialogElement | null = null;
   const show = () => {
-    if (shown || button.disabled || !button.isConnected) return;
+    if (stopped || shown || button.disabled || !button.isConnected) return;
+    if (screen.querySelector('dialog[open] .stage-result-finish')) { shown = true; button.classList.add('is-ready'); return; }
     // Wait for the stage's own result popup or a letter to close so the two never stack.
-    if (document.querySelector('dialog[open], .modal-layer')) { window.setTimeout(show, 400); return; }
+    if (document.querySelector('dialog[open], .modal-layer')) { clearTimeout(retryTimer); retryTimer = window.setTimeout(show, 400); return; }
     shown = true;
     const dialog = document.createElement('dialog');
+    finishDialog = dialog;
     dialog.className = 'stage-popup stage-finish';
     dialog.innerHTML = `<div class="stage-popup-card"><span class="stage-popup-label">MISSION 0${stages.find(item => item.id === stageId)!.mission} 완료</span><span class="stage-stamp" aria-hidden="true">★ 완료</span><h2>다 했어요! 멋져요 ★</h2><button class="stage-popup-close" aria-label="닫기">×</button><div class="stage-popup-body"><p>${finishLines[stageId]}</p></div><div class="stage-popup-actions"><button class="stage-finish-later">조금 더 실험할래요</button><button class="button button-primary stage-finish-go">${button.textContent}</button></div></div>`;
     dialog.querySelector('.stage-popup-close')!.addEventListener('click', () => dialog.close());
@@ -707,11 +714,13 @@ function watchFinish(screen: HTMLElement, stageId: StageId) {
     document.body.append(dialog); dialog.showModal(); tone(700); window.setTimeout(() => tone(760), 160);
     window.setTimeout(() => dialog.querySelector('.stage-stamp')?.classList.add('is-stamped'), 60);
   };
-  const observer = new MutationObserver(show);
+  // Result animations schedule their own popup first; do not race it with a second modal.
+  const scheduleShow = () => { clearTimeout(retryTimer); retryTimer = window.setTimeout(show, 900); };
+  const observer = new MutationObserver(scheduleShow);
   observer.observe(button, { attributes: true, attributeFilter: ['disabled'] });
-  const stop = () => { observer.disconnect(); };
+  const stop = () => { stopped = true; clearTimeout(retryTimer); observer.disconnect(); finishDialog?.close(); finishDialog?.remove(); };
   const previous = cleanup; cleanup = () => { stop(); previous?.(); };
-  show();
+  scheduleShow();
 }
 const finishLines: Record<StageId, string> = {
   cargo: '빵집 주문을 다 배달했어요. 이제 운반 레일을 고칠 수 있어요!',
@@ -726,7 +735,6 @@ performance.mark('force-lab-ready');
 // The offline worker installs after the title has settled so its precache never competes with the first paint.
 const startOffline = () => { if ('requestIdleCallback' in window) window.requestIdleCallback(prepareOffline, { timeout: 3000 }); else prepareOffline(); };
 window.addEventListener('load', () => window.setTimeout(startOffline, 3000), { once: true });
-
 // After a deploy the shell this tab loaded may point at chunks that no longer exist; one reload fetches the fresh shell.
 window.addEventListener('vite:preloadError', () => {
   try {
@@ -736,3 +744,4 @@ window.addEventListener('vite:preloadError', () => {
   } catch { return; }
   location.reload();
 });
+

@@ -13,22 +13,32 @@ export interface WorkshopScene {
   dispose: () => void;
 }
 
+export type WorkshopSceneFailure = 'webgl' | 'context-lost' | 'asset';
+export class WorkshopSceneError extends Error {
+  constructor(public kind: WorkshopSceneFailure) { super(kind); }
+}
+
 // The user's travel drives the apparatus directly; trials never autoplay.
-export function createWorkshopScene(host: HTMLElement): WorkshopScene {
+export function createWorkshopScene(host: HTMLElement, onFailure: (kind: WorkshopSceneFailure) => void = () => {}): WorkshopScene {
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-4, 4, 3, -3, .1, 80);
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' });
+  let renderer: THREE.WebGLRenderer;
+  try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' }); }
+  catch { throw new WorkshopSceneError('webgl'); }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.setClearColor(0x000000, 0); renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.domElement.setAttribute('aria-label', '설계 손잡이와 연결된 입체 지레와 빗면');
   host.append(renderer.domElement);
-  let disposed = false, progress = 0, angle = 16;
+  let disposed = false, failed = false, progress = 0, angle = 16;
+  const fail = (kind: WorkshopSceneFailure) => { if (!disposed && !failed) { failed = true; onFailure(kind); } };
+  const contextLost = (event: Event) => { event.preventDefault(); fail('context-lost'); };
+  renderer.domElement.addEventListener('webglcontextlost', contextLost);
   let tool: WorkshopTool | 'direct' = 'lever', setting = 1;
   scene.add(new THREE.HemisphereLight('#fff1d0', '#765744', 2.5));
   const sunlight = new THREE.DirectionalLight('#ffedd0', 2.8);
   sunlight.position.set(-3, 7, 5); scene.add(sunlight);
   const material = (color: string, metalness = .03) => new THREE.MeshStandardMaterial({ color, metalness, roughness: .7 });
-  const woodMap = new THREE.TextureLoader().load('/assets/textures/workshop-wood.webp', () => draw());
+  const woodMap = new THREE.TextureLoader().load('/assets/textures/workshop-wood.webp', () => draw(), undefined, () => fail('asset'));
   woodMap.colorSpace = THREE.SRGBColorSpace; woodMap.wrapS = woodMap.wrapT = THREE.RepeatWrapping; woodMap.repeat.set(.32, .32);
   const wood = new THREE.MeshStandardMaterial({ color: '#f4d3a4', map: woodMap, roughness: .72 }), edge = material('#83502d'), teal = material('#267a78');
   const brass = material('#d8ae65', .3), light = material('#fff0b5'), coral = material('#ba582e');
@@ -73,7 +83,7 @@ export function createWorkshopScene(host: HTMLElement): WorkshopScene {
   const topPost = box(.18, 1.7, .18, teal, 0, .85, -.56, ramp);
   const topFlag = box(.52, .32, .045, brass, 0, 1.91, -.56, ramp);
   const bottomPost = box(.12, .3, .12, edge, 0, .15, -.56, ramp);
-  function draw() { if (!disposed) renderer.render(scene, camera); }
+  function draw() { if (!disposed && !failed) renderer.render(scene, camera); }
   /** Stretch a bottom-centred model into the box the procedural part used to fill. */
   function fit(model: THREE.Object3D, width: number, height: number | null, depth: number) {
     const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3()), scale = width / size.x;
@@ -85,7 +95,7 @@ export function createWorkshopScene(host: HTMLElement): WorkshopScene {
     if (disposed) return;
     supportMesh.visible = supportBase.visible = bearing.visible = false;
     support.add(fit(model, 1.15, 1.6, .95)); draw();
-  }).catch(() => {});
+  }).catch(() => fail('asset'));
   loader.loadAsync('/assets/models/workshop/crate.glb').then(({ scene: model }) => {
     if (disposed) return;
     for (const group of [leverCargo, rampCargo]) {
@@ -93,7 +103,7 @@ export function createWorkshopScene(host: HTMLElement): WorkshopScene {
       const crate = fit(model.clone(), .66, null, .66); crate.position.y = -.31; group.add(crate);
     }
     draw();
-  }).catch(() => {});
+  }).catch(() => fail('asset'));
   function setPose() {
     lever.visible = tool === 'lever'; ramp.visible = tool === 'ramp';
     if (tool === 'lever') {
@@ -165,9 +175,11 @@ export function createWorkshopScene(host: HTMLElement): WorkshopScene {
       return ([0,1,2] as LeverSetting[]).reduce((best,next)=>Math.abs(project(getWorkshopDesign('lever',next).pivot+lever.position.x,.7).x-x)<Math.abs(project(getWorkshopDesign('lever',best).pivot+lever.position.x,.7).x-x)?next:best,1 as LeverSetting);
     },
     dispose() {
+      renderer.domElement.removeEventListener('webglcontextlost', contextLost);
       disposed = true; observer.disconnect(); const materials = new Set<THREE.Material>();
       scene.traverse(object => { if (object instanceof THREE.Mesh) { object.geometry.dispose(); (Array.isArray(object.material) ? object.material : [object.material]).forEach(item => materials.add(item)); } });
       materials.forEach(item => { (item as THREE.MeshStandardMaterial).map?.dispose(); item.dispose(); }); renderer.dispose(); renderer.domElement.remove();
     },
   };
 }
+

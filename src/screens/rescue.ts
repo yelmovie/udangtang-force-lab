@@ -19,6 +19,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   let usedClue = '';
   let feedback = '';
   let lastScaleReading:number|null=null;
+  let weightDialog: HTMLDialogElement | null = null, wasLoaded = false;
   // A short lock after each stage change so a repeated tap on the same button does not start the next stage.
   let stageLock = false, lastStep = -1, stageTimer = 0, stopTimer = 0, slideFrame = 0, flashRecord = false;
   let scene: CoreScene | undefined, sceneTried = false, sceneLoading = false, sceneFailed = false, use2D = false;
@@ -89,6 +90,8 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   }
   function placeGrip(next: CoreProjection) {
     projection = next; grip.style.left = `${next.core.x}px`; grip.style.top = `${next.core.y}px`;
+    // At the long ramp's left edge, keep the drag hint inside the work area.
+    grip.classList.toggle('hint-right', next.core.x < 180);
     for (const route of ['long', 'short'] as const) {
       const label = root.querySelector<HTMLElement>(`#core-${route}-tag`)!;
       label.style.left = `${next[route].x}px`; label.style.top = `${next[route].y}px`;
@@ -195,7 +198,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     if(lastScaleReading!==null&&lastScaleReading!==reading) digits.animate([{opacity:.35},{opacity:1}],{duration:matchMedia('(prefers-reduced-motion: reduce)').matches?1:180});
     lastScaleReading=reading;
     root.querySelector('#rescue-scale-zero')!.setAttribute('aria-disabled',String(busy));
-    if (step === 0) controls.innerHTML = `<button data-rescue="load">${state.loaded ? '코어 내려놓기' : '코어 올려놓기'}</button><button data-rescue="zero">0 맞추기</button><button data-rescue="measure" class="rescue-primary">무게 기록</button>`;
+    if (step === 0) controls.innerHTML = `<button data-rescue="load">${state.loaded ? '코어 내려놓기' : '코어 올려놓기'}</button><button data-rescue="zero">0 맞추기</button>${state.loaded ? '<button data-rescue="reading">측정값 다시 보기</button>' : ''}`;
     if (step === 1) controls.innerHTML = `<span>나는 상자의 오른쪽!</span><button data-rescue="push" aria-pressed="${gateAction === 'push'}">← 벽 쪽으로 밀기</button><button data-rescue="pull" aria-pressed="${gateAction === 'pull'}">내 쪽으로 당기기 →</button>`;
     if (step === 2) controls.innerHTML = `<div class="rescue-route-controls">${(['short','long'] as const).map(route => `<button data-route="${route}" aria-label="${route === 'short' ? '짧은 빗면' : '긴 빗면'}" aria-pressed="${state.route === route}"><span>${route === 'short' ? 'A' : 'B'}</span>${route === 'short' ? '짧은 빗면' : '긴 빗면'}</button>`).join('')}</div><label class="rescue-force-control" for="rescue-force">미는 힘 <strong>${forceNames[state.force - 1]}</strong><i class="force-step-arrow" style="--level:${state.force}" aria-hidden="true"></i><input id="rescue-force" type="range" min="1" max="3" step="1" value="${state.force}" aria-label="게임 속 미는 힘"></label><button data-rescue="retry">다시 출발</button>`;
     controls.inert = busy;
@@ -208,6 +211,43 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     root.querySelector('#rescue-used-clue')!.textContent = usedClue;
     for (const route of ['short','long']) root.querySelector(`#${route}-path`)!.classList.toggle('route-selected', state.route === route);
     finish.disabled = busy || !rescueReady(state) || (coreMode && !scene); pose(state.delivered ? 1 : restProgress); tell(feedback);
+    const justLoaded = state.loaded && !wasLoaded;
+    wasLoaded = state.loaded;
+    if (step !== 0 || !state.loaded) closeWeightDialog();
+    else if (justLoaded) openWeightDialog();
+  }
+  function closeWeightDialog() {
+    const dialog = weightDialog;
+    weightDialog = null;
+    if (dialog) { dialog.close(); dialog.remove(); }
+  }
+  function openWeightDialog() {
+    if (!active || busy || phase() !== 0 || !state.loaded || weightDialog) return;
+    const dialog = document.createElement('dialog');
+    dialog.className = 'stage-popup rescue-weight-popup';
+    dialog.setAttribute('aria-labelledby', 'rescue-weight-title');
+    dialog.setAttribute('aria-describedby', 'rescue-weight-description');
+    dialog.innerHTML = `<div class="stage-popup-card"><button class="stage-popup-close" type="button" aria-label="닫기">×</button><p class="stage-popup-label">코어 무게 확인</p><h2 id="rescue-weight-title">저울의 숫자는 ${coreWeight + (state.zeroed ? 0 : 20)} g</h2><div class="stage-popup-body"><p id="rescue-weight-description">${state.zeroed ? '코어의 무게를 기록하고 다음 작전을 시작해요.' : '빈 저울이 20 g이었어요. 코어를 내리고 0을 맞춘 뒤 다시 재요.'}</p></div><div class="stage-popup-actions">${state.zeroed ? '' : '<button class="button" type="button" data-weight="unload">코어 내려놓기</button>'}<button class="button button-primary" type="button" data-weight="record"${state.zeroed ? '' : ' disabled'}>무게 기록</button></div></div>`;
+    dialog.addEventListener('click', event => {
+      const button = (event.target as Element).closest<HTMLButtonElement>('button');
+      if (!button || button.disabled) return;
+      if (button.classList.contains('stage-popup-close')) { closeWeightDialog(); return; }
+      if (button.dataset.weight === 'unload') {
+        closeWeightDialog();
+        controls.querySelector<HTMLButtonElement>('[data-rescue="load"]')?.click();
+        controls.querySelector<HTMLButtonElement>('[data-rescue="zero"]')?.focus();
+      }
+      if (button.dataset.weight === 'record' && state.loaded && state.zeroed && phase() === 0) {
+        closeWeightDialog();
+        state.measured = true; restProgress = 0;
+        tell('코어는 180 g! 이제 벽 옆 상자를 움직여 길을 열어요.');
+        companion.setMood('success'); context.sound(470); commit();
+        controls.querySelector<HTMLButtonElement>('[data-rescue="pull"]')?.focus();
+      }
+    }, { signal });
+    dialog.addEventListener('cancel', event => { event.preventDefault(); closeWeightDialog(); }, { signal });
+    root.append(dialog); weightDialog = dialog; dialog.showModal();
+    dialog.querySelector<HTMLButtonElement>(state.zeroed ? '[data-weight="record"]' : '[data-weight="unload"]')?.focus();
   }
   function commit() { context.commit(); update(); }
   function reset() { mounted3D = false; overview(); restProgress = 0; travel = 0; state.delivered = false; pose(0); }
@@ -218,11 +258,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     const action = button.dataset.rescue;
     if (action === 'load') { state.loaded = !state.loaded; tell(state.loaded ? '코어를 올렸어요. 영점과 숫자를 확인해요.' : '코어를 내렸어요. 빈 저울이 0 g일까요?'); }
     if (action === 'zero') { if (state.loaded) tell('코어를 먼저 내려놓고 빈 저울의 영점을 맞춰요.'); else { state.zeroed = true; tell('빈 저울이 0 g이에요. 다시 코어를 올려요.'); } }
-    if (action === 'measure') {
-      if (!state.loaded) tell('코어를 저울 위로 옮겨 주세요.');
-      else if (!state.zeroed) tell('빈 저울도 20 g이었어요! 코어를 내리고 영점을 맞춰 다시 재요.');
-      else { state.measured = true; restProgress = 0; tell('코어는 180 g! 이제 벽 옆 상자를 움직여 길을 열어요.'); companion.setMood('success'); }
-    }
+    if (action === 'reading') { openWeightDialog(); return; }
     if (action === 'push' || action === 'pull') { gateAction = action; restProgress = 0; tell(action === 'push' ? '벽 쪽으로 밀면 움직일 수 있을까요?' : '내 쪽으로 당겨 봐요.'); }
     if (button.dataset.route) { selectRoute(button.dataset.route as RescueRun['route']); return; }
     if (action === 'retry') { reset(); tell(`출발점으로 돌아왔어요. ${nextHint()}`); }
@@ -303,7 +339,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
       else { restProgress = 0; tell('아직 도착하지 않았어요. 코어를 빗면을 따라 조금 더 끌어 봐요.'); companion.setMood('observe'); }
     }
   }
-  function endPointer(event: PointerEvent, cancelled: boolean) {
+  function endPointer(event: Pick<PointerEvent, 'pointerId'>, cancelled: boolean) {
     if (held !== event.pointerId) return;
     held = null; busy = false;
     if (svg.hasPointerCapture(event.pointerId)) svg.releasePointerCapture(event.pointerId);
@@ -415,9 +451,11 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   root.addEventListener('focusout', event=>{ if (keyHeld && [art,gate,handle,grip].includes(event.target as typeof art)) stopKey(true); }, { signal });
   function cancelInput() {
     stopKey(true); stopButton(true);
+    if (held !== null) endPointer({ pointerId: held }, true);
     if (corePointer !== null) stopCorePointer({ pointerId: corePointer }, true);
   }
   window.addEventListener('blur', cancelInput, { signal });
+  window.addEventListener('resize', cancelInput, { signal });
   document.addEventListener('visibilitychange', () => { if (document.hidden) cancelInput(); }, { signal });
   finish.addEventListener('click', async () => {
     if (busy || !rescueReady(state) || (!use2D && !scene)) return;
@@ -437,5 +475,5 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   }, { signal });
   tell(state.delivered ? '코어가 도착했어요. 비교 기록을 확인하고 중앙 장치에 다시 끼워요.' : state.gate ? '같은 힘으로 두 빗면을 비교해요. 길을 고른 뒤 코어를 직접 끌어 보세요.' : state.measured ? '코어는 180 g! 벽 옆 상자를 직접 움직여 길을 열어요.' : '분리된 배터리 코어를 다시 장착할 거예요. 먼저 빈 저울을 0으로 맞추고 코어의 무게를 재요.');
   renderClues(); update();
-  return () => { active = false; cancelAnimationFrame(frame); cancelAnimationFrame(buttonFrame); cancelAnimationFrame(slideFrame); clearTimeout(stageTimer); clearTimeout(stopTimer); events.abort(); scene?.dispose(); companion.dispose(); };
+  return () => { active = false; closeWeightDialog(); cancelAnimationFrame(frame); cancelAnimationFrame(buttonFrame); cancelAnimationFrame(slideFrame); clearTimeout(stageTimer); clearTimeout(stopTimer); events.abort(); scene?.dispose(); companion.dispose(); };
 }

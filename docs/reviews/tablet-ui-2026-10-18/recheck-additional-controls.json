@@ -1,0 +1,22 @@
+[
+  {
+    "state": "workshop-lever",
+    "count": 8,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1024,
+      768
+    ]
+  },
+  {
+    "state": "workshop-ramp",
+    "count": 8,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1024,
+      768
+    ]
+  }
+]

@@ -435,6 +435,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     event.preventDefault(); resetGesture(); changeFulcrum(Math.max(0,Math.min(2,state.fulcrumPosition+(event.key==='ArrowLeft'?1:-1))) as LeverSetting); context.commit();
   },{signal});
   window.addEventListener('blur',()=>endDesign(true),{signal});
+  window.addEventListener('resize',()=>{ endDesign(true); if (keyHeld || heldPointer !== null) end(true); },{signal});
   const resizeObserver=new ResizeObserver(()=>{if(active)requestAnimationFrame(positionHandle);}); resizeObserver.observe(world);
   notebookBoard.addEventListener('click', event => {
     if ((event.target as Element).closest('#workshop-open-request')) { enterRequest(); return; }
@@ -460,10 +461,42 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     const attempts = levelRecord()?.attempts ?? 0;
     context.finish('workshop', `직접 들기와 두 도구를 같은 화물·같은 도착 높이에서 비교했어요. ${summaries.join(' ')} 힘 예산 의뢰에서는 콩이의 작은 힘 안에서 화물 3개를 ${attempts}번 시도해 모두 올렸고, 무거운 화물일수록 받침대를 화물 가까이 두거나 빗면을 길게 해야 했어요.`);
   }, { signal });
-  import('../three/workshopScene').then(module => {
+  let loadGeneration = 0;
+  const recovery = document.createElement('section');
+  recovery.className = 'scene-recovery'; recovery.hidden = true;
+  recovery.setAttribute('role', 'alert');
+  world.append(recovery);
+  function showSceneFailure(kind: 'webgl' | 'context-lost' | 'asset' | 'module') {
     if (!active) return;
-    canvas.replaceChildren(); scene = module.createWorkshopScene(canvas); scene.configure(tool, currentSetting()); scene.setCargoWeight(level === 2 ? workshopCargos[cargoIndex()].weight : 1); update();
-  }).catch(() => { if (active) { canvas.innerHTML = '<div class="scene-error">작업대를 준비하지 못했어요. 새로고침해 다시 열어 주세요.</div>'; setFeedback('3D 작업대를 다시 열어야 해요.'); update(); } });
+    clearTimeout(waitTimer); waiting = false; cargo = savedCargo();
+    recordPending = null; recordDialog?.close();
+    endDesign(true); resetGesture();
+    scene?.dispose(); scene = null;
+    const messages = {
+      webgl: '이 브라우저에서 3D 화면을 켜지 못했어요. 다시 준비하거나 지도로 돌아갈 수 있어요.',
+      'context-lost': '3D 화면 연결이 끊겼어요. 작업대를 다시 준비해요.',
+      asset: '작업대 그림이나 모형을 불러오지 못했어요. 연결을 확인하고 다시 준비해요.',
+      module: '작업대 프로그램을 불러오지 못했어요. 연결을 확인하고 다시 준비해요.',
+    };
+    recovery.hidden = false; recovery.dataset.failure = kind;
+    recovery.innerHTML = `<h2>작업대를 다시 준비해요</h2><p>${messages[kind]}</p><p>저장된 실험 기록은 그대로 있어요.</p><div class="scene-recovery-actions"><button class="button button-primary" data-scene-retry>다시 준비하기</button><button class="button button-secondary" data-scene-map>지도로 돌아가기</button></div>`;
+    recovery.querySelector('[data-scene-retry]')!.addEventListener('click', loadScene, { once: true });
+    recovery.querySelector('[data-scene-map]')!.addEventListener('click', () => context.navigate('map'), { once: true });
+    update(); recovery.querySelector<HTMLButtonElement>('button')!.focus({ preventScroll: true });
+  }
+  function loadScene() {
+    const generation = ++loadGeneration;
+    recovery.hidden = true; canvas.innerHTML = '<div class="scene-loading" role="status">작업대 준비 중…</div>';
+    import('../three/workshopScene').then(module => {
+      if (!active || generation !== loadGeneration) return;
+      canvas.replaceChildren();
+      try {
+        scene = module.createWorkshopScene(canvas, kind => { if (generation === loadGeneration) showSceneFailure(kind); });
+        scene.configure(tool, currentSetting()); scene.setCargoWeight(level === 2 ? workshopCargos[cargoIndex()].weight : 1); update();
+      } catch (error) { showSceneFailure(error instanceof module.WorkshopSceneError ? error.kind : 'webgl'); }
+    }).catch(() => { if (active && generation === loadGeneration) showSceneFailure('module'); });
+  }
+  loadScene();
   update();
   return () => { active = false; recordDialog?.close(); clearTimeout(waitTimer); endDesign(true); resetGesture(); resizeObserver.disconnect(); events.abort(); scene?.dispose(); };
 }

@@ -1,0 +1,41 @@
+/* Keep controls in their own row; long Korean instructions retain their type size. */
+#app .balance-screen > .balance-topbar {
+  position: static; flex: 0 0 auto; display: flex; flex-wrap: wrap;
+  align-items: center; gap: 8px 16px; pointer-events: auto;
+}
+#app .balance-topbar > div:first-child { display: none; }
+#app .balance-topbar .balance-goal { flex: 1 1 420px; flex-wrap: wrap; min-width: 0; }
+#app .balance-topbar .balance-top-tools { flex: 0 0 auto; margin-left: auto; }
+#app .balance-screen #balance-phase {
+  top: 8px; left: 50%; max-width: calc(100% - 32px); width: max-content;
+  white-space: normal; word-break: keep-all; overflow-wrap: anywhere; line-height: 1.4;
+}
+#app .balance-dock .dock-label { flex: 0 1 230px; white-space: normal; word-break: keep-all; line-height: 1.4; }
+.mission-orientation { display: none; }
+@media (orientation: portrait) {
+  .mission-orientation { display: block; padding: 14px; border: 2px solid #b8822d; border-radius: 14px; background: #ffedb5; color: #513615; font-size: 20px; line-height: 1.5; }
+  .mission-card #mission-start:disabled { opacity: .55; }
+}
+#app .fake-pick, #app .instrument-text-button, .stage-popup-close,
+#app .camera-button, #app .basket-part { min-width: 44px; min-height: 44px; }
+.scene-recovery {
+  position: absolute; inset: 12px; z-index: 20; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px; padding: 24px;
+  overflow: auto; text-align: center; background: #fff9ed; color: #244d47;
+  border: 3px solid #b8822d; border-radius: 20px;
+}
+.scene-recovery h2 { margin: 0; font-size: 26px; }
+.scene-recovery p { margin: 0; max-width: 560px; font-size: 20px; line-height: 1.5; word-break: keep-all; }
+.scene-recovery-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.scene-recovery button { min-height: 48px; }
+.scene-recovery[hidden] { display: none; }
+.prediction-chip-question { font-size: 16px; line-height: 1.4; word-break: keep-all; }
+#app .fake-pick { white-space: normal; word-break: keep-all; line-height: 1.4; }
+/* The core's drag label must not cover the A/B route buttons above the ramps. */
+#app .core-studio .core-grip span {
+  left: auto; right: 100%; top: 50%; bottom: auto; margin-right: 6px;
+  transform: translateY(-50%);
+}
+#app .core-studio .core-grip.hint-right span {
+  left: 100%; right: auto; margin-right: 0; margin-left: 6px;
+}

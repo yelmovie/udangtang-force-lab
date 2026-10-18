@@ -73,7 +73,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         const n = [1, 3, 5].find(parts => latestRun(parts, 'push') && latestRun(parts, 'pull'));
         if (!n) return '밀기와 당기기도 해 봐요.';
         const push = latestRun(n, 'push')!.distance, pull = latestRun(n, 'pull')!.distance;
-        return `밀기 ${push}칸 · 당기기 ${pull}칸 → ${push === pull ? '거리가 같아요' : '거리가 조금 달라요'}`;
+        return `부품 ${n}개 · 밀기 ${push}칸 · 당기기 ${pull}칸. ${push === pull ? '같은 상자에 오른쪽으로 같은 힘을 주어 거리가 같아요.' : '거리가 조금 달라요.'}`;
     }
     const travel = () => Math.max(64, Math.min(120, field.clientWidth * .12));
     const canPush = () => !busy && !waiting && (level === 1 ? !needsSetup : force !== null && !deliveredAll());
@@ -95,7 +95,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             return force ? `${label} · 아이를 잡고 오른쪽으로 옮겨요` : `${label} · 힘을 골라요`;
         }
         if (finding) return '위의 빵집 배달 가기를 눌러요';
-        if (ready()) return '기록 보기에서 더 멀리 간 상자를 골라요';
+        if (ready()) return '실험은 끝! 위의 비교하고 의뢰 받기를 눌러요';
         if (needsSetup) return !weightCompared() ? '부품 개수를 바꿔 같은 쪽에서 다시 움직여요' : '같은 개수로 미는 쪽을 바꿔 봐요';
         return '아이를 잡고 오른쪽 표시까지 옮긴 뒤 손을 놓아요';
     }
@@ -152,6 +152,10 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         field.dataset.busy = String(busy); field.dataset.setup = String(canPush());
         root.querySelector('#cargo-record-count')!.textContent = String(state.runs.length);
         recordOpen.disabled = locked || !state.runs.length;
+        const needsFinding = level === 1 && ready() && !finding;
+        recordOpen.firstChild!.textContent = needsFinding ? '비교하고 의뢰 받기 → ' : '기록 보기 ';
+        recordOpen.classList.toggle('cargo-record-next', needsFinding);
+        root.querySelector<HTMLElement>('#cargo-record-count')!.hidden = needsFinding;
         ordersOpen.hidden = !finding || level === 2;
         step.textContent = stepText();
         root.querySelector('#cargo-feedback')!.textContent = feedback;
@@ -391,7 +395,9 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         const dialog = document.createElement('dialog');
         dialog.className = 'stage-popup cargo-popup';
         dialog.setAttribute('aria-labelledby', 'cargo-popup-title');
-        dialog.innerHTML = `<div class="stage-popup-card"><button class="stage-popup-close" aria-label="닫기">×</button><p class="stage-popup-label">${label}</p><h2 id="cargo-popup-title">${title}</h2><div class="stage-popup-body">${body}</div><div class="stage-popup-actions"><button class="button button-primary stage-popup-continue">계속 실험하기</button></div></div>`;
+        const needsFinding = level === 1 && ready() && !finding;
+        dialog.innerHTML = `<div class="stage-popup-card"><button class="stage-popup-close" aria-label="닫기">×</button><p class="stage-popup-label">${label}</p><h2 id="cargo-popup-title">${title}</h2><div class="stage-popup-body">${body}</div><div class="stage-popup-actions">${!finish.disabled ? '<button class="button button-primary stage-result-finish">운반 레일 복구하기 →</button>' : `<button class="button ${needsFinding ? 'button-secondary' : 'button-primary'} stage-popup-continue">${needsFinding ? '더 실험해 보기' : '계속 실험하기'}</button>`}</div></div>`;
+        dialog.querySelector('.stage-result-finish')?.addEventListener('click', () => { if (!finish.disabled) { dialog.close(); finish.click(); } });
         dialog.querySelectorAll('.stage-popup-close,.stage-popup-continue').forEach(b => b.addEventListener('click', () => dialog.close()));
         dialog.addEventListener('close', () => {
             dialog.remove();
@@ -417,7 +423,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     }
     function nextHint() {
         if (finding) return level === 1 ? '위의 <strong>빵집 배달 가기</strong>를 눌러 의뢰를 받아요.' : '';
-        if (ready()) return '';
+        if (ready()) return '위에서 <strong>더 멀리 간 상자</strong>를 고르면 빵집 의뢰가 와요.';
         if (!weightCompared()) return '부품 개수를 바꿔 <strong>같은 쪽</strong>에서 다시 움직여 봐요.';
         return '같은 개수로 <strong>힘을 주는 쪽</strong>을 바꿔 봐요.';
     }
@@ -466,7 +472,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         const light = latestRun(1)!;
         const heavy = latestRun(5)!;
         const delivered = cargoOrders.map((order, i) => `${order.parts}개는 ${forceName(orders()[i] as ForceLevel)}`).join(', ');
-        context.finish('cargo', `저장된 ${state.runs.length}번의 실험에서 같은 힘으로 1개 상자는 ${light.distance}칸, 5개 상자는 ${heavy.distance}칸 움직였어요. 밀기·당기기 비교: ${directionText()}. 빵집 오븐 수리 부품 배달에서는 ${delivered}으로 같은 노란 칸에 멈춰, 무거운 상자일수록 같은 곳까지 보내려면 더 큰 힘이 필요했어요.`);
+        context.finish('cargo', `저장된 ${state.runs.length}번의 실험에서 같은 힘으로 1개 상자는 ${light.distance}칸, 5개 상자는 ${heavy.distance}칸 움직였어요. 밀기·당기기 비교: ${directionText()} 빵집 오븐 수리 부품 배달에서는 ${delivered}으로 같은 노란 칸에 멈춰, 무거운 상자일수록 같은 곳까지 보내려면 더 큰 힘이 필요했어요.`);
     }, { signal: events.signal });
     if (finding) findingNote = findingMessage(true);
     update();

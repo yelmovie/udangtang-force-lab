@@ -1,6 +1,6 @@
 import type { StageId } from './data';
 import type { SaveData } from './state';
-import { predictionRecap } from './inquiryPlan';
+import { inquiryPlans, predictionRecap } from './inquiryPlan';
 import './predictionChip.css';
 
 const escape = (text: string) => text.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -16,8 +16,8 @@ export function showPredictionChip(host: HTMLElement, save: SaveData, stage: Sta
   chip.type = 'button';
   chip.className = 'prediction-chip';
   chip.dataset.matched = String(recap.matched);
-  chip.setAttribute('aria-label', `내 예상 ${recap.predicted}. ${recap.matched ? '예상과 같아요' : '예상과 달라요'}. 눌러서 닫기`);
-  chip.innerHTML = `<span class="prediction-chip-label">내 예상</span><strong>${escape(recap.predicted)}</strong><span class="prediction-chip-stamp" aria-hidden="true">${recap.matched ? '✓ 예상과 같아요!' : '어? 예상과 달라요!'}</span>`;
+  chip.setAttribute('aria-label', `처음 질문: ${inquiryPlans[stage].prompt} 처음 생각 ${recap.predicted}. ${recap.matched ? '예상과 같아요' : '예상과 달라요'}. 눌러서 닫기`);
+  chip.innerHTML = `<span class="prediction-chip-label">처음 생각</span><span class="prediction-chip-question">${escape(inquiryPlans[stage].prompt)}</span><strong>${escape(recap.predicted)}</strong><span class="prediction-chip-stamp" aria-hidden="true">${recap.matched ? '✓ 처음 생각과 같아요!' : '처음 생각에서 새로 배웠어요!'}</span>`;
   host.append(chip);
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
     chip.animate([

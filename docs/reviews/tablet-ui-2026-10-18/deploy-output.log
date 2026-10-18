@@ -1,0 +1,23 @@
+
+ ⛅️ wrangler 4.151.1
+────────────────────
+🌀 Building list of assets...
+✨ Read 201 files from the assets directory D:\iscreammedia_sc34\1udangtangtang\dist
+🌀 Starting asset upload...
+🌀 Found 6 new or modified static assets to upload. Proceeding with upload...
++ /index.html
++ /assets/coreScene-68_POyAH.js
++ /assets/workshopScene-fC86OYXk.js
++ /assets/index-DQr1Dekj.css
++ /sw.js
++ /assets/index-BKkKuNbk.js
+Uploaded 2 of 6 assets
+Uploaded 4 of 6 assets
+Uploaded 6 of 6 assets
+✨ Success! Uploaded 6 files (174 already uploaded) (1.25 sec)
+
+Total Upload: 0.34 KiB / gzip: 0.24 KiB
+Uploaded udangtang-force-lab (6.02 sec)
+Deployed udangtang-force-lab triggers (0.61 sec)
+  https://udangtang-force-lab.yelsam.workers.dev
+Current Version ID: f9e15f17-b76a-4c3b-9310-09d5106a2b8f

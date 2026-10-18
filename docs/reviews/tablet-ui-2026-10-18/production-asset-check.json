@@ -1,0 +1,48 @@
+{
+  "at": "2026-10-18T05:11:56.374Z",
+  "base": "https://udangtang-force-lab.yelsam.workers.dev",
+  "results": [
+    {
+      "path": "/index.html",
+      "status": 200,
+      "bytes": 1809,
+      "match": true,
+      "sha256": "091e2ed0bf6c15e368eec69382bc9261e2626fc9f4baad8f8e5d590fbff807a3"
+    },
+    {
+      "path": "/assets/index-BKkKuNbk.js",
+      "status": 200,
+      "bytes": 297070,
+      "match": true,
+      "sha256": "0b169fcf345dd73e09581f00c06bc9ddb5890ce4862a748107c54bd6b4e97ff8"
+    },
+    {
+      "path": "/assets/index-DQr1Dekj.css",
+      "status": 200,
+      "bytes": 252165,
+      "match": true,
+      "sha256": "bee97b10076e6e7363557498605a1631d56c82db15b6dd42e7f079bf233f3150"
+    },
+    {
+      "path": "/assets/workshopScene-fC86OYXk.js",
+      "status": 200,
+      "bytes": 5740,
+      "match": true,
+      "sha256": "dda2ca4afeefdfd7ca6f4c6aaf99867ad793ac4ea3023458a49e38549f9fd78e"
+    },
+    {
+      "path": "/assets/coreScene-68_POyAH.js",
+      "status": 200,
+      "bytes": 12675,
+      "match": true,
+      "sha256": "90e0fba21c51b6f256b331e835132adce1d8783d095c7465833e363d63a1c482"
+    },
+    {
+      "path": "/sw.js",
+      "status": 200,
+      "bytes": 7882,
+      "match": true,
+      "sha256": "14c1524c408d3204a4b1f65d0caa14450bd92a0c7a3e6cd6b152b05087172030"
+    }
+  ]
+}

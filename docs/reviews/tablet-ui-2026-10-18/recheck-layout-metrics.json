@@ -1,0 +1,152 @@
+[
+  {
+    "name": "cargo",
+    "count": 7,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1024,
+      768
+    ]
+  },
+  {
+    "name": "balance",
+    "count": 7,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1024,
+      768
+    ]
+  },
+  {
+    "name": "scale",
+    "count": 14,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1024,
+      768
+    ]
+  },
+  {
+    "name": "workshop",
+    "count": 7,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1024,
+      768
+    ]
+  },
+  {
+    "name": "rescue",
+    "count": 11,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1024,
+      768
+    ]
+  },
+  {
+    "name": "cargo",
+    "count": 7,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1180,
+      820
+    ]
+  },
+  {
+    "name": "balance",
+    "count": 7,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1180,
+      820
+    ]
+  },
+  {
+    "name": "scale",
+    "count": 14,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1180,
+      820
+    ]
+  },
+  {
+    "name": "workshop",
+    "count": 7,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1180,
+      820
+    ]
+  },
+  {
+    "name": "rescue",
+    "count": 11,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1180,
+      820
+    ]
+  },
+  {
+    "name": "cargo",
+    "count": 7,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1280,
+      800
+    ]
+  },
+  {
+    "name": "balance",
+    "count": 7,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1280,
+      800
+    ]
+  },
+  {
+    "name": "scale",
+    "count": 14,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1280,
+      800
+    ]
+  },
+  {
+    "name": "workshop",
+    "count": 7,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1280,
+      800
+    ]
+  },
+  {
+    "name": "rescue",
+    "count": 11,
+    "outside": [],
+    "undersized": [],
+    "viewport": [
+      1280,
+      800
+    ]
+  }
+]

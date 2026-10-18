@@ -112,6 +112,7 @@
 .cargo-record-open:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 #1e6664}
 .cargo-record-open span{min-width:26px;padding:2px 7px;border-radius:999px;background:#f5ce74;color:#264846;text-align:center}
 .cargo-record-open:disabled{opacity:.5;cursor:default;box-shadow:none}
+.cargo-record-open.cargo-record-next{background:#f5ce74;color:#174b4c}
 .cargo-tools .cargo-bakery-open{min-height:48px;min-width:0;padding:6px 18px;font-size:17px;white-space:nowrap}
 .cargo-tools [hidden]{display:none}
 .cargo-dock{justify-content:center}.cargo-dock>div>strong{max-width:none;white-space:nowrap}.cargo-method .segmented button,.cargo-force .segmented button{white-space:nowrap}

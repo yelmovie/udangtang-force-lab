@@ -1,0 +1,1273 @@
+{
+  "at": "2026-10-18T05:25:22.456Z",
+  "base": "https://udangtang-force-lab.yelsam.workers.dev",
+  "rootStatus": 200,
+  "rootAssets": [
+    "/assets/index-BT-iukWF.js",
+    "/assets/index-D_Yf7XK_.css"
+  ],
+  "checked": 180,
+  "failures": [],
+  "results": [
+    {
+      "path": "/assets/audio/error_001.ogg",
+      "status": 200,
+      "bytes": 7373,
+      "match": true,
+      "sha256": "46e67425d16339772e8d328fb36a49426c9467418686e11beeb71ff84b0f6433"
+    },
+    {
+      "path": "/assets/audio/confirmation_002.ogg",
+      "status": 200,
+      "bytes": 14169,
+      "match": true,
+      "sha256": "33b17a9a9a2397c62b285c52c33a907fdffb476909c99e42dde603f6a7a8b12c"
+    },
+    {
+      "path": "/assets/backgrounds/lab.webp",
+      "status": 200,
+      "bytes": 128094,
+      "match": true,
+      "sha256": "2762ae4aa4e39572e54311d2481483d18c4782ed72f48099785ddf0671e232cf"
+    },
+    {
+      "path": "/assets/audio/LICENSE-Kenney.txt",
+      "status": 200,
+      "bytes": 2191,
+      "match": true,
+      "sha256": "f3131e6166a86cd1920a2bce867c57199c2d15ceec1f399c1c8a35a702cc1940"
+    },
+    {
+      "path": "/assets/characters/student_poses.webp",
+      "status": 200,
+      "bytes": 366408,
+      "match": true,
+      "sha256": "f1f0f34db46ca13a86616bb5769b8ac2719abe24a2c880df235611704ce2ec64"
+    },
+    {
+      "path": "/assets/backgrounds/cargo.webp",
+      "status": 200,
+      "bytes": 120032,
+      "match": true,
+      "sha256": "e3a52490dac0aa0f00f4db2dc26c42f9c041dfc4e98a8f32e5f560811ab5836a"
+    },
+    {
+      "path": "/assets/audio/click_003.ogg",
+      "status": 200,
+      "bytes": 4371,
+      "match": true,
+      "sha256": "2fa929138bc3a0f432696588f66eac94b8f6d463905ec8808c6461ce4b054292"
+    },
+    {
+      "path": "/assets/backgrounds/scale.webp",
+      "status": 200,
+      "bytes": 106322,
+      "match": true,
+      "sha256": "434abb930b3fe7b18b010f9ef7608488f3c35e9573396fc79daa4b22af2beb8e"
+    },
+    {
+      "path": "/assets/backgrounds/islands.webp",
+      "status": 200,
+      "bytes": 247634,
+      "match": true,
+      "sha256": "45cddca12c2683081971b29ed6b7da21c31c4615f27cc766688a624f197eea48"
+    },
+    {
+      "path": "/assets/characters/squirrel_poses.webp",
+      "status": 200,
+      "bytes": 321138,
+      "match": true,
+      "sha256": "78a0121a3722cfb57e660e13faf8cc4e85a4287f7a46e1512b90469ce3f0ab3a"
+    },
+    {
+      "path": "/assets/backgrounds/balance-tilt.webp",
+      "status": 200,
+      "bytes": 105892,
+      "match": true,
+      "sha256": "3c734e99eda348d0424daac82927442665ac1ad7683ef74e4fff11e0c0d14c84"
+    },
+    {
+      "path": "/assets/backgrounds/workshop.webp",
+      "status": 200,
+      "bytes": 115092,
+      "match": true,
+      "sha256": "1f17463d4dfadb7ed2a0d32b2446a7f66f88ef9a354bfda1ca01f93785c4aa39"
+    },
+    {
+      "path": "/assets/backgrounds/rescue-lab.webp",
+      "status": 200,
+      "bytes": 129832,
+      "match": true,
+      "sha256": "cbee70d0ab9f16bb7a9b43e0f678a994a90c4283ded84711bcc5027dec242736"
+    },
+    {
+      "path": "/assets/characters/corgi_poses.webp",
+      "status": 200,
+      "bytes": 360706,
+      "match": true,
+      "sha256": "d28b010ba5095a1605a20b5d2fc2da398cda8ceb0b2dd248ebfce83985348ef0"
+    },
+    {
+      "path": "/assets/ui/title.webp",
+      "status": 200,
+      "bytes": 90004,
+      "match": true,
+      "sha256": "acb5eba8243cc808f42c2062c75a98fa4ac4deb70304e347fb19915db0b3a83c"
+    },
+    {
+      "path": "/assets/backgrounds/core-hall-v2.webp",
+      "status": 200,
+      "bytes": 95364,
+      "match": true,
+      "sha256": "629cb98e1915b09b341512c0563d4c9494649ae5e3b2ca2d78c6b2ee88e85485"
+    },
+    {
+      "path": "/assets/backgrounds/balance.webp",
+      "status": 200,
+      "bytes": 108094,
+      "match": true,
+      "sha256": "346596a7594e2558ef91ca5f64a68710f479eb6c775ce715926f075737e8530b"
+    },
+    {
+      "path": "/assets/props/wood-crate.webp",
+      "status": 200,
+      "bytes": 25686,
+      "match": true,
+      "sha256": "78042cd2662039885c7b7353826ffb2721a964f50bd6db93d77135bab7df0acc"
+    },
+    {
+      "path": "/assets/backgrounds/core.webp",
+      "status": 200,
+      "bytes": 175592,
+      "match": true,
+      "sha256": "ed1a88b425a20abac6d685a8e2484561d8070f8e1e80682589c349f31acca5c6"
+    },
+    {
+      "path": "/assets/backgrounds/workshop-clear.webp",
+      "status": 200,
+      "bytes": 123632,
+      "match": true,
+      "sha256": "6554a5bf8cbcb7a5134085d6794e63c2861e8d3abf72abbf6433ceca8b621e65"
+    },
+    {
+      "path": "/assets/game/tray.webp",
+      "status": 200,
+      "bytes": 15968,
+      "match": true,
+      "sha256": "221257e5dd008d7d7e8ece9ed11fa4ae1b47e70acbe075ab70b63f0c2334442b"
+    },
+    {
+      "path": "/assets/game/wood-block.webp",
+      "status": 200,
+      "bytes": 7980,
+      "match": true,
+      "sha256": "4dd6a5373909ceec33b2203486af7f06f2a68bc5f611f2d6afee8d4d6e3b9af1"
+    },
+    {
+      "path": "/assets/game/book.webp",
+      "status": 200,
+      "bytes": 8666,
+      "match": true,
+      "sha256": "c9bf3dc1a250c5e03d59a18e2557cece299c7ac3ae519e9eab009313aacb6177"
+    },
+    {
+      "path": "/assets/game/apple.webp",
+      "status": 200,
+      "bytes": 10476,
+      "match": true,
+      "sha256": "50e7454c7f57a383c8100bf95b2c07da335a7debed268bb71dd0636ea886bdee"
+    },
+    {
+      "path": "/assets/game/nut.webp",
+      "status": 200,
+      "bytes": 9552,
+      "match": true,
+      "sha256": "9c43db695b1e301520c5f9690021883c9982248df5f4b8ec7f223195d2bbc43c"
+    },
+    {
+      "path": "/assets/game/eraser.webp",
+      "status": 200,
+      "bytes": 8470,
+      "match": true,
+      "sha256": "68b784d00da8f01921c83ee2c64755d69b318d627309998fb98675a508b2dbee"
+    },
+    {
+      "path": "/assets/game/rock.webp",
+      "status": 200,
+      "bytes": 7676,
+      "match": true,
+      "sha256": "e04dfedc629854b540df7ea8f6c0c10f1ec03e7e4d1a56e482375455d5b429b7"
+    },
+    {
+      "path": "/assets/game/balance-pan.webp",
+      "status": 200,
+      "bytes": 14426,
+      "match": true,
+      "sha256": "c6774a273f0f6eabdd84add9265ff2e0326c6c0a91bf5d157d2d4f871b8999ce"
+    },
+    {
+      "path": "/assets/game/scale.webp",
+      "status": 200,
+      "bytes": 19902,
+      "match": true,
+      "sha256": "1aaed85207f2ae77225dd9a6872b7f66528dd0942579b067e2f291f421aa0b0e"
+    },
+    {
+      "path": "/assets/game/balance-beam.webp",
+      "status": 200,
+      "bytes": 1366,
+      "match": true,
+      "sha256": "53857b7e587955b65d7506a573c2e995e15bb8c366ac2ccc9e4bc0a44cf669fd"
+    },
+    {
+      "path": "/assets/game/balance-base.webp",
+      "status": 200,
+      "bytes": 13760,
+      "match": true,
+      "sha256": "f28afbb5301a09bacfba9e5b3e1c15998436981107a98681afc20af726b24f4e"
+    },
+    {
+      "path": "/assets/backgrounds/ending-village.webp",
+      "status": 200,
+      "bytes": 248082,
+      "match": true,
+      "sha256": "a9cd8847d39c9cefa9065891aba9b85a2291ca1be99a04ce4d2866239a484485"
+    },
+    {
+      "path": "/assets/game/crate-empty.webp",
+      "status": 200,
+      "bytes": 27390,
+      "match": true,
+      "sha256": "06acdc04a6f639e7171db09eebc4ee3b87192c793ffa4645f4d7824e16b5693f"
+    },
+    {
+      "path": "/assets/game/student-observe.webp",
+      "status": 200,
+      "bytes": 18666,
+      "match": true,
+      "sha256": "c9d026b64fb414c52ce842dae1f511b2f8f6b9ae25d27fa1558c92137061216b"
+    },
+    {
+      "path": "/assets/game/student-idle.webp",
+      "status": 200,
+      "bytes": 25026,
+      "match": true,
+      "sha256": "e33b9b844db6abea19d6be22ce0797569f31914f88cad417042b0dc8dfcd228b"
+    },
+    {
+      "path": "/assets/game/student-effort.webp",
+      "status": 200,
+      "bytes": 22834,
+      "match": true,
+      "sha256": "33b1215158dc032899958d389980cc4990bdd10412dcddfd1b50a4f66884f62f"
+    },
+    {
+      "path": "/assets/game/student-success.webp",
+      "status": 200,
+      "bytes": 22928,
+      "match": true,
+      "sha256": "bbe7b6a21fcac958e86053624797856fd97e9c1a1696224c8005767350ba9200"
+    },
+    {
+      "path": "/assets/game/corgi-observe.webp",
+      "status": 200,
+      "bytes": 16522,
+      "match": true,
+      "sha256": "a28e0a4d0b8c2d3e489e59067c98b3aae16eb4fbba83018afa98ec53c03d646f"
+    },
+    {
+      "path": "/assets/game/corgi-effort.webp",
+      "status": 200,
+      "bytes": 14702,
+      "match": true,
+      "sha256": "b28a4faac222d3868294577b99cd7516fc68fc5b4aec64b81bcc98f7db3abbde"
+    },
+    {
+      "path": "/assets/game/manifest.json",
+      "status": 200,
+      "bytes": 5498,
+      "match": true,
+      "sha256": "1862cd7601ca48efaee73facc31c312aaee0fdc220600db96bd3583735273700"
+    },
+    {
+      "path": "/assets/game/student-cargo-pull.webp",
+      "status": 200,
+      "bytes": 85506,
+      "match": true,
+      "sha256": "d5a311e34aa328a02c1bbe1b31d97a4f3f8d5e4bd7ef457e19897d8387dd2a31"
+    },
+    {
+      "path": "/assets/game/balance-wood-v2.webp",
+      "status": 200,
+      "bytes": 46336,
+      "match": true,
+      "sha256": "19a1d4d96879f49d94021b1817a0baf03c6a87759eb5ec3ab4baf01804ae9c23"
+    },
+    {
+      "path": "/assets/game/balance-metal-v2.webp",
+      "status": 200,
+      "bytes": 31206,
+      "match": true,
+      "sha256": "76b2ddfbdeba24357c234dfc3c09113e4d40e219c58453ded72a94c7c7278c03"
+    },
+    {
+      "path": "/assets/game/balance-ceramic-v2.webp",
+      "status": 200,
+      "bytes": 21084,
+      "match": true,
+      "sha256": "f04de1ac3273a728993758a6db800423f7f0b8c03497917efe9db3e66cc33202"
+    },
+    {
+      "path": "/assets/game/balance-lock-pin.webp",
+      "status": 200,
+      "bytes": 14118,
+      "match": true,
+      "sha256": "f6a5f2661b9a098b03337ab5e7411c0a613f2ebbb517290dddc8501d74002ebb"
+    },
+    {
+      "path": "/assets/game/student-cargo-push.webp",
+      "status": 200,
+      "bytes": 83930,
+      "match": true,
+      "sha256": "67529405b4f2fcc3632f3c8d31912046d7e688d15f43b55e8289335319051af8"
+    },
+    {
+      "path": "/assets/props/core-cargo.webp",
+      "status": 200,
+      "bytes": 24308,
+      "match": true,
+      "sha256": "2cfc92266ea452900b6a7131c7a32bde240d4d211751a107c7656eab602f983e"
+    },
+    {
+      "path": "/assets/game/workshop-direct-start.webp",
+      "status": 200,
+      "bytes": 54350,
+      "match": true,
+      "sha256": "5977163af1abe853b6e100b6f37a11a6d8a96d07fb8f1e6db4f1a16b0b5f39ae"
+    },
+    {
+      "path": "/assets/game/workshop-direct-lift.webp",
+      "status": 200,
+      "bytes": 46744,
+      "match": true,
+      "sha256": "0dd99afe897262ed5428c3280716099c0401163b621065452af726cc1770ec37"
+    },
+    {
+      "path": "/assets/game/workshop-lever-hard.webp",
+      "status": 200,
+      "bytes": 49630,
+      "match": true,
+      "sha256": "b2cf9a8c5eccc8e7969d7f840e4b61d9134ffec358d6c1e055598c7da3fa9b4d"
+    },
+    {
+      "path": "/assets/game/corgi-success.webp",
+      "status": 200,
+      "bytes": 14420,
+      "match": true,
+      "sha256": "c016cb11a27d4918779d1906c1ed63e24a4d07176e8cc78e32e4d10b9f88382b"
+    },
+    {
+      "path": "/assets/game/corgi-idle.webp",
+      "status": 200,
+      "bytes": 14298,
+      "match": true,
+      "sha256": "fab45560fee760d8e9e420f94eb8627692d150d2e8057787456dfe8321d152ba"
+    },
+    {
+      "path": "/assets/game/workshop-ramp-easy.webp",
+      "status": 200,
+      "bytes": 45592,
+      "match": true,
+      "sha256": "31e8ef4f2f392aa7cf5c612d3b35964151627525af430ec96c9abf1bab83ebd7"
+    },
+    {
+      "path": "/assets/game/workshop-lever-press-0.webp",
+      "status": 200,
+      "bytes": 211622,
+      "match": true,
+      "sha256": "ea1bcbfdaec6a859c0c414888b6147741da315713047bad1753e5521390275da"
+    },
+    {
+      "path": "/assets/game/workshop-lever-press-1.webp",
+      "status": 200,
+      "bytes": 202390,
+      "match": true,
+      "sha256": "9fbc1827c4924be30b4fdbb4e51e83ed2016246ffe72cd022964d82473e23f4a"
+    },
+    {
+      "path": "/assets/game/workshop-lever-press-4.webp",
+      "status": 200,
+      "bytes": 129558,
+      "match": true,
+      "sha256": "9735d85594d6a46cd54baf22f51294bb2355d86abce4a2e90b995c702a834a6f"
+    },
+    {
+      "path": "/assets/game/workshop-lever-press-0-hard.webp",
+      "status": 200,
+      "bytes": 66148,
+      "match": true,
+      "sha256": "f9da7a665c4fdb1ae35164d4bebb13ce3583d7236a2bbf915597d4430f87cbfa"
+    },
+    {
+      "path": "/assets/game/workshop-ramp-hard.webp",
+      "status": 200,
+      "bytes": 47886,
+      "match": true,
+      "sha256": "6923394720acbfa8cdf9e266491e5c614c99013b7798002a6f28b0129ac01478"
+    },
+    {
+      "path": "/assets/game/workshop-lever-easy.webp",
+      "status": 200,
+      "bytes": 46870,
+      "match": true,
+      "sha256": "b38bac06e8bc92149a78e14b11399018197931631aa5448cf839ca1d518d2ea9"
+    },
+    {
+      "path": "/assets/game/workshop-lever-press-2.webp",
+      "status": 200,
+      "bytes": 68120,
+      "match": true,
+      "sha256": "95c5a1da0360cd3d64e6c6d74593a90b1be3d849308dec9ba39e198bcc8ba703"
+    },
+    {
+      "path": "/assets/game/workshop-lever-press-3.webp",
+      "status": 200,
+      "bytes": 63140,
+      "match": true,
+      "sha256": "15f19f4a5398b7624b803655fcfef4d8274236e39e1191478f6081c654ac68da"
+    },
+    {
+      "path": "/assets/game/workshop-lever-press-1-hard.webp",
+      "status": 200,
+      "bytes": 60566,
+      "match": true,
+      "sha256": "e251f3a24dadfec65e11867ab1e232c917b7fa68e7e6c3312a0552090863c00e"
+    },
+    {
+      "path": "/assets/game/workshop-lever-press-3-easy.webp",
+      "status": 200,
+      "bytes": 59192,
+      "match": true,
+      "sha256": "9d276da407d0766a9cce6c81c67fa437e0b3ee76eb59417f2cc3cdbccc8b6e6a"
+    },
+    {
+      "path": "/assets/game/workshop-lever-press-2-hard.webp",
+      "status": 200,
+      "bytes": 64242,
+      "match": true,
+      "sha256": "d0d9a9e4fab36181bb59906667c31e4f2a8b0c089efdfdf8bdac1b8cbbb0ff04"
+    },
+    {
+      "path": "/assets/game/cargo-part.webp",
+      "status": 200,
+      "bytes": 4196,
+      "match": true,
+      "sha256": "c0e9595a68ffc15fccbfb7a3b4b1dd7ce9f805b369dfe1d3e5b0f88437c075e7"
+    },
+    {
+      "path": "/assets/game/cargo-parts-1.webp",
+      "status": 200,
+      "bytes": 2366,
+      "match": true,
+      "sha256": "2ca752d6bd9af41cfb2a81e4ab0c3bf2afe07b04ec2793861ef176c29f8a2542"
+    },
+    {
+      "path": "/assets/game/cargo-parts-3.webp",
+      "status": 200,
+      "bytes": 3776,
+      "match": true,
+      "sha256": "741bc68834452b02ca9e605f42adae91f79ddbef3427190756f61a92a42f3939"
+    },
+    {
+      "path": "/assets/game/toolcard-cargo.webp",
+      "status": 200,
+      "bytes": 22226,
+      "match": true,
+      "sha256": "b1584e384b9d0cf62622e4d49406ff8eea4c8ff34e2ab83d685efb737fb764e5"
+    },
+    {
+      "path": "/assets/game/cargo-parts-5.webp",
+      "status": 200,
+      "bytes": 4884,
+      "match": true,
+      "sha256": "edc21ae87063b27828d30111082d3ad0c7667789e4d2c9bf9170329241d0f666"
+    },
+    {
+      "path": "/assets/game/toolcard-balance.webp",
+      "status": 200,
+      "bytes": 19856,
+      "match": true,
+      "sha256": "fd88aba232caa90d5cf8852a2b1f49b636ea04a4eda41f2e6ad1cad41e9a08f6"
+    },
+    {
+      "path": "/assets/game/toolcard-scale.webp",
+      "status": 200,
+      "bytes": 13658,
+      "match": true,
+      "sha256": "57dc5fdc9e4108133c07c2f11e8890ba707f0ebbcd733ce3d09572abbc334676"
+    },
+    {
+      "path": "/assets/game/balance-corgi.webp",
+      "status": 200,
+      "bytes": 50572,
+      "match": true,
+      "sha256": "0d8d4ad0b40ba9bd99104f6f0b83c635a0fb78a624b92e97bd17073bf7654a03"
+    },
+    {
+      "path": "/assets/game/toolcard-rescue.webp",
+      "status": 200,
+      "bytes": 23416,
+      "match": true,
+      "sha256": "8fd56b88456b00000efabfde0baabf767cce635c2d0e2fa1a1a03a941851ef72"
+    },
+    {
+      "path": "/assets/game/balance-student.webp",
+      "status": 200,
+      "bytes": 59676,
+      "match": true,
+      "sha256": "96622775923b5c524a959c01f1f5ca1c7fb46b0b04e3f8486456dcbe17668f65"
+    },
+    {
+      "path": "/assets/game/toolcard-workshop.webp",
+      "status": 200,
+      "bytes": 15268,
+      "match": true,
+      "sha256": "354f4f1dbc94b2850e26f5bd30fc65893e084d124de0a19fdc4677bfabbd4be9"
+    },
+    {
+      "path": "/assets/village/buildings/cargo.webp",
+      "status": 200,
+      "bytes": 222622,
+      "match": true,
+      "sha256": "7b900032a175a9e51e89b224b716abb9ad4d3803c2a99f2fc0975caad6a55feb"
+    },
+    {
+      "path": "/assets/village/buildings/scale.webp",
+      "status": 200,
+      "bytes": 257480,
+      "match": true,
+      "sha256": "3de56d257ed978d22f717fbf4b1516f2181edfd429a40e04ba7a2bcac2bb4978"
+    },
+    {
+      "path": "/assets/village/buildings/core.webp",
+      "status": 200,
+      "bytes": 225140,
+      "match": true,
+      "sha256": "039aebec676723ce803828776892af48948e8b4c45449587a90b7578cc880c1b"
+    },
+    {
+      "path": "/assets/game/workshop-lever-press-4-easy.webp",
+      "status": 200,
+      "bytes": 37330,
+      "match": true,
+      "sha256": "53bb96903c84408a5c6eddc02fe9ddbd38719b4ce4a0099f539c9b0335f74f0e"
+    },
+    {
+      "path": "/assets/village/buildings/empty.webp",
+      "status": 200,
+      "bytes": 1960,
+      "match": true,
+      "sha256": "abf86e0ae8b69878a619c08c97e02d60e4e8adcac8cbb9bab9859bac11c5eb8c"
+    },
+    {
+      "path": "/assets/village/corgi/down-1.webp",
+      "status": 200,
+      "bytes": 63830,
+      "match": true,
+      "sha256": "c4d3cf879e75bed25be766e5ff02432179ae3e79fb41c12d694fc49ff298f0e1"
+    },
+    {
+      "path": "/assets/village/corgi/down-2.webp",
+      "status": 200,
+      "bytes": 64726,
+      "match": true,
+      "sha256": "1bf70f10c4b4800694ffb45bae61ef9af7a47baaf6f40465bc4594425215cbc1"
+    },
+    {
+      "path": "/assets/village/corgi/down-3.webp",
+      "status": 200,
+      "bytes": 65682,
+      "match": true,
+      "sha256": "d274f38ef069f7e8ffc397663094898ca9adc5790e47f714641af4755fcf44de"
+    },
+    {
+      "path": "/assets/village/corgi/left-2.webp",
+      "status": 200,
+      "bytes": 63962,
+      "match": true,
+      "sha256": "8773b431983a1dc43aec5fd8520dc8d415d66810c3c7ca288a419382eb3d8a02"
+    },
+    {
+      "path": "/assets/village/corgi/left-3.webp",
+      "status": 200,
+      "bytes": 65118,
+      "match": true,
+      "sha256": "54f81f386c7baf4c4e918aabddf4cfb603e663113d1bd2df1b8b0c8f5f7c3f3a"
+    },
+    {
+      "path": "/assets/village/corgi/right-1.webp",
+      "status": 200,
+      "bytes": 61820,
+      "match": true,
+      "sha256": "af416fcda25c151fdf41daf5aabbabd5c056d3c9c51eec31454e666dea4d87be"
+    },
+    {
+      "path": "/assets/village/corgi/left-4.webp",
+      "status": 200,
+      "bytes": 65716,
+      "match": true,
+      "sha256": "5b452142e1ecb47b91ce6bc7a7f7a1119de9e7b8a18f1537b38956ba40b5a2d3"
+    },
+    {
+      "path": "/assets/village/buildings/balance.webp",
+      "status": 200,
+      "bytes": 198096,
+      "match": true,
+      "sha256": "2567628618381ed83e89f354fac95829a5d55174cab967b59636280971012d0e"
+    },
+    {
+      "path": "/assets/village/corgi/right-2.webp",
+      "status": 200,
+      "bytes": 62532,
+      "match": true,
+      "sha256": "1817c6f285d5bcca26d79064a3bc9ab08a0bf83211cd32ce3eee6904afd1862f"
+    },
+    {
+      "path": "/assets/village/corgi/left-1.webp",
+      "status": 200,
+      "bytes": 66206,
+      "match": true,
+      "sha256": "e485e57db84b0e89009bf1f359bf8174fb3b296466b0f8ea37af0a2701e762e8"
+    },
+    {
+      "path": "/assets/village/corgi/down-4.webp",
+      "status": 200,
+      "bytes": 63478,
+      "match": true,
+      "sha256": "7210fc19e997f9ed44b02b8b636ab7119cbf78ea3b95a8b3b23aa3724d6e2c5d"
+    },
+    {
+      "path": "/assets/village/corgi/right-3.webp",
+      "status": 200,
+      "bytes": 62108,
+      "match": true,
+      "sha256": "ebce569588a3a912d7cd1b217a00fb22b9aa6bedb6077479cedb5fb353eebfad"
+    },
+    {
+      "path": "/assets/village/corgi/right-4.webp",
+      "status": 200,
+      "bytes": 66036,
+      "match": true,
+      "sha256": "09cf9977a6f498399feaf675dd9cbb5e6da13ecbfb6da7c71bb3b24ca3e3d18c"
+    },
+    {
+      "path": "/assets/village/buildings/workshop.webp",
+      "status": 200,
+      "bytes": 232330,
+      "match": true,
+      "sha256": "3b9e8d9ae8f770423155bebd721c7c5c9395ca3f84969befc8f097ca91faa013"
+    },
+    {
+      "path": "/assets/village/corgi/up-2.webp",
+      "status": 200,
+      "bytes": 52880,
+      "match": true,
+      "sha256": "ed3721bccebd8f493f90d5e0c11da26234b3e2f7f8e1f7c0081dbe4112f3d999"
+    },
+    {
+      "path": "/assets/village/npc/guide.webp",
+      "status": 200,
+      "bytes": 125678,
+      "match": true,
+      "sha256": "f7bb5febf6a9d3bac3373b58021826ddca5e4a216f6beadf0db3c562d100888c"
+    },
+    {
+      "path": "/assets/village/npc/wave.webp",
+      "status": 200,
+      "bytes": 149762,
+      "match": true,
+      "sha256": "f461145e65f0d7fcd781f81685427a5c2f0288de1d0de83babb46682fa17786a"
+    },
+    {
+      "path": "/assets/village/corgi/up-4.webp",
+      "status": 200,
+      "bytes": 52144,
+      "match": true,
+      "sha256": "9a90fea2cf48657a3cffde97b85ba55d00da82d096a03903765d9bb558db250f"
+    },
+    {
+      "path": "/assets/village/npc/baker.webp",
+      "status": 200,
+      "bytes": 153290,
+      "match": true,
+      "sha256": "871ee6b650cf30e199a2a0a1005920ea4a9116e0ab4947494d96239e8fe56ef5"
+    },
+    {
+      "path": "/assets/village/npc/point.webp",
+      "status": 200,
+      "bytes": 151884,
+      "match": true,
+      "sha256": "af7aaab649168f8f3d04a738dd0b36141e4a706c807614ab5fcd41a997d2105c"
+    },
+    {
+      "path": "/assets/village/npc/inspector.webp",
+      "status": 200,
+      "bytes": 162848,
+      "match": true,
+      "sha256": "c8d48cd1713c3f3e7e389d871800d84a5c4467635f205c4df0df725a48051f26"
+    },
+    {
+      "path": "/assets/village/corgi/up-3.webp",
+      "status": 200,
+      "bytes": 51314,
+      "match": true,
+      "sha256": "f3ab5b4e3353eba509649c093dc8200798d6503ee04d1e416fd1f4e1bac7b5e2"
+    },
+    {
+      "path": "/assets/village/npc/crafter.webp",
+      "status": 200,
+      "bytes": 143578,
+      "match": true,
+      "sha256": "b12a836fbf21764c376018c22731f4f95e57d878301cc74b62bbe4e6cfc2706c"
+    },
+    {
+      "path": "/assets/village/props/prop-02.webp",
+      "status": 200,
+      "bytes": 40342,
+      "match": true,
+      "sha256": "3ec095394c49ee87d302554b854a0d63c173e6a2111cba3377aceda1ed7ff0b4"
+    },
+    {
+      "path": "/assets/village/props/prop-01.webp",
+      "status": 200,
+      "bytes": 68220,
+      "match": true,
+      "sha256": "77bcd4eb5ddbc47d5d536447e89d7b5dba30fd68e1e39f7794bf5bbe6c21bd18"
+    },
+    {
+      "path": "/assets/village/corgi/up-1.webp",
+      "status": 200,
+      "bytes": 52736,
+      "match": true,
+      "sha256": "9ef594acb032085d0c4fefff75102361b9a043275c9ca071fa7996289a87a3cb"
+    },
+    {
+      "path": "/assets/village/props/prop-04.webp",
+      "status": 200,
+      "bytes": 73808,
+      "match": true,
+      "sha256": "65297b0fa33f92a796d771f2f57822a08723ce00dba26bf1cbbf206899646440"
+    },
+    {
+      "path": "/assets/village/props/prop-05.webp",
+      "status": 200,
+      "bytes": 52542,
+      "match": true,
+      "sha256": "16065cbe2a00f322418967af81ee1bdbe86fe2faae1faee77071fd586681ce89"
+    },
+    {
+      "path": "/assets/village/props/prop-06.webp",
+      "status": 200,
+      "bytes": 48820,
+      "match": true,
+      "sha256": "55020eca7cf6d447c36108390f6fa3bfedfcf79a0b8a30a86adbe5282c310f3d"
+    },
+    {
+      "path": "/assets/village/props/prop-03.webp",
+      "status": 200,
+      "bytes": 57792,
+      "match": true,
+      "sha256": "63e308b5087d4cf0eab84469345c8481890466d60965a35cb9fb3e546149495c"
+    },
+    {
+      "path": "/assets/village/npc/think.webp",
+      "status": 200,
+      "bytes": 127824,
+      "match": true,
+      "sha256": "598bc7a2c1227580e92205ea86d7278f5ba2fb2acd7700ae93db61d9541ba9a2"
+    },
+    {
+      "path": "/assets/village/props/prop-08.webp",
+      "status": 200,
+      "bytes": 64972,
+      "match": true,
+      "sha256": "34d8957cf53b571726a9c411c7383f5206a7f96474a16c7227ac139d76b18afc"
+    },
+    {
+      "path": "/assets/village/props/prop-10.webp",
+      "status": 200,
+      "bytes": 23070,
+      "match": true,
+      "sha256": "e371fd4601e42dc18ab1a540a9ed1868dc7365f4e38504d8806816391c3ac034"
+    },
+    {
+      "path": "/assets/village/props/prop-09.webp",
+      "status": 200,
+      "bytes": 46054,
+      "match": true,
+      "sha256": "93fd37ea1adcc159f99bf96e3dc2b2c1de978e32919909bc076e057bf186c7fb"
+    },
+    {
+      "path": "/assets/village/student/down-1.webp",
+      "status": 200,
+      "bytes": 53046,
+      "match": true,
+      "sha256": "5c640477526cef211f518365b1c43d320b205221f499990bc6b64582e5503139"
+    },
+    {
+      "path": "/assets/village/student/down-2.webp",
+      "status": 200,
+      "bytes": 53588,
+      "match": true,
+      "sha256": "a5aeb7b6e6bb21051f94da5a056a47e05ea1a8bb298872abbe929ec75baf3b38"
+    },
+    {
+      "path": "/assets/village/student/down-3.webp",
+      "status": 200,
+      "bytes": 53482,
+      "match": true,
+      "sha256": "e1792e33a1b0a4609c5ade972a41c6f21735930edda7a0c9bb082fcb0b893a54"
+    },
+    {
+      "path": "/assets/village/student/down-4.webp",
+      "status": 200,
+      "bytes": 52574,
+      "match": true,
+      "sha256": "db0f6965b6c686b5756afdcbf131d7a5afc299194cf4632b11fc0f1699518bcf"
+    },
+    {
+      "path": "/assets/village/props/prop-07.webp",
+      "status": 200,
+      "bytes": 22746,
+      "match": true,
+      "sha256": "9c624080e11d173244137f22ef404851a58b51f1c631603e28a6eaa1b140c6c5"
+    },
+    {
+      "path": "/assets/village/props/prop-12.webp",
+      "status": 200,
+      "bytes": 104930,
+      "match": true,
+      "sha256": "4d6e7c1fcbedace061bc85836349c792cf36d5a70542528098c0e41e92a67ecf"
+    },
+    {
+      "path": "/assets/village/student/left-1.webp",
+      "status": 200,
+      "bytes": 52276,
+      "match": true,
+      "sha256": "b61a6b2cfdbd922515d7b4f1014f0c07276335084e27d4fb8892f722a1f7bd87"
+    },
+    {
+      "path": "/assets/village/props/prop-11.webp",
+      "status": 200,
+      "bytes": 68930,
+      "match": true,
+      "sha256": "98242f2f14d91e2aa671036cad3d3ffa069b4ca371bb9bc0bbb5b5d3be1afab3"
+    },
+    {
+      "path": "/assets/village/student/left-3.webp",
+      "status": 200,
+      "bytes": 54644,
+      "match": true,
+      "sha256": "298f1fdf27e98fa4587f4534ace1bc2f7e322859fbec5dcbf6cc0cfa513fb50b"
+    },
+    {
+      "path": "/assets/village/student/left-2.webp",
+      "status": 200,
+      "bytes": 51102,
+      "match": true,
+      "sha256": "74cf31e8ccb41108de30c8fdbea5561ff076a4a172c45950433b3d87754cf1c1"
+    },
+    {
+      "path": "/assets/village/student/right-2.webp",
+      "status": 200,
+      "bytes": 49764,
+      "match": true,
+      "sha256": "0451854a239b45e2eb196f0d97a9d6efaaff90e56dfc5cce2cb5af4367b2f8a5"
+    },
+    {
+      "path": "/assets/village/student/right-4.webp",
+      "status": 200,
+      "bytes": 52322,
+      "match": true,
+      "sha256": "32ddaeee38b09f2e872b85bde4c283128ea503b2c70dcf225ec3a94b0599ca24"
+    },
+    {
+      "path": "/assets/village/student/up-1.webp",
+      "status": 200,
+      "bytes": 49758,
+      "match": true,
+      "sha256": "25eb18aade7fc0e347d199febfe2a9dc6af0fd6e4b0bb7d116779e9cdfd6174d"
+    },
+    {
+      "path": "/assets/village/student/right-3.webp",
+      "status": 200,
+      "bytes": 54612,
+      "match": true,
+      "sha256": "4a813be60cbfd6b0cf8716ec11a163481f8aac71c718d4115a8686c9972fc8bf"
+    },
+    {
+      "path": "/assets/village/student/up-2.webp",
+      "status": 200,
+      "bytes": 49194,
+      "match": true,
+      "sha256": "e622c7a3d97a819c77f5e83367e88c2fd7dcb06d505322403f3e9524f68bf7cf"
+    },
+    {
+      "path": "/assets/village/student/left-4.webp",
+      "status": 200,
+      "bytes": 52338,
+      "match": true,
+      "sha256": "27d6268c8aa881ca8ce58f0cc912408056c44fbb3ac36dd5944fc920f7322ec4"
+    },
+    {
+      "path": "/assets/village/student/up-3.webp",
+      "status": 200,
+      "bytes": 49586,
+      "match": true,
+      "sha256": "bd5007421ba976c6af2d4aae9658563119adc8bf7c1bd632e2b789c52a2b4453"
+    },
+    {
+      "path": "/assets/village/student/up-4.webp",
+      "status": 200,
+      "bytes": 48650,
+      "match": true,
+      "sha256": "88e63ebe64da8832c190733f7c6e1c98edec60f8f09c50d8df149e13bf9a3ea7"
+    },
+    {
+      "path": "/assets/village/manifest.json",
+      "status": 200,
+      "bytes": 41897,
+      "match": true,
+      "sha256": "f7fc6d28573f96b5270e8ca378235c7471f03ef254ec54f4a40b042f048d5016"
+    },
+    {
+      "path": "/assets/village/student/right-1.webp",
+      "status": 200,
+      "bytes": 52504,
+      "match": true,
+      "sha256": "43a10a6e80acedfafcc0a878cec47f0dbdc727ed30f07eca0e29194750873262"
+    },
+    {
+      "path": "/assets/village/world-map.json",
+      "status": 200,
+      "bytes": 22702,
+      "match": true,
+      "sha256": "1a632f712c90a858fd22b761fed06e0be5946214633da161d997df6ed1faa4db"
+    },
+    {
+      "path": "/assets/fonts/jua-korean-400.woff2",
+      "status": 200,
+      "bytes": 368172,
+      "match": true,
+      "sha256": "b5c280f7c75d6634c3011682ab7787b73b8cfc4acaee4b70fa7aad228adf7d70"
+    },
+    {
+      "path": "/assets/village/terrain.webp",
+      "status": 200,
+      "bytes": 598292,
+      "match": true,
+      "sha256": "9038beaa0c8454d857dc663acb1bfb0f16b6545bf3ea80108a21ad800c7db2cb"
+    },
+    {
+      "path": "/assets/fonts/jua-latin-400.woff2",
+      "status": 200,
+      "bytes": 16620,
+      "match": true,
+      "sha256": "a317499f46a11810207ace4e5fdf04c9949250abeb914a1e713c391e4606c4f2"
+    },
+    {
+      "path": "/assets/fonts/Jua-OFL.txt",
+      "status": 200,
+      "bytes": 4474,
+      "match": true,
+      "sha256": "75de1deee2759c8ab2c576ae9233078552ad2c02dda3a07822042ad402d4f86a"
+    },
+    {
+      "path": "/assets/village/npc/clerk.webp",
+      "status": 200,
+      "bytes": 134688,
+      "match": true,
+      "sha256": "3f4210447955e1bd6176d98a992df5b4929261a8991d5b1c0827ba5be0a8d26f"
+    },
+    {
+      "path": "/assets/models/workshop/fulcrum.glb",
+      "status": 200,
+      "bytes": 194700,
+      "match": true,
+      "sha256": "cd8d000189c57254866a70e52e3de96b456e1aa21d9027a74a004b378e1cf36f"
+    },
+    {
+      "path": "/assets/models/workshop/crate.glb",
+      "status": 200,
+      "bytes": 230628,
+      "match": true,
+      "sha256": "9466ad6b205140426a8e596652719416e8875fbfd6a79c44642f9b67458aacb0"
+    },
+    {
+      "path": "/assets/story/intro-01.webp",
+      "status": 200,
+      "bytes": 257596,
+      "match": true,
+      "sha256": "d3c3487ef935ffd2f9d362a8082a18a1902654efd256685261b06d7e2649bcfd"
+    },
+    {
+      "path": "/assets/story/final-01.webp",
+      "status": 200,
+      "bytes": 154046,
+      "match": true,
+      "sha256": "a7137b22c60e853a2c09913dd7c0cee7f23f172aa37a41a15a1a0b257a519f44"
+    },
+    {
+      "path": "/assets/story/final-02.webp",
+      "status": 200,
+      "bytes": 228564,
+      "match": true,
+      "sha256": "577ca1fb443787c40ecd0a28046f34abc3a4f805a35bd6c66233dec3b3094433"
+    },
+    {
+      "path": "/assets/story/final-03.webp",
+      "status": 200,
+      "bytes": 292746,
+      "match": true,
+      "sha256": "a118ac3c4c1a99da8f3c06683da6ef16db31d4b9fbebfb5cd9b496e5d08f98a1"
+    },
+    {
+      "path": "/assets/story/intro.mp4",
+      "status": 200,
+      "bytes": 2138816,
+      "match": true,
+      "sha256": "6b8304ad17f017d4f4a1c3eb435ae8fb248d2fa52b3a17acbf90ad645a1fb7a6"
+    },
+    {
+      "path": "/assets/concepts/cargo.webm",
+      "status": 200,
+      "bytes": 180389,
+      "match": true,
+      "sha256": "ead85d6597b5caef9bd33ae2b91179a825945937f78737a16ac81112d1ac250e"
+    },
+    {
+      "path": "/assets/story/ending.mp4",
+      "status": 200,
+      "bytes": 3216507,
+      "match": true,
+      "sha256": "911de17a3fb1688abe0a09fe8893d0a947127d750bd0e2e9968744f98ad8bb4f"
+    },
+    {
+      "path": "/assets/concepts/cargo.webp",
+      "status": 200,
+      "bytes": 12340,
+      "match": true,
+      "sha256": "d16694a02a0ed54b1a4bed86e537cfc7cee73b402d113a06910008a9872d1ba0"
+    },
+    {
+      "path": "/assets/concepts/cargo.mp4",
+      "status": 200,
+      "bytes": 107992,
+      "match": true,
+      "sha256": "8288ce4d119ae92ca52c72fd3f660c8d9c32b7947e08e57f51ccece098bec97e"
+    },
+    {
+      "path": "/assets/story/intro-02.webp",
+      "status": 200,
+      "bytes": 180452,
+      "match": true,
+      "sha256": "2a346183d4a5337736b10e2b34a02cb93ea3aa7e19825ddf79dcd923fd1e995e"
+    },
+    {
+      "path": "/assets/concepts/balance.webp",
+      "status": 200,
+      "bytes": 11242,
+      "match": true,
+      "sha256": "c2e8572637188e3816b7dd3f8535f0b77e962ea64f9aad9b478b6fa12011cbe1"
+    },
+    {
+      "path": "/assets/concepts/balance.mp4",
+      "status": 200,
+      "bytes": 217792,
+      "match": true,
+      "sha256": "3b5ec7e100c3c37c27ae0a64a3fe18b61bfc6e888a4b7d50d7d206d6e47fc239"
+    },
+    {
+      "path": "/assets/concepts/scale.webp",
+      "status": 200,
+      "bytes": 13996,
+      "match": true,
+      "sha256": "6f10c7008ab6e0d00dd921170497a2402ecdda14a31f858abba323fc5af5b47f"
+    },
+    {
+      "path": "/assets/concepts/workshop.webm",
+      "status": 200,
+      "bytes": 287258,
+      "match": true,
+      "sha256": "62358a5e7f2fd44fa45b4c4dc82eda64407e451230fe9b9c48c3ac7787a1d393"
+    },
+    {
+      "path": "/assets/models/core/dock.glb",
+      "status": 200,
+      "bytes": 522712,
+      "match": true,
+      "sha256": "f923c3ce52bb73b604f29419bf98344ec27a4b2d4172e26339291170a8de6814"
+    },
+    {
+      "path": "/assets/concepts/workshop.mp4",
+      "status": 200,
+      "bytes": 156416,
+      "match": true,
+      "sha256": "ab28b881e3e661565d4974048bb63590b53a08af044e700734d9148a539db5e9"
+    },
+    {
+      "path": "/assets/concepts/workshop.webp",
+      "status": 200,
+      "bytes": 10580,
+      "match": true,
+      "sha256": "0873a72261291be323382f202dd56a13efdff0bd203d009d68b33520af27eb12"
+    },
+    {
+      "path": "/assets/concepts/balance.webm",
+      "status": 200,
+      "bytes": 418967,
+      "match": true,
+      "sha256": "a93a734472b910329176c8a7834a0414f181e399554820913b49395f64c3740b"
+    },
+    {
+      "path": "/assets/concepts/rescue.mp4",
+      "status": 200,
+      "bytes": 233556,
+      "match": true,
+      "sha256": "74bf11ad15c8320e5453c20b53ccaa37451da9d7afcb13873dd959ab838230f5"
+    },
+    {
+      "path": "/assets/concepts/rescue.webp",
+      "status": 200,
+      "bytes": 14840,
+      "match": true,
+      "sha256": "acc715b5672aaf0dbeee0e55dee650098a70f24ac7933d5ce02fd7c2363c7792"
+    },
+    {
+      "path": "/assets/textures/workshop-wood.webp",
+      "status": 200,
+      "bytes": 15816,
+      "match": true,
+      "sha256": "8cd3bd74a0758189cd5850537bab6e7c9e5bfcf4d52ee5b779d072a03b31aa04"
+    },
+    {
+      "path": "/assets/concepts/scale.mp4",
+      "status": 200,
+      "bytes": 185271,
+      "match": true,
+      "sha256": "7fdfa94fbc73b5711757e88f0953ab7b3cf83ce4dc29891227b32aeed984d97e"
+    },
+    {
+      "path": "/assets/CREDITS.md",
+      "status": 200,
+      "bytes": 6703,
+      "match": true,
+      "sha256": "5830413c602a3bcfb629df5ebc3fa1031b048939976509dfa3635a26f51f3cd5"
+    },
+    {
+      "path": "/assets/index-D_Yf7XK_.css",
+      "status": 200,
+      "bytes": 252235,
+      "match": true,
+      "sha256": "639048d47d45fb46d50338fc35cb5929fafa3cca8aed4684a90120c5dbabd015"
+    },
+    {
+      "path": "/assets/concepts/scale.webm",
+      "status": 200,
+      "bytes": 292438,
+      "match": true,
+      "sha256": "872ed7a7a81a7f2bbb8ce4b0c7b16cfadf53471c9f069371c069ca09013faf8c"
+    },
+    {
+      "path": "/assets/index-BT-iukWF.js",
+      "status": 200,
+      "bytes": 297816,
+      "match": true,
+      "sha256": "eea1feebb5f7d2cdebf85d6dd8ea26d64eca9e96ab859277d4ad6be9ac8f5ebf"
+    },
+    {
+      "path": "/assets/coreScene-BRnvlSOR.js",
+      "status": 200,
+      "bytes": 12675,
+      "match": true,
+      "sha256": "a19009dcec4b9bcb0f7dea78951896d4bb9f5f8ea4d3fc5e5ad0662c1473b1da"
+    },
+    {
+      "path": "/assets/workshopScene-cXArJAr3.js",
+      "status": 200,
+      "bytes": 5740,
+      "match": true,
+      "sha256": "48ba9ffc2804de678d0c7637b975261577fa4b23270f6b6c2a3935233a32d423"
+    },
+    {
+      "path": "/favicon.svg",
+      "status": 200,
+      "bytes": 431,
+      "match": true,
+      "sha256": "03242b852cb85f21ddef15acffb8f21f60df1515cb56114c2213eee210075f48"
+    },
+    {
+      "path": "/icons/icon-192.png",
+      "status": 200,
+      "bytes": 9845,
+      "match": true,
+      "sha256": "67273f9dbfbbf7dd440f335edfe72dda1221437b10a18d9bd0f0af752258bb94"
+    },
+    {
+      "path": "/assets/GLTFLoader-D2yk_eFr.js",
+      "status": 200,
+      "bytes": 608598,
+      "match": true,
+      "sha256": "05a47f61116cb019957847ff9bffb219e073d3a3beaa02de1f8ee066951f1d0b"
+    },
+    {
+      "path": "/icons/icon-512.png",
+      "status": 200,
+      "bytes": 32846,
+      "match": true,
+      "sha256": "2243f983e1287f8ec2b2c6d86f499dd9133ffb4731c6b3a626d9505c5345f075"
+    },
+    {
+      "path": "/manifest.webmanifest",
+      "status": 200,
+      "bytes": 833,
+      "match": true,
+      "sha256": "f9f64adc126c575b9856dfefa6ec38ef79d5a0b69dc02f0d6b111754483fc780"
+    },
+    {
+      "path": "/sw.js",
+      "status": 200,
+      "bytes": 7882,
+      "match": true,
+      "sha256": "fe8fda347ae2439923f44d7b1babd56bed82829c895232b64fa4448c4f08e236"
+    },
+    {
+      "path": "/assets/story/intro-03.webp",
+      "status": 200,
+      "bytes": 106612,
+      "match": true,
+      "sha256": "86181761b96b1a824b5bdad82f90d4f0fd12562f389b6710dc98141b8075a23d"
+    },
+    {
+      "path": "/index.html",
+      "status": 200,
+      "bytes": 1809,
+      "match": true,
+      "sha256": "b016e3fbc3cf23bf4de893d68d996124db1cd6d8fcb7d3b3fac633197517500a"
+    },
+    {
+      "path": "/assets/concepts/rescue.webm",
+      "status": 200,
+      "bytes": 428142,
+      "match": true,
+      "sha256": "b9650e2e43be48d5e2a3b2df145a1ddeb27a8eb446738c92b8a2b11bbbf288e8"
+    },
+    {
+      "path": "/assets/models/core/core.glb",
+      "status": 200,
+      "bytes": 1333112,
+      "match": true,
+      "sha256": "7946b3334ee0e428a1833dd8b4ed098a42c5c3b92ce019afd289bbdfbaf696c4"
+    }
+  ]
+}
