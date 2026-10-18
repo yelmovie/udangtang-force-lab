@@ -727,3 +727,12 @@ performance.mark('force-lab-ready');
 const startOffline = () => { if ('requestIdleCallback' in window) window.requestIdleCallback(prepareOffline, { timeout: 3000 }); else prepareOffline(); };
 window.addEventListener('load', () => window.setTimeout(startOffline, 3000), { once: true });
 
+// After a deploy the shell this tab loaded may point at chunks that no longer exist; one reload fetches the fresh shell.
+window.addEventListener('vite:preloadError', () => {
+  try {
+    const last = Number(sessionStorage.getItem('force-lab-reload') ?? 0);
+    if (Date.now() - last < 60_000) return;
+    sessionStorage.setItem('force-lab-reload', String(Date.now()));
+  } catch { return; }
+  location.reload();
+});

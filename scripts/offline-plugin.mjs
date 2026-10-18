@@ -63,6 +63,14 @@ self.addEventListener('fetch', event => {
   if (!ALLOWED.has(lookup) || !RUNTIME.test(lookup)) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
+    if (isStart) {
+      // Network first: a new deploy must hand out its own shell, or the cached one asks for chunks that no longer exist.
+      try {
+        const fresh = await Promise.race([fetch(request), new Promise((_, reject) => setTimeout(reject, 4000, new Error('timeout')))]);
+        if (fresh.ok) return fresh;
+      } catch {}
+      return (await cache.match(lookup)) || fetch(request);
+    }
     const hit = await cache.match(lookup);
     if (hit) return hit;
     const response = await fetch(request);
