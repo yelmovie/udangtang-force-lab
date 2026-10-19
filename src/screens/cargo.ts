@@ -27,7 +27,8 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     } | null = null;
     // Level 2 (bakery orders) is session play on top of the saved level 1 records.
     let finding = ready() && Array.isArray(state.orders);
-    let level: 1 | 2 = finding ? 2 : 1;
+    // Once every order is delivered the stage reopens as free level 1 experimenting, so it never locks.
+    let level: 1 | 2 = finding && !ordersComplete(state.orders) ? 2 : 1;
     let force: ForceLevel | null = null;
     let misses = 0;
     let findingTried = false;
@@ -41,7 +42,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     root.innerHTML = `<section class="experiment-screen cargo-expedition">
     <div class="experiment-heading"><div><p class="eyebrow">01 · 물자 배송소</p><h1>멈춘 화물을 움직여라!</h1><p>같은 힘을 주면, 무거운 상자도 같은 곳에 도착할까?</p></div><div class="cargo-tools"><button class="cargo-record-open" id="cargo-record-open">기록 보기 <span id="cargo-record-count">0</span></button><button class="button button-primary cargo-bakery-open" id="cargo-open-orders" hidden>빵집 배달 가기 →</button></div>${missionProgressMarkup('cargo', ['1개·5개', '밀기·당기기', '더 멀리 간 상자', '빵집 주문 3장'])}</div>
     <div class="cargo-adventure"><div class="cargo-scene" aria-label="화물 실험 무대">
-      <div class="cargo-scene-caption"><span class="instrument-phase cargo-step" id="cargo-step" tabindex="-1"></span></div>
+      <div class="cargo-scene-caption"><span class="instrument-phase cargo-step" id="cargo-step" tabindex="-1"></span><button class="button button-primary cargo-tap-go" id="cargo-tap-go">눌러서 밀기 →</button></div>
       <div class="cargo-finding-cta" hidden><p>실험 끝! 1개·5개, 밀기·당기기를 모두 해 봤어요.</p><button class="button button-primary" id="cargo-finding-go">비교하고 의뢰 받기 →</button></div>
       <div class="cargo-rail"><span class="rail-start">출발</span><span class="rail-end">어디까지 갈까?</span><i class="rail-ticks"></i><div class="cargo-target-zone" hidden><span>빵집 문 앞</span></div><div class="cargo-ghosts" aria-hidden="true"></div><div class="cargo-gesture-guide" aria-hidden="true"><span class="cargo-gesture-arrow">→</span><span class="cargo-gesture-target">같은 힘</span></div><div class="cargo-object" data-mood="idle" aria-label="부품을 담는 상자"><span class="cargo-pull-strap" aria-hidden="true"></span><span class="cargo-force-arrow" aria-hidden="true"><b>같은 힘</b></span><button class="cargo-worker-grip"><img class="cargo-worker cargo-worker-push" src="${imagePath('student-cargo-push')}" alt="" draggable="false"><img class="cargo-worker cargo-worker-pull" src="${imagePath('student-cargo-pull')}" alt="" draggable="false"><span class="cargo-grab-cue">${fingerIcon}</span></button><img class="cargo-box-art" src="${imagePath('crate-empty')}" alt="나무 운반 상자" draggable="false"><div class="cargo-contents"></div><span class="cargo-load-tag"></span></div></div>
       <div class="cargo-distance" role="status"></div>
@@ -53,6 +54,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     const finish = root.querySelector<HTMLButtonElement>('#cargo-finish')!;
     const recordOpen = root.querySelector<HTMLButtonElement>('#cargo-record-open')!;
     const ordersOpen = root.querySelector<HTMLButtonElement>('#cargo-open-orders')!;
+    const tapGo = root.querySelector<HTMLButtonElement>('#cargo-tap-go')!;
     // Results and the comparison question live in a popup that opens only after a try ends,
     // so the stage itself keeps the full width while the student is operating it.
     let popup: HTMLDialogElement | null = null;
@@ -95,12 +97,13 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             if (deliveredAll()) return '배달 완료! 운반 레일 복구하기를 눌러요';
             if (waiting) return misses ? '흔적을 보고 힘을 다시 골라요' : '배달 성공! 다음 주문이 와요';
             const label = `주문 ${orders().length + 1} · 부품 ${currentOrder().parts}개`;
-            return force ? `${label} · 아이를 잡고 오른쪽으로 옮겨요` : `${label} · 힘을 골라요`;
+            return force ? `${label} · 아이를 옮기거나 눌러서 밀기` : `${label} · 아래에서 힘을 고른 뒤 움직여 보세요`;
         }
+        if (finding && deliveredAll()) return '배달 완료! 부품과 방향을 바꿔 더 실험해 봐요';
         if (finding) return '위의 빵집 배달 가기를 눌러요';
         if (ready()) return '실험은 끝! 가운데 비교하고 의뢰 받기를 눌러요';
         if (needsSetup) return !weightCompared() ? '부품 개수를 바꿔 같은 쪽에서 다시 움직여요' : '같은 개수로 미는 쪽을 바꿔 봐요';
-        return '아이를 잡고 오른쪽 표시까지 옮긴 뒤 손을 놓아요';
+        return '아이를 오른쪽 표시까지 옮기거나 눌러서 움직여요';
     }
     function renderGhosts() {
         // Level 1: where every other load stopped, so 1·3·5 can be compared side by side on the rail.
@@ -149,6 +152,8 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         zone.style.left = endPosition(lo);
         zone.style.setProperty('--zone-span', `${(hi - lo) * .7}%`);
         handle.disabled = !canPush();
+        tapGo.textContent = action === 'pull' ? '눌러서 당기기 →' : '눌러서 밀기 →';
+        tapGo.disabled = !canPush() && !needsForce();
         handle.setAttribute('aria-label', level === 1
             ? `남자아이를 잡고 오른쪽 표시까지 ${action === 'push' ? '밀기' : '당기기'}. Enter로도 실험`
             : `남자아이를 잡고 ${forceLabel}으로 오른쪽 표시까지 밀기. Enter로도 실험`);
@@ -159,7 +164,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         const needsFinding = level === 1 && ready() && !finding;
         root.querySelector<HTMLElement>('.cargo-finding-cta')!.hidden = !needsFinding || locked;
         root.querySelector<HTMLElement>('.cargo-scene-caption')!.hidden = needsFinding && !locked;
-        ordersOpen.hidden = !finding || level === 2;
+        ordersOpen.hidden = !finding || level === 2 || deliveredAll();
         step.textContent = stepText();
         root.querySelector('#cargo-feedback')!.textContent = feedback;
         if (finding && level === 1 && !busy && !popup && !deliveredAll()) letterOnce(root, 'cargo', enterOrders);
@@ -204,7 +209,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         state.runs.push(run);
         state.runs = state.runs.slice(-20);
         railRuns.push(run);
-        needsSetup = true;
+        needsSetup = !deliveredAll();
         context.commit();
         context.sound(710);
         setActorMood('observe');
@@ -213,7 +218,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         if (chip)
             showPredictionChip(field, context.save, 'cargo');
         if (ready() && !finding)
-            feedback += ' 기록 보기에서 정리해 봐요.';
+            feedback += ' 가운데 비교하고 의뢰 받기를 눌러요.';
         update();
         // Let the stop spot (and the prediction chip) be seen before the result card covers the stage.
         schedulePopup(() => recordPopup(run), chip ? 2200 : 700);
@@ -230,7 +235,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             if (deliveredAll()) {
                 feedback += ' 오븐을 고칠 수 있어요!';
                 update();
-                schedulePopup(() => openPopup('배달 결과', '배달 완료! 오븐을 고칠 수 있어요', `<p>부품 ${order.parts}개는 ${forceName(push)}으로 빵집 문 앞에 딱 멈췄어요.</p>${ordersMarkup()}<p class="cargo-popup-next">아래 <strong>운반 레일 복구하기</strong>를 눌러요.</p>`), 700);
+                schedulePopup(() => openPopup('배달 결과', '배달 완료! 오븐을 고칠 수 있어요', `<p>부품 ${order.parts}개는 ${forceName(push)}으로 빵집 문 앞에 딱 멈췄어요.</p>${ordersMarkup()}<p class="cargo-popup-next"><strong>운반 레일 복구하기</strong>를 누르거나, 더 실험해 봐도 돼요.</p>`, exploreFreely), 700);
                 return;
             }
             waiting = true;
@@ -256,6 +261,19 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             resetCrate();
             update();
         }), 700);
+    }
+    function exploreFreely() {
+        if (!active || level === 1) return update();
+        level = 1; force = null; misses = 0; ghosts = []; railRuns = []; needsSetup = false;
+        resetCrate();
+        feedback = '배달 완료! 부품 개수나 힘을 주는 쪽을 바꿔 더 실험해 봐요.';
+        update();
+    }
+    function needsForce() { return level === 2 && force === null && !deliveredAll() && !busy && !waiting; }
+    function nudgeForce() {
+        const row = root.querySelector<HTMLElement>('.cargo-force')!;
+        row.classList.remove('cargo-force-nudge'); void row.offsetWidth; row.classList.add('cargo-force-nudge');
+        feedback = '먼저 아래에서 힘(작은 힘 · 중간 힘 · 큰 힘)을 골라요. 그다음 아이를 옮기거나 눌러서 밀어요.'; context.sound(300); update(); step.textContent = '먼저 아래에서 힘을 골라요 ↓';
     }
     function enterOrders() {
         if (!finding || busy) return;
@@ -301,10 +319,8 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         if (!source)
             return;
         // Grabbing the child before a force is picked points the student at the force buttons instead of doing nothing.
-        if (source === handle && source.disabled && level === 2 && force === null && !deliveredAll()) {
-            const row = root.querySelector<HTMLElement>('.cargo-force')!;
-            row.classList.remove('cargo-force-nudge'); void row.offsetWidth; row.classList.add('cargo-force-nudge');
-            feedback = '먼저 아래에서 힘(작은 힘 · 중간 힘 · 큰 힘)을 골라요. 그다음 아이를 잡고 옮겨요.'; context.sound(300); update(); step.textContent = '먼저 아래에서 힘을 골라요 ↓';
+        if (source === handle && source.disabled && needsForce()) {
+            nudgeForce();
             return;
         }
         if (source.disabled)
@@ -354,7 +370,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
                 void experiment(current.travel, Math.min(dx, current.travel));
             else {
                 setActorMood('idle');
-                feedback = '아이를 오른쪽 표시까지 옮겨야 출발해요. 빠르게 옮겨도 천천히 옮겨도 힘은 같아요.';
+                feedback = '아이를 오른쪽 표시까지 옮겨야 출발해요. 위의 눌러서 움직이기 버튼을 눌러도 돼요. 빠르게 옮겨도 천천히 옮겨도 힘은 같아요.';
                 update();
             }
         }
@@ -385,6 +401,8 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     stageResize.observe(field);
     handle.addEventListener('click', event => { if (event.detail === 0 && !drag)
         void experiment(travel()); }, { signal: events.signal });
+    // Tap alternative to dragging: the same experiment(), which canPush()/busy already guard against double runs.
+    tapGo.addEventListener('click', () => { if (drag) return; if (needsForce()) nudgeForce(); else void experiment(travel()); }, { signal: events.signal });
     function schedulePopup(show: () => void, delay: number) {
         clearTimeout(popupTimer);
         pendingPopup = show;
@@ -401,7 +419,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         dialog.className = 'stage-popup cargo-popup';
         dialog.setAttribute('aria-labelledby', 'cargo-popup-title');
         const needsFinding = level === 1 && ready() && !finding;
-        dialog.innerHTML = `<div class="stage-popup-card"><button class="stage-popup-close" aria-label="닫기">×</button><p class="stage-popup-label">${label}</p><h2 id="cargo-popup-title">${title}</h2><div class="stage-popup-body">${body}</div><div class="stage-popup-actions">${!finish.disabled ? '<button class="button button-primary stage-result-finish">운반 레일 복구하기 →</button>' : `<button class="button ${needsFinding ? 'button-secondary' : 'button-primary'} stage-popup-continue">${needsFinding ? '더 실험해 보기' : '계속 실험하기'}</button>`}</div></div>`;
+        dialog.innerHTML = `<div class="stage-popup-card"><button class="stage-popup-close" aria-label="닫기">×</button><p class="stage-popup-label">${label}</p><h2 id="cargo-popup-title">${title}</h2><div class="stage-popup-body">${body}</div><div class="stage-popup-actions">${!finish.disabled ? '<button class="button button-secondary stage-popup-continue">계속 실험하기</button><button class="button button-primary stage-result-finish">운반 레일 복구하기 →</button>' : `<button class="button ${needsFinding ? 'button-secondary' : 'button-primary'} stage-popup-continue">${needsFinding ? '더 실험해 보기' : '계속 실험하기'}</button>`}</div></div>`;
         dialog.querySelector('.stage-result-finish')?.addEventListener('click', () => { if (!finish.disabled) { dialog.close(); finish.click(); } });
         dialog.querySelectorAll('.stage-popup-close,.stage-popup-continue').forEach(b => b.addEventListener('click', () => dialog.close()));
         dialog.addEventListener('close', () => {
@@ -427,6 +445,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         return `<div class="cargo-discovery"><strong>같은 힘으로 움직였을 때, 더 멀리 간 상자는?</strong>${finding ? '' : '<div><button data-finding="light">부품 1개</button><button data-finding="heavy">부품 5개</button></div>'}<p class="cargo-finding" role="status">${findingNote || findingMessage(finding)}</p></div>`;
     }
     function nextHint() {
+        if (finding && deliveredAll()) return '배달은 끝났어요. 부품 개수나 힘을 주는 쪽을 바꿔 더 실험해 봐요.';
         if (finding) return level === 1 ? '위의 <strong>빵집 배달 가기</strong>를 눌러 의뢰를 받아요.' : '';
         if (ready()) return '위에서 <strong>더 멀리 간 상자</strong>를 고르면 빵집 의뢰가 와요.';
         if (!weightCompared()) return '부품 개수를 바꿔 <strong>같은 쪽</strong>에서 다시 움직여 봐요.';

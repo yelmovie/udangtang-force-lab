@@ -105,3 +105,11 @@ test('saved orders keep only the valid delivered prefix', () => {
   assert.equal(cargo.ordersComplete([1, 2]), false);
   assert.equal(cargo.ordersComplete(undefined), false);
 });
+
+test('finishing cargo again after free experimenting does not add a second completion', () => {
+  const save = state.freshSave();
+  state.completeStage(save, 'cargo', 'first');
+  state.completeStage(save, 'cargo', 'again');
+  assert.deepEqual(save.completed.filter(id => id === 'cargo'), ['cargo']);
+  assert.equal(save.evidence.cargo, 'again');
+});
