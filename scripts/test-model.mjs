@@ -613,3 +613,15 @@ test('a newly better workshop result needs a fresh choice, survives reload, and 
   assert.equal(workshop.recordWorkshopTrial(restored.workshop,'lever',2),false);
   assert.equal(restored.workshop.leverFinding,true,'repeating a worse design does not invalidate the supported choice');
 });
+test('music has its own switch, and older saves keep music with the effect switch', () => {
+  assert.equal(state.freshSave().musicOn, false);
+  const legacy = state.freshSave(); delete legacy.musicOn; legacy.soundOn = true;
+  localStorage.setItem(state.SAVE_KEY, JSON.stringify(legacy));
+  assert.equal(state.readSave().musicOn, true, 'a save from before the split keeps its music on');
+  const split = { ...state.freshSave(), soundOn: true, musicOn: false };
+  localStorage.setItem(state.SAVE_KEY, JSON.stringify(split));
+  const restored = state.readSave();
+  assert.equal(restored.soundOn, true);
+  assert.equal(restored.musicOn, false, 'music stays off while effects are on');
+  localStorage.setItem(state.SAVE_KEY, JSON.stringify(state.freshSave()));
+});

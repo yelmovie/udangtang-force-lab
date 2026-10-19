@@ -70,8 +70,10 @@
   .life-basket-head svg { width:40px; height:25px; }
   .life-basket-head strong { font-size:19px; }
   .life-basket-head small { font-size:12px; }
-  .life-basket-items img { max-width:56px; }
-  .life-basket-items li { font-size:12px; }
+  /* Filed cards shrink to thumbnails (names stay for screen readers) so two rows still fit beside the tray. */
+  .life-basket-items img { max-width:52px; }
+  .life-basket-items li { position:relative; padding:2px; }
+  .life-basket-items li span { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
   .life-feedback { min-height:40px; padding:6px 12px; font-size:15px; }
   .life-finish { gap:10px; padding:12px; }
   .life-finish p { font-size:17px; }

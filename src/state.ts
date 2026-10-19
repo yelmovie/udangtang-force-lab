@@ -37,7 +37,10 @@ export interface SaveData {
   currentPage: PageId;
   completed: StageId[];
   evidence: Partial<Record<StageId, string>>;
+  /** Effect sounds (clicks, results). */
   soundOn: boolean;
+  /** Background music, switched separately from the effects. Older saves follow soundOn. */
+  musicOn?: boolean;
   soundVolume?: number;
   /** orders: delivering force step per finished bakery order (level 2); present once the level 1 finding is chosen. */
   cargo: { parts: number; action: 'push' | 'pull'; runs: CargoRun[]; orders?: number[] };
@@ -67,6 +70,7 @@ export function freshSave(): SaveData {
     evidence: {},
     inquiryPlans: {},
     soundOn: false,
+    musicOn: false,
     soundVolume: 0.3,
     cargo: { parts: 1, action: 'push', runs: [] },
     balance: { left: null, right: null, prediction: null, runs: [] },
@@ -94,6 +98,7 @@ export function readSave(): SaveData | null {
       completed,
       evidence,
       soundOn: item.soundOn === true,
+      musicOn: typeof item.musicOn === 'boolean' ? item.musicOn : item.soundOn === true,
       soundVolume: typeof item.soundVolume === 'number' && Number.isFinite(item.soundVolume) ? Math.min(1, Math.max(0, item.soundVolume)) : 0.3,
       cargo: {
         parts: [1, 3, 5].includes(item.cargo?.parts ?? 0) ? item.cargo!.parts : 1,

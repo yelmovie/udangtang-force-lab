@@ -20,7 +20,7 @@ import { mountVillage } from './screens/village';
 import { villageRewards } from './villageStory';
 import { playMusic, playSound, stopMusic, stopSounds, setVolume, type MusicName } from './sound';
 import { infoContent, type InfoSection } from './info';
-import { offlineMessage, prepareOffline, watchOffline } from './offline';
+import { prepareOffline } from './offline';
 import type { AppContext } from './appTypes';
 import { abilityStatements, challenges } from './challenges';
 import { openLearningReview } from './learningReview';
@@ -58,9 +58,9 @@ function tone(frequency = 520) {
 }
 /** While a story video is open it decides the music: the ending plays its own track, the prologue keeps quiet for its own sound. */
 let storyMusic: MusicName | 'quiet' | null = null;
-/** Background music follows the same sound switch as the effects. */
+/** Background music has its own switch in settings; the header button turns music and effects on or off together. */
 function syncMusic() {
-  if (!save.soundOn || storyMusic === 'quiet') { stopMusic(); return; }
+  if (!save.musicOn || storyMusic === 'quiet') { stopMusic(); return; }
   setVolume(save.soundVolume ?? 0.3);
   playMusic(storyMusic ?? 'stage');
 }
@@ -440,7 +440,7 @@ function header(title: string, subtitle: string) {
     <div class="topbar-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기 · 학생 기록과 분리' : '초등 3학년 과학 · 힘과 우리 생활'}</span><strong>${title}</strong><span>${subtitle}</span></div>
     <div class="top-actions">
       ${(count => `<button class="icon-button" data-top="bag" aria-label="도구 가방 열기, 카드 ${count}장" aria-haspopup="dialog" title="도구 가방">${bagIcon()}${count ? `<span class="toolbag-count" aria-hidden="true">${count}</span>` : ''}</button>`)(earnedToolCards(adminSave ?? save).length)}
-      <button class="icon-button" data-top="sound" aria-label="소리 ${save.soundOn ? '끄기' : '켜기'}" aria-pressed="${save.soundOn}">${soundIcon()}</button>
+      <button class="icon-button" data-top="sound" aria-label="소리 ${anySound() ? '끄기' : '켜기'}" aria-pressed="${anySound()}">${soundIcon()}</button>
       <button class="icon-button" data-top="settings" aria-label="설정 열기" aria-haspopup="dialog" title="설정">${settingsIcon()}</button>
     </div>
   </header>`;
@@ -450,15 +450,17 @@ function settingsIcon() {
   return `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 14 5l2.5-.3.8 2.4 2.2 1.2-.8 2.4.8 2.4-2.2 1.2-.8 2.4-2.5-.3-2 1.5-2-1.5-2.5.3-.8-2.4-2.2-1.2.8-2.4-.8-2.4 2.2-1.2.8-2.4L10 5z"/><circle cx="12" cy="11.2" r="2.6"/></svg>`;
 }
 
+/** True while effects or music are on: the header speaker shows sound and mutes both. */
+function anySound() { return save.soundOn || save.musicOn === true; }
 function soundIcon() {
-  return `<svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/>${save.soundOn ? '<path d="M17 8a5 5 0 0 1 0 8M19.5 5a9 9 0 0 1 0 14"/>' : '<path d="m17 9 4 6m0-6-4 6"/>'}</svg>`;
+  return `<svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/>${anySound() ? '<path d="M17 8a5 5 0 0 1 0 8M19.5 5a9 9 0 0 1 0 14"/>' : '<path d="m17 9 4 6m0-6-4 6"/>'}</svg>`;
 }
 
 function renderTitle(root: HTMLElement) {
   const hasSave = readSave() !== null;
   root.innerHTML = `<section class="title-screen">
     <div class="title-actions">
-      <button class="icon-button" data-top="sound" aria-label="소리 ${save.soundOn ? '끄기' : '켜기'}" aria-pressed="${save.soundOn}">${soundIcon()}</button>
+      <button class="icon-button" data-top="sound" aria-label="소리 ${anySound() ? '끄기' : '켜기'}" aria-pressed="${anySound()}">${soundIcon()}</button>
       <button class="icon-button" data-top="settings" aria-label="설정 열기" aria-haspopup="dialog" title="설정">${settingsIcon()}</button>
     </div>
     <div class="character" data-pose="title-student" role="img" aria-label="청록 고글과 멜빵바지를 입은 학생 탐구자"></div>
@@ -554,8 +556,7 @@ function openSettings() {
   overlay.className = 'modal-layer settings-layer';
   const appWasInert = app.inert;
   app.inert = true;
-  const unwatch = watchOffline(() => { const status = overlay.querySelector('#offline-status'); if (status) status.textContent = offlineMessage(); });
-  const close = () => { unwatch(); app.inert = appWasInert; overlay.remove(); app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.focus(); };
+  const close = () => { app.inert = appWasInert; overlay.remove(); app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.focus(); };
   type Section = 'menu' | 'admin' | 'reset' | InfoSection;
   const headings: Record<Section, string> = { menu: '설정', help: '학생 탐구 가이드', teacher: '교사 가이드', curriculum: '교육과정', info: '정보와 출처', admin: '관리자 해금', reset: '탐구 기록 초기화' };
   const show = (section: Section) => {
@@ -569,8 +570,7 @@ function openSettings() {
         <button data-settings="prologue"><span>${icons.play}</span> 프롤로그 다시 보기</button>
         ${save.completed.length === stages.length || adminUnlocked ? `<button data-settings="ending"><span>${icons.sparkle}</span> 점등식 다시 보기</button>` : ''}
         <button class="settings-danger" data-settings="reset"><span>${icons.reset}</span> 기록 초기화</button></div></details>
-        <div class="settings-audio"><button class="button button-secondary" data-settings="sound" aria-pressed="${save.soundOn}">소리 ${save.soundOn ? '켜짐 · 끄기' : '꺼짐 · 켜기'}</button><label for="sound-volume">소리 크기<output id="volume-value">${Math.round((save.soundVolume ?? 0.3) * 100)}%</output></label><input id="sound-volume" type="range" min="0" max="100" step="5" value="${Math.round((save.soundVolume ?? 0.3) * 100)}" aria-label="소리 크기"></div>
-        <p class="settings-offline" id="offline-status" role="status">${offlineMessage()}</p>`;
+        <div class="settings-audio"><div class="settings-audio-switches"><button class="button button-secondary" data-settings="music" aria-pressed="${save.musicOn === true}">${switchLabel('배경음', save.musicOn === true)}</button><button class="button button-secondary" data-settings="sound" aria-pressed="${save.soundOn}">${switchLabel('효과음', save.soundOn)}</button></div><label for="sound-volume">소리 크기 <output id="volume-value">${Math.round((save.soundVolume ?? 0.3) * 100)}%</output></label><input id="sound-volume" type="range" min="0" max="100" step="5" value="${Math.round((save.soundVolume ?? 0.3) * 100)}" aria-label="소리 크기"></div>`;
     } else if (section === 'admin') {
       content = `<p class="settings-lead">${adminUnlocked ? '실험 5개가 모두 열려 있어요.' : '실험 5개와 결과 화면을 미리 볼 수 있어요.'} 미리보기 조작은 학생 기록에 반영되지 않아요.</p><button class="button button-primary full" data-settings="toggle-admin">${adminUnlocked ? '관리자 해금 종료' : '전체 화면 한꺼번에 해금'}</button><p class="settings-lead">해금은 이 탭에서만 유지되고 새로고침하면 종료돼요.</p>`;
       if (adminUnlocked) content += `<div class="settings-links" aria-label="미리 볼 실험">${stages.map(stage=>`<button data-preview-stage="${stage.id}">${stage.mission}. ${stage.title}</button>`).join('')}<button data-preview-stage="complete">결과 화면</button></div>`;
@@ -597,13 +597,20 @@ function openSettings() {
       save.soundOn = !save.soundOn;
       persist();
       button.setAttribute('aria-pressed', String(save.soundOn));
-      button.textContent = `소리 ${save.soundOn ? '켜짐 · 끄기' : '꺼짐 · 켜기'}`;
+      button.textContent = switchLabel('효과음', save.soundOn);
       updateSoundButton();
       if (save.soundOn) tone(520); else stopSounds();
+    }
+    else if (action === 'music') {
+      save.musicOn = !save.musicOn;
+      persist();
+      button.setAttribute('aria-pressed', String(save.musicOn));
+      button.textContent = switchLabel('배경음', save.musicOn);
+      updateSoundButton();
       syncMusic();
     }
     else if (action === 'confirm-reset') {
-      const sound = { soundOn: save.soundOn, soundVolume: save.soundVolume };
+      const sound = { soundOn: save.soundOn, musicOn: save.musicOn, soundVolume: save.soundVolume };
       close(); adminUnlocked = false; adminSave = null;
       save = { ...freshSave(), ...sound }; context.save = save;
       persist(); viewPage = 'title'; render();
@@ -641,16 +648,22 @@ function updateSoundButton() {
   const button = app.querySelector<HTMLButtonElement>('[data-top="sound"]');
   if (!button) return;
   button.innerHTML = soundIcon();
-  button.setAttribute('aria-pressed', String(save.soundOn));
-  button.setAttribute('aria-label', `소리 ${save.soundOn ? '끄기' : '켜기'}`);
+  button.setAttribute('aria-pressed', String(anySound()));
+  button.setAttribute('aria-label', `소리 ${anySound() ? '끄기' : '켜기'}`);
+}
+/** Settings switch text: what is on now, then what a press does. */
+function switchLabel(name: string, on: boolean): string {
+  return `${name} ${on ? '켜짐 · 끄기' : '꺼짐 · 켜기'}`;
 }
 
 function bindHeader() {
+  // One quick switch for the classroom: it mutes everything, or brings back music and effects together.
   app.querySelector<HTMLButtonElement>('[data-top="sound"]')?.addEventListener('click', () => {
-    save.soundOn = !save.soundOn;
+    const on = !anySound();
+    save.soundOn = on; save.musicOn = on;
     persist();
     updateSoundButton();
-    if (save.soundOn) tone(620); else stopSounds();
+    if (on) tone(620); else stopSounds();
     syncMusic();
   });
   app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.addEventListener('click', openSettings);
