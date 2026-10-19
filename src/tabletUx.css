@@ -39,3 +39,20 @@
 #app .core-studio .core-grip.hint-right span {
   left: 100%; right: auto; margin-right: 0; margin-left: 6px;
 }
+
+/* Notched tablets (index.html sets viewport-fit=cover): the insets are 0 on ordinary screens, so nothing moves there. */
+#app > .topbar { padding: calc(8px + env(safe-area-inset-top, 0px)) calc(12px + env(safe-area-inset-right, 0px)) 8px calc(12px + env(safe-area-inset-left, 0px)); }
+#app > .screen { padding-right: env(safe-area-inset-right, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); }
+.story-layer .modal-card.story-video-card { padding: 0 calc(24px + env(safe-area-inset-right, 0px)) calc(72px + env(safe-area-inset-bottom, 0px)) calc(24px + env(safe-area-inset-left, 0px)); }
+@media (max-height: 700px) { .story-layer .modal-card.story-video-card { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); } }
+
+/* Classroom board (1920): helper text and small labels reach 18px. */
+@media (min-width: 1600px) and (min-height: 900px) {
+  #app :is(.balance-goal > span, #balance-record-label, #balance-count, .balance-pan .balance-side, .balance-pan-name, .balance-lock-callout, #balance-result, .object-options .object-card strong),
+  #app :is(#cargo-record-open, .cargo-rail .rail-start, .cargo-rail .rail-end),
+  #app :is(.core-eyebrow, #rescue-phase, #rescue-readout, .rescue-notebook > summary),
+  #app :is(.village-labels .village-star, .village-board-count) { font-size: 18px; }
+  #app .village-board-count { min-width: 28px; height: 28px; }
+  /* The core top bar is 85px tall here; start the stage head below it instead of under it. */
+  #app .experiment-screen.core-studio { padding-top: 92px; }
+}

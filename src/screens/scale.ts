@@ -109,7 +109,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     if(level===1) return canCompleteScale(state) ? `<div class="scale-request"><span class="scale-request-from">보급소 직원의 의뢰</span><button class="button button-primary" id="scale-request-open">${record() ? '의뢰 이어 하기' : '의뢰 받기'}</button>${springButton}</div>` : '';
     if(requestDone()&&!waiting) return `<div class="scale-request is-done"><span class="scale-request-from">의뢰 완료 ✓</span><p>가짜 ${fakeRounds.length}개를 저울 숫자로 찾았어요</p>${springButton}</div>`;
     const r=fakeRounds[round()];
-    return `<div class="scale-request is-active"><span class="scale-request-from">의뢰 ${round()+1} / ${fakeRounds.length}</span><p>가짜 1개 · 진짜는 모두 <strong>${r.real} g</strong></p><button class="scale-heft" id="scale-heft">✋ 손으로 들어 보기</button></div>`;
+    return `<div class="scale-request is-active"><span class="scale-request-from">의뢰 ${round()+1} / ${fakeRounds.length}</span><p>가짜 1개 · 진짜는 모두 <strong>${r.real} g</strong></p><button class="scale-heft" id="scale-heft">손으로 들어 보기</button></div>`;
   }
   function phaseText() {
     if(busy) return '숫자가 멈출 때까지 살펴봐요';

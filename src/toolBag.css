@@ -53,7 +53,7 @@ button.toolcard:focus-visible { outline: 3px solid #ffc247; outline-offset: 3px;
 /* Top bar bag button: earned count badge */
 .icon-button .toolbag-count {
   position: absolute; right: -6px; top: -6px; min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box;
-  border-radius: 999px; background: #ef923e; color: #fff; border: 2px solid #fff;
+  border-radius: 999px; background: #b45309; color: #fff; /* white on #b45309 = 5.0:1 */ border: 2px solid #fff;
   font-size: 14px; font-weight: 900; line-height: 18px; text-align: center;
 }
 
@@ -99,7 +99,7 @@ button.toolcard:focus-visible { outline: 3px solid #ffc247; outline-offset: 3px;
   .toolcard-record { font-size: 16px; }
   .toolcard-record b { font-size: 14px; }
   .toolcard-where, .toolcard-from { font-size: 16px; }
-  .icon-button .toolbag-count { font-size: 16px; min-width: 26px; height: 26px; line-height: 22px; }
+  .icon-button .toolbag-count { font-size: 18px; min-width: 28px; height: 28px; line-height: 24px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .toolcard-flip-inner { animation: none; }

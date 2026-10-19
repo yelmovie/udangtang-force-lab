@@ -50,7 +50,7 @@
 .story-video-card.is-finished .story-video-wrap::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, #ffd27a00 40%, #ffb84d55 100%); animation: story-glow 1.6s ease-in-out infinite alternate; pointer-events: none; }
 @keyframes story-glow { to { opacity: .35; } }
 .story-video-card.is-finished .story-actions [data-story='done'] { animation: story-done-pulse 3.5s ease-in-out infinite; }
-@keyframes story-done-pulse { 0%, 80%, 100% { transform: scale(1); box-shadow: 0 6px 0 #9f7954, 0 0 0 0 #ffd27a99; } 90% { transform: scale(1.06); box-shadow: 0 6px 0 #9f7954, 0 0 0 14px #ffd27a00; } }
+@keyframes story-done-pulse { 0%, 80%, 100% { transform: scale(1); } 90% { transform: scale(1.06); } }
 /* Fixed so the burst also covers the mission-complete modal, not only the film. */
 .story-confetti { position: fixed; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
 .story-confetti i { position: absolute; left: var(--x); top: -4%; width: 14px; height: 22px; border-radius: 3px; background: var(--c); animation: story-confetti-fall 2.8s ease-in var(--d) both; }
@@ -60,4 +60,4 @@
 @media (max-height: 700px) { .story-video-card > .story-caption.story-text { font-size: 26px; } .story-finish-banner { font-size: 28px; padding: 6px 22px; } }
 
 /* Subtitle band is see-through so the film stays visible behind the words. */
-.story-video-card > .story-caption.story-text { background: linear-gradient(#0a2a3366, #061a2280); backdrop-filter: blur(3px); border-color: #ffd27acc; box-shadow: 0 4px 0 #4a3a2299, 0 10px 30px #0006; text-shadow: 0 3px 0 #000, 0 0 10px #000, 0 0 22px #000c; }
+.story-video-card > .story-caption.story-text { background: linear-gradient(#0a2a3380, #061a229e); border-color: #ffd27acc; box-shadow: 0 4px 0 #4a3a2299, 0 10px 30px #0006; text-shadow: 0 3px 0 #000, 0 0 10px #000, 0 0 22px #000c; }

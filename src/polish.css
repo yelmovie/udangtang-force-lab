@@ -32,7 +32,6 @@ h1, h2, h3, .button, .brand, .topbar-title strong, .eyebrow, .control-label, .mi
   position: relative;
   border-radius: var(--radius-md);
   transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
-  will-change: transform;
 }
 .button::after {
   /* glossy top highlight */
@@ -79,8 +78,8 @@ button.button:not(:disabled):active {
 
 /* ===== Popups ===== */
 .modal-layer {
-  background: radial-gradient(ellipse at 50% 40%, #1d4b4bd9, #0c2a2ae8 75%);
-  backdrop-filter: blur(3px);
+  /* No backdrop blur: the dim is nearly opaque and re-blurring the page under every popup frame is costly on tablets. */
+  background: radial-gradient(ellipse at 50% 40%, #1d4b4be0, #0c2a2aee 75%);
   animation: dim-in .22s ease both;
 }
 .modal-card {
@@ -245,7 +244,7 @@ button.button:not(:disabled):active {
   .title-screen .title-buttons .button { font-size: 28px; }
 }
 @keyframes title-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.015); } }
-@keyframes start-pulse { 0%, 80%, 100% { box-shadow: 0 var(--btn-edge-height) 0 var(--btn-edge-primary), 0 12px 18px rgba(121, 69, 34, .22); } 90% { box-shadow: 0 var(--btn-edge-height) 0 var(--btn-edge-primary), 0 0 0 10px #ffd88a55; } }
+@keyframes start-pulse { 0%, 80%, 100% { scale: 1; } 90% { scale: 1.05; } }
 
 /* ===== Top bar: icons only, floating over the screen (no title text, no green band); back + home on the left ===== */
 #app { position: relative; }
@@ -279,10 +278,11 @@ button.button:not(:disabled):active {
 @media (max-width: 760px), (orientation: portrait) { #app .village-screen .village-hud { top: 64px; right: 10px; } }
 
 /* ===== Village signs on roofs: translucent; the base button look (radius, edge, states) is in village.css ===== */
-.village-labels button { font-size: 15px; background: #fff4d7cc; border-color: #715737cc; color: #3b2c1e; backdrop-filter: blur(2px); }
+.village-labels button { font-size: 15px; background: #fff4d7e6; border-color: #715737cc; color: #3b2c1e; }
 .village-labels button.is-current { animation: sign-pulse 3s ease-in-out infinite; }
 .village-labels button.is-locked { border-color: #7c806eaa; }
-@keyframes sign-pulse { 0%, 100% { box-shadow: 0 3px 0 #754717, 0 0 0 3px #fff2b2aa, 0 6px 12px rgba(6, 30, 30, .25); } 50% { box-shadow: 0 3px 0 #754717, 0 0 0 8px #ffd88a66, 0 6px 12px rgba(6, 30, 30, .25); } }
+/* scale (not box-shadow) so the pulse stays on the compositor; the halo ring itself is static in village.css. */
+@keyframes sign-pulse { 0%, 100% { scale: 1; } 50% { scale: 1.07; } }
 /* tablet landscape (1024–1366 wide) */
 @media (min-width: 761px) and (max-width: 1366px) and (orientation: landscape) { .village-labels button { font-size: 16px; } }
 /* interactive board */

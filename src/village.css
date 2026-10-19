@@ -127,6 +127,8 @@
   .village-objective strong { font-size: 16px; }
   .village-count { font-size: 16px; padding: 8px; }
   .village-labels button { padding: 5px 7px; font-size: 14px; }
+  /* Building labels stop below the top bar (back/home/star badge, bag badge); --cam-y is the map's camera offset from village.ts. */
+  .village-labels { --label-floor: calc(60px - var(--cam-y, 0px)); }
   .village-labels .village-npc-label { font-size: 0; width: 48px; padding: 0; }
   .village-npc-label::after { content: '···'; font-size: 25px; }
   #app .village-screen .village-pad { grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 48px); gap: 4px; }

@@ -86,7 +86,7 @@
 .cargo-orders,.cargo-force{display:flex;align-items:center;gap:14px}.cargo-orders>strong,.cargo-force>strong{max-width:130px;font-size:16px}
 .cargo-order-cards{display:flex;gap:8px}
 .cargo-order-card{display:grid;justify-items:center;align-content:center;min-width:84px;min-height:60px;padding:4px 8px;border:2px dashed #cdbb98;border-radius:12px;background:#fffdf7;color:#7b6a4c;font-size:14px;line-height:1.2}
-.cargo-order-card b{font-size:16px}.cargo-order-card em{font-style:normal;font-weight:900;font-size:14px}
+.cargo-order-card b{font-size:16px}.cargo-order-card small{font-size:14px}.cargo-order-card em{font-style:normal;font-weight:900;font-size:14px}
 .cargo-order-card[data-state="now"]{border:3px solid #087c79;background:#d2f1e5;color:#174b4c;animation:cargo-order-pop .6s ease-out}
 .cargo-order-card[data-state="done"]{border:2px solid #4c9a5a;background:#e6f4e7;color:#1c5a43}
 @keyframes cargo-order-pop{0%{transform:scale(.9)}60%{transform:scale(1.05)}100%{transform:none}}
@@ -104,7 +104,7 @@
 .cargo-load-ghost{position:fixed;z-index:1500;width:90px;pointer-events:none;transform:translate(-50%,-50%);text-align:center;background:#fff7ddbd;border-radius:14px;padding:5px;color:#184945}
 .cargo-load-ghost img{width:70px;display:block}.cargo-load-ghost b{font-size:18px}
 @media(max-width:1280px){.cargo-dock{gap:12px;padding:10px 12px}.cargo-inventory,.cargo-method{gap:8px}.cargo-inventory>strong,.cargo-method>strong,.cargo-orders>strong,.cargo-force>strong{display:none}.cargo-order-card{min-width:70px}}
-@media(min-width:1600px){.cargo-dock{padding:18px 26px}.cargo-dock strong,.cargo-method .segmented button,.cargo-force .segmented button,.cargo-scene-caption{font-size:20px}.cargo-load-options button{min-width:90px;font-size:18px}.cargo-load-tag,.cargo-gesture-target,.cargo-ghost span,.cargo-force-arrow b,.cargo-target-zone span,.cargo-order-card b{font-size:18px}.cargo-trace{font-size:20px}.cargo-order-card{min-width:100px}}
+@media(min-width:1600px){.cargo-dock{padding:18px 26px}.cargo-dock strong,.cargo-method .segmented button,.cargo-force .segmented button,.cargo-scene-caption{font-size:20px}.cargo-load-options button{min-width:90px;font-size:18px}.cargo-load-tag,.cargo-gesture-target,.cargo-ghost span,.cargo-force-arrow b,.cargo-target-zone span,.cargo-order-card b,.cargo-order-card small{font-size:18px}.cargo-trace{font-size:20px}.cargo-order-card{min-width:100px}}
 
 /* One colour per load, shared by the rail ghosts and the side-by-side bars. */
 .cargo-trace[data-parts="1"],.cargo-ghost[data-parts="1"]{--trace:#20978c}
@@ -149,7 +149,7 @@
 .cargo-force[data-waiting] [data-force]{border-color:#be8c38;box-shadow:0 0 0 3px #ffe0a4;animation:cargo-force-glow 1.4s ease-in-out infinite}
 .cargo-force[data-waiting]>strong::after{content:' ← 먼저 골라요';color:#b2321f}
 .cargo-force.cargo-force-nudge{animation:cargo-force-shake .5s ease-in-out}
-@keyframes cargo-force-glow{50%{box-shadow:0 0 0 7px #ffd27a66}}
+@keyframes cargo-force-glow{50%{scale:1.04}}
 @keyframes cargo-force-shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 @media(prefers-reduced-motion:reduce){.cargo-force[data-waiting] [data-force],.cargo-force.cargo-force-nudge{animation:none}}
 /* Finger cue sits on the child's shoulder, not above the empty corner of the grip box. */

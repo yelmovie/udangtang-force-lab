@@ -222,7 +222,7 @@
 .workshop-design-dock input { flex:1; }
 .design-stop-label { color:#466359; font-size:16px; font-weight:850; white-space:nowrap; }
 .workshop-handle[data-pushing='false']:not(:disabled) { animation:handle-ready 1.6s ease-in-out infinite; }
-@keyframes handle-ready { 50% { box-shadow:0 5px 0 #73331e,0 0 0 10px #ffd56a88; } }
+@keyframes handle-ready { 50% { scale:1.05; } }
 /* 표정 말풍선: 힘이 클수록 찡그린 얼굴·땀·흔들림, 작을수록 웃는 얼굴 */
 .workshop-effort { position:absolute; left:58%; top:-6%; display:flex; align-items:center; gap:4px; pointer-events:none; z-index:3; }
 .effort-face { position:relative; width:64px; height:64px; flex:0 0 auto; border-radius:50%; border:3px solid #fff8e6; box-shadow:0 3px 8px #4c382244; background:#fff5dc url('/assets/game/workshop-lever-easy.webp') 32% 4% / 175% auto no-repeat; }
@@ -316,7 +316,7 @@
 .workshop-drawer > .workshop-record-button { flex:none; min-height:48px; padding:6px 14px; font-size:16px; border-color:#c5b084; color:#5a3d0e; background:#fff9e9; box-shadow:0 4px 0 #b39162; }
 .workshop-drawer > .workshop-record-button:not(:disabled):active { box-shadow:0 1px 0 #b39162; }
 .workshop-drawer > .workshop-record-button[data-attention='true']:not(:disabled) { border-color:#cf9a3d; background:#fff1bc; box-shadow:0 0 0 3px #ffd77b90; animation:record-call 1.6s ease-in-out infinite; }
-@keyframes record-call { 50% { box-shadow:0 0 0 7px #ffd77b55; } }
+@keyframes record-call { 50% { scale:1.05; } }
 
 /* 공통 팝업 규격은 src/stagePopup.css (dialog.stage-popup). 여기엔 이 스테이지 고유 내용만. */
 @media (prefers-reduced-motion: reduce) { .workshop-drawer > .workshop-record-button { animation:none; } }

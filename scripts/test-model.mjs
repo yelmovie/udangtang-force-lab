@@ -326,6 +326,23 @@ test('v1 saves without the new rescue state keep four completed missions and evi
   assert.equal(state.stageIsOpen(restored, 'rescue'), true);
 });
 
+test('a completion edited in by hand does not skip earlier missions', () => {
+  const save = state.freshSave();
+  save.completed = ['scale'];
+  save.evidence.scale = 'typed in';
+  const restored = restore(save);
+  assert.deepEqual(restored.completed, []);
+  assert.equal(state.stageIsOpen(restored, 'workshop'), false);
+  save.completed = ['balance', 'cargo', 'workshop'];
+  assert.deepEqual(restore(save).completed, ['cargo', 'balance']);
+});
+
+test('an unreadable save is kept aside instead of being lost', () => {
+  localStorage.setItem(state.SAVE_KEY, '{"version":1, broken');
+  assert.equal(state.readSave(), null);
+  assert.equal(localStorage.getItem(state.BROKEN_SAVE_KEY), '{"version":1, broken');
+});
+
 test('route experiment accepts only valid force levels and reproduces both paths', () => {
   for (const force of [1, 2, 3]) {
     assert.equal(model.canLift('short', force), force === 3);

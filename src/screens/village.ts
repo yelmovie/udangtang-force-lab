@@ -494,7 +494,10 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   function follow() {
     const sw=shell.clientWidth,sh=shell.clientHeight,mw=map?.width??16,mh=map?.height??9;
     const axis=(view:number,size:number,at:number)=>size<=view?(view-size)/2:Math.min(0,Math.max(view-size,view/2-at));
-    frame.style.transform=`translate(${axis(sw,frameWidth,actor.x/mw*frameWidth)}px,${axis(sh,frameHeight,actor.y/mh*frameHeight)}px)`;
+    const y=axis(sh,frameHeight,actor.y/mh*frameHeight);
+    frame.style.transform=`translate(${axis(sw,frameWidth,actor.x/mw*frameWidth)}px,${y}px)`;
+    // Short screens: building labels keep clear of the top bar badges (village.css --label-floor uses this).
+    labels.style.setProperty('--cam-y',`${y}px`);
   }
   function resize() {
     const mw=map?.width??16,mh=map?.height??9,sw=Math.max(1,shell.clientWidth),sh=Math.max(1,shell.clientHeight);
@@ -546,7 +549,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   }
   function setupLabels() {
     labels.replaceChildren();
-    for(const building of map!.buildings){const button=document.createElement('button');button.className='village-building-label';button.dataset.stage=building.id;button.style.left=`${(building.x+building.width/2)/map!.width*100}%`;button.style.top=`${(building.y+building.height*0.42)/map!.height*100}%`;const name=document.createElement('span');name.textContent=`${story.changes.includes(building.id)?'✓ ':''}${villageRewards[building.id].name}`;button.append(name,starRow(building.id));button.classList.toggle('is-current',story.next===building.id);button.classList.toggle('is-complete',story.changes.includes(building.id));button.classList.toggle('is-locked',!options.adminUnlocked&&!stageIsOpen(context.save,building.id));button.setAttribute('aria-label',`${villageRewards[building.id].name} 문 앞으로 걷기, ${starText(building.id)}`);button.addEventListener('click',()=>goTo(building.entry,villageRewards[building.id].name),{signal:events.signal});labels.append(button);}
+    for(const building of map!.buildings){const button=document.createElement('button');button.className='village-building-label';button.dataset.stage=building.id;button.style.left=`${(building.x+building.width/2)/map!.width*100}%`;button.style.top=`max(${(building.y+building.height*0.42)/map!.height*100}%, var(--label-floor, 0px))`;const name=document.createElement('span');name.textContent=`${story.changes.includes(building.id)?'✓ ':''}${villageRewards[building.id].name}`;button.append(name,starRow(building.id));button.classList.toggle('is-current',story.next===building.id);button.classList.toggle('is-complete',story.changes.includes(building.id));button.classList.toggle('is-locked',!options.adminUnlocked&&!stageIsOpen(context.save,building.id));button.setAttribute('aria-label',`${villageRewards[building.id].name} 문 앞으로 걷기, ${starText(building.id)}`);button.addEventListener('click',()=>goTo(building.entry,villageRewards[building.id].name),{signal:events.signal});labels.append(button);}
     for(const npc of map!.npcs){const button=document.createElement('button');button.className='village-npc-label';button.style.left=`${npc.x/map!.width*100}%`;button.style.top=`${(npc.y-100)/map!.height*100}%`;button.textContent='도토리 박사';button.setAttribute('aria-label',`${npc.name}에게 걸어가기`);button.addEventListener('click',()=>goTo({x:npc.x-72,y:npc.y+6},npc.name),{signal:events.signal});labels.append(button);const bubble=document.createElement('button');bubble.className='village-npc-bubble';bubble.hidden=true;bubble.style.left=`${(npc.x-30)/map!.width*100}%`;bubble.style.top=`${(npc.y-112)/map!.height*100}%`;bubble.setAttribute('aria-label',`${npc.name}의 이야기 더 듣기`);bubble.addEventListener('click',()=>interact(),{signal:events.signal});labels.append(bubble);}
     const open=cards.filter(card=>card.status==='open').length;
     const boardLabel=document.createElement('button');boardLabel.className='village-board-label';boardLabel.style.left=`${requestBoardSpot.x/map!.width*100}%`;boardLabel.style.top=`${(requestBoardSpot.y+6)/map!.height*100}%`;

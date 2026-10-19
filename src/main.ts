@@ -460,6 +460,28 @@ function soundIcon() {
   return `<svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/>${anySound() ? '<path d="M17 8a5 5 0 0 1 0 8M19.5 5a9 9 0 0 1 0 14"/>' : '<path d="m17 9 4 6m0-6-4 6"/>'}</svg>`;
 }
 
+/** In-app yes/no box; window.confirm looks like a browser error on tablets. Resolves true only on the confirm button. */
+function confirmBox(title: string, body: string, okLabel: string): Promise<boolean> {
+  return new Promise(resolve => {
+    const dialog = document.createElement('dialog');
+    dialog.className = 'stage-popup confirm-popup';
+    dialog.setAttribute('aria-labelledby', 'confirm-title');
+    dialog.innerHTML = `<div class="stage-popup-card"><h2 id="confirm-title">${title}</h2><div class="stage-popup-body"><p>${body}</p></div><div class="stage-popup-actions"><button class="button button-secondary" data-confirm="no">취소</button><button class="button button-primary" data-confirm="yes">${okLabel}</button></div></div>`;
+    let answer = false;
+    dialog.addEventListener('click', event => {
+      const button = (event.target as Element).closest<HTMLButtonElement>('[data-confirm]');
+      if (button) { answer = button.dataset.confirm === 'yes'; dialog.close(); }
+    });
+    dialog.addEventListener('close', () => { dialog.remove(); resolve(answer); });
+    document.body.append(dialog);
+    dialog.showModal();
+    dialog.querySelector<HTMLButtonElement>('[data-confirm="no"]')!.focus();
+  });
+}
+
+/** Teacher check before the admin preview. Not a security feature: the value ships in the client. */
+const TEACHER_CODE = 'yelsam';
+
 function renderTitle(root: HTMLElement) {
   const hasSave = readSave() !== null;
   root.innerHTML = `<section class="title-screen">
@@ -483,11 +505,12 @@ function renderTitle(root: HTMLElement) {
   if (document.readyState === 'complete') requestAnimationFrame(reveal);
   else window.addEventListener('load', () => window.setTimeout(reveal, 250), { once: true });
   bindHeader();
-  root.querySelector<HTMLButtonElement>('#new-start')?.addEventListener('click', () => {
-    if (hasSave && !window.confirm('기존 탐구 기록을 지우고 새로 시작할까요?')) return;
+  root.querySelector<HTMLButtonElement>('#new-start')?.addEventListener('click', async () => {
+    if (hasSave && !await confirmBox('기존 탐구 기록을 지우고 새로 시작할까요?', '별, 도구 카드, 실험 기록이 이 기기에서 모두 지워져요. 소리 설정은 그대로예요.', '기록 지우고 시작')) return;
     adminUnlocked = false;
     adminSave = null;
-    save = freshSave();
+    save = { ...freshSave(), soundOn: save.soundOn, musicOn: save.musicOn, soundVolume: save.soundVolume };
+    missionCardShown.clear();
     villageReturn = undefined;
     villageCelebration = undefined;
     context.save = save;
@@ -576,7 +599,7 @@ function openSettings() {
         <button class="settings-danger" data-settings="reset"><span>${icons.reset}</span> 기록 초기화</button></div></details>
         <div class="settings-audio"><div class="settings-audio-switches"><button class="button button-secondary" data-settings="music" aria-pressed="${save.musicOn === true}">${switchLabel('배경음', save.musicOn === true)}</button><button class="button button-secondary" data-settings="sound" aria-pressed="${save.soundOn}">${switchLabel('효과음', save.soundOn)}</button></div><label for="sound-volume">소리 크기 <output id="volume-value">${Math.round((save.soundVolume ?? 0.3) * 100)}%</output></label><input id="sound-volume" type="range" min="0" max="100" step="5" value="${Math.round((save.soundVolume ?? 0.3) * 100)}" aria-label="소리 크기"></div>`;
     } else if (section === 'admin') {
-      content = `<p class="settings-lead">${adminUnlocked ? '실험 5개가 모두 열려 있어요.' : '실험 5개와 결과 화면을 미리 볼 수 있어요.'} 미리보기 조작은 학생 기록에 반영되지 않아요.</p><button class="button button-primary full" data-settings="toggle-admin">${adminUnlocked ? '관리자 해금 종료' : '전체 화면 한꺼번에 해금'}</button><p class="settings-lead">해금은 이 탭에서만 유지되고 새로고침하면 종료돼요.</p>`;
+      content = `<p class="settings-lead">${adminUnlocked ? '실험 5개가 모두 열려 있어요.' : '실험 5개와 결과 화면을 미리 볼 수 있어요.'} 미리보기 조작은 학생 기록에 반영되지 않아요.</p>${adminUnlocked ? '' : '<label class="settings-code"><span>교사용 확인 코드</span><input id="teacher-code" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></label>'}<button class="button button-primary full" data-settings="toggle-admin">${adminUnlocked ? '관리자 해금 종료' : '전체 화면 한꺼번에 해금'}</button><p class="settings-lead">해금은 이 탭에서만 유지되고 새로고침하면 종료돼요.${adminUnlocked ? '' : ' 확인 코드는 저장되지 않으며 이 화면에서만 검사해요. 계정이나 개인정보를 보호하는 보안 비밀번호는 아니에요.'}</p>`;
       if (adminUnlocked) content += `<div class="settings-links" aria-label="미리 볼 실험">${stages.map(stage=>`<button data-preview-stage="${stage.id}">${stage.mission}. ${stage.title}</button>`).join('')}<button data-preview-stage="complete">결과 화면</button></div>`;
     } else if (section === 'reset') {
       content = '<p class="settings-lead">이 브라우저의 모든 실험 기록과 복구 진행을 지울까요? 지운 기록은 되돌릴 수 없어요. 소리 설정은 유지해요.</p><button class="button button-secondary settings-danger" data-settings="confirm-reset">기록을 지우고 처음으로</button>';
@@ -616,14 +639,21 @@ function openSettings() {
     else if (action === 'confirm-reset') {
       const sound = { soundOn: save.soundOn, musicOn: save.musicOn, soundVolume: save.soundVolume };
       close(); adminUnlocked = false; adminSave = null;
-      save = { ...freshSave(), ...sound }; context.save = save;
+      save = { ...freshSave(), ...sound }; context.save = save; missionCardShown.clear();
       persist(); viewPage = 'title'; render();
     }
     else if (action === 'ending') { close(); navigate('complete'); openEndingCeremony(); }
     else if (action === 'prologue') { close(); openStoryModal({ lines: prologueLines, finishLabel: '닫기', video: introVideo }); }
-    else if (action === 'toggle-admin') { const enable = !adminUnlocked; close(); setAdminMode(enable); navigate('map'); }
+    else if (action === 'toggle-admin') {
+      const enable = !adminUnlocked;
+      if (enable && overlay.querySelector<HTMLInputElement>('#teacher-code')?.value.trim() !== TEACHER_CODE) { toast('교사용 확인 코드가 맞지 않아요.'); overlay.querySelector<HTMLInputElement>('#teacher-code')?.focus(); return; }
+      close(); setAdminMode(enable); navigate('map');
+    }
     else if (action === 'save') { if (persist()) toast('진행 기록을 저장했어요.'); }
     else if (action === 'home') { close(); setAdminMode(false); viewPage = 'title'; render(); }
+  });
+  overlay.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && (event.target as Element).id === 'teacher-code') overlay.querySelector<HTMLButtonElement>('[data-settings="toggle-admin"]')?.click();
   });
   overlay.addEventListener('input', event => {
     if (!(event.target instanceof HTMLInputElement) || event.target.id !== 'sound-volume') return;

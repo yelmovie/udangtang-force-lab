@@ -26,8 +26,11 @@
 | 중앙 동력실 실내 배경 | `backgrounds/core-hall-v2.webp` | 2026-10-08 내장 이미지 생성 도구로 제작. 원본·프롬프트는 `references/design/core-studio-v2/`에 보관 | 프로젝트를 위해 생성한 이미지. 조작 모델과 UI는 별도로 구현 |
 | 코어·빈 중앙 장치 3D | `models/core/*.glb` | 사용자가 Meshy로 생성해 전달한 GLB를 폴리곤·텍스처 최적화 | Meshy 계정의 생성·이용 조건은 별도 확인. CC0 등 별도 라이선스를 추정하지 않음 |
 | 배경음악 2곡 (스테이지 반복 `Curious Discovery`·점등식 `Magical Power-Up`) | `audio/bgm-stage.mp3`, `audio/bgm-ending.mp3` | 2026-10-19 사용자가 Suno로 생성해 전달(연주곡) | 생성형 AI 음악. Suno 요금제별 상업적 이용 조건은 별도 확인 |
-| 효과음 3종 (`click_003`, `error_001`, `confirmation_002`) | `audio/*.ogg` | Kenney — Interface Sounds (kenney.nl/assets/interface-sounds) | CC0 1.0. 원문 `doc/licenses/kenney-interface-sounds` |
+| 효과음 3종 (`click_003`, `error_001`, `confirmation_002`) | `audio/*.ogg` | Kenney — Interface Sounds (kenney.nl/assets/interface-sounds) | CC0 1.0. 원문 `audio/LICENSE-Kenney.txt` 동봉 |
 | 제목·버튼 글꼴 | `fonts/jua-*.woff2` | Jua, Woowahan Brothers Corp. (Google Fonts 배포본) | SIL OFL 1.1. 원문 `fonts/Jua-OFL.txt` 동봉. Reserved Font Name "Jua" |
+| 앱 아이콘·파비콘 | `/favicon.svg`, `/icons/icon-192.png`, `/icons/icon-512.png` | 직접 그린 SVG 플라스크 아이콘(PNG는 같은 그림을 변환) | 앱 제작자 보유 |
+| 화면 아이콘(홈·소리·설정·재생·별 등) | `src/icons.ts` (코드 안 SVG) | 직접 그린 SVG 선 아이콘 | 앱 제작자 보유 |
+| 공유 썸네일 | `/og-image.jpg` (1200×630) | 2026-10-19 위 `backgrounds/lab.webp`와 `ui/title.webp`를 sharp로 합성 | 앱 제작자 보유 |
 
 ## 고지
 

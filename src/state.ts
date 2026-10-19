@@ -81,15 +81,25 @@ export function freshSave(): SaveData {
   };
 }
 
+/** An unreadable save is copied here before a fresh start can overwrite the only copy. */
+export const BROKEN_SAVE_KEY = `${SAVE_KEY}-broken`;
+function keepBroken(text: string) {
+  try { localStorage.setItem(BROKEN_SAVE_KEY, text); } catch { /* storage blocked or full: nothing more we can keep */ }
+}
+
 export function readSave(): SaveData | null {
+  let text: string | null = null;
   try {
-    const text = localStorage.getItem(SAVE_KEY);
+    text = localStorage.getItem(SAVE_KEY);
     if (!text) return null;
     const raw: unknown = JSON.parse(text);
-    if (!raw || typeof raw !== 'object' || (raw as { version?: unknown }).version !== 1) return null;
+    if (!raw || typeof raw !== 'object' || (raw as { version?: unknown }).version !== 1) { keepBroken(text); return null; }
     const item = raw as Partial<SaveData>;
     const fallback = freshSave();
-    const completed = Array.isArray(item.completed) ? [...new Set(item.completed.filter((id): id is StageId => stageIds.includes(id)))] : [];
+    const listed = Array.isArray(item.completed) ? item.completed : [];
+    // Missions unlock in order, so a completion only counts when every earlier mission is completed too.
+    const firstMissing = stageIds.findIndex(id => !listed.includes(id));
+    const completed = firstMissing < 0 ? [...stageIds] : stageIds.slice(0, firstMissing);
     const evidence: SaveData['evidence'] = {};
     for (const id of completed) if (typeof item.evidence?.[id] === 'string') evidence[id] = item.evidence[id];
     const restored: SaveData = {
@@ -165,6 +175,7 @@ export function readSave(): SaveData | null {
     if ((stageIds.includes(restored.currentPage as StageId) && !stageIsOpen(restored, restored.currentPage as StageId)) || (restored.currentPage === 'complete' && restored.completed.length !== stageIds.length)) restored.currentPage = 'map';
     return restored;
   } catch {
+    if (text) keepBroken(text);
     return null;
   }
 }
