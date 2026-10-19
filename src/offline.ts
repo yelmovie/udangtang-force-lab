@@ -3,7 +3,8 @@ let state: OfflineState = import.meta.env.DEV ? 'development' : 'preparing';
 const listeners = new Set<() => void>();
 export function offlineMessage(): string {
   return {
-    development: '개발 미리보기: 오프라인 저장은 배포용 빌드에서 준비합니다.',
+    // The dev server never installs the worker, so there is no status worth showing there.
+    development: '',
     unsupported: '이 브라우저에서는 오프라인 준비를 지원하지 않습니다. 인터넷 연결을 유지해 주세요.',
     preparing: '첫 화면 자료를 저장하고 있어요. 잠시 인터넷 연결을 유지해 주세요.',
     ready: '오프라인 준비 완료 · 한 번 열어 본 화면은 인터넷 없이도 열려요.',

@@ -13,7 +13,7 @@ h1, h2, h3, .button, .brand, .topbar-title strong, .eyebrow, .control-label, .mi
   font-family: var(--font-display); font-weight: 400; letter-spacing: 0;
 }
 /* Long reading passages stay in a text face. */
-.settings-reading, .discovery-detail p, .report-detail p, .teacher-diagnostics, .teacher-save-record, .help-card p, .settings-lead { font-family: var(--font-body); }
+.settings-reading, .discovery-detail p, .report-detail p, .help-card p, .settings-lead { font-family: var(--font-body); }
 /* Inline SVG icons sit on the text line. */
 .settings-links button > span svg, .orientation-hint span svg, .village-client-bubble svg, .core-view-tools svg, .camera-button svg, .spring-row button svg, .balance-popup-predict button svg, #balance-swap svg { width: 1.2em; height: 1.2em; vertical-align: middle; }
 :root {

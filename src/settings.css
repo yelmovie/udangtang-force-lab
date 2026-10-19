@@ -31,13 +31,8 @@
 .settings-audio input { display: block; width: 100%; min-height: 48px; accent-color: #177574; margin: 4px 0 0; }
 .settings-audio .button { width: 100%; min-height: 48px; font-size: 20px; }
 .settings-offline { font-size: 16px; line-height: 1.5; padding: 12px 14px; background: #fff4d9; border-radius: 12px; color: #485b4d; }
+.settings-offline:empty { display: none; }
 .settings-back { margin-top: 18px; min-height: 52px; font-size: 20px; }
 .settings-layer .settings-lead { font-size: 20px; }
 .settings-layer .settings-danger { border-color: #c99d79; background: #fff1df; }
-.teacher-diagnostics { font-size: 16px; color: #50625b; margin-block: 16px; }
-.teacher-diagnostics summary { cursor: pointer; padding: 14px 10px; min-height: 48px; border: 2px solid #c2d9ca; border-radius: 10px; font-weight: 800; }
-.teacher-diagnostics dl { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin: 14px 0; }
-.teacher-diagnostics dd { margin: 0; font-variant-numeric: tabular-nums; }
-.teacher-diagnostics p { line-height: 1.5; }
-.teacher-save-record { max-height: 320px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; padding: 14px; border: 1px solid #c2d9ca; border-radius: 10px; background: #f4f8ed; font-size: 14px; line-height: 1.5; }
 @media (max-width: 600px) { .settings-layer .settings-links { grid-template-columns: 1fr; } }
