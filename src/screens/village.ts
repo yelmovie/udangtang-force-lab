@@ -535,15 +535,14 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if(!next){hint.textContent='그곳까지 갈 길이 없어. 흙길이나 다리를 눌러 봐!';destination=null;path=[];draw();return;}
     clearInput();path=next;destination=next.at(-1)??null;hint.textContent=name?`${name} 앞까지 길을 따라 걸어갈게.`:'길을 따라 가는 중… 방향판을 누르면 직접 걸을 수 있어.';canvas.focus();draw();
   }
-  /** Small star row under a building name: earned, empty, or switched off by the teacher. */
+  /** Small star row under a building name: earned or empty. */
   function starRow(id: StageId) {
     const row=document.createElement('span');row.className='village-label-stars';row.setAttribute('aria-hidden','true');
-    stars[id].slots.forEach((slot,i)=>{const star=document.createElement('span');star.className='village-star';star.classList.toggle('is-done',slot.done);star.classList.toggle('is-off',!slot.done&&!!slot.off);star.classList.toggle('is-new',freshStars[id][i]);star.textContent=slot.done?'★':'☆';row.append(star);});
+    stars[id].slots.forEach((slot,i)=>{const star=document.createElement('span');star.className='village-star';star.classList.toggle('is-done',slot.done);star.classList.toggle('is-new',freshStars[id][i]);star.textContent=slot.done?'★':'☆';row.append(star);});
     return row;
   }
   function starText(id: StageId) {
-    const off=stars[id].slots.some(slot=>slot.off&&!slot.done);
-    return `별 ${stars[id].earned}개${off?', 2단계 의뢰는 쉬는 중':''}`;
+    return `별 ${stars[id].earned}개`;
   }
   function setupLabels() {
     labels.replaceChildren();
@@ -558,7 +557,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   function openBoard() {
     if(!map||paused())return;
     clearInput();path=[];destination=null;
-    board.querySelector('.village-board-lead')!.textContent=cards[0].optional?'오늘 의뢰는 선택이에요. 하고 싶은 의뢰가 있으면 도와줘요.':'마을 사람들의 부탁이에요. 실험 1단계를 마치면 그 건물에서 의뢰를 받을 수 있어요.';
+    board.querySelector('.village-board-lead')!.textContent='마을 사람들의 부탁이에요. 실험 1단계를 마치면 그 건물에서 의뢰를 받을 수 있어요.';
     const list=board.querySelector('.village-board-cards')!;list.replaceChildren();
     for(const card of cards){
       const item=document.createElement('li');item.className=`village-board-card is-${card.status}`;
@@ -572,7 +571,6 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       const from=document.createElement('strong');from.textContent=locked?`??? · ${villageRewards[card.stage].name}`:`${card.client} · ${villageRewards[card.stage].name}`;
       const quote=document.createElement('p');quote.textContent=locked?'누가 부탁할지는 아직 비밀이에요.':`“${card.quote}”`;
       const status=document.createElement('span');status.className='village-board-status';status.textContent=card.statusText;
-      if(card.optional){const tag=document.createElement('span');tag.className='village-board-tag';tag.textContent='선택 의뢰';status.prepend(tag);}
       text.append(from,quote,status);
       const go=document.createElement('button');go.textContent=`${withDirectionParticle(villageRewards[card.stage].name)} 가기`;
       go.addEventListener('click',()=>{const building=map?.buildings.find(b=>b.id===card.stage);board.close();last=performance.now();if(building)goTo(building.entry,villageRewards[card.stage].name);});

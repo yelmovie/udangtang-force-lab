@@ -470,7 +470,6 @@ button.button:not(:disabled):active {
 .star-row li span { font-size:18px; line-height:1; }
 .star-row li.is-done { background:#fff1c4; color:#7a5310; }
 .star-row li.is-done span { color:#e3a21a; }
-.star-row li.is-off { opacity:.6; }
 .report-card .star-row { justify-content:flex-start; }
 .star-row.is-celebrating li.is-done span { animation:star-pop .5s cubic-bezier(.2,.8,.3,1.4) both; animation-delay:calc(var(--i) * .15s + .2s); }
 @keyframes star-pop { from { transform:scale(0) rotate(-40deg); } to { transform:none; } }

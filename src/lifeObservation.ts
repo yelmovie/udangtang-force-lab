@@ -1,253 +1,251 @@
+export type LifeTool = 'lever' | 'ramp';
+/**
+ * Sorting record for "생활 속 도구를 찾아요". `object` / `use` are readable lists rebuilt from `sorted`
+ * (main.ts shows them on the result screen and in the workshop evidence). `shared` is the old self-report
+ * checkbox: only older records carry it, the sorting board has none.
+ */
 export type LifeObservation = {
-  tool: 'lever' | 'ramp'; source: 'around' | 'example'; object: string; use: string; shared: boolean;
+  /** Cards the student put in the right basket. */
+  sorted: string[];
+  /** Cards first dropped in the other basket: a note for the teacher, never a penalty. */
+  missed: string[];
+  object: string; use: string; shared: boolean;
 };
+
+/* ===== Picture cards: each one is a real use of a lever or a ramp. Art: public/assets/life-tools/{id}.webp (320x240). ===== */
+export type LifeCard = { id: string; name: string; tool: LifeTool; why: string; hint: string };
+/** Mixed order so the tray never groups levers and ramps together. */
+export const lifeCards: LifeCard[] = [
+  { id: 'slide', name: '미끄럼틀', tool: 'ramp', why: '비스듬한 면을 따라 내려와서 똑바로 떨어질 때보다 천천히, 안전하게 내려와요.', hint: '미끄럼틀의 타는 면이 어떻게 놓여 있는지 봐요.' },
+  { id: 'bottle-opener', name: '병따개', tool: 'lever', why: '뚜껑 위에 닿은 곳이 받침점이 되어, 긴 손잡이를 들면 작은 힘으로 뚜껑이 열려요.', hint: '병따개가 뚜껑에 닿아 받쳐지는 곳을 찾아봐요.' },
+  { id: 'seesaw', name: '시소', tool: 'lever', why: '가운데 받침점을 중심으로 움직여요. 받침점에서 멀리 누를수록 작은 힘으로 친구를 들어 올려요.', hint: '시소 가운데를 받치고 있는 곳이 보이나요?' },
+  { id: 'wheelchair-ramp', name: '휠체어 경사로', tool: 'ramp', why: '비스듬한 길을 따라 밀면 들어 올리지 않아도 적은 힘으로 문 앞까지 올라가요.', hint: '휠체어가 올라가는 길이 어떤 모양인지 봐요.' },
+  { id: 'mountain-road', name: '지그재그 산길', tool: 'ramp', why: '길을 비스듬히 돌려 길게 만들면 덜 가팔라서 적은 힘으로 올라가요.', hint: '산길이 꼭대기까지 곧장 가나요, 비스듬히 돌아가나요?' },
+  { id: 'claw-hammer', name: '장도리', tool: 'lever', why: '나무판에 닿은 머리가 받침점이 되어, 긴 손잡이를 당기면 작은 힘으로 못이 뽑혀요.', hint: '장도리 머리가 나무판에 닿아 받쳐지는 곳을 찾아봐요.' },
+  { id: 'truck-ramp', name: '트럭 경사판', tool: 'ramp', why: '무거운 짐을 들어 올리지 않고 비스듬한 판을 따라 적은 힘으로 밀어 올려요.', hint: '수레가 올라가는 판이 어떤 모양인지 봐요.' },
+  { id: 'scissors', name: '가위', tool: 'lever', why: '가운데 못이 받침점이에요. 종이를 못 가까이에 넣으면 작은 힘으로도 잘 잘려요.', hint: '가위 가운데 동그란 못을 찾아봐요.' },
+];
+export const lifeBaskets: Record<LifeTool, { name: string; idea: string }> = {
+  lever: { name: '지레', idea: '받침점을 중심으로 작은 힘으로 큰 힘을 내요' },
+  ramp: { name: '빗면', idea: '비스듬한 면을 따라 적은 힘으로 높이 올려요' },
+};
+export const lifeSummary = '지레는 받침점을 중심으로, 빗면은 비스듬한 면을 따라 적은 힘으로 일을 하게 도와줘요.';
+export const lifeCard = (id: string) => lifeCards.find(card => card.id === id);
+
+const cardIds = (items: unknown): string[] => Array.isArray(items)
+  ? [...new Set(items.filter((id): id is string => typeof id === 'string' && !!lifeCard(id)))] : [];
+function lifeRecord(sorted: string[], missed: string[]): LifeObservation {
+  const list = (tool: LifeTool) => `${lifeBaskets[tool].name}: ${lifeCards.filter(card => card.tool === tool && sorted.includes(card.id)).map(card => card.name).join(', ') || '아직 없어요'}`;
+  return { sorted, missed, object: list('lever'), use: list('ramp'), shared: false };
+}
+export const emptyLifeObservation = (): LifeObservation => lifeRecord([], []);
+
+/** A record with cards is rebuilt from known card ids; older 3-step records ({ tool, source, object, use }) keep their words. */
 export function retainLifeObservation(value: unknown): LifeObservation | undefined {
   if (!value || typeof value !== 'object') return;
-  const raw = value as Partial<LifeObservation>;
-  if (!['lever', 'ramp'].includes(raw.tool ?? '') || !['around', 'example'].includes(raw.source ?? '')) return;
-  return { tool: raw.tool!, source: raw.source!, object: typeof raw.object === 'string' ? raw.object.slice(0, 80) : '', use: typeof raw.use === 'string' ? raw.use.slice(0, 160) : '', shared: raw.shared === true };
+  const raw = value as Record<string, unknown>;
+  const sorted = cardIds(raw.sorted), missed = cardIds(raw.missed);
+  if (sorted.length || missed.length) return lifeRecord(sorted, missed);
+  const text = (item: unknown, max: number) => typeof item === 'string' ? item.trim().slice(0, max) : '';
+  const object = text(raw.object, 80), use = text(raw.use, 160);
+  return object || use ? { sorted: [], missed: [], object, use, shared: raw.shared === true } : undefined;
 }
-export function hasLifeObservation(value: LifeObservation | undefined): boolean {
-  return !!value && !!value.object.trim() && !!value.use.trim();
+export function lifeSortDone(value: LifeObservation | undefined): boolean {
+  return !!value && lifeCards.every(card => value.sorted.includes(card.id));
+}
+/** One drop: the right basket files the card; the other basket only notes it, and the card goes back to try again. */
+export function dropLifeCard(record: LifeObservation, cardId: string, basket: LifeTool): { result: 'correct' | 'retry'; record: LifeObservation } | undefined {
+  const card = lifeCard(cardId);
+  if (!card || record.sorted.includes(cardId)) return;
+  if (card.tool === basket) return { result: 'correct', record: lifeRecord([...record.sorted, cardId], record.missed) };
+  return { result: 'retry', record: lifeRecord(record.sorted, record.missed.includes(cardId) ? record.missed : [...record.missed, cardId]) };
 }
 
-/* ===== Picture cards: the student picks what they saw, the principle comes with the card. ===== */
-export type LifeCard = { id: string; name: string; tool: LifeObservation['tool']; how: string; uses: string[]; svg: string };
-export const LIFE_OTHER = 'other';
-export const lifeToolNames: Record<LifeObservation['tool'], string> = { lever: '지레', ramp: '빗면' };
-const lifeToolIs: Record<LifeObservation['tool'], string> = { lever: '지레예요', ramp: '빗면이에요' };
-export const lifeCards: LifeCard[] = [
-  { id: 'opener', name: '병따개', tool: 'lever', how: '받침점에 대고 손잡이를 들면 뚜껑이 올라와요.', uses: ['병뚜껑을 딸 때', '캔 뚜껑을 들어 올릴 때'],
-    svg: '<rect x="16" y="42" width="28" height="34" rx="5" fill="#9dbdae"/><rect x="22" y="30" width="16" height="14" fill="#9dbdae"/><rect x="19" y="25" width="22" height="7" fill="#d99b35"/><path d="M22 24L108 12L110 21L40 31Z" fill="#527c83"/><circle cx="30" cy="27" r="3.5" fill="#b64d32"/>' },
-  { id: 'scissors', name: '가위', tool: 'lever', how: '가운데 못이 받침점이 되어 날이 종이를 눌러요.', uses: ['종이를 자를 때', '끈이나 테이프를 자를 때'],
-    svg: '<path d="M60 40L112 18M60 40L112 62" stroke="#7d8d94" stroke-width="6" stroke-linecap="round"/><path d="M36 30L60 40L36 50" fill="none" stroke="#d26b4a" stroke-width="6"/><circle cx="25" cy="26" r="12" fill="none" stroke="#d26b4a" stroke-width="6"/><circle cx="25" cy="54" r="12" fill="none" stroke="#d26b4a" stroke-width="6"/><circle cx="60" cy="40" r="4" fill="#344849"/>' },
-  { id: 'seesaw', name: '시소', tool: 'lever', how: '가운데 받침점을 두고 한쪽을 누르면 다른 쪽이 올라가요.', uses: ['친구와 오르내리며 놀 때', '무거운 쪽과 가벼운 쪽을 비교할 때'],
-    svg: '<path d="M4 75H116" stroke="#9dbdae" stroke-width="4"/><path d="M49 74L60 50L71 74Z" fill="#d99b35"/><path d="M10 62L110 38" stroke="#5986a2" stroke-width="8" stroke-linecap="round"/><circle cx="20" cy="48" r="8" fill="#e08c6a"/><circle cx="100" cy="24" r="8" fill="#7aa86b"/>' },
-  { id: 'hammer', name: '장도리', tool: 'lever', how: '머리를 받침점으로 삼아 손잡이를 당기면 못이 뽑혀요.', uses: ['못을 뽑을 때', '붙은 판자를 떼어 낼 때'],
-    svg: '<rect x="6" y="62" width="108" height="12" rx="2" fill="#d7b37b"/><path d="M78 62V48" stroke="#7d8d94" stroke-width="4"/><path d="M24 18L80 52" stroke="#b8794b" stroke-width="9" stroke-linecap="round"/><path d="M72 40L98 46L94 60L80 62L70 52Z" fill="#527c83"/>' },
-  { id: 'wheelbarrow', name: '손수레', tool: 'lever', how: '바퀴가 받침점이 되어 손잡이를 들면 짐이 가볍게 들려요.', uses: ['무거운 짐을 옮길 때', '흙이나 모래를 나를 때'],
-    svg: '<path d="M18 28H80L72 50H28Z" fill="#5986a2"/><path d="M30 50L114 38" stroke="#b8794b" stroke-width="6" stroke-linecap="round"/><path d="M84 46L88 72" stroke="#b8794b" stroke-width="5"/><circle cx="28" cy="62" r="12" fill="#344849"/><circle cx="28" cy="62" r="4" fill="#e6e6e6"/>' },
-  { id: 'wheelchair-ramp', name: '휠체어 경사로', tool: 'ramp', how: '높은 턱까지 비스듬한 길을 따라 조금씩 올라가요.', uses: ['휠체어로 턱을 오를 때', '유모차를 밀어 올릴 때'],
-    svg: '<path d="M4 74L84 38V74Z" fill="#d7b37b"/><rect x="84" y="38" width="32" height="36" fill="#799b8f"/><path d="M38 34V54H54" fill="none" stroke="#5986a2" stroke-width="5" stroke-linejoin="round"/><circle cx="46" cy="58" r="10" fill="none" stroke="#344849" stroke-width="4"/>' },
-  { id: 'stair-slide', name: '계단 옆 미끄럼판', tool: 'ramp', how: '계단 대신 비스듬한 판을 따라 바퀴를 굴려 올려요.', uses: ['자전거를 끌고 올라갈 때', '수레를 밀어 올릴 때'],
-    svg: '<path d="M8 76H32V64H52V52H72V40H92V28H114V76Z" fill="#c9c2b2"/><path d="M8 68L112 20" stroke="#d99b35" stroke-width="7" stroke-linecap="round"/>' },
-  { id: 'screw', name: '나사', tool: 'ramp', how: '빙글빙글 감긴 빗면을 따라 돌리면 조금씩 들어가요.', uses: ['나무에 단단히 박을 때', '두 물건을 붙여 고정할 때'],
-    svg: '<rect x="12" y="28" width="16" height="24" rx="3" fill="#7d8d94"/><path d="M28 33H96L112 40L96 47H28Z" fill="#a9b6bb"/><path d="M38 32L45 48M50 32L57 48M62 32L69 48M74 32L81 48M86 32L93 48" stroke="#527c83" stroke-width="3"/>' },
-];
-export type LifePlace = { id: string; label: string; tag: string; source: LifeObservation['source'] };
-export const lifePlaces: LifePlace[] = [
-  { id: 'school', label: '학교', tag: '학교', source: 'around' },
-  { id: 'home', label: '집', tag: '집', source: 'around' },
-  { id: 'playground', label: '놀이터', tag: '놀이터', source: 'around' },
-  { id: 'street', label: '길', tag: '길', source: 'around' },
-  { id: 'picture', label: '그림에서 봤어요', tag: '그림', source: 'example' },
-];
+const hasFinal = (word: string) => { const code = word.charCodeAt(word.length - 1) - 0xac00; return code >= 0 && code < 11172 && code % 28 !== 0; };
+export function lifeDropMessage(cardId: string, result: 'correct' | 'retry'): string {
+  const card = lifeCard(cardId);
+  if (!card) return '';
+  if (result === 'retry') return `다시 생각해요. ${card.hint}`;
+  return `맞아요! ${card.name}${hasFinal(card.name) ? '은' : '는'} ${card.tool === 'lever' ? '지레예요' : '빗면이에요'}. ${card.why}`;
+}
+export function lifePickMessage(cardId: string): string {
+  const name = lifeCard(cardId)?.name ?? '';
+  return `${name}${hasFinal(name) ? '을' : '를'} 골랐어요. 이제 지레 바구니나 빗면 바구니를 눌러요.`;
+}
 
-/** What the student has picked so far; `useChoice` is a card's preset use, `customUse` a typed one. */
-export type LifeDraft = {
-  cardId: string; otherName: string; otherTool?: LifeObservation['tool'];
-  placeId: string; useChoice: string; customUse: string; shared: boolean;
+const toolIcons: Record<LifeTool, string> = {
+  lever: '<path d="M6 30L58 14" stroke="currentColor" stroke-width="6" stroke-linecap="round"/><path d="M24 37L32 23L40 37Z" fill="currentColor"/>',
+  ramp: '<path d="M4 37H60V11Z" fill="currentColor"/><rect x="25" y="11" width="12" height="11" rx="2" transform="rotate(-25 31 22)" fill="#fff"/>',
 };
-export const emptyLifeDraft = (): LifeDraft => ({ cardId: '', otherName: '', placeId: '', useChoice: '', customUse: '', shared: false });
-export const lifeCard = (id: string) => lifeCards.find(card => card.id === id);
-const clean = (text: string) => text.replace(/\s+/g, ' ').trim();
 
-export function lifeDraftName(draft: LifeDraft): string {
-  return draft.cardId === LIFE_OTHER ? clean(draft.otherName) : lifeCard(draft.cardId)?.name ?? '';
-}
-/** A listed card decides lever or ramp; only "목록에 없어요" asks the student. */
-export function lifeDraftTool(draft: LifeDraft): LifeObservation['tool'] | undefined {
-  return draft.cardId === LIFE_OTHER ? draft.otherTool : lifeCard(draft.cardId)?.tool;
-}
-export function lifeDraftUse(draft: LifeDraft): string {
-  return clean(draft.useChoice || draft.customUse).replace(/[.。]+$/, '');
-}
-export function lifeStepDone(draft: LifeDraft, step: 1 | 2 | 3): boolean {
-  if (step === 1) return !!lifeDraftName(draft) && !!lifeDraftTool(draft);
-  if (step === 2) return lifePlaces.some(place => place.id === draft.placeId);
-  return !!lifeDraftUse(draft);
-}
-/** Picking a picture alone is not an observation: tool, place and use are all required. */
-export function canFinishLifeDraft(draft: LifeDraft): boolean {
-  return lifeStepDone(draft, 1) && lifeStepDone(draft, 2) && lifeStepDone(draft, 3);
-}
-
-/** Stored as readable text ("학교 · 병따개") so the result screen and old records keep working. */
-export function lifeDraftToObservation(draft: LifeDraft): LifeObservation {
-  const place = lifePlaces.find(item => item.id === draft.placeId);
-  return {
-    tool: lifeDraftTool(draft) ?? 'ramp',
-    source: place?.source ?? 'around',
-    object: [place?.tag ?? '', lifeDraftName(draft)].filter(Boolean).join(' · ').slice(0, 80),
-    use: lifeDraftUse(draft).slice(0, 160),
-    shared: draft.shared,
-  };
-}
-/** Reads card-made records back into picks; free-typed (older) text becomes an editable "목록에 없어요" entry. */
-export function lifeDraftFromObservation(value: LifeObservation | undefined): LifeDraft {
-  const draft = emptyLifeDraft();
-  if (!value) return draft;
-  draft.shared = value.shared;
-  let name = clean(value.object);
-  const [head, ...rest] = name.split(' · ');
-  const place = lifePlaces.find(item => item.tag === head);
-  if (place) { draft.placeId = place.id; name = rest.join(' · '); }
-  else if (value.source === 'example') draft.placeId = 'picture';
-  const card = lifeCards.find(item => item.name === name);
-  if (card) draft.cardId = card.id;
-  else if (name) { draft.cardId = LIFE_OTHER; draft.otherName = name; draft.otherTool = value.tool; }
-  const use = clean(value.use);
-  if (card?.uses.includes(use)) draft.useChoice = use;
-  else draft.customUse = use;
-  return draft;
-}
-export function lifeShareSentence(draft: LifeDraft): string {
-  const name = lifeDraftName(draft) || '__';
-  const use = lifeDraftUse(draft);
-  const usePart = !use ? '__할 때' : use.endsWith('때') ? use : `“${use}” 할 때`;
-  return `내가 본 도구는 ${name}이고, ${usePart} 써요.`;
-}
-export function lifeFirstOpenStep(draft: LifeDraft): 1 | 2 | 3 {
-  return !lifeStepDone(draft, 1) ? 1 : !lifeStepDone(draft, 2) ? 2 : 3;
-}
-
-const escape = (text: string) => text.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
-const cardSvg = (svg: string) => `<svg viewBox="0 0 120 80" aria-hidden="true" focusable="false">${svg}</svg>`;
-const stepTitles = ['내가 본 도구를 골라요', '어디서 봤어요?', '무엇을 할 때 쓰나요?'];
-
-/** A student's description and self-reported sharing; never an automatic mastery grade. */
+/** Sort picture cards into the lever and ramp baskets: drag, tap a card then a basket, or use the keyboard. */
 export function openLifeObservation(options: {
   app: HTMLElement; value?: LifeObservation; onSave: (value: LifeObservation) => void; onDone: () => void;
 }): void {
-  const draft = lifeDraftFromObservation(options.value);
-  let step = lifeFirstOpenStep(draft);
+  let record = options.value ?? emptyLifeObservation();
+  let selected = '';
+  let feedback: { text: string; tone: '' | 'correct' | 'retry' } = { text: '', tone: '' };
+  let drag: { pointer: number; card: HTMLButtonElement; x: number; y: number; ghost: HTMLElement | null; over: HTMLElement | null } | null = null;
+  let suppressClickUntil = 0;
+  const image = (id: string) => `<img src="${import.meta.env.BASE_URL}assets/life-tools/${id}.webp" alt="" width="320" height="240" draggable="false">`;
   const modal = document.createElement('div');
-  modal.className = 'modal-layer';
+  modal.className = 'modal-layer life-layer';
   const wasInert = options.app.inert;
   const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   options.app.inert = true;
-  modal.innerHTML = `<section class="modal-card life-card" role="dialog" aria-modal="true" aria-labelledby="life-title">
-    <div class="settings-heading"><h2 id="life-title">생활 속 도구를 찾아요</h2><button type="button" id="life-close" aria-label="공방으로 돌아가기">×</button></div>
-    <ol class="life-steps">${['도구', '장소', '쓰임'].map((label, i) => `<li data-step="${i + 1}"><span aria-hidden="true">${i + 1}</span>${label}</li>`).join('')}</ol>
-    <p class="life-picked" id="life-picked" hidden></p>
-    <div class="life-step" data-step="1">
-      <h3 tabindex="-1">${stepTitles[0]}</h3>
-      <div class="life-card-grid">${lifeCards.map(card => `<button type="button" class="life-pick" data-card="${card.id}" aria-pressed="false">${cardSvg(card.svg)}<span>${card.name}</span></button>`).join('')}</div>
-      <div class="life-other">
-        <button type="button" class="life-pick life-other-pick" data-card="${LIFE_OTHER}" aria-pressed="false">목록에 없어요</button>
-        <div class="life-other-fields" id="life-other-fields" hidden>
-          <input id="life-other-name" maxlength="30" aria-label="내가 본 도구 이름" placeholder="도구 이름 (예: 손톱깎이)">
-          <div class="life-other-tool" role="group" aria-label="어떤 원리인가요?">${(['lever', 'ramp'] as const).map(tool => `<button type="button" class="life-pick" data-other-tool="${tool}" aria-pressed="false">${lifeToolNames[tool]}</button>`).join('')}</div>
-        </div>
+  modal.innerHTML = `<section class="modal-card life-card" role="dialog" aria-modal="true" aria-labelledby="life-title" aria-describedby="life-guide">
+    <div class="settings-heading"><h2 id="life-title">생활 속 도구를 찾아요</h2><span class="life-count" id="life-count"></span><button type="button" id="life-close" aria-label="공방으로 돌아가기">×</button></div>
+    <p class="life-guide" id="life-guide"><span class="life-guide-intro">공방에서 써 본 지레와 빗면이 우리 생활에도 있어요. </span>그림 카드를 알맞은 바구니로 끌어다 놓아요. <span class="life-guide-tap">카드를 누르고 바구니를 눌러도 돼요.</span></p>
+    <div class="life-board">
+      <div class="life-middle">
+        <div class="life-tray" role="group" aria-label="생활 속 도구 그림 카드">${lifeCards.map(card => `<div class="life-slot"><button type="button" class="life-tool" data-card="${card.id}" aria-pressed="false">${image(card.id)}<span>${card.name}</span></button></div>`).join('')}</div>
+        <div class="life-finish" id="life-finish" hidden><p><strong>다 찾았어요!</strong> ${lifeSummary}</p><button type="button" class="button button-primary" id="life-done">관찰 기록으로 마치기</button></div>
       </div>
+      ${(['lever', 'ramp'] as const).map(tool => `<div class="life-basket is-${tool}" data-basket="${tool}">
+        <button type="button" class="life-basket-head" data-basket="${tool}"><svg viewBox="0 0 64 40" aria-hidden="true" focusable="false">${toolIcons[tool]}</svg><strong>${lifeBaskets[tool].name}</strong><small>${lifeBaskets[tool].idea}</small></button>
+        <ul class="life-basket-items" aria-label="${lifeBaskets[tool].name} 바구니에 넣은 카드"></ul>
+      </div>`).join('')}
     </div>
-    <div class="life-step" data-step="2" hidden>
-      <h3 tabindex="-1">${stepTitles[1]}</h3>
-      <div class="life-place-grid">${lifePlaces.map(place => `<button type="button" class="life-pick" data-place="${place.id}" aria-pressed="false">${place.label}</button>`).join('')}</div>
-    </div>
-    <div class="life-step" data-step="3" hidden>
-      <h3 tabindex="-1">${stepTitles[2]}</h3>
-      <div class="life-use-grid" id="life-use-grid"></div>
-      <label class="life-label" id="life-custom-label">직접 짧게 써요<input id="life-custom-use" maxlength="60" placeholder="예: 물건을 들어 올릴 때"></label>
-      <p class="life-share" id="life-share" aria-live="polite"></p>
-      <label class="life-shared"><input type="checkbox" id="life-shared">친구나 선생님에게 설명했어요 (선택)</label>
-    </div>
-    <p id="life-status" role="status"></p>
-    <div class="life-nav"><button type="button" class="button button-secondary" id="life-back">이전</button><button type="button" class="button button-primary" id="life-next">다음</button><button type="button" class="button button-primary" id="life-done">관찰 기록으로 마치기</button></div>
+    <p class="life-feedback" id="life-feedback" role="status"></p>
   </section>`;
   const field = <T extends HTMLElement>(id: string) => modal.querySelector<T>(`#${id}`)!;
-  const all = <T extends HTMLElement>(selector: string) => [...modal.querySelectorAll<T>(selector)];
-  const save = () => options.onSave(lifeDraftToObservation(draft));
-  const statusText = (): string => {
-    if (step === 1) {
-      if (draft.cardId === LIFE_OTHER) return lifeStepDone(draft, 1) ? `고른 원리: ${lifeToolNames[draft.otherTool!]}` : '도구 이름을 쓰고 지레인지 빗면인지 골라요.';
-      const card = lifeCard(draft.cardId);
-      return card ? `${card.how} ${lifeToolIs[card.tool]}.` : '주변에서 본 도구와 닮은 그림을 골라요.';
-    }
-    if (step === 2) return lifeStepDone(draft, 2) ? '좋아요. 이제 쓰임을 골라요.' : '도구를 본 곳을 골라요.';
-    return canFinishLifeDraft(draft) ? '내가 본 도구와 쓰임을 기록했어요.' : '쓰임을 하나 고르거나 짧게 써요.';
+  const cardButton = (id: string) => modal.querySelector<HTMLButtonElement>(`.life-tool[data-card="${id}"]`);
+  const basketBox = (tool: LifeTool) => modal.querySelector<HTMLElement>(`.life-basket[data-basket="${tool}"]`)!;
+  const flash = (element: Element | null | undefined, name: string) => {
+    if (!element) return;
+    element.classList.remove(name); void (element as HTMLElement).offsetWidth; element.classList.add(name);
   };
+
   const render = () => {
-    const card = lifeCard(draft.cardId);
-    const pressed = (selector: string, key: string, value: string | undefined) =>
-      all<HTMLButtonElement>(selector).forEach(button => button.setAttribute('aria-pressed', String(button.dataset[key] === value)));
-    pressed('[data-card]', 'card', draft.cardId);
-    pressed('[data-other-tool]', 'otherTool', draft.otherTool);
-    pressed('[data-place]', 'place', draft.placeId);
-    pressed('[data-use]', 'use', draft.useChoice);
-    field('life-other-fields').hidden = draft.cardId !== LIFE_OTHER;
-    all<HTMLElement>('.life-step').forEach(panel => { panel.hidden = Number(panel.dataset.step) !== step; });
-    all<HTMLElement>('.life-steps li').forEach(item => {
-      const n = Number(item.dataset.step) as 1 | 2 | 3;
-      item.classList.toggle('is-current', n === step);
-      item.classList.toggle('is-done', n !== step && lifeStepDone(draft, n));
-      if (n === step) item.setAttribute('aria-current', 'step'); else item.removeAttribute('aria-current');
-    });
-    const tool = lifeDraftTool(draft);
-    const place = lifePlaces.find(item => item.id === draft.placeId);
-    field('life-picked').hidden = step === 1 || !lifeDraftName(draft);
-    field('life-picked').textContent = `내가 고른 도구: ${lifeDraftName(draft)}${tool ? ` (${lifeToolNames[tool]})` : ''}`
-      + (step === 3 && place ? ` · ${place.id === 'picture' ? place.label : `${place.label}에서 봤어요`}` : '');
-    field('life-custom-label').firstChild!.textContent = card ? '보기에 없으면 직접 짧게 써요 (선택)' : '무엇을 할 때 쓰는지 짧게 써요';
-    field('life-share').textContent = `친구에게 이렇게 말해요: ${lifeShareSentence(draft)}`;
-    field('life-status').textContent = statusText();
-    field<HTMLButtonElement>('life-back').hidden = step === 1;
-    field<HTMLButtonElement>('life-next').hidden = step === 3;
-    field<HTMLButtonElement>('life-next').disabled = step !== 3 && !lifeStepDone(draft, step);
-    field<HTMLButtonElement>('life-done').hidden = step !== 3;
-    field<HTMLButtonElement>('life-done').disabled = !canFinishLifeDraft(draft);
+    const done = lifeSortDone(record);
+    for (const card of lifeCards) {
+      // A filed card keeps its slot (dashed outline) so the other cards do not jump around.
+      const button = cardButton(card.id)!;
+      button.disabled = record.sorted.includes(card.id);
+      button.setAttribute('aria-pressed', String(selected === card.id));
+    }
+    for (const tool of ['lever', 'ramp'] as const) {
+      const list = basketBox(tool).querySelector<HTMLElement>('.life-basket-items')!;
+      const filed = record.sorted.filter(id => lifeCard(id)?.tool === tool);
+      if (list.children.length !== filed.length) list.innerHTML = filed.map(id => `<li data-filed="${id}">${image(id)}<span>${lifeCard(id)!.name}</span></li>`).join('');
+      basketBox(tool).classList.toggle('is-ready', !!selected);
+    }
+    field('life-count').textContent = `찾은 도구 ${record.sorted.length} / ${lifeCards.length}`;
+    field('life-finish').hidden = !done;
+    modal.querySelector<HTMLElement>('.life-tray')!.hidden = done;
+    const status = field('life-feedback');
+    const text = feedback.text || (done ? '' : '카드를 골라 지레 바구니나 빗면 바구니에 놓아요.');
+    if (status.textContent !== text) status.textContent = text;
+    status.dataset.tone = feedback.tone;
   };
-  const renderUses = () => {
-    const card = lifeCard(draft.cardId);
-    field('life-use-grid').innerHTML = card ? card.uses.map(use => `<button type="button" class="life-pick" data-use="${escape(use)}" aria-pressed="false">${escape(use)}</button>`).join('') : '';
-    field('life-use-grid').hidden = !card;
-    field<HTMLInputElement>('life-custom-use').value = draft.customUse;
+  /** Focus stays on something visible: the next card after a filed one, the same card after a retry. */
+  const focusAfterDrop = (cardId: string, result: 'correct' | 'retry') => {
+    if (result === 'retry') { cardButton(cardId)?.focus({ preventScroll: true }); return; }
+    if (lifeSortDone(record)) { field('life-done').focus({ preventScroll: true }); return; }
+    const at = lifeCards.findIndex(card => card.id === cardId);
+    const next = [...lifeCards.slice(at + 1), ...lifeCards.slice(0, at)].find(card => !record.sorted.includes(card.id));
+    if (next) cardButton(next.id)?.focus({ preventScroll: true });
   };
-  const goTo = (next: 1 | 2 | 3) => {
-    step = next;
-    if (step === 3) renderUses();
+  const drop = (cardId: string, basket: LifeTool) => {
+    const outcome = dropLifeCard(record, cardId, basket);
+    if (!outcome) return;
+    record = outcome.record;
+    options.onSave(record);
+    selected = '';
+    feedback = { text: lifeDropMessage(cardId, outcome.result), tone: outcome.result };
     render();
-    modal.querySelector<HTMLElement>(`.life-step[data-step="${step}"] h3`)!.focus();
+    if (outcome.result === 'correct') { flash(basketBox(basket), 'is-got'); flash(modal.querySelector(`[data-filed="${cardId}"]`), 'is-new'); }
+    else { flash(basketBox(basket), 'is-miss'); flash(cardButton(cardId)?.closest('.life-slot'), 'is-retry'); }
+    focusAfterDrop(cardId, outcome.result);
   };
-  const close = () => { options.app.inert = wasInert; modal.remove(); if (previous?.isConnected) previous.focus(); };
+  const pick = (cardId: string) => {
+    selected = selected === cardId ? '' : cardId;
+    feedback = { text: selected ? lifePickMessage(selected) : '', tone: '' };
+    render();
+  };
+  const clearDrag = () => {
+    if (!drag) return;
+    drag.ghost?.remove();
+    drag.over?.classList.remove('is-over');
+    drag.card.classList.remove('is-lifted');
+    if (drag.card.hasPointerCapture(drag.pointer)) drag.card.releasePointerCapture(drag.pointer);
+    drag = null;
+  };
+  const basketAt = (x: number, y: number) => document.elementFromPoint(x, y)?.closest<HTMLElement>('.life-basket') ?? null;
+  const close = () => { clearDrag(); options.app.inert = wasInert; modal.remove(); if (previous?.isConnected) previous.focus(); };
+
+  modal.addEventListener('pointerdown', event => {
+    if (drag || event.button !== 0) return;
+    const card = (event.target as Element).closest<HTMLButtonElement>('.life-tool');
+    if (!card || card.disabled) return;
+    drag = { pointer: event.pointerId, card, x: event.clientX, y: event.clientY, ghost: null, over: null };
+    card.setPointerCapture(event.pointerId);
+  });
+  modal.addEventListener('pointermove', event => {
+    if (!drag || drag.pointer !== event.pointerId) return;
+    if (!drag.ghost) {
+      if (Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 10) return;
+      drag.ghost = document.createElement('div');
+      drag.ghost.className = 'life-ghost';
+      drag.ghost.setAttribute('aria-hidden', 'true');
+      drag.ghost.innerHTML = drag.card.innerHTML;
+      modal.append(drag.ghost);
+      drag.card.classList.add('is-lifted');
+    }
+    drag.ghost.style.left = `${event.clientX}px`;
+    drag.ghost.style.top = `${event.clientY}px`;
+    const over = basketAt(event.clientX, event.clientY);
+    if (over !== drag.over) { drag.over?.classList.remove('is-over'); over?.classList.add('is-over'); drag.over = over; }
+  });
+  modal.addEventListener('pointerup', event => {
+    if (!drag || drag.pointer !== event.pointerId) return;
+    const { card, ghost } = drag;
+    const basket = ghost ? basketAt(event.clientX, event.clientY)?.dataset.basket : undefined;
+    clearDrag();
+    if (!ghost) return; // a plain tap: the click handler picks the card
+    suppressClickUntil = performance.now() + 350;
+    if (basket === 'lever' || basket === 'ramp') drop(card.dataset.card!, basket);
+    else { feedback = { text: '바구니 위에서 손을 떼요. 카드를 누르고 바구니를 눌러도 돼요.', tone: '' }; render(); }
+  });
+  modal.addEventListener('pointercancel', event => { if (drag?.pointer === event.pointerId) clearDrag(); });
 
   modal.addEventListener('click', event => {
-    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('button');
-    if (!button || button.disabled) return;
-    const { card, otherTool, place, use } = button.dataset;
-    if (button.id === 'life-close') { close(); return; }
-    if (button.id === 'life-back') { goTo((step - 1) as 1 | 2); return; }
-    if (button.id === 'life-next') { if (lifeStepDone(draft, step)) goTo((step + 1) as 2 | 3); return; }
-    if (button.id === 'life-done') { if (!canFinishLifeDraft(draft)) return; save(); close(); options.onDone(); return; }
-    if (card !== undefined) { if (card !== draft.cardId) draft.useChoice = ''; draft.cardId = card; }
-    else if (otherTool === 'lever' || otherTool === 'ramp') draft.otherTool = otherTool;
-    else if (place !== undefined) draft.placeId = place;
-    else if (use !== undefined) {
-      draft.useChoice = draft.useChoice === use ? '' : use;
-      if (draft.useChoice) { draft.customUse = ''; field<HTMLInputElement>('life-custom-use').value = ''; }
-    } else return;
-    save(); render();
-    if (card === LIFE_OTHER && !draft.otherName) field('life-other-name').focus();
-  });
-  modal.addEventListener('input', event => {
-    const target = event.target as HTMLInputElement;
-    if (target.id === 'life-other-name') draft.otherName = target.value;
-    else if (target.id === 'life-custom-use') { draft.customUse = target.value; if (target.value.trim()) draft.useChoice = ''; }
-    else if (target.id === 'life-shared') draft.shared = target.checked;
-    else return;
-    save(); render();
+    if (performance.now() < suppressClickUntil) return;
+    const target = event.target as HTMLElement;
+    const button = target.closest<HTMLButtonElement>('button');
+    if (button?.id === 'life-close') { close(); return; }
+    if (button?.id === 'life-done') { if (!lifeSortDone(record)) return; options.onSave(record); close(); options.onDone(); return; }
+    const card = target.closest<HTMLButtonElement>('.life-tool');
+    if (card) {
+      pick(card.dataset.card!);
+      // Keyboard: Enter on a card jumps to the lever basket; Tab reaches the ramp basket.
+      if (selected && event.detail === 0) basketBox('lever').querySelector<HTMLButtonElement>('button')!.focus();
+      return;
+    }
+    const basket = target.closest<HTMLElement>('.life-basket')?.dataset.basket;
+    if (basket !== 'lever' && basket !== 'ramp') return;
+    if (selected) { drop(selected, basket); return; }
+    if (lifeSortDone(record)) return;
+    feedback = { text: '먼저 그림 카드를 하나 골라요. 그다음 바구니를 눌러요.', tone: '' };
+    render();
+    flash(modal.querySelector('.life-tray'), 'is-nudge');
   });
   modal.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { e.preventDefault(); close(); }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      if (drag) clearDrag();
+      else if (selected) { const card = selected; pick(card); cardButton(card)?.focus(); }
+      else close();
+      return;
+    }
     if (e.key !== 'Tab') return;
-    const controls = all<HTMLElement>('button:not(:disabled), input').filter(el => el.getClientRects().length);
+    const controls = [...modal.querySelectorAll<HTMLElement>('button:not(:disabled)')].filter(el => el.getClientRects().length);
     if (e.shiftKey && document.activeElement === controls[0]) { e.preventDefault(); controls.at(-1)?.focus(); }
     else if (!e.shiftKey && document.activeElement === controls.at(-1)) { e.preventDefault(); controls[0]?.focus(); }
   });
 
-  field<HTMLInputElement>('life-other-name').value = draft.otherName;
-  field<HTMLInputElement>('life-shared').checked = draft.shared;
-  if (step === 3) renderUses();
   render();
-  document.body.append(modal); field('life-close').focus();
+  document.body.append(modal);
+  const first = lifeCards.find(card => !record.sorted.includes(card.id));
+  (first ? cardButton(first.id) : field('life-done'))?.focus({ preventScroll: true });
 }

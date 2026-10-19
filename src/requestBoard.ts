@@ -1,4 +1,4 @@
-import { requestsEnabled, type SaveData } from './state';
+import type { SaveData } from './state';
 import { cargoForceNames, cargoOrders, ordersComplete } from './cargoModel';
 import { mysteryComplete, mysteryRoundCount } from './balanceModel';
 import { canCompleteScale, fakeRequestComplete, fakeRounds } from './scaleModel';
@@ -52,15 +52,14 @@ export function requestStatus(save: SaveData, stage: RequestStage): RequestStatu
   return requestSolved(save, stage) ? 'solved' : levelOneDone(save, stage) ? 'open' : 'locked';
 }
 
-export type RequestCard = VillageRequest & { stage: RequestStage; status: RequestStatus; optional: boolean; statusText: string };
+export type RequestCard = VillageRequest & { stage: RequestStage; status: RequestStatus; statusText: string };
 
-/** The four board cards. With requests switched off by the teacher every card is an optional request. */
+/** The four board cards. */
 export function requestBoard(save: SaveData): RequestCard[] {
-  const optional = !requestsEnabled(save);
   return requestStages.map(stage => {
     const status = requestStatus(save, stage);
-    const statusText = status === 'solved' ? '해결했어요 ✓' : status === 'locked' ? '실험 1단계를 마치면 열려요' : optional ? '하고 싶으면 도와줘요' : '도와줄 수 있어요';
-    return { ...villageRequests[stage], stage, status, optional, statusText };
+    const statusText = status === 'solved' ? '해결했어요 ✓' : status === 'locked' ? '실험 1단계를 마치면 열려요' : '도와줄 수 있어요';
+    return { ...villageRequests[stage], stage, status, statusText };
   });
 }
 

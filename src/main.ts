@@ -10,7 +10,7 @@ import './storyVideo.css';
 import './stagePopup.css';
 import { openLifeObservation } from './lifeObservation';
 import { stages, type PageId, type StageId } from './data';
-import { completeStage, freshSave, readSave, requestsEnabled, stageIsOpen, writeSave, type SaveData } from './state';
+import { completeStage, freshSave, readSave, stageIsOpen, writeSave, type SaveData } from './state';
 import { mountCargo } from './screens/cargo';
 import { mountBalance } from './screens/balance';
 import { mountScale } from './screens/scale';
@@ -18,7 +18,7 @@ import { mountWorkshop } from './screens/workshop';
 import { mountRescue } from './screens/rescue';
 import { mountVillage } from './screens/village';
 import { villageRewards } from './villageStory';
-import { playSound, stopSounds, setVolume } from './sound';
+import { playMusic, playSound, stopMusic, stopSounds, setVolume, type MusicName } from './sound';
 import { infoContent, type InfoSection } from './info';
 import { offlineMessage, prepareOffline, watchOffline } from './offline';
 import { diagnosticMarkup } from './diagnostics';
@@ -57,6 +57,16 @@ function tone(frequency = 520) {
   setVolume(save.soundVolume ?? 0.3);
   playSound(frequency >= 680 ? 'success' : frequency < 400 ? 'bump' : 'click');
 }
+/** While a story video is open it decides the music: the ending plays its own track, the prologue keeps quiet for its own sound. */
+let storyMusic: MusicName | 'quiet' | null = null;
+/** Background music follows the same sound switch as the effects. */
+function syncMusic() {
+  if (!save.soundOn || storyMusic === 'quiet') { stopMusic(); return; }
+  setVolume(save.soundVolume ?? 0.3);
+  playMusic(storyMusic ?? 'stage');
+}
+// Browsers only start audio after a tap, so the first tap anywhere retries the music.
+document.addEventListener('pointerdown', syncMusic, { once: true });
 
 /** Confetti burst: 28 pieces with their own drift, delay and colour. Skipped under reduced motion. */
 function confetti(host: HTMLElement) {
@@ -110,7 +120,7 @@ function finish(stageId: StageId, summary: string) {
       onSave: value => { activeSave.lifeObservation = value; if (!adminUnlocked) persist(); },
       onDone: () => {
         const observation = activeSave.lifeObservation!;
-        finishWithEvidence(stageId, summary + ' 생활 속 관찰: ' + observation.object.trim() + ' — ' + observation.use.trim() + (observation.shared ? ' (설명했다고 스스로 표시함)' : ' (친구와 나눌 기록)'));
+        finishWithEvidence(stageId, `${summary} 생활 속 도구 분류: ${observation.object.trim()} / ${observation.use.trim()}`);
       },
     });
   } else finishWithEvidence(stageId, summary);
@@ -186,13 +196,9 @@ function predictionMarkup(recap: PredictionRecap, className = 'discovery-predict
   const verdict = predictionVerdict(recap);
   return `<div class="${className} prediction-recap" data-matched="${recap.matched ?? 'none'}"><p><span class="prediction-tag">처음 생각</span>${escapeHtml(recap.predicted ?? '기록된 예상이 없어')}</p><p><span class="prediction-tag is-result">실제 결과</span>${escapeHtml(recap.result)}</p>${verdict ? `<strong class="prediction-verdict">${verdict}</strong>` : ''}</div>`;
 }
-/** Teacher-facing label: requests (level 2) are required by default and can be made optional for short lessons. */
-function requestsLabel(): string {
-  return requestsEnabled(save) ? '의뢰 레벨 필수 <small>눌러서 선택으로</small>' : '의뢰 레벨 선택 <small>눌러서 필수로</small>';
-}
-/** Three star slots per mission: completed, level 2 request, challenge. Teacher-off slots read "꺼짐", never as missing. */
+/** Three star slots per mission: completed, level 2 request, challenge. */
 function starRow(stars: StageStars, celebrate = false): string {
-  return `<ul class="star-row${celebrate ? ' is-celebrating' : ''}" aria-label="별 ${stars.earned}개">${stars.slots.map((slot, i) => `<li class="${slot.done ? 'is-done' : slot.off ? 'is-off' : ''}" style="--i:${i}"><span aria-hidden="true">${slot.done ? '★' : '☆'}</span>${escapeHtml(slot.label)}${slot.off && !slot.done ? ' · 꺼짐' : ''}</li>`).join('')}</ul>`;
+  return `<ul class="star-row${celebrate ? ' is-celebrating' : ''}" aria-label="별 ${stars.earned}개">${stars.slots.map((slot, i) => `<li class="${slot.done ? 'is-done' : ''}" style="--i:${i}"><span aria-hidden="true">${slot.done ? '★' : '☆'}</span>${escapeHtml(slot.label)}</li>`).join('')}</ul>`;
 }
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!);
@@ -205,7 +211,7 @@ const prologueLines = [
   { who: '코기 콩이', text: '그런데 코어가 너무 무거워! 네 건물에서 밀고 당기기, 무게 비교, 도구 쓰는 법을 익혀서 다시 장착할 방법을 찾자!' },
 ];
 type StoryVideo = { src: string; cues: number[]; duration: number; poster?: string };
-type StoryOptions = { lines: { who: string; text: string }[]; finishLabel: string; onDone?: () => void; skippable?: boolean; scenes?: string[]; video?: StoryVideo };
+type StoryOptions = { lines: { who: string; text: string }[]; finishLabel: string; onDone?: () => void; skippable?: boolean; scenes?: string[]; video?: StoryVideo; music?: MusicName };
 const introVideo: StoryVideo = { src: '/assets/story/intro.mp4', cues: [0, 6, 12], duration: 16 };
 const endingVideo: StoryVideo = { src: '/assets/story/ending.mp4', cues: [0, 4, 10], duration: 16 };
 function storyCueIndex(cues: number[], time: number): number {
@@ -227,6 +233,7 @@ function openStoryModal(options: StoryOptions) {
     teardownVideo?.(); teardownVideo = null;
     document.removeEventListener('keydown', onEscape, true);
     app.inert = appWasInert; modal.remove();
+    storyMusic = null; syncMusic();
     if (opener?.isConnected) opener.focus?.();
     options.onDone?.();
   };
@@ -336,11 +343,13 @@ function openStoryModal(options: StoryOptions) {
   });
   document.addEventListener('keydown', onEscape, true);
   document.body.append(modal);
+  storyMusic = options.music ?? (options.video ? 'quiet' : null); syncMusic();
   if (options.video) drawVideo(options.video); else draw();
 }
 function openEndingCeremony() {
   openStoryModal({
     video: endingVideo,
+    music: 'ending',
     scenes:[1,2,3].map(i=>`/assets/story/final-0${i}.webp`),
     lines:[
       {who:'코기 콩이',text:'딸깍! 떨어져 있던 배터리 코어를 중앙 장치에 다시 끼웠어!'},
@@ -549,7 +558,7 @@ function openSettings() {
   const unwatch = watchOffline(() => { const status = overlay.querySelector('#offline-status'); if (status) status.textContent = offlineMessage(); });
   const close = () => { unwatch(); app.inert = appWasInert; overlay.remove(); app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.focus(); };
   type Section = 'menu' | 'admin' | 'reset' | InfoSection;
-  const headings: Record<Section, string> = { menu: '설정', help: '학생 탐구 가이드', teacher: '교사 운영 가이드', curriculum: '교육과정 연결', info: '정보와 출처', admin: '관리자 해금', reset: '탐구 기록 초기화' };
+  const headings: Record<Section, string> = { menu: '설정', help: '학생 탐구 가이드', teacher: '교사 가이드', curriculum: '교육과정', info: '정보와 출처', admin: '관리자 해금', reset: '탐구 기록 초기화' };
   const show = (section: Section) => {
     let content: string;
     if (section === 'menu') {
@@ -557,12 +566,11 @@ function openSettings() {
         <button data-settings="home"><span>${icons.home}</span> 메인 화면</button>
         <button data-settings="help"><span>?</span> 학생 가이드</button><button data-settings="save"><span>${icons.check}</span> 지금 저장</button></div><details class="teacher-tools"><summary>선생님 도구 · 정보</summary><div class="settings-links"><button data-settings="teacher"><span>${icons.book}</span> 교사 가이드</button>
         <button data-settings="curriculum"><span>${icons.target}</span> 교육과정</button><button data-settings="info"><span>${icons.info}</span> 정보와 출처</button>
-        <button data-settings="requests" aria-pressed="${requestsEnabled(save)}"><span>${icons.star}</span> ${requestsLabel()}</button>
         <button data-settings="admin"><span>${icons.gear}</span> 관리자 해금 <small>${adminUnlocked ? '사용 중' : ''}</small></button>
         <button data-settings="prologue"><span>${icons.play}</span> 프롤로그 다시 보기</button>
-        ${save.completed.length === stages.length || adminUnlocked ? '<button data-settings="ending"><span>${icons.sparkle}</span> 점등식 다시 보기</button>' : ''}
+        ${save.completed.length === stages.length || adminUnlocked ? `<button data-settings="ending"><span>${icons.sparkle}</span> 점등식 다시 보기</button>` : ''}
         <button class="settings-danger" data-settings="reset"><span>${icons.reset}</span> 기록 초기화</button></div></details>
-        <div class="settings-audio"><button class="button button-secondary" data-settings="sound" aria-pressed="${save.soundOn}">효과음 ${save.soundOn ? '켜짐 · 끄기' : '꺼짐 · 켜기'}</button><label for="sound-volume">효과음 크기 <output id="volume-value">${Math.round((save.soundVolume ?? 0.3) * 100)}%</output></label><input id="sound-volume" type="range" min="0" max="100" step="5" value="${Math.round((save.soundVolume ?? 0.3) * 100)}" aria-label="효과음 크기"></div>
+        <div class="settings-audio"><button class="button button-secondary" data-settings="sound" aria-pressed="${save.soundOn}">소리 ${save.soundOn ? '켜짐 · 끄기' : '꺼짐 · 켜기'}</button><label for="sound-volume">소리 크기<output id="volume-value">${Math.round((save.soundVolume ?? 0.3) * 100)}%</output></label><input id="sound-volume" type="range" min="0" max="100" step="5" value="${Math.round((save.soundVolume ?? 0.3) * 100)}" aria-label="소리 크기"></div>
         <p class="settings-offline" id="offline-status" role="status">${offlineMessage()}</p>`;
     } else if (section === 'admin') {
       content = `<p class="settings-lead">${adminUnlocked ? '실험 5개가 모두 열려 있어요.' : '실험 5개와 결과 화면을 미리 볼 수 있어요.'} 미리보기 조작은 학생 기록에 반영되지 않아요.</p><button class="button button-primary full" data-settings="toggle-admin">${adminUnlocked ? '관리자 해금 종료' : '전체 화면 한꺼번에 해금'}</button><p class="settings-lead">해금은 이 탭에서만 유지되고 새로고침하면 종료돼요.</p>`;
@@ -590,9 +598,10 @@ function openSettings() {
       save.soundOn = !save.soundOn;
       persist();
       button.setAttribute('aria-pressed', String(save.soundOn));
-      button.textContent = `효과음 ${save.soundOn ? '켜짐 · 끄기' : '꺼짐 · 켜기'}`;
+      button.textContent = `소리 ${save.soundOn ? '켜짐 · 끄기' : '꺼짐 · 켜기'}`;
       updateSoundButton();
       if (save.soundOn) tone(520); else stopSounds();
+      syncMusic();
     }
     else if (action === 'confirm-reset') {
       const sound = { soundOn: save.soundOn, soundVolume: save.soundVolume };
@@ -603,16 +612,6 @@ function openSettings() {
     else if (action === 'ending') { close(); navigate('complete'); openEndingCeremony(); }
     else if (action === 'prologue') { close(); openStoryModal({ lines: prologueLines, finishLabel: '닫기', video: introVideo }); }
     else if (action === 'toggle-admin') { const enable = !adminUnlocked; close(); setAdminMode(enable); navigate('map'); }
-    else if (action === 'requests') {
-      const requests = !requestsEnabled(save);
-      save.teacherOptions = { requests };
-      if (adminSave) adminSave.teacherOptions = { requests };
-      persist();
-      button.setAttribute('aria-pressed', String(requests));
-      button.innerHTML = `<span>${icons.star}</span> ${requestsLabel()}`;
-      toast(requests ? '의뢰 레벨을 마쳐야 다음 미션이 끝나요.' : '의뢰 레벨은 선택이에요. 실험만 마쳐도 미션을 끝낼 수 있어요.');
-      render();
-    }
     else if (action === 'save') { if (persist()) toast('진행 기록을 저장했어요.'); }
     else if (action === 'home') { close(); setAdminMode(false); viewPage = 'title'; render(); }
   });
@@ -653,6 +652,7 @@ function bindHeader() {
     persist();
     updateSoundButton();
     if (save.soundOn) tone(620); else stopSounds();
+    syncMusic();
   });
   app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.addEventListener('click', openSettings);
   app.querySelector<HTMLButtonElement>('[data-top="bag"]')?.addEventListener('click', () => { tone(470); openToolBag({ app, save: adminSave ?? save, sound: () => tone(470), preview: adminUnlocked }); });
@@ -671,6 +671,7 @@ function render() {
   if (viewPage === 'complete') { title = '나의 탐구 결과'; subtitle = '실험실 복구 완료'; }
   app.innerHTML = `${viewPage === 'title' ? '' : header(title, subtitle)}<main id="screen" class="screen"></main><aside class="orientation-hint" role="status"><span aria-hidden="true">${icons.rotateLeft}${icons.landscape}</span><h2>가로로 펼치면 실험실이 보여요!</h2><p>태블릿은 가로로 돌리고,<br>웹에서는 창을 가로로 넓혀 주세요.</p><small>진행 중인 실험은 그대로 이어져요.</small></aside>`;
   bindHeader();
+  syncMusic();
   const screen = app.querySelector<HTMLElement>('#screen')!;
   switch (viewPage) {
     case 'title': renderTitle(screen); break;

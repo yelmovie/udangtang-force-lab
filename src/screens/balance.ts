@@ -2,7 +2,6 @@ import type { AppContext } from '../appTypes';
 import { icons } from '../icons';
 import { balanceObjects } from '../data';
 import type { BalanceRun } from '../state';
-import { requestsEnabled } from '../state';
 import { mountCompanion } from '../sprites';
 import { setTapHint } from '../interactionHints';
 import { letterOnce } from '../requestLetter';
@@ -52,7 +51,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   const itemName = (id: string) => level === 1 ? objectName(id) : `${id} 상자`;
   const requestOpen = () => level === 1 && canFinish();
   const frozen = () => busy || waiting || (level === 2 && (!round || mysteryDone()));
-  const canSave = () => !busy && !waiting && canFinish() && (mysteryDone() || !requestsEnabled(context.save));
+  const canSave = () => !busy && !waiting && canFinish() && mysteryDone();
   // Level 1 asks for a prediction once both pans hold an object and nothing has been observed yet.
   const predictPending = () => level === 1 && !requestOpen() && !!state.left && !!state.right && !state.prediction && !visibleOutcome;
   let feedback = level === 2
@@ -361,7 +360,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     if (button.id==='balance-record') openPopup(predictPending() ? 'predict' : 'record');
     if (button.id==='balance-swap') { [state.left,state.right]=[state.right,state.left]; resetObservation(); feedback='두 물체의 자리를 바꿨어요. 무거운 물체가 바뀌었을까요, 위치만 바뀌었을까요?'; context.commit(); update(); }
     if (button.id==='balance-test') void release();
-    if ((button.id==='balance-finish' || button.id==='balance-popup-finish') && canFinish() && (mysteryDone() || !requestsEnabled(context.save))) {
+    if ((button.id==='balance-finish' || button.id==='balance-popup-finish') && canFinish() && mysteryDone()) {
       closePopup();
       const levelRun = state.runs.find(run=>run.actual==='level')!;
       const tilted = state.runs.find(run=>run.actual!=='level')!;

@@ -138,7 +138,6 @@
 .village-labels .village-label-stars { display: block; margin-top: 1px; font-size: 13px; line-height: 1; letter-spacing: 2px; }
 .village-star { display: inline-block; color: #9a8558; }
 .village-star.is-done { color: #e2a417; text-shadow: 0 1px 0 #6f4b0c; }
-.village-star.is-off { color: #a9a698; opacity: .55; }
 @media (prefers-reduced-motion: no-preference) {
   .village-star.is-new { animation: village-star-pop .55s ease-out .6s both; }
 }
@@ -176,7 +175,6 @@
 .village-board-text strong { font-size: 17px; }
 .village-board-text p { margin: 0; font-size: 16px; line-height: 1.45; word-break: keep-all; }
 .village-board-status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: #2f5f48; font-size: 15px; font-weight: 800; }
-.village-board-tag { padding: 2px 8px; border-radius: 10px; color: #4b3470; background: #e6dcf5; font-size: 13px; }
 .village-board-card > button { grid-area: go; justify-self: start; font-size: 16px; }
 .village-board-card.is-locked { background: #ece8dc; border-color: #a9a28e; box-shadow: 0 3px 0 #a9a28e; }
 .village-board-card.is-locked .village-board-status { color: #5d5a4e; }

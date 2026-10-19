@@ -98,21 +98,6 @@ test('the third star is the mission challenge', () => {
   assert.equal(stars.stageStars(save, 'balance').slots[2].done, false);
 });
 
-test('teacher-off requests show as off, keep earned stars, and leave the total reachable', () => {
-  const save = state.freshSave();
-  save.teacherOptions = { requests: false };
-  save.completed = ['cargo'];
-  for (const id of ['cargo', 'balance', 'scale', 'workshop']) assert.deepEqual(stars.stageStars(save, id).slots[1], { label: '2단계 의뢰', done: false, off: true });
-  assert.equal(stars.stageStars(save, 'rescue').slots[1].off, undefined);
-  assert.deepEqual(stars.totalStars(save), { earned: 1, max: 11 });
-  // A request finished before the teacher switched it off stays earned and counted.
-  save.cargo.orders = cargo.cargoOrders.map(order => cargo.orderSolution(order));
-  const cargoStars = stars.stageStars(save, 'cargo');
-  assert.equal(cargoStars.earned, 2);
-  assert.deepEqual(cargoStars.slots[1], { label: '2단계 의뢰', done: true, off: true });
-  assert.deepEqual(stars.totalStars(save), { earned: 2, max: 12 });
-});
-
 test('stars are computed, never written into the save', () => {
   const save = allRequestsDone(state.freshSave());
   save.completed = [...stageIds];

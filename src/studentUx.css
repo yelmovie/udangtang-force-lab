@@ -6,43 +6,88 @@
 .teacher-tools > summary,.complete-details > summary { cursor:pointer; padding:14px 16px; min-height:48px; font-size:19px; font-weight:800; }
 .teacher-tools { margin:12px 0; border:1px solid #c5d5cc; border-radius:16px; }
 .complete-details { margin:16px 0; padding:8px; border-radius:20px; background:#fff9e9; border:1px solid #d6c6a4; }
-.life-card { width:min(860px,94vw); padding:20px 28px 22px; text-align:left; }
+/* 생활 속 도구를 찾아요: picture cards sorted into the lever and ramp baskets (drag, tap-tap or keyboard). */
+.modal-layer.life-layer { padding:8px; }
+.life-card { width:min(1180px,100%); max-height:calc(var(--app-height, 100dvh) - 16px); overflow-y:auto; overscroll-behavior:contain; padding:14px 22px 16px; display:flex; flex-direction:column; gap:8px; text-align:left; }
 .life-card [hidden] { display:none!important; }
 .life-card .settings-heading h2 { font-size:28px; margin:0; }
-.life-card #life-close { min-width:48px; min-height:48px; border-radius:50%; font-size:24px; }
-.life-steps { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 6px; padding:0; list-style:none; }
-.life-steps li { display:flex; align-items:center; gap:8px; padding:6px 14px; border-radius:999px; background:#eef2ea; color:#5d756d; font-size:17px; font-weight:800; }
-.life-steps li span { display:grid; place-items:center; width:26px; height:26px; border-radius:50%; background:#fff; font-size:15px; }
-.life-steps li.is-current { background:#0d7073; color:#fff; }
-.life-steps li.is-current span { color:#0d7073; }
-.life-steps li.is-done span { background:#5aa77f; color:#fff; }
-.life-picked { margin:4px 0; font-size:17px; font-weight:800; color:#0d7073; }
-.life-step h3 { margin:6px 0 10px; font-size:22px; color:#254e46; }
-.life-pick { min-height:56px; padding:8px 12px; border:3px solid #c9dccf; border-radius:16px; background:#fff; color:#254e46; font:inherit; font-size:18px; font-weight:800; line-height:1.25; cursor:pointer; touch-action:manipulation; word-break:keep-all; transition:border-color .15s ease, background .15s ease, box-shadow .15s ease; }
-.life-pick[aria-pressed="true"] { border-color:#0d7073; background:#e2f3ec; box-shadow:0 0 0 3px #0d707333; }
-.life-pick:focus-visible,.life-card input:focus-visible { outline:4px solid #efb851; outline-offset:2px; }
-.life-card-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-.life-card-grid .life-pick { display:grid; justify-items:center; gap:4px; padding:8px 6px; }
-.life-card-grid svg { width:100%; max-width:120px; height:64px; }
-.life-card-grid span { font-size:17px; }
-.life-other { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
-.life-other-fields { display:flex; flex:1 1 380px; gap:10px; }
-.life-other-fields input { flex:1; min-width:0; }
-.life-other-tool { display:flex; gap:8px; }
-.life-other-tool .life-pick { min-width:84px; }
-.life-place-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
-.life-place-grid .life-pick { min-height:88px; font-size:22px; }
-.life-use-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; margin-bottom:10px; }
-.life-label { display:grid; gap:6px; font-size:18px; font-weight:700; margin-bottom:10px; }
-.life-card input:not([type=checkbox]) { box-sizing:border-box; width:100%; min-height:52px; padding:10px 12px; font:inherit; font-size:18px; border:2px solid #97b3a6; border-radius:12px; background:#fff; color:#254e46; }
-.life-share { margin:8px 0; padding:12px; background:#edf5e6; border-radius:12px; font-size:19px; font-weight:800; line-height:1.45; word-break:keep-all; }
-.life-shared { display:flex; align-items:center; min-height:48px; gap:12px; font-size:18px; }
-.life-shared input { width:28px; height:28px; }
-.life-card #life-status { min-height:26px; margin:8px 0 0; font-size:17px; line-height:1.4; }
-.life-nav { display:flex; gap:12px; margin-top:8px; }
-.life-nav #life-next,.life-nav #life-done { margin-left:auto; }
-.life-card .life-nav .button { margin-top:0; }
-@media (prefers-reduced-motion:reduce) { .life-pick { transition:none; } }
+.life-count { margin-left:auto; padding:4px 14px; border-radius:999px; background:#e2f3ec; color:#0d5f61; font-size:17px; font-weight:900; white-space:nowrap; }
+.life-card #life-close { flex:0 0 auto; min-width:48px; min-height:48px; border-radius:50%; font-size:24px; }
+.life-guide { margin:0; color:#4f6a63; font-size:17px; font-weight:800; line-height:1.4; word-break:keep-all; }
+.life-guide-tap { color:#0d7073; }
+.life-board { display:grid; grid-template-columns:minmax(150px,220px) minmax(0,1fr) minmax(150px,220px); grid-template-areas:"lever middle ramp"; gap:12px; flex:none; }
+.life-middle { grid-area:middle; display:grid; align-content:center; min-width:0; }
+.life-tray { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+.life-slot { display:grid; min-width:0; border-radius:18px; }
+.life-slot:has(> .life-tool:disabled) { outline:3px dashed #e1d3b3; outline-offset:-3px; background:#fbf5e8; }
+.life-tool { width:100%; min-width:0; min-height:48px; display:grid; justify-items:center; align-content:start; gap:2px; padding:6px 6px 8px; border:3px solid #eadcbc; border-radius:18px; background:#fff; color:#254e46; font:inherit; font-size:17px; font-weight:900; line-height:1.2; word-break:keep-all; box-shadow:0 4px 0 #dccaa2; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease, opacity .15s ease; }
+.life-tool img { display:block; width:100%; max-width:160px; height:auto; aspect-ratio:4/3; object-fit:contain; pointer-events:none; }
+.life-tool:hover { border-color:#97c7b5; }
+.life-tool[aria-pressed="true"] { border-color:#0d7073; background:#e2f3ec; box-shadow:0 0 0 4px #0d707333, 0 4px 0 #0d7073; transform:translateY(-3px); }
+.life-tool.is-lifted { opacity:.35; }
+.life-tool:disabled { visibility:hidden; }
+.life-basket { --basket:#0d7073; --basket-soft:#e3f3ee; --basket-text:#0d5b5d; --basket-ring:#0d707340; grid-area:lever; display:flex; flex-direction:column; gap:8px; min-width:0; padding:8px; border:3px dashed var(--basket); border-radius:22px; background:var(--basket-soft); cursor:pointer; transition:transform .15s ease, box-shadow .15s ease, background .15s ease; }
+.life-basket.is-ramp { --basket:#c46f16; --basket-soft:#fff0dc; --basket-text:#844407; --basket-ring:#c46f1640; grid-area:ramp; }
+.life-basket-head { display:grid; justify-items:center; gap:2px; min-height:48px; padding:8px 6px; border:0; border-radius:16px; background:#fff; color:var(--basket-text); font:inherit; text-align:center; cursor:pointer; box-shadow:0 3px 0 var(--basket-ring); }
+.life-basket-head svg { width:56px; height:35px; color:var(--basket); }
+.life-basket-head strong { font-size:24px; line-height:1.1; }
+.life-basket-head small { color:#4f6a63; font-size:14px; font-weight:800; line-height:1.3; word-break:keep-all; }
+.life-basket-items { flex:1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-content:start; gap:6px; min-height:64px; margin:0; padding:0; list-style:none; }
+.life-basket-items:empty::before { content:'여기에 놓아요'; grid-column:1 / -1; align-self:center; padding:14px 0; color:var(--basket-text); opacity:.6; font-size:15px; font-weight:900; text-align:center; }
+.life-basket-items li { display:grid; justify-items:center; padding:3px; border-radius:12px; background:#fff; color:#254e46; font-size:13px; font-weight:900; line-height:1.15; text-align:center; word-break:keep-all; }
+.life-basket-items img { display:block; width:100%; max-width:80px; height:auto; aspect-ratio:4/3; object-fit:contain; }
+.life-basket.is-ready,.life-basket.is-over { border-style:solid; background:#fff; box-shadow:0 0 0 4px var(--basket-ring); }
+.life-basket.is-over { transform:scale(1.03); }
+.life-tool:focus-visible,.life-basket-head:focus-visible,.life-card #life-close:focus-visible,.life-finish .button:focus-visible { outline:4px solid #efb851; outline-offset:2px; }
+.life-basket.is-got { animation:life-got .5s ease; }
+.life-basket.is-miss,.life-tray.is-nudge,.life-slot.is-retry .life-tool { animation:life-shake .45s ease; }
+.life-basket-items li.is-new { animation:life-pop .4s ease both; }
+@keyframes life-shake { 0%,100% { translate:0; } 25% { translate:-6px 0; } 50% { translate:6px 0; } 75% { translate:-3px 0; } }
+@keyframes life-got { 40% { scale:1.05; } }
+@keyframes life-pop { from { scale:.6; opacity:0; } }
+.life-ghost { position:fixed; z-index:5; left:0; top:0; width:150px; display:grid; justify-items:center; padding:6px 6px 8px; border:3px solid #0d7073; border-radius:18px; background:#fff; color:#254e46; font-size:16px; font-weight:900; pointer-events:none; transform:translate(-50%,-55%) rotate(-4deg); box-shadow:0 16px 30px rgba(6,30,30,.35); }
+.life-ghost img { display:block; width:100%; height:auto; }
+.life-feedback { min-height:52px; margin:0; padding:10px 16px; display:flex; align-items:center; border:1px solid #e1d5bc; border-radius:16px; background:#f4efe2; color:#3d5a54; font-size:17px; font-weight:800; line-height:1.4; word-break:keep-all; }
+.life-feedback:empty { display:none; }
+.life-feedback[data-tone="correct"] { border-color:#9fd0b4; background:#e4f3e9; color:#1f6b4c; }
+.life-feedback[data-tone="retry"] { border-color:#f0c98a; background:#fff3dc; color:#7a4a12; }
+.life-finish { display:grid; justify-items:center; gap:14px; padding:22px; border:2px solid #c3dccb; border-radius:20px; background:#eef6ec; text-align:center; }
+.life-finish p { margin:0; color:#254e46; font-size:20px; font-weight:800; line-height:1.5; word-break:keep-all; }
+.life-finish strong { display:block; color:#0d7073; font-size:26px; }
+.life-card .life-finish .button { margin-top:0; }
+@media (max-height:520px) {
+  .life-card { padding:8px 14px 10px; gap:6px; }
+  .life-card .settings-heading h2 { font-size:22px; }
+  .life-count { padding:2px 10px; font-size:15px; }
+  .life-guide { font-size:15px; }
+  .life-guide-intro { display:none; }
+  .life-board { grid-template-columns:minmax(140px,180px) minmax(0,1fr) minmax(140px,180px); gap:8px; }
+  .life-tray { gap:6px; }
+  .life-tool { padding:3px 4px 5px; border-width:2px; border-radius:14px; font-size:15px; }
+  .life-tool img { max-height:66px; }
+  .life-basket { gap:5px; padding:5px; border-radius:16px; }
+  .life-basket-head { padding:4px; }
+  .life-basket-head svg { width:40px; height:25px; }
+  .life-basket-head strong { font-size:19px; }
+  .life-basket-head small { font-size:12px; }
+  .life-basket-items img { max-width:56px; }
+  .life-basket-items li { font-size:12px; }
+  .life-feedback { min-height:40px; padding:6px 12px; font-size:15px; }
+  .life-finish { gap:10px; padding:12px; }
+  .life-finish p { font-size:17px; }
+  .life-finish strong { font-size:21px; }
+}
+/* Phone landscape: the basket rule line and the intro guide give way so cards and baskets fit. */
+@media (max-height:400px) {
+  .life-guide, .life-basket-head small { display:none; }
+}
+@media (max-width:700px) {
+  .life-board { grid-template-columns:1fr 1fr; grid-template-areas:"middle middle" "lever ramp"; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .life-tool,.life-basket { transition:none; }
+  .life-basket,.life-tray,.life-slot .life-tool,.life-basket-items li { animation:none!important; }
+}
 .scale-comparison { display:flex; justify-content:center; gap:16px; flex-wrap:wrap; padding:8px 12px; border-radius:14px; background:#edf4df; color:#254e46; font-size:18px; }
 .scale-comparison span { display:flex; gap:12px; }
 .scale-comparison strong { font-weight:800; }
@@ -51,7 +96,6 @@
 .instrument-screen.scale-screen .scale-basket { height:92px; }
 .instrument-screen.scale-screen .basket-part { height:88px; }
 .instrument-screen.scale-screen .basket-part img { height:64px; }
-.instrument-screen.scale-screen #scale-clear,.instrument-screen.scale-screen #scale-measure { font-size:15px; }
 .balance-screen .balance-goal { justify-content:flex-start; min-height:36px; padding:4px 12px; }
 .balance-screen .instrument-predictions { grid-template-columns:1fr auto; gap:6px 12px; padding:6px 10px; }
 .balance-screen .instrument-predictions .question-prompt { grid-column:1; font-size:18px; }
@@ -77,9 +121,6 @@
   .instrument-screen.balance-screen .instrument-phase { top:6px; font-size:18px; }
   .instrument-screen .object-card { min-height:70px; }
   .instrument-screen.scale-screen { --device-width:330px; }
-  .instrument-screen.scale-screen .scale-display { padding-top:20px; }
-  .instrument-screen.scale-screen .scale-display strong { font-size:38px; }
-  .instrument-screen.scale-screen .scale-stability { font-size:14px; }
   .instrument-screen.scale-screen .scale-body { bottom:32px; }
   .instrument-screen.scale-screen .scale-basket { bottom:calc(32px + var(--device-width) * .44); }
   .instrument-screen.scale-screen .scale-difference { bottom:4px; padding:5px 8px; font-size:16px; }
@@ -89,7 +130,5 @@
   .mission-card { padding:20px 28px; }
 }
 @media (max-width:700px) {
-  .life-card-grid { grid-template-columns:repeat(2,1fr); }
-  .life-other-fields { flex-wrap:wrap; }
   .scale-comparison { gap:6px; }
 }

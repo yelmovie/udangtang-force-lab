@@ -93,21 +93,6 @@ test('partial level 2 progress is still open, not solved', () => {
   assert.deepEqual(statuses(save), { cargo: 'open', balance: 'open', scale: 'open', workshop: 'open' });
 });
 
-test('the teacher switching requests off marks every card optional but keeps solved ones solved', () => {
-  const save = state.freshSave();
-  save.teacherOptions = { requests: false };
-  save.cargo.orders = cargo.cargoOrders.map(order => cargo.orderSolution(order));
-  save.levels = { scale: { cleared: [], attempts: 0 } };
-  const cards = board.requestBoard(save);
-  assert.ok(cards.every(card => card.optional));
-  assert.deepEqual(cards.map(card => [card.status, card.statusText]), [
-    ['solved', '해결했어요 ✓'],
-    ['locked', '실험 1단계를 마치면 열려요'],
-    ['open', '하고 싶으면 도와줘요'],
-    ['locked', '실험 1단계를 마치면 열려요'],
-  ]);
-});
-
 test('only requests solved since the last village visit count as new', () => {
   assert.deepEqual(board.newlySolved(undefined, ['cargo']), [], 'no earlier visit: nothing to animate');
   assert.deepEqual(board.newlySolved([], ['cargo']), ['cargo']);
@@ -125,7 +110,6 @@ test('thank-you lines name what the student did', () => {
 
 test('board judgements never change the save', () => {
   const save = solveAll(state.freshSave());
-  save.teacherOptions = { requests: false };
   const before = JSON.stringify(save);
   board.requestBoard(save); board.solvedRequests(save);
   for (const stage of board.requestStages) { board.requestStatus(save, stage); board.requestThanks(save, stage); }

@@ -2,7 +2,6 @@ import type { AppContext } from '../appTypes';
 import { icons } from '../icons';
 import { scaleParts, targetWeight } from '../data';
 import { mountCompanion } from '../sprites';
-import { requestsEnabled } from '../state';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { canCompleteScale, comparisonParts, emptyScaleReading, fakeHint, fakeLabels, fakeLayout, fakeRequestComplete, fakeRounds, fakeSummary, judgeFakePick, nextFakeRound, recordFakePick, recordScaleRun, scaleComparison, recordSpringRead, springDone, springEyeLabels, springHint, springObjects, springParallax, springReading, springStartOffset, springSummary, turnSpringScrew, type EyeLevel } from '../scaleModel';
 import { letterOnce } from '../requestLetter';
@@ -96,7 +95,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     if(level===2) return (fakeOn===null ? 0 : fakeLayout(round(),fakeSeed)[fakeOn])+(fakeZeroed?0:emptyScaleReading);
     return state.parts.reduce((sum,id)=>sum+scaleParts.find(p=>p.id===id)!.weight,0)+(state.zeroed?0:15);
   }
-  function canFinish() { return canCompleteScale(state) && (requestDone() || !requestsEnabled(context.save)); }
+  function canFinish() { return canCompleteScale(state) && requestDone(); }
   function renderFakeDock() {
     if(dockRound===round()) return;
     dockRound=round();

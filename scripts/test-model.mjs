@@ -93,13 +93,15 @@ test('basic workshop needs direct lift, two fulcrum positions (one easier) and b
   assert.equal(workshop.canFinishWorkshopExploration({...basic,trials:workshop.retainWorkshopRuns([{tool:'lever',setting:0},{tool:'lever',setting:1},{tool:'ramp',setting:0}])}),false,'both ramp lengths are needed');
   assert.deepEqual(workshop.workshopFinishSteps({...basic,trials:workshop.retainWorkshopRuns([{tool:'lever',setting:1},{tool:'lever',setting:2}])}),{direct:true,lever:false,ramp:false},'two harder positions do not show a smaller force');
 });
-test('life observation retains drafts without equating a sharing checkbox to a completed observation', () => {
-  assert.equal(life.hasLifeObservation(life.retainLifeObservation({tool:'ramp',source:'example',object:'  ',use:' ',shared:true})),false);
+test('life observation keeps sorting progress and older records without treating a draft as finished', () => {
+  assert.equal(life.retainLifeObservation({tool:'ramp',source:'example',object:'  ',use:' ',shared:true}),undefined);
   assert.equal(life.retainLifeObservation({tool:'alien',source:'example'}),undefined);
-  const kept=life.retainLifeObservation({tool:'ramp',source:'around',object:'학교 경사판',use:'수레를 높은 턱에 올려요',shared:false});
-  assert.equal(life.hasLifeObservation(kept),true);
-  assert.equal(kept.shared,false);
-  assert.equal(life.retainLifeObservation({...kept,use:'a'.repeat(1000)}).use.length,160);
+  const older=life.retainLifeObservation({tool:'ramp',source:'around',object:'학교 경사판',use:'수레를 높은 턱에 올려요',shared:false});
+  assert.equal(older.use,'수레를 높은 턱에 올려요');
+  assert.equal(life.lifeSortDone(older),false);
+  assert.equal(life.retainLifeObservation({tool:'ramp',source:'around',object:'학교 경사판',use:'a'.repeat(1000)}).use.length,160);
+  const kept=life.dropLifeCard(life.emptyLifeObservation(),'seesaw','lever').record;
+  assert.equal(life.lifeSortDone(kept),false);
   const save=state.freshSave(); save.lifeObservation=kept;
   state.writeSave(save);
   assert.deepEqual(state.readSave().lifeObservation,kept);

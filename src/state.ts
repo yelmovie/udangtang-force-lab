@@ -30,11 +30,6 @@ export function retainLevels(value: unknown): LevelRecords {
   }
   return kept;
 }
-/** Teacher choice: level 2 requests are part of the basic flow unless turned off. */
-export type TeacherOptions = { requests: boolean };
-export function requestsEnabled(save: Pick<SaveData, 'teacherOptions'>): boolean {
-  return save.teacherOptions?.requests !== false;
-}
 export type RescueState = { zeroed: boolean; loaded: boolean; measured: boolean; gate: boolean; route: 'short' | 'long'; force: number; runs: RescueRun[]; delivered: boolean };
 
 export interface SaveData {
@@ -57,7 +52,6 @@ export interface SaveData {
   lifeObservation?: LifeObservation;
   /** Optional level 2 requests (balance mystery blocks, scale fake part, workshop force budget). */
   levels?: LevelRecords;
-  teacherOptions?: TeacherOptions;
   savedAt: number;
 }
 
@@ -143,7 +137,6 @@ export function readSave(): SaveData | null {
       inquiryPlans: retainInquiryPlans(item.inquiryPlans),
       lifeObservation: retainLifeObservation(item.lifeObservation),
       levels: retainLevels(item.levels),
-      teacherOptions: { requests: item.teacherOptions?.requests !== false },
       savedAt: Number.isFinite(item.savedAt) ? item.savedAt! : Date.now(),
       rescue: {
         zeroed: item.rescue?.zeroed === true,

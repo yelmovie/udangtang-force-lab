@@ -4,7 +4,6 @@ import { showPredictionChip } from '../predictionChip';
 import { letterOnce } from '../requestLetter';
 import { cargoDistance, cargoForceNames, cargoOrders, orderHint, orderResult, ordersComplete, type ForceLevel } from '../cargoModel';
 import type { CargoRun } from '../state';
-import { requestsEnabled } from '../state';
 import '../cargo.css';
 const imagePath = (name: string) => `${import.meta.env.BASE_URL}assets/game/${name}.webp`;
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -33,6 +32,9 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     let misses = 0;
     let findingTried = false;
     let ghosts: { distance: number; force: ForceLevel }[] = [];
+    // Level 1 rail traces: only tries made in the current direction since entering or switching,
+    // because push and pull stop at the same spot and older traces read as leftover crates.
+    let railRuns: CargoRun[] = [];
     let orderCards = '';
     const fingerIcon = `<svg viewBox="0 0 32 36" fill="none" aria-hidden="true"><path d="M11 18V6a3 3 0 0 1 6 0v9l2-1 4 2 3 2v9c0 5-3 7-8 7h-2c-4 0-6-2-8-6l-5-8c-2-3 2-6 4-3l4 5" fill="#fff5d7" stroke="#76512a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 16v6m6-5v6" stroke="#76512a" stroke-width="1.6" stroke-linecap="round"/></svg>`;
     let feedback = level === 1 ? '같은 힘으로 상자를 움직이고, 멈춘 곳을 비교해요.' : '빵집 문 앞 노란 칸에 딱 멈추게 보내요.';
@@ -40,6 +42,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     <div class="experiment-heading"><div><p class="eyebrow">01 · 물자 배송소</p><h1>멈춘 화물을 움직여라!</h1><p>같은 힘을 주면, 무거운 상자도 같은 곳에 도착할까?</p></div><div class="cargo-tools"><button class="cargo-record-open" id="cargo-record-open">기록 보기 <span id="cargo-record-count">0</span></button><button class="button button-primary cargo-bakery-open" id="cargo-open-orders" hidden>빵집 배달 가기 →</button></div>${missionProgressMarkup('cargo', ['1개·5개', '밀기·당기기', '더 멀리 간 상자', '빵집 주문 3장'])}</div>
     <div class="cargo-adventure"><div class="cargo-scene" aria-label="화물 실험 무대">
       <div class="cargo-scene-caption"><span class="instrument-phase cargo-step" id="cargo-step" tabindex="-1"></span></div>
+      <div class="cargo-finding-cta" hidden><p>실험 끝! 1개·5개, 밀기·당기기를 모두 해 봤어요.</p><button class="button button-primary" id="cargo-finding-go">비교하고 의뢰 받기 →</button></div>
       <div class="cargo-rail"><span class="rail-start">출발</span><span class="rail-end">어디까지 갈까?</span><i class="rail-ticks"></i><div class="cargo-target-zone" hidden><span>빵집 문 앞</span></div><div class="cargo-ghosts" aria-hidden="true"></div><div class="cargo-gesture-guide" aria-hidden="true"><span class="cargo-gesture-arrow">→</span><span class="cargo-gesture-target">같은 힘</span></div><div class="cargo-object" data-mood="idle" aria-label="부품을 담는 상자"><span class="cargo-pull-strap" aria-hidden="true"></span><span class="cargo-force-arrow" aria-hidden="true"><b>같은 힘</b></span><button class="cargo-worker-grip"><img class="cargo-worker cargo-worker-push" src="${imagePath('student-cargo-push')}" alt="" draggable="false"><img class="cargo-worker cargo-worker-pull" src="${imagePath('student-cargo-pull')}" alt="" draggable="false"><span class="cargo-grab-cue">${fingerIcon}</span></button><img class="cargo-box-art" src="${imagePath('crate-empty')}" alt="나무 운반 상자" draggable="false"><div class="cargo-contents"></div><span class="cargo-load-tag"></span></div></div>
       <div class="cargo-distance" role="status"></div>
     </div><div class="cargo-dock"><div class="cargo-inventory" data-level="1"><strong>① 상자에 담을 부품</strong><div class="cargo-load-options">${[1, 3, 5].map(n => `<button data-parts="${n}" aria-label="같은 금속 부품 ${n}개 담기"><img src="${imagePath(`cargo-parts-${n}`)}" alt="" draggable="false"><span>부품 ${n}개</span></button>`).join('')}</div></div><div class="cargo-method" data-level="1"><strong>② 힘을 주는 쪽</strong><div class="segmented"><button data-action="push">뒤에서 밀기 →</button><button data-action="pull">앞에서 당기기 →</button></div></div><div class="cargo-orders" data-level="2"><strong>빵집 주문서</strong><div class="cargo-order-cards"></div></div><div class="cargo-force" data-level="2"><strong>힘 단계</strong><div class="segmented">${([1, 2, 3] as const).map(f => `<button data-force="${f}"><i class="cargo-step-arrow" style="--step:${f}" aria-hidden="true"></i>${cargoForceNames[f - 1]}</button>`).join('')}</div></div></div></div>
@@ -95,7 +98,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             return force ? `${label} · 아이를 잡고 오른쪽으로 옮겨요` : `${label} · 힘을 골라요`;
         }
         if (finding) return '위의 빵집 배달 가기를 눌러요';
-        if (ready()) return '실험은 끝! 위의 비교하고 의뢰 받기를 눌러요';
+        if (ready()) return '실험은 끝! 가운데 비교하고 의뢰 받기를 눌러요';
         if (needsSetup) return !weightCompared() ? '부품 개수를 바꿔 같은 쪽에서 다시 움직여요' : '같은 개수로 미는 쪽을 바꿔 봐요';
         return '아이를 잡고 오른쪽 표시까지 옮긴 뒤 손을 놓아요';
     }
@@ -103,7 +106,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         // Level 1: where every other load stopped, so 1·3·5 can be compared side by side on the rail.
         const items = level === 2
             ? ghosts.map((g, i) => ({ distance: g.distance, label: `${i === ghosts.length - 1 ? '지난번' : '그 전'} · ${forceName(g.force)}`, age: ghosts.length - 1 - i, parts: 0 }))
-            : [1, 3, 5].flatMap(n => { const run = latestRun(n, state.action); return run ? [{ distance: run.distance, label: `${n}개 상자가 멈춘 곳`, age: 0, parts: n, current: n === state.parts }] : []; });
+            : [1, 3, 5].flatMap(n => { const run = [...railRuns].reverse().find(r => r.parts === n); return run ?[{ distance: run.distance, label: `${n}개 상자가 멈춘 곳`, age: 0, parts: n, current: n === state.parts }] : []; });
         // The crate the student is pushing right now keeps its own picture; only its arrival sign is drawn.
         root.querySelector('.cargo-ghosts')!.innerHTML = items.map(g => `<div class="cargo-ghost" data-age="${g.age}" data-parts="${g.parts}" data-current="${'current' in g && g.current}" style="left:${endPosition(g.distance)}"><img src="${imagePath('crate-empty')}" alt="" draggable="false"><span>${g.label}</span></div>`).join('');
     }
@@ -152,17 +155,17 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         field.dataset.busy = String(busy); field.dataset.setup = String(canPush());
         root.querySelector('#cargo-record-count')!.textContent = String(state.runs.length);
         recordOpen.disabled = locked || !state.runs.length;
+        // The next step sits in the middle of the stage, where it cannot be missed on a board or tablet.
         const needsFinding = level === 1 && ready() && !finding;
-        recordOpen.firstChild!.textContent = needsFinding ? '비교하고 의뢰 받기 → ' : '기록 보기 ';
-        recordOpen.classList.toggle('cargo-record-next', needsFinding);
-        root.querySelector<HTMLElement>('#cargo-record-count')!.hidden = needsFinding;
+        root.querySelector<HTMLElement>('.cargo-finding-cta')!.hidden = !needsFinding || locked;
+        root.querySelector<HTMLElement>('.cargo-scene-caption')!.hidden = needsFinding && !locked;
         ordersOpen.hidden = !finding || level === 2;
         step.textContent = stepText();
         root.querySelector('#cargo-feedback')!.textContent = feedback;
         if (finding && level === 1 && !busy && !popup && !deliveredAll()) letterOnce(root, 'cargo', enterOrders);
         positionGuide();
         renderGhosts();
-        finish.disabled = locked || !ready() || !finding || !(deliveredAll() || !requestsEnabled(context.save));
+        finish.disabled = locked || !ready() || !finding || !deliveredAll();
     }
     async function experiment(gesture: number, preview = 0) {
         if (!canPush())
@@ -200,6 +203,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         const hadBoth = !!latestRun(1) && !!latestRun(5);
         state.runs.push(run);
         state.runs = state.runs.slice(-20);
+        railRuns.push(run);
         needsSetup = true;
         context.commit();
         context.sound(710);
@@ -271,11 +275,12 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             return; setParts(Number(button.dataset.parts)); }, { signal: events.signal });
     }
     root.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(b => b.addEventListener('click', () => { if (busy || waiting || drag || level !== 1)
-        return; state.action = b.dataset.action as 'push' | 'pull'; needsSetup = false; resetCrate(); context.commit(); feedback = state.action === 'push' ? '뒤에서 미는 쪽으로 바꿨어요.' : '앞에서 당기는 쪽으로 바꿨어요.'; update(); }, { signal: events.signal }));
+        return; if (b.dataset.action !== state.action) railRuns = []; state.action = b.dataset.action as 'push' | 'pull'; needsSetup = false; resetCrate(); context.commit(); feedback = state.action === 'push' ? '뒤에서 미는 쪽으로 바꿨어요.' : '앞에서 당기는 쪽으로 바꿨어요.'; update(); }, { signal: events.signal }));
     root.querySelectorAll<HTMLButtonElement>('[data-force]').forEach(b => b.addEventListener('click', () => { if (busy || waiting || drag || level !== 2 || deliveredAll())
         return; force = Number(b.dataset.force) as ForceLevel; context.sound(380 + force * 60); update(); }, { signal: events.signal }));
     ordersOpen.addEventListener('click', enterOrders, { signal: events.signal });
     recordOpen.addEventListener('click', () => { if (!busy && !waiting && !drag) recordPopup(); }, { signal: events.signal });
+    root.querySelector('#cargo-finding-go')!.addEventListener('click', () => { if (!busy && !waiting && !drag) recordPopup(); }, { signal: events.signal });
     function clearDrag() {
         if (!drag)
             return;
@@ -430,7 +435,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     /** Level 1 record card: after a try it leads with that result; once both comparisons exist it asks the question. */
     function recordPopup(run?: CargoRun) {
         const asking = ready() && !finding;
-        const label = asking ? '질문' : run ? '실험 결과' : '내 실험 기록';
+        const label = asking ? '비교하고 의뢰 받기' : run ? '실험 결과' : '내 실험 기록';
         const title = asking ? '더 멀리 간 상자는 어느 쪽일까?' : run ? `부품 ${run.parts}개 상자를 ${run.action === 'push' ? '밀었더니' : '당겼더니'} ${run.distance}칸 갔어요` : '같은 힘으로 몇 칸 갔을까?';
         const hint = nextHint();
         openPopup(label, title, `<div class="cargo-record">${tracesMarkup()}${questionMarkup()}${level === 2 ? ordersMarkup() : ''}${hint ? `<p class="cargo-popup-next">${hint}</p>` : ''}</div>`);
@@ -468,7 +473,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         update();
     }, { signal: events.signal });
     finish.addEventListener('click', () => {
-        if (!ready() || !finding || !(deliveredAll() || !requestsEnabled(context.save)) || busy || waiting) return;
+        if (!ready() || !finding || !deliveredAll() || busy || waiting) return;
         const light = latestRun(1)!;
         const heavy = latestRun(5)!;
         const delivered = cargoOrders.map((order, i) => `${order.parts}개는 ${forceName(orders()[i] as ForceLevel)}`).join(', ');

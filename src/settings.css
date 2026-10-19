@@ -11,8 +11,20 @@
 .settings-reading h3 { font-size: clamp(22px,2vw,28px); margin: 24px 0 8px; color: #165e5d; }
 .settings-reading li { margin-block: 12px; }
 .settings-reading ol { padding-left: 1.5em; }
-.curriculum-list dt { font-weight: 900; color: #126f70; margin-top: 16px; }
-.curriculum-list dd { margin: 4px 0 0; }
+.settings-brief { line-height: 1.5; }
+.settings-brief .brief-lead { margin: 4px 0 14px; }
+.settings-brief b { display: block; margin-bottom: 2px; color: #126f70; font-family: var(--font-head); }
+.brief-steps, .brief-notes { display: grid; gap: 10px; margin: 0 0 14px; padding: 0; list-style: none; }
+.brief-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.brief-notes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.settings-reading .brief-steps li, .settings-reading .brief-notes li { margin: 0; padding: 12px 14px; border-radius: 14px; }
+.brief-steps li { border: 2px solid #cfe2d6; background: #f3faf5; }
+.brief-notes li { background: #fff4dc; font-size: .9em; }
+.brief-map, .brief-facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 16px; margin: 0; }
+.brief-map dt, .brief-facts dt { font-weight: 900; color: #126f70; white-space: nowrap; }
+.brief-map dd, .brief-facts dd { margin: 0; }
+.brief-map dd span { display: block; color: #5b7470; font-size: .85em; }
+@media (max-width: 700px) { .brief-steps, .brief-notes { grid-template-columns: minmax(0, 1fr); } }
 .settings-reading .settings-source { border-top: 2px solid #dbdec9; padding-top: 14px; font-size: 16px; }
 .settings-audio { margin: 18px 0; padding: 16px; background: #edf3e7; border: 2px solid #c2d9ca; border-radius: 16px; }
 .settings-audio label { display: flex; justify-content: space-between; align-items: center; font-size: 20px; font-weight: 900; }

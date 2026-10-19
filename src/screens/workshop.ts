@@ -1,7 +1,6 @@
 import type { AppContext } from '../appTypes';
 import { icons } from '../icons';
 import type { WorkshopScene } from '../three/workshopScene';
-import { requestsEnabled } from '../state';
 import { applyWorkshopL2Attempt, canFinishWorkshopExploration, workshopFinishSteps, getWorkshopDesign, hasWorkshopComparison, isBestWorkshopDesign, judgeWorkshopL2, recordWorkshopTrial, workshopBudget, workshopCargos, workshopL2Complete, workshopL2Current, workshopL2Force, workshopL2Hint, workshopL2HintLevel, type LeverSetting, type RampSetting, type WorkshopL2Result, type WorkshopTool } from '../workshopModel';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { fingerIcon } from '../interactionHints';
@@ -237,7 +236,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     if (canFinishWorkshopExploration(state) && !busy && !workshopL2Complete(levelRecord())) letterOnce(root, 'workshop', enterRequest);
     if (canFinishWorkshopExploration(state)) root.querySelector<HTMLElement>('#workshop-choice')!.insertAdjacentHTML('beforeend', workshopL2Complete(levelRecord()) ? '<p class="finding-earned">✓ 공방 친구의 의뢰도 끝냈어요</p>' : `<div class="workshop-request-invite"><img src="/assets/game/corgi-observe.webp" alt="" draggable="false"><p><strong>공방 친구의 의뢰가 왔어요!</strong>콩이 힘으로 화물 3개를 올려 줄래요?</p><button id="workshop-open-request" class="button button-primary" ${busy ? 'disabled' : ''}>의뢰 받기 →</button></div>`);
     }
-    finish.disabled = busy || !canFinishWorkshopExploration(state) || !(workshopL2Complete(levelRecord()) || !requestsEnabled(context.save));
+    finish.disabled = busy || !canFinishWorkshopExploration(state) || !workshopL2Complete(levelRecord());
     const leverRuns=state.trials.filter(r=>r.tool==='lever'), rampRuns=state.trials.filter(r=>r.tool==='ramp');
     setMissionProgress(root,[steps.direct,steps.lever,steps.ramp],
       !steps.direct?'먼저 직접 들어요'
@@ -323,7 +322,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     const tried = state.trials.some(run => run.tool === tool && run.setting === currentSetting());
     const finding = tool === 'lever' ? state.leverFinding : state.rampFinding;
     if (hasWorkshopComparison(state.trials, tool) && !finding) return '기록 보기를 눌러 질문에 답해요';
-    const allDone = workshopL2Complete(levelRecord()) || !requestsEnabled(context.save) ? '모두 했어요!' : '기록 보기에서 의뢰를 받아요';
+    const allDone = workshopL2Complete(levelRecord()) ? '모두 했어요!' : '기록 보기에서 의뢰를 받아요';
     if (tool === 'lever') return steps.lever && tried ? (steps.ramp ? allDone : '③ 빗면을 눌러 이어서 해요') : tried ? '받침대를 다른 곳으로 옮겨요' : '손잡이를 아래로 끝까지 눌러요';
     return steps.ramp && tried ? (steps.lever ? allDone : '② 지레로 돌아가 비교해요') : tried ? '아래에서 빗면 길이를 바꿔요' : '손잡이를 오른쪽 끝까지 밀어요';
   }
@@ -452,7 +451,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   root.querySelector('#turn-left')!.addEventListener('click', () => {scene?.turn(-1);positionHandle();}, { signal });
   root.querySelector('#turn-right')!.addEventListener('click', () => {scene?.turn(1);positionHandle();}, { signal });
   finish.addEventListener('click', () => {
-    if (heldPointer !== null || keyHeld || designPointer!==null || waiting || sliding || !canFinishWorkshopExploration(state) || !(workshopL2Complete(levelRecord()) || !requestsEnabled(context.save))) return;
+    if (heldPointer !== null || keyHeld || designPointer!==null || waiting || sliding || !canFinishWorkshopExploration(state) || !workshopL2Complete(levelRecord())) return;
     const summaries = (['lever', 'ramp'] as WorkshopTool[]).map(name => {
       const runs = state.trials.filter(run => run.tool === name);
       const best = runs.reduce((a, b) => a.force < b.force ? a : b);
