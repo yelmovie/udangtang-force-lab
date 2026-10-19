@@ -11,7 +11,7 @@ export const toolCardInfo: Record<StageId, ToolCardInfo> = {
   cargo: { stage: 'cargo', name: '밀기 장갑', idea: '같은 힘으로 밀면 가벼운 물체가 더 멀리 움직여요.' },
   balance: { stage: 'balance', name: '수평대', idea: '무거운 쪽은 내려가고, 무게가 같으면 수평이 돼요.' },
   scale: { stage: 'scale', name: '전자저울', idea: '0을 맞춘 저울로 재면 무게를 숫자로 비교할 수 있어요.' },
-  workshop: { stage: 'workshop', name: '지레와 빗면 판', idea: '지레와 빗면을 쓰면 직접 들 때보다 작은 힘으로 올릴 수 있어요.' },
+  workshop: { stage: 'workshop', name: '지레와 빗면 판', idea: '받침점을 물체 가까이 둔 지레나 길고 완만한 빗면은 작은 힘으로 올려요. 대신 움직이는 거리는 길어져요.' },
   rescue: { stage: 'rescue', name: '코어 운반 기록', idea: '같은 높이라면 길고 완만한 빗면에서 작은 힘으로도 옮길 수 있어요.' },
 };
 

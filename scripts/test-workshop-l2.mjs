@@ -53,13 +53,13 @@ test('force reuses getWorkshopDesign times the cargo weight', () => {
   assert.ok(model.workshopL2Force(2, 'ramp', 0) > model.workshopL2Force(1, 'ramp', 0));
 });
 
-test('a miss reports how many cells overflowed and stalls part way', () => {
+test('a miss reports how many cells overflowed and barely moves the cargo', () => {
   const miss = model.judgeWorkshopL2(2, 'ramp', 0);
   assert.equal(miss.budgetCells, 6);
   assert.equal(miss.needCells, 9);
   assert.equal(miss.overCells, 3);
   assert.ok(miss.stallAt > 0 && miss.stallAt < 1);
-  assert.ok(model.judgeWorkshopL2(2, 'lever', 2).stallAt < miss.stallAt, 'a bigger overflow stops earlier');
+  assert.equal(model.judgeWorkshopL2(2, 'lever', 2).stallAt, miss.stallAt, 'force is not a fuel: any shortfall only twitches the cargo');
   const hit = model.judgeWorkshopL2(2, 'lever', 0);
   assert.equal(hit.overCells, 0);
   assert.ok(hit.needCells <= hit.budgetCells);
@@ -87,7 +87,8 @@ test('the clue gets one step more specific every two misses', () => {
   const hints = [0, 1, 2, 3].map(level => model.workshopL2Hint(level, 'ramp'));
   assert.equal(new Set(hints).size, 4);
   assert.match(model.workshopL2Hint(2, 'lever'), /받침대/);
-  assert.match(model.workshopL2Hint(3, 'lever'), /화물 가까이/);
+  assert.match(model.workshopL2Hint(3, 'lever'), /앞 화물을 올렸던 설계/);
+  assert.doesNotMatch(model.workshopL2Hint(3, 'lever'), /화물 가까이|길고 완만/, 'the last clue still never names the answer setting');
   assert.match(model.workshopL2Hint(0, 'direct'), /지레나 빗면/);
 });
 

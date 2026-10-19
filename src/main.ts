@@ -148,7 +148,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
       <h2 id="world-title">${stage.evidence}</h2>${starRow(stageStars(activeSave, stageId), true)}
       ${newCard ? toolCardRevealMarkup(newCard) : ''}
       <div class="discovery-recap"><img src="/assets/game/corgi-success.webp" alt=""><div><strong class="discovery-key">${escapeHtml(toolCardInfo[stageId].idea)}</strong>${guessMarkup(predictionRecap(activeSave, stageId))}</div></div>
-      <details class="discovery-detail"><summary>더 해 보기 (선택)</summary><p>${challenge.done ? `★ ${challenge.label}` : challenge.hint}</p>${learningTask(activeSave, stageId) ? '<button class="button button-secondary" id="optional-review">내 기록으로 문제 풀기</button>' : ''}<p class="discovery-record">${escapeHtml(summary)}</p></details>
+      ${learningTask(activeSave, stageId) ? '<button class="button button-secondary" id="optional-review">근거 설명하기</button>' : ''}<details class="discovery-detail"><summary>도전 과제 (선택)</summary><p>${challenge.done ? `★ ${challenge.label}` : challenge.hint}</p><p class="discovery-record">${escapeHtml(summary)}</p></details>
       ${adminUnlocked ? '<p class="small-note">미리보기 결과는 학생 진행 기록에 반영되지 않습니다.</p>' : `<div class="world-meter"><span style="width:${save.completed.length * 20}%"></span></div><p class="small-note">전체 실험실 복구 ${save.completed.length * 20}% · 미션 ${save.completed.length}/5 완료</p>`}
       <button class="button button-primary" id="world-continue">${stageId === 'rescue' ? '마을 점등식 보러 가기 ✦' : '달라진 마을 보러 가기'}</button>
     </div>`;
@@ -534,7 +534,7 @@ function renderComplete(root: HTMLElement) {
   const completed = save.completed.length;
   const progress = completed * 20;
   root.innerHTML = `<section class="complete-screen">
-    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리 재장착 성공 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1>${(({ earned, max }) => `<p class="ending-stars" aria-label="모은 별 ${earned}개, 전체 ${max}개">★ ${earned} / ${max}</p>`)(totalStars(save))}<p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 장착했어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button></div></div>
+    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1>${(({ earned, max }) => `<p class="ending-stars" aria-label="모은 별 ${earned}개, 전체 ${max}개">★ ${earned} / ${max}</p>`)(totalStars(save))}<p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 장착했어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button></div></div>
     <details class="complete-details"><summary>내 실험과 발견 살펴보기 · ${completed} / 5</summary>
     <div class="report-grid">${stages.map(stage => {
       const task = learningTask(save, stage.id), record = save.learning?.[stage.id];

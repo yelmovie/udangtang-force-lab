@@ -447,7 +447,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     function nextHint() {
         if (finding && deliveredAll()) return '배달은 끝났어요. 부품 개수나 힘을 주는 쪽을 바꿔 더 실험해 봐요.';
         if (finding) return level === 1 ? '위의 <strong>빵집 배달 가기</strong>를 눌러 의뢰를 받아요.' : '';
-        if (ready()) return '위에서 <strong>더 멀리 간 상자</strong>를 고르면 빵집 의뢰가 와요.';
+        if (ready()) return '위에서 <strong>더 멀리 간 상자</strong>를 고르면 빵집에서 도와 달라는 부탁(의뢰)이 와요.';
         if (!weightCompared()) return '부품 개수를 바꿔 <strong>같은 쪽</strong>에서 다시 움직여 봐요.';
         return '같은 개수로 <strong>힘을 주는 쪽</strong>을 바꿔 봐요.';
     }
@@ -464,7 +464,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         if (!light || !heavy) return '1개와 5개를 먼저 해 봐요.';
         if (!ready()) return '밀기와 당기기도 먼저 해 봐요.';
         if (correct) return '맞아요! 가벼운 상자가 더 멀리 가요.';
-        return findingTried ? '막대 길이를 다시 비교해 봐요.' : '막대를 보고 골라 봐요.';
+        return findingTried ? '부품 5개 막대가 정말 더 길었나요? 두 막대의 끝을 견주어 봐요.' : '막대를 보고 골라 봐요.';
     }
     root.addEventListener('click', event => {
         const button = (event.target as Element).closest<HTMLButtonElement>('[data-finding]');

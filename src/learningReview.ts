@@ -64,7 +64,7 @@ export function openLearningReview(options: {
       record.answers[step] = { first: old?.first ?? choice, chosen: choice, tries: Math.min(100, (old?.tries ?? 0) + 1) };
       record.completed = learningRecordComplete(task, record);
       options.commit();
-      feedback = choice === q.correct ? `✓ ${q.explanation}` : `기록을 다시 살펴봐요. ${q.hint}`;
+      feedback = choice === q.correct ? `✓ ${q.explanation}` : `${q.why?.[choice] ?? '기록을 다시 살펴봐요.'} ${q.hint}`;
       draw();
     } else if (button.dataset.learning === 'next' && record.answers[step]?.chosen === task.questions[step].correct) {
       if (step < task.questions.length - 1) { step++; feedback = ''; draw(); }

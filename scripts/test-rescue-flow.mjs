@@ -72,6 +72,6 @@ test('the finish summary names the force and which route stopped or arrived', ()
   assert.equal(model.comparisonSummary([shortStop(1)]), '');
   const summary = model.comparisonSummary([shortArrive, longArrive(3), shortStop(2), longArrive(2), shortStop(1)]);
   assert.match(summary, /^중간 힘으로 똑같이 밀었을 때/);
-  assert.match(summary, /짧고 가파른 빗면에서는 코어가 중간에 멈추고/);
+  assert.match(summary, /짧고 가파른 빗면에서는 코어가 올라가지 못하고/);
   assert.match(summary, /길고 완만한 빗면에서는 끝까지 도착했어요\.$/);
 });

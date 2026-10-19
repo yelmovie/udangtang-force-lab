@@ -38,7 +38,7 @@ export function comparisonHint(runs: RescueRun[], force: number): string {
 }
 export function comparisonSummary(runs: RescueRun[]): string {
   const found = firstFairComparison(runs);
-  return found ? `${forceNames[found.force - 1]}으로 똑같이 밀었을 때 ${routeNames[found.stopped.route]}에서는 코어가 중간에 멈추고, ${routeNames[found.arrived.route]}에서는 끝까지 도착했어요.` : '';
+  return found ? `${forceNames[found.force - 1]}으로 똑같이 밀었을 때 ${routeNames[found.stopped.route]}에서는 코어가 올라가지 못하고, ${routeNames[found.arrived.route]}에서는 끝까지 도착했어요.` : '';
 }
 // Keep the first discovery as evidence, plus recent trials, without growing the save forever.
 export function retainRescueRuns(runs: RescueRun[]): RescueRun[] {

@@ -526,7 +526,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   function restHint() {
     if(nearestNpc)return `${nearestNpc.name} 곁이야. 오른쪽 아래 버튼을 누르면 이야기를 들을 수 있어!`;
     if(nearestClient)return `${villageRequests[nearestClient].client} 곁이야. 오른쪽 아래 버튼을 누르면 인사를 들을 수 있어!`;
-    if(nearBoard)return '의뢰 게시판이야. 오른쪽 아래 버튼을 누르면 마을 사람들의 의뢰를 볼 수 있어!';
+    if(nearBoard)return '의뢰 게시판이야. 의뢰는 마을 사람들이 도와 달라고 하는 부탁이야. 오른쪽 아래 버튼을 눌러 봐!';
     if(!story.next)return '마을에 불이 모두 켜졌어! 「내 발견 모아 보기」를 눌러 봐.';
     return `다음 목적지는 ${villageRewards[story.next].name}! 불이 켜진 이름표를 누르면 걸어가요.`;
   }

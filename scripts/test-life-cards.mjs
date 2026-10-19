@@ -71,8 +71,8 @@ test('sorting all eight finishes with readable lists for the result screen and e
   assert.equal(record.object, '지레: 병따개, 시소, 장도리, 가위');
   assert.equal(record.use, '빗면: 미끄럼틀, 휠체어 경사로, 지그재그 산길, 트럭 경사판');
   assert.equal(record.shared, false);
-  assert.match(life.lifeSummary, /받침점/);
-  assert.match(life.lifeSummary, /비스듬한 면/);
+  assert.match(life.lifeSummary, /움직이는 거리는 길어져요/, 'the summary names the trade-off, not a free lunch');
+  assert.match(life.lifeSummary, /지레와 빗면/);
 });
 
 test('feedback: a right drop says why in one line, a retry only gives a hint', () => {

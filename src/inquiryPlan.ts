@@ -31,11 +31,11 @@ export const inquiryPlans: Record<StageId, InquiryPlan> = {
     result: '저울로 재 보니 사과 모형 80 g, 책 모형 70 g이었어. 사과 모형이 10 g 더 무거웠어.',
   },
   workshop: {
-    prompt: '도구를 쓰면 직접 들 때보다 필요한 힘이 어떻게 될까?',
+    prompt: '받침점 위치나 빗면 길이를 잘 고르면 직접 들 때보다 필요한 힘이 어떻게 될까?',
     choices: [{ id: 'less', label: '힘이 줄어들 것 같아' }, { id: 'same', label: '똑같을 것 같아' }, { id: 'more', label: '힘이 더 들 것 같아' }],
     observation: '같은 화물을 같은 높이까지 올릴 때 도구와 설정에 따라 필요한 힘을 비교해 봐.',
     expected: 'less',
-    result: '받침대를 화물 가까이 두거나 빗면을 길게 하면 직접 들 때보다 힘이 적게 들었어.',
+    result: '받침점을 화물 가까이 두거나 빗면을 길게 하면 힘이 적게 들었어. 대신 움직인 거리는 길었어.',
   },
   rescue: {
     prompt: '같은 작은 힘으로 밀면 어느 길에서 코어가 끝까지 올라갈까?',

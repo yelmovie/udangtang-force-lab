@@ -72,7 +72,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   /** Red cells past the bar's 12 still count: say how many the bar could not show. */
   const missingText = (result: WorkshopL2Result) => { const outside = Math.max(0, result.budgetCells + result.overCells - budgetCellCount); return `모자란 힘 ${result.overCells}칸${outside ? ` (막대 밖 ${outside}칸 더)` : ''}`; };
   const cellsMarkup = (result: WorkshopL2Result) => cellClasses(result, true).map(name => `<i class="${name}"></i>`).join('');
-  const budgetNextStep = (used: WorkshopTool | 'direct') => used === 'lever' ? '받침대를 화물 쪽으로 옮겨 봐요' : used === 'ramp' ? '빗면을 길게 해 봐요' : '지레나 빗면을 골라 봐요';
+  const budgetNextStep = (used: WorkshopTool | 'direct') => used === 'lever' ? '받침대 위치를 바꿔 빨간 칸을 비교해요' : used === 'ramp' ? '빗면 길이를 바꿔 빨간 칸을 비교해요' : '지레나 빗면을 골라 봐요';
   function renderBudget() {
     const bar = root.querySelector<HTMLElement>('#workshop-budget')!;
     bar.hidden = level !== 2;
@@ -84,7 +84,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     const classes = cellClasses(result, showOver);
     bar.querySelectorAll<HTMLElement>('.budget-cells i').forEach((cell, index) => { cell.className = classes[index]; });
     bar.querySelector('.budget-more')!.textContent = showOver && result ? missingText(result) : '';
-    const status = !result ? '콩이는 6칸까지 힘을 낼 수 있어요' : live ? '힘을 주는 중…' : result.success ? '✓ 콩이 힘으로 충분해요' : `${result.overCells}칸 모자라요 · ${budgetNextStep(traces.at(-1)?.tool ?? tool)}`;
+    const status = !result ? '콩이는 6칸까지 힘을 낼 수 있어요' : live ? '힘을 주는 중…' : result.success ? '✓ 콩이 힘으로 충분해요' : misses < 2 ? `${result.overCells}칸 모자라요` : `${result.overCells}칸 모자라요 · ${budgetNextStep(traces.at(-1)?.tool ?? tool)}`;
     bar.querySelector('.budget-status')!.textContent = status;
     bar.dataset.state = showOver ? 'over' : result?.success && !live ? 'ok' : 'idle';
     bar.setAttribute('aria-label', `콩이가 낼 수 있는 힘 막대. 콩이 힘은 6칸까지예요. 빨간 칸은 모자란 힘이에요. ${status}`);
@@ -221,7 +221,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     // While experimenting the board is only force bars; the question waits for two records.
     quiz.hidden = !choosing; note.hidden = !finding || tool === 'direct';
     root.querySelector<HTMLElement>('#workshop-observation-help')!.textContent = '어느 쪽이 힘이 덜 들었나요?';
-    root.querySelector<HTMLElement>('#workshop-answer-help')!.textContent = '짧은 막대를 눌러요';
+    root.querySelector<HTMLElement>('#workshop-answer-help')!.textContent = '힘 막대를 비교해 골라요';
     notebook.classList.toggle('quiz-ready',choosing); notebook.classList.toggle('quiz-done',tool!=='direct'&&finding);
     recordButton.dataset.attention = String(choosing || (canFinishWorkshopExploration(state) && !workshopL2Complete(levelRecord())));
     const isLatest = (runTool: WorkshopTool | 'direct', setting = 0) => lastRun?.tool === runTool && lastRun.setting === setting;
@@ -232,7 +232,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
       const latest = isLatest(run.tool, run.setting) ? ' is-latest' : '';
       return choosing ? `<button class="workshop-run workshop-run-choice${latest}" data-finding="${run.setting}" ${busy ? 'disabled' : ''}><span class="workshop-answer-number">${index+1}</span>${content}</button>` : `<article class="workshop-run${latest}">${content}</article>`;
     }).join('') || (state.direct ? '' : '<div class="workshop-empty">직접 들면<br>힘 막대가 생겨요</div>');
-    root.querySelector<HTMLElement>('#workshop-choice')!.innerHTML = finding && tool !== 'direct' ? `<p class="finding-earned">✓ 작은 힘, 더 먼 길!</p><p class="workshop-finding">${tool === 'lever' ? '받침대가 화물에 가까울수록 힘은 작게 들고, 손잡이는 더 멀리 움직여요.' : '빗면이 길고 완만할수록 힘은 작게 들고, 화물은 더 먼 길을 가요.'}</p>` : '';
+    root.querySelector<HTMLElement>('#workshop-choice')!.innerHTML = finding && tool !== 'direct' ? `<p class="finding-earned">✓ 작은 힘, 더 먼 길!</p><p class="workshop-finding">${tool === 'lever' ? '받침점이 화물에 가까울수록 힘은 작게 들고, 손잡이는 더 멀리 움직여요.' : '빗면이 길고 완만할수록 힘은 작게 들고, 화물은 더 먼 길을 가요.'}</p>` : '';
     if (canFinishWorkshopExploration(state) && !busy && !workshopL2Complete(levelRecord())) letterOnce(root, 'workshop', enterRequest);
     if (canFinishWorkshopExploration(state)) root.querySelector<HTMLElement>('#workshop-choice')!.insertAdjacentHTML('beforeend', workshopL2Complete(levelRecord()) ? '<p class="finding-earned">✓ 공방 친구의 의뢰도 끝냈어요</p>' : `<div class="workshop-request-invite"><img src="/assets/game/corgi-observe.webp" alt="" draggable="false"><p><strong>공방 친구의 의뢰가 왔어요!</strong>콩이 힘으로 화물 3개를 올려 줄래요?</p><button id="workshop-open-request" class="button button-primary" ${busy ? 'disabled' : ''}>의뢰 받기 →</button></div>`);
     }
@@ -258,7 +258,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
       return `<article class="workshop-cargo-card" data-state="${cleared ? 'done' : now ? 'now' : 'next'}"><i class="cargo-weight" style="--weight:${cargo.weight}" aria-hidden="true"></i><strong>${index + 1}. ${cargo.label}</strong><span>${cleared ? '✓ 올렸어요' : now ? '지금 올릴 화물' : '다음 화물'}</span></article>`;
     }).join('');
     root.querySelector<HTMLElement>('#workshop-choice')!.innerHTML = done
-      ? '<p class="finding-earned">✓ 의뢰 완료!</p><p class="workshop-finding">무거운 화물일수록 받침대를 화물 가까이, 빗면을 더 길게 하면 콩이의 힘으로도 올릴 수 있었어요.</p>'
+      ? '<p class="finding-earned">✓ 의뢰 완료!</p><p class="workshop-finding">무거운 화물일수록 받침점을 화물 가까이, 빗면을 더 길게 하면 콩이의 힘으로도 올릴 수 있었어요.</p>'
       : traces.length
         ? '<p class="workshop-trace-title">이 화물에서 해 본 설계</p>' + traces.map((trace, index) => `<div class="workshop-trace" data-ok="${trace.result.success}" data-age="${traces.length - 1 - index}"><strong>${index === traces.length - 1 ? '<em class="workshop-latest">방금</em>' : ''}${trace.label}</strong><span class="trace-cells" aria-hidden="true">${cellsMarkup(trace.result)}</span><span>${trace.result.success ? '✓ 올렸어요' : `${missingText(trace.result)} · 멈춤`}</span></div>`).join('')
         : '<p>도구와 설계를 고른 뒤 손잡이를 움직여요. 필요한 힘이 콩이 힘 6칸보다 많으면 화물이 멈추고, 모자란 힘이 빨간 칸으로 남아요.</p>';
@@ -280,7 +280,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     context.commit();
     if (!result.success) {
       misses++;
-      setFeedback(`${name}이 중간에 멈췄다가 미끄러져 내려왔어요. 힘이 ${result.overCells}칸 모자랐어요. ${workshopL2Hint(workshopL2HintLevel(misses), tool)}`);
+      setFeedback(`콩이 힘으로는 ${name}이 올라가지 않았어요. 필요한 힘보다 ${result.overCells}칸 모자랐어요. ${workshopL2Hint(workshopL2HintLevel(misses), tool)}`);
       queueRecord(feedback); slideBack(); return;
     }
     misses = 0; context.sound(780);
@@ -311,7 +311,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     resetGesture(); tool = next; toolChangedAt = performance.now(); scene?.configure(tool, currentSetting());
     scene?.setCargoWeight(level === 2 ? workshopCargos[cargoIndex()].weight : 1);
     if (level === 2) { setFeedback(tool === 'direct' ? '콩이 혼자 들어 볼까요? 손잡이를 위로 움직여요.' : tool === 'lever' ? '받침대를 옮기고 손잡이를 아래로 눌러요. 힘 막대를 지켜봐요.' : '빗면 길이를 고르고 오른쪽으로 밀어요. 힘 막대를 지켜봐요.'); update(); return; }
-    setFeedback(tool === 'direct' ? '손잡이를 위로 움직여 화물을 들어 봐요.' : tool === 'lever' ? '받침대 위치에 따라 힘이 어떻게 달라질까요?' : '빗면 길이에 따라 힘이 어떻게 달라질까요?');
+    setFeedback(tool === 'direct' ? '손잡이를 위로 움직여 화물을 들어 봐요.' : tool === 'lever' ? '받침대가 판자를 받치는 곳이 받침점이에요. 받침점 위치에 따라 힘이 어떻게 달라질까요?' : '빗면 길이에 따라 힘이 어떻게 달라질까요?');
     update();
   }
   /** One line telling the student the next physical action. */
@@ -458,7 +458,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
       return `${name === 'lever' ? '지레' : '빗면'}에서 ${runs.map(run => getWorkshopDesign(name, run.setting).label).join(' / ')}를 시험했고, ${getWorkshopDesign(name, best.setting).label}에서 직접 들 때보다 작은 힘이 들었어요.`;
     });
     const attempts = levelRecord()?.attempts ?? 0;
-    context.finish('workshop', `직접 들기와 두 도구를 같은 화물·같은 도착 높이에서 비교했어요. ${summaries.join(' ')} 힘 예산 의뢰에서는 콩이의 작은 힘 안에서 화물 3개를 ${attempts}번 시도해 모두 올렸고, 무거운 화물일수록 받침대를 화물 가까이 두거나 빗면을 길게 해야 했어요.`);
+    context.finish('workshop', `직접 들기와 두 도구를 같은 화물·같은 도착 높이에서 비교했어요. ${summaries.join(' ')} 콩이 힘(6칸) 안에서 옮기는 의뢰에서는 화물 3개를 ${attempts}번 시도해 모두 올렸고, 무거운 화물일수록 받침점을 화물 가까이 두거나 빗면을 길게 해야 했어요.`);
   }, { signal });
   let loadGeneration = 0;
   const recovery = document.createElement('section');

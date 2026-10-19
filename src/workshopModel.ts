@@ -109,8 +109,8 @@ export function judgeWorkshopL2(cargo: number, tool: WorkshopL2Tool, setting: nu
   const needCells = Math.ceil(force / workshopForcePerCell - 1e-9);
   const budgetCells = workshopBudget / workshopForcePerCell;
   const success = tool !== 'direct' && force <= workshopBudget;
-  // Over budget, the cargo gets as far as the budget carries it, then slides back.
-  const stallAt = success ? 1 : Math.max(.15, Math.min(.85, workshopBudget / force));
+  // Over budget the cargo only twitches: force is not a fuel that carries it part way.
+  const stallAt = success ? 1 : .05;
   return { force, success, needCells, budgetCells, overCells: Math.max(0, needCells - budgetCells), stallAt };
 }
 
@@ -143,5 +143,5 @@ export function workshopL2Hint(level: number, tool: WorkshopL2Tool): string {
   if (level <= 0) return '설계를 바꿔 다시 해 봐요.';
   if (level === 1) return '힘 막대의 빨간 칸을 보세요. 설계를 바꾸면 빨간 칸이 줄어드는지 살펴봐요.';
   if (level === 2) return tool === 'lever' ? '받침대 위치를 바꿔 보세요. 어느 쪽으로 옮기면 힘이 작아졌나요?' : '빗면 길이를 바꿔 보세요. 어떤 빗면에서 힘이 작았나요?';
-  return '무거운 화물일수록 받침대는 화물 가까이, 빗면은 길고 완만하게 해 봐요.';
+  return '앞 화물을 올렸던 설계와 지금 설계를 비교해 봐요. 어느 쪽으로 바꿀 때 빨간 칸이 줄었나요?';
 }

@@ -16,7 +16,7 @@ export type LifeObservation = {
 export type LifeCard = { id: string; name: string; tool: LifeTool; why: string; hint: string };
 /** Mixed order so the tray never groups levers and ramps together. */
 export const lifeCards: LifeCard[] = [
-  { id: 'slide', name: '미끄럼틀', tool: 'ramp', why: '비스듬한 면을 따라 내려와서 똑바로 떨어질 때보다 천천히, 안전하게 내려와요.', hint: '미끄럼틀의 타는 면이 어떻게 놓여 있는지 봐요.' },
+  { id: 'slide', name: '미끄럼틀', tool: 'ramp', why: '타는 면이 비스듬하게 놓인 빗면이에요. 높은 곳과 낮은 곳을 길고 비스듬한 면으로 이어요.', hint: '미끄럼틀의 타는 면이 어떻게 놓여 있는지 봐요.' },
   { id: 'bottle-opener', name: '병따개', tool: 'lever', why: '뚜껑 위에 닿은 곳이 받침점이 되어, 긴 손잡이를 들면 작은 힘으로 뚜껑이 열려요.', hint: '병따개가 뚜껑에 닿아 받쳐지는 곳을 찾아봐요.' },
   { id: 'seesaw', name: '시소', tool: 'lever', why: '가운데 받침점을 중심으로 움직여요. 받침점에서 멀리 누를수록 작은 힘으로 친구를 들어 올려요.', hint: '시소 가운데를 받치고 있는 곳이 보이나요?' },
   { id: 'wheelchair-ramp', name: '휠체어 경사로', tool: 'ramp', why: '비스듬한 길을 따라 밀면 들어 올리지 않아도 적은 힘으로 문 앞까지 올라가요.', hint: '휠체어가 올라가는 길이 어떤 모양인지 봐요.' },
@@ -26,10 +26,10 @@ export const lifeCards: LifeCard[] = [
   { id: 'scissors', name: '가위', tool: 'lever', why: '가운데 못이 받침점이에요. 종이를 못 가까이에 넣으면 작은 힘으로도 잘 잘려요.', hint: '가위 가운데 동그란 못을 찾아봐요.' },
 ];
 export const lifeBaskets: Record<LifeTool, { name: string; idea: string }> = {
-  lever: { name: '지레', idea: '받침점을 중심으로 작은 힘으로 큰 힘을 내요' },
+  lever: { name: '지레', idea: '받침점이 물체에 가까울수록 작은 힘으로 들어요' },
   ramp: { name: '빗면', idea: '비스듬한 면을 따라 적은 힘으로 높이 올려요' },
 };
-export const lifeSummary = '지레는 받침점을 중심으로, 빗면은 비스듬한 면을 따라 적은 힘으로 일을 하게 도와줘요.';
+export const lifeSummary = '지레와 빗면을 쓰면 작은 힘으로 물체를 옮길 수 있어요. 대신 움직이는 거리는 길어져요.';
 export const lifeCard = (id: string) => lifeCards.find(card => card.id === id);
 
 const cardIds = (items: unknown): string[] => Array.isArray(items)
@@ -65,7 +65,7 @@ const hasFinal = (word: string) => { const code = word.charCodeAt(word.length - 
 export function lifeDropMessage(cardId: string, result: 'correct' | 'retry'): string {
   const card = lifeCard(cardId);
   if (!card) return '';
-  if (result === 'retry') return `다시 생각해요. ${card.hint}`;
+  if (result === 'retry') return `다시 생각해요. 받침점이 있나요, 비스듬한 면이 있나요? ${card.hint}`;
   return `맞아요! ${card.name}${hasFinal(card.name) ? '은' : '는'} ${card.tool === 'lever' ? '지레예요' : '빗면이에요'}. ${card.why}`;
 }
 export function lifePickMessage(cardId: string): string {

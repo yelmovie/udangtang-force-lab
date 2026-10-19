@@ -177,7 +177,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   }
   // Level 1 opens a popup for each finished measurement until both models are compared; later free play stays in the footer.
   function measureResult(parts:string[],value:number,zeroed:boolean):PopResult {
-    if(!zeroed) return { title:`${value} g? 영점 전 숫자예요`, text:`빈 저울이 이미 ${emptyScaleReading} g을 가리키고 있었어요. 그래서 모형의 무게보다 ${emptyScaleReading} g 더 크게 보여요.`, question:{ prompt:'정확한 무게를 재려면 먼저 무엇을 할까요?', choices:[['heavier','모형을 하나 더 올려요'],['zero','모두 내리고 0 맞추기를 눌러요']], correct:'zero', right:'맞아요! 빈 저울을 0으로 맞추면 모형의 무게만 숫자로 나와요.', hint:`숫자에 빈 저울의 ${emptyScaleReading} g이 더해져 있어요. 빈 저울부터 0으로 맞춰야 해요.` } };
+    if(!zeroed) return { title:`${value} g? 0을 맞추기 전 숫자예요`, text:`빈 저울이 이미 ${emptyScaleReading} g을 가리키고 있었어요. 그래서 모형의 무게보다 ${emptyScaleReading} g 더 크게 보여요.`, question:{ prompt:'정확한 무게를 재려면 먼저 무엇을 할까요?', choices:[['heavier','모형을 하나 더 올려요'],['zero','모두 내리고 0 맞추기를 눌러요']], correct:'zero', right:'맞아요! 빈 저울을 0으로 맞추면 모형의 무게만 숫자로 나와요.', hint:`숫자에 빈 저울의 ${emptyScaleReading} g이 더해져 있어요. 빈 저울부터 0으로 맞춰야 해요.` } };
     if(parts.length>1) return { title:`함께 올려서 ${value} g이에요`, text:`${parts.map(shortName).join(', ')} 모형을 한꺼번에 재었어요. 이 숫자로는 각각의 무게를 알 수 없어요.`, question:{ prompt:'두 모형의 무게를 비교하려면 어떻게 잴까요?', choices:[['one','하나씩 따로 재요'],['together','함께 올려 재요']], correct:'one', right:'맞아요! 하나씩 재야 두 숫자를 비교할 수 있어요. 모두 내리고 하나만 올려요.', hint:'함께 재면 두 무게가 더해진 숫자 하나만 나와요.' } };
     const name=props[parts[0]].name;
     if(canCompleteScale(state)) {
@@ -201,7 +201,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     const items=loaded();
     basketItems.innerHTML=items.map(id=>`<button class="basket-part${fakeIndex(id)>=0?' fake-basket-part':''}" data-remove="${id}" aria-label="${nameOf(id)} 저울에서 빼기">${partArt(id)}<span>${nameOf(id).replace(' 모형','')}</span><i aria-hidden="true">−</i></button>`).join('');
     readingNode.textContent=reading===null ? String(loadReading()) : String(reading);
-    root.querySelector('#scale-stability')!.textContent=busy ? '안정되는 중…' : reading!==null ? zeroedNow() ? '안정 ✓' : '영점 전 숫자' : '측정값';
+    root.querySelector('#scale-stability')!.textContent=busy ? '안정되는 중…' : reading!==null ? zeroedNow() ? '안정 ✓' : '0 맞추기 전' : '측정값';
     root.querySelector('.scale-display')!.classList.toggle('is-stable',!busy&&reading!==null&&zeroedNow());
     root.querySelector('.scale-display')!.setAttribute('aria-busy',String(busy));
     root.querySelector<HTMLButtonElement>('#zero-button')!.disabled=busy||waiting;
@@ -287,7 +287,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
         companion.setMood('observe'); context.sound(520); update();
       } else {
         state.runs=recordScaleRun(state.runs,{parts,reading:measuredValue,zeroed});
-        feedback=!zeroed ? '빈 저울을 0으로 맞춰야 정확히 잴 수 있어요.' : canCompleteScale(state) ? '저울로 어느 쪽이 얼마나 무거운지 알아냈어요! 보급소 직원의 의뢰가 도착했어요.' : parts.length>1 ? '비교할 때는 사과와 책 모형을 하나씩 올려요.' : `${props[parts[0]].name}은 ${measuredValue} g이에요. 다른 모형과 비교해요.`;
+        feedback=!zeroed ? '빈 저울을 0으로 맞춰야 정확히 잴 수 있어요. 이것을 영점 맞추기라고 해요.' : canCompleteScale(state) ? '저울로 어느 쪽이 얼마나 무거운지 알아냈어요! 보급소 직원의 의뢰가 도착했어요.' : parts.length>1 ? '비교할 때는 사과와 책 모형을 하나씩 올려요.' : `${props[parts[0]].name}은 ${measuredValue} g이에요. 다른 모형과 비교해요.`;
         companion.setMood(zeroed&&measuredValue===targetWeight?'success':'observe'); context.commit(); context.sound(zeroed&&measuredValue===targetWeight?730:520);
         if(!wasComplete) showResult(measureResult(parts,measuredValue,zeroed));
         update();
