@@ -1,4 +1,4 @@
-// 미션별 개념 클립(tools/remotion-concepts에서 렌더한 무음 영상) 재생 모달.
+// 미션별 개념 클립(tools/concept-clips에서 렌더한 무음 영상) 재생 모달.
 // 스포일러 금지: 버튼은 각 미션이 핵심 발견을 확인한 뒤에만 syncConceptButton(..., true)로 보인다.
 // 영상에는 글자가 없고, 자막은 장면 시간에 맞춰 DOM으로 얹는다.
 import './conceptClip.css';
@@ -6,7 +6,7 @@ import './conceptClip.css';
 export type ConceptStage = 'cargo' | 'balance' | 'scale' | 'workshop' | 'rescue';
 type Clip = { title: string; cues: { at: number; text: string }[] };
 
-// at은 초. 렌더 장면(tools/remotion-concepts/src/clips)의 프레임 구간과 맞춘다.
+// at은 초. 렌더 장면(tools/concept-clips/clips.mjs)의 프레임 구간과 맞춘다.
 const clips: Record<ConceptStage, Clip> = {
   cargo: { title: '같은 힘, 다른 무게', cues: [
     { at: 0, text: '같은 힘으로 부품 1개 상자와 5개 상자를 밀어요.' },
