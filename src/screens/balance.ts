@@ -28,7 +28,6 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   let busy = false;
   let waiting = false;
   let animation: Animation | null = null;
-  let timer = 0;
   let suppressClickUntil = 0;
   const last = state.runs.at(-1);
   let visibleOutcome: BalanceRun['actual'] | null = last && last.left === state.left && last.right === state.right && state.prediction === null ? last.actual : null;
@@ -52,8 +51,8 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   const requestOpen = () => level === 1 && canFinish();
   const frozen = () => busy || waiting || (level === 2 && (!round || mysteryDone()));
   const canSave = () => !busy && !waiting && canFinish() && mysteryDone();
-  // Level 1 asks for a prediction once both pans hold an object and nothing has been observed yet.
-  const predictPending = () => level === 1 && !requestOpen() && !!state.left && !!state.right && !state.prediction && !visibleOutcome;
+  // Level 1 asks for a prediction once both pans hold an object; the choices sit on the stage until the pin is pulled.
+  const predictOpen = () => level === 1 && !requestOpen() && !!state.left && !!state.right && !visibleOutcome;
   let feedback = level === 2
     ? mysteryDone() ? '의뢰를 모두 해결했어요. 발견 저장을 눌러요.' : '수수께끼 상자 의뢰를 이어서 해요. 두 상자를 양쪽에 놓고 비교해요.'
     : canFinish() ? '다리 점검원의 의뢰가 도착했어요. 의뢰를 받아 수수께끼 상자를 풀어요.' : '같은 크기의 물체 두 개를 놓고, 잠금핀을 뽑기 전에 예상해 봐요.';
@@ -76,7 +75,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
         <button class="balance-pan right" data-pan="right" aria-label="오른쪽 자리"><span class="balance-side">오른쪽</span><div class="pan-object" id="right-object"></div><strong class="balance-pan-name" id="right-name">물체 놓기</strong></button>
       </div><div class="balance-pivot"></div><div class="balance-stand"></div></div>
       <div class="balance-lock" id="balance-lock"><span class="balance-lock-socket" aria-hidden="true"></span><button id="balance-test" class="balance-pin" aria-label="고리에 달린 잠금핀을 오른쪽으로 뽑아 기울기 확인"><img src="/assets/game/balance-lock-pin.webp" alt=""></button><span class="balance-lock-callout" id="balance-lock-callout">고리를 잡고 뽑기 →</span></div>
-      <div class="balance-result" id="balance-result" role="status"></div>
+      <div class="balance-result" id="balance-result"></div>
       <div class="instrument-companion" id="balance-companion" aria-hidden="true"></div>
     </div>
     <div class="instrument-dock balance-dock">
@@ -93,7 +92,6 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   const requestButton = root.querySelector<HTMLButtonElement>('#balance-request-open')!;
   const recordButton = root.querySelector<HTMLButtonElement>('#balance-record')!;
   let popup: HTMLDialogElement | null = null;
-  let popupKind: 'predict' | 'record' = 'record';
   let popupTimer = 0;
   // Weighing pose (one object in each hand) instead of the scale-holding art the other stages use.
   const companion = mountCompanion(root.querySelector<HTMLElement>('#balance-companion')!, 'idle', { student: 'balance-student', corgi: 'balance-corgi' });
@@ -114,17 +112,24 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       return visibleOutcome ? '한 물체를 바꾸어 다시 비교해요' : !p.left || !p.right ? '① 양쪽에 물체를 하나씩 놓아요' : !state.prediction ? '② 어느 쪽이 내려갈지 예상해요' : '③ 고리를 누르거나 오른쪽으로 뽑아요';
     }
     if (mysteryDone()) return '의뢰 완료! 발견 저장을 눌러요';
-    if (waiting) return '찾았어요! 다음 상자 꾸러미를 준비해요';
+    if (waiting) return '찾았어요! 다음 꾸러미를 눌러요';
     const tag = `수수께끼 ${roundIndex + 1}/${mysteryRoundCount}`;
     return !p.left || !p.right ? `${tag} · 상자 두 개를 양쪽에 놓아요` : visibleOutcome ? `${tag} · 다시 비교하거나 제일 무거운 상자를 골라요` : `${tag} · 고리를 누르거나 오른쪽으로 뽑아요`;
   }
-  function resultText() {
+  /** The student's guess and what the beam did stay in two separate boxes; the guess is never rewritten. */
+  const compareMarkup = (run: BalanceRun) => `<span class="balance-compare"><span class="balance-guess">내 예상 <b>${names[run.prediction]}</b></span><span class="balance-seen">관찰 결과 <b>${names[run.actual]}</b></span></span>`;
+  function resultMarkup() {
     const p = pans();
-    if (level === 1) return shownRun ? `예상 ${names[shownRun.prediction]} → 관찰 ${names[shownRun.actual]} · ${reason(shownRun)}` : p.left && p.right ? state.prediction ? '예상을 골랐어요. 잠금핀을 뽑아 확인해요.' : '아직 잠겨 있어요. 예상한 뒤 핀을 뽑아 확인해요.' : '같은 크기, 다른 재질! 무게를 비교해요.';
+    if (level === 1) {
+      if (predictOpen()) return `<span class="balance-ask">${state.prediction ? `내 예상: ${names[state.prediction]} · 잠금핀을 뽑아 확인해요` : '② 어느 쪽이 내려갈까요?'}</span><span class="predict-options balance-stage-predict">${(['left','level','right'] as const).map(id => `<button data-predict="${id}" aria-pressed="${id === state.prediction}" aria-label="${names[id]} 예상"${busy ? ' disabled' : ''}>${id === 'left' ? icons.arrowDownLeft : id === 'right' ? icons.arrowDownRight : '═'} <span>${id === 'left' ? '왼쪽' : id === 'right' ? '오른쪽' : '수평'}</span></button>`).join('')}</span><button class="instrument-text-button" id="balance-swap"${busy ? ' disabled' : ''}>${icons.swap} 자리 바꾸기</button>`;
+      return shownRun ? `${compareMarkup(shownRun)}<span class="balance-reason">${reason(shownRun)}</span>` : p.left && p.right ? '아직 잠겨 있어요. 예상한 뒤 핀을 뽑아 확인해요.' : '같은 크기, 다른 재질! 무게를 비교해요.';
+    }
     if (mysteryDone()) return '진짜 기둥 부품을 모두 찾았어요!';
+    if (waiting && found) return `<span>찾았어요! ${found} 상자가 진짜 기둥 부품이에요.</span><button class="button button-primary balance-next-round" id="balance-next-round">다음 꾸러미 →</button>`;
     if (shownRecord) return `기록 「${relationText(shownRecord)}」 · ${recordReason(shownRecord)}`;
     return p.left && p.right ? '잠금핀을 뽑아 어느 상자가 무거운지 확인해요.' : '상자는 모두 똑같이 생겼어요. 수평대로만 알 수 있어요.';
   }
+  let resultHtml = '';
   function update() {
     const p = pans(), locked = frozen();
     for (const side of ['left','right'] as const) {
@@ -148,12 +153,18 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     requestButton.disabled = busy;
     setTapHint(requestButton, requestOpen() && !busy);
     recordButton.disabled = busy;
-    root.querySelector('#balance-record-label')!.textContent = predictPending() ? '② 예상 고르기' : '기록 보기';
-    setTapHint(recordButton, !busy && predictPending());
     finish.disabled = !canSave();
     root.querySelector('#balance-phase')!.textContent = phaseText();
     root.querySelectorAll<HTMLElement>('.balance-dock .dock-label').forEach(label => { label.textContent = phaseText(); });
-    result.textContent = resultText();
+    const html = resultMarkup();
+    if (html !== resultHtml) {
+      // Re-render only on change, and keep keyboard focus on the same choice.
+      const focusKey = result.contains(document.activeElement) ? (document.activeElement as HTMLElement).dataset.predict : undefined;
+      result.innerHTML = resultHtml = html;
+      result.classList.toggle('is-asking', predictOpen());
+      if (focusKey) result.querySelector<HTMLElement>(`[data-predict="${focusKey}"]`)?.focus();
+    }
+    result.querySelectorAll<HTMLButtonElement>('[data-predict]').forEach(button => setTapHint(button, !busy && !state.prediction));
     root.querySelector('#balance-tilt-goal')!.textContent = `${hasTilt() ? '✓' : '○'} 기울기 발견`;
     root.querySelector('#balance-level-goal')!.textContent = `${hasLevel() ? '✓' : '○'} 수평 발견`;
     root.querySelector('#balance-mystery-goal')!.textContent = `${mysteryDone() ? '✓' : '○'} 수수께끼 상자 ${Math.min(nextMysteryRound(levelRecord()), mysteryRoundCount)}/${mysteryRoundCount}`;
@@ -169,17 +180,8 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     usesChip.classList.toggle('done', thrifty);
     if (popup) renderPopup();
   }
-  /** One stage popup at a time: 'predict' asks before the pin comes out; 'record' shows the result, the records and the next question. */
-  function popupContent(kind: 'predict' | 'record') {
-    if (kind === 'predict') {
-      const off = busy || !state.left || !state.right;
-      return {
-        label: '이번 비교 예상', title: '어느 쪽이 내려갈까?',
-        lead: `왼쪽 ${objectName(state.left!)} · 오른쪽 ${objectName(state.right!)}. 잠금핀을 뽑기 전에 골라요.`,
-        body: `<div class="predict-options balance-popup-predict">${(['left','level','right'] as const).map(id => `<button data-predict="${id}" aria-pressed="${id === state.prediction}" aria-label="${names[id]} 예상"${off ? ' disabled' : ''}>${id === 'left' ? icons.arrowDownLeft : id === 'right' ? icons.arrowDownRight : '═'} <span>${id === 'left' ? '왼쪽' : id === 'right' ? '오른쪽' : '수평'}</span></button>`).join('')}</div><button class="instrument-text-button" id="balance-swap"${off ? ' disabled' : ''}>${icons.swap} 두 물체 자리 바꾸기</button>`,
-        actions: '<button class="button button-secondary" id="balance-popup-close">물체 다시 고르기</button>',
-      };
-    }
+  /** One stage popup at a time: it opens after a try ends and shows the result, the records and the next question. */
+  function popupContent() {
     const save = canSave() ? '<button class="button button-primary" id="balance-popup-finish">발견 저장 →</button>' : '';
     const keepGoing = (primary: boolean) => `<button class="button ${primary ? 'button-primary' : 'button-secondary'}" id="balance-popup-close">계속 실험하기</button>`;
     if (level === 1) {
@@ -190,7 +192,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       return {
         label: run ? '이번 비교 결과' : '나의 발견',
         title: run ? run.prediction === run.actual ? '이번 비교 예상과 같아요!' : '이번 비교 예상과 달라도 괜찮아요!' : '지금까지의 발견',
-        lead: run ? `예상 ${names[run.prediction]} → 관찰 ${names[run.actual]}. ${reason(run)}` : phaseText(),
+        lead: run ? `${compareMarkup(run)}${reason(run)}` : phaseText(),
         body: `<div class="balance-popup-runs"><strong>나의 발견 ${state.runs.length}</strong><div class="result-list">${rows}</div></div><p class="balance-popup-next">${next}</p>${request}`,
         actions: requestOpen() ? `${keepGoing(false)}<button class="button button-primary" id="balance-popup-request"${busy ? ' disabled' : ''}>의뢰 받기 →</button>` : `${save ? keepGoing(false) : keepGoing(true)}${save}`,
       };
@@ -202,25 +204,22 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       title: mysteryDone() ? '의뢰를 모두 해결했어요!' : waiting && found ? `찾았어요! ${found} 상자` : shownRecord ? `기록 「${relationText(shownRecord)}」` : '비교 기록 카드',
       lead: feedback,
       body: `<div class="mystery-panel"><div class="mystery-panel-head"><strong>비교 기록 카드</strong><span>${round ? `수평대 ${uses}번` : '의뢰 완료'}</span>${thrifty ? '<span class="mystery-badge">알뜰 탐정</span>' : ''}</div><div class="mystery-records">${cards}</div>${picks}</div>`,
-      actions: `${save ? keepGoing(false) : keepGoing(true)}${save}`,
+      actions: waiting && found && !mysteryDone() ? `${keepGoing(false)}<button class="button button-primary" id="balance-popup-next">다음 꾸러미 →</button>` : `${save ? keepGoing(false) : keepGoing(true)}${save}`,
     };
   }
   function renderPopup() {
     if (!popup) return;
     // Keep keyboard focus on the same control across a re-render.
     const focused = document.activeElement instanceof HTMLElement && popup.contains(document.activeElement) ? document.activeElement : null;
-    const focusKey = !focused ? '' : focused.id ? `#${focused.id}` : focused.dataset.pick ? `[data-pick="${focused.dataset.pick}"]` : focused.dataset.predict ? `[data-predict="${focused.dataset.predict}"]` : '';
-    const kind = popupKind === 'predict' && predictPending() ? 'predict' : 'record';
-    const content = popupContent(kind);
-    popup.dataset.kind = kind;
+    const focusKey = !focused ? '' : focused.id ? `#${focused.id}` : focused.dataset.pick ? `[data-pick="${focused.dataset.pick}"]` : '';
+    const content = popupContent();
     popup.innerHTML = `<div class="stage-popup-card"><button class="stage-popup-close" aria-label="닫기">×</button><span class="stage-popup-label">${content.label}</span><h2 id="balance-popup-title">${content.title}</h2><div class="stage-popup-body"><p class="stage-popup-lead">${content.lead}</p>${content.body}</div><div class="stage-popup-actions">${content.actions}</div></div>`;
     if (focusKey) popup.querySelector<HTMLElement>(focusKey)?.focus();
   }
-  function openPopup(kind: 'predict' | 'record') {
+  function openPopup() {
     clearTimeout(popupTimer);
     // Never over a drag, the pin animation, or the client's letter.
     if (!active || busy || drag || document.querySelector('dialog.request-letter[open]')) return;
-    popupKind = kind;
     if (!popup) {
       const dialog = popup = document.createElement('dialog');
       dialog.className = 'stage-popup balance-popup';
@@ -231,7 +230,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       renderPopup();
       dialog.showModal();
     } else renderPopup();
-    popup.querySelector<HTMLButtonElement>(popup.dataset.kind === 'predict' ? '[data-predict]:not(:disabled)' : '.stage-popup-actions .button-primary, #balance-popup-close')?.focus();
+    popup.querySelector<HTMLButtonElement>('.stage-popup-actions .button-primary, #balance-popup-close')?.focus();
   }
   const closePopup = () => { clearTimeout(popupTimer); popup?.close(); };
   function startRound() {
@@ -263,7 +262,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     countAttempt();
     feedback = `「${relationText(record)}」 기록 카드가 생겼어요. ${recordReason(record)} 다른 상자와 더 비교하거나, 제일 무거운 상자를 골라요.`;
     busy = false; companion.setMood('observe'); context.commit(); context.sound(record.actual === 'level' ? 700 : 520); update();
-    openPopup('record');
+    openPopup();
   }
   function pick(id: string) {
     if (frozen() || level !== 2 || !round || !records.length) return;
@@ -284,16 +283,18 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     feedback = `찾았어요! ${id} 상자가 진짜 기둥 부품이에요. 수평대 ${uses}번의 기록을 이어서 알아냈어요.${saving ? ' 알뜰 탐정이에요!' : ''}`;
     companion.setMood('success'); context.commit(); context.sound(780);
     if (mysteryDone()) { feedback += ' 의뢰를 모두 해결했어요. 발견 저장을 눌러요.'; update(); return; }
+    // The result stays until the student presses 다음 꾸러미; nothing advances on a timer.
+    feedback += ' 다음 꾸러미를 눌러 이어서 풀어요.';
     waiting = true; update();
-    timer = window.setTimeout(() => {
-      if (!active) return;
-      waiting = false;
-      startRound();
-      feedback = `다음 꾸러미는 상자가 ${round?.boxes.length ?? 4}개예요. 무게가 같은 상자도 섞여 있어요.`;
-      companion.setMood('observe'); update();
-      // The old cards were replaced; keep keyboard users on the new boxes.
-      if (!root.contains(document.activeElement)) root.querySelector<HTMLButtonElement>('.mystery-card')?.focus({ preventScroll: true });
-    }, reducedMotion() ? 600 : 1800);
+  }
+  function nextRound() {
+    if (!waiting || level !== 2) return;
+    closePopup();
+    waiting = false;
+    startRound();
+    feedback = `다음 꾸러미는 상자가 ${round?.boxes.length ?? 4}개예요. 무게가 같은 상자도 섞여 있어요.`;
+    companion.setMood('observe'); context.sound(520); update();
+    root.querySelector<HTMLButtonElement>('.mystery-card')?.focus({ preventScroll: true });
   }
   function resetObservation() { if (level === 1) state.prediction = null; visibleOutcome = null; shownRun = null; shownRecord = null; pin.style.setProperty('--pin-x','0px'); lock.classList.remove('is-open'); }
   function place(id: string, side: 'left'|'right') {
@@ -305,8 +306,6 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     feedback = `${itemName(id)}${level === 1 ? '을' : '를'} ${side === 'left' ? '왼쪽' : '오른쪽'}에 놓았어요. ${p.left && p.right ? level === 1 ? '어느 쪽이 내려갈지 예상해요.' : '잠금핀을 뽑아 비교해요.' : `반대쪽에도 ${level === 1 ? '물체' : '상자'}를 놓아요.`}`;
     companion.setMood('effort'); context.commit(); context.sound(470); update();
     root.querySelector(`[data-pan="${side}"] .instrument-object`)?.animate([{transform:'translateY(-22px) scale(.9)'},{transform:'translateY(3px) scale(1.06)'},{transform:'translateY(0) scale(1)'}],{duration:reducedMotion() ? 1 : 320});
-    // Both pans are set: let the object land, then ask for the prediction.
-    if (predictPending()) { clearTimeout(popupTimer); popupTimer = window.setTimeout(() => { if (predictPending()) openPopup('predict'); }, reducedMotion() ? 0 : 380); }
   }
   async function release(fromX = 0) {
     const p = pans();
@@ -344,7 +343,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       feedback = `${prediction === actual ? '예상과 같아요!' : '예상과 달라도 괜찮아요!'} ${reason(run)} ${canFinish() ? '두 가지를 모두 발견했어요. 다리 점검원의 의뢰가 도착했어요!' : hasTilt() ? '이제 수평인 짝을 찾아봐요.' : '이제 기울어진 짝을 찾아봐요.'}`;
       busy = false; companion.setMood(canFinish() ? 'success' : 'observe'); context.commit(); context.sound(actual === 'level' ? 700 : 520); update();
       if (firstTilt) showPredictionChip(root.querySelector<HTMLElement>('.instrument-stage')!, context.save, 'balance');
-      openPopup('record'); // skipped while the client's letter is open
+      openPopup(); // skipped while the client's letter is open
     }
     animation.cancel(); animation = null;
   }
@@ -354,10 +353,11 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     if (!button || button.disabled) return;
     if (button.dataset.object) { selectedObject = button.dataset.object; feedback = `${itemName(selectedObject!)} 선택! 놓을 자리를 눌러요. 끌어서 놓아도 돼요.`; update(); }
     if (button.dataset.pan) { if (selectedObject) place(selectedObject,button.dataset.pan as 'left'|'right'); else { feedback=`아래 ${level === 1 ? '물체' : '상자'}를 고른 다음 왼쪽 또는 오른쪽 자리를 눌러요.`; update(); } }
-    if (button.dataset.predict) { state.prediction=button.dataset.predict as BalanceRun['prediction']; visibleOutcome=null; shownRun=null; feedback=`${names[state.prediction]}을 예상했어요. 가운데 잠금핀 고리를 뽑아 확인해요.`; context.commit(); closePopup(); update(); }
+    if (button.dataset.predict) { state.prediction=button.dataset.predict as BalanceRun['prediction']; visibleOutcome=null; shownRun=null; feedback=`${names[state.prediction]}을 예상했어요. 가운데 잠금핀 고리를 뽑아 확인해요.`; context.commit(); update(); }
     if (button.dataset.pick) pick(button.dataset.pick);
     if (button.id==='balance-request-open' || button.id==='balance-popup-request') enterMystery();
-    if (button.id==='balance-record') openPopup(predictPending() ? 'predict' : 'record');
+    if (button.id==='balance-record') openPopup();
+    if (button.id==='balance-next-round' || button.id==='balance-popup-next') nextRound();
     if (button.id==='balance-swap') { [state.left,state.right]=[state.right,state.left]; resetObservation(); feedback='두 물체의 자리를 바꿨어요. 무거운 물체가 바뀌었을까요, 위치만 바뀌었을까요?'; context.commit(); update(); }
     if (button.id==='balance-test') void release();
     if ((button.id==='balance-finish' || button.id==='balance-popup-finish') && canFinish() && mysteryDone()) {
@@ -414,5 +414,5 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   window.addEventListener('resize',endDrag,{signal:events.signal});
   if (level === 2) startRound();
   update();
-  return()=>{active=false; clearTimeout(timer); closePopup(); endDrag(); events.abort(); animation?.cancel(); companion.dispose();};
+  return()=>{active=false; closePopup(); endDrag(); events.abort(); animation?.cancel(); companion.dispose();};
 }

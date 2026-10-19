@@ -274,3 +274,20 @@
   .balance-screen .balance-record-button { padding:6px 10px; gap:5px; }
   .balance-screen .balance-topbar { gap:6px 8px; }
 }
+
+/* Prediction choices on the stage (under the beam) instead of a popup; guess and observation in separate boxes. */
+.instrument-screen.balance-screen .balance-result.is-asking,
+.instrument-screen.balance-screen .balance-result:has(.balance-compare, .balance-next-round) { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px 12px; max-width:min(86%, 900px); padding:8px 14px; }
+.balance-screen .balance-ask { font-weight:900; color:#244d47; font-size:clamp(17px,1.5vw,21px); }
+.balance-screen .balance-stage-predict { display:flex; gap:8px; }
+.instrument-screen.balance-screen .balance-stage-predict button { min-height:52px; min-width:112px; padding:0 14px; font-size:24px; }
+.instrument-screen.balance-screen .balance-stage-predict button span { font-size:19px; }
+.balance-screen .balance-stage-predict button[aria-pressed="true"] { background:#15847b; color:#fff; border-color:#0f5f58; }
+.instrument-screen.balance-screen .balance-result .instrument-text-button { width:auto; min-height:48px; margin:0; font-size:17px; }
+.balance-compare { display:inline-flex; flex-wrap:wrap; gap:8px; }
+.balance-guess, .balance-seen { display:inline-flex; align-items:baseline; gap:6px; padding:5px 12px; border-radius:12px; font-size:16px; color:#3b5850; }
+.balance-guess { background:#eef3f8; border:2px dashed #8aa4bd; }
+.balance-seen { background:#e3f6d9; border:2px solid #57a57d; }
+.balance-guess b, .balance-seen b { font-size:19px; color:#173f42; }
+.balance-popup .stage-popup-lead .balance-compare { display:flex; margin-bottom:8px; }
+.balance-screen .balance-next-round { min-height:52px; padding:0 24px; font-size:20px; }
