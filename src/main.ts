@@ -227,15 +227,17 @@ function openStoryModal(options: StoryOptions) {
   let closed = false;
   let teardownVideo: (() => void) | null = null;
   const onEscape = (event: KeyboardEvent) => { if (event.key === 'Escape' && modal.querySelector('.story-video-card')) { event.preventDefault(); tone(470); close(); } };
-  const close = () => {
+  // dismissed: the back button removed the modal, so tear down without running onDone.
+  const close = (dismissed = false) => {
     if (closed) return; closed = true;
     teardownVideo?.(); teardownVideo = null;
     document.removeEventListener('keydown', onEscape, true);
     app.inert = appWasInert; modal.remove();
     storyMusic = null; syncMusic();
     if (opener?.isConnected) opener.focus?.();
-    options.onDone?.();
+    if (!dismissed) options.onDone?.();
   };
+  modal.addEventListener('modal-dismiss', () => close(true));
   const draw = () => {
     const line = options.lines[index];
     const last = index === options.lines.length - 1;
@@ -389,6 +391,7 @@ function openMissionCard(stageId: StageId) {
   const syncOrientation = () => { start.disabled = orientation.matches; };
   orientation.addEventListener('change', syncOrientation); syncOrientation();
   const close = () => { orientation.removeEventListener('change', syncOrientation); app.inert = appWasInert; modal.remove(); };
+  modal.addEventListener('modal-dismiss', close);
   modal.querySelectorAll<HTMLButtonElement>('[data-plan]').forEach(button => button.addEventListener('click', () => {
     selected = button.dataset.plan!;
     modal.querySelectorAll<HTMLButtonElement>('[data-plan]').forEach(choice => choice.setAttribute('aria-pressed', String(choice === button)));
@@ -417,7 +420,8 @@ window.addEventListener('popstate', event => {
   const page = (event.state as { page?: PageId } | null)?.page;
   if (!page || page === viewPage) return;
   closeLearningReview?.(); closeLearningReview = null;
-  document.querySelectorAll('.modal-layer').forEach(node => node.remove()); app.inert = false;
+  // Modals with global listeners or media listen for modal-dismiss and tear themselves down first.
+  document.querySelectorAll('.modal-layer').forEach(node => { node.dispatchEvent(new Event('modal-dismiss')); node.remove(); }); app.inert = false;
   backNavigation = true;
   if (page === 'title') { viewPage = 'title'; render(); } else navigate(page);
   backNavigation = false;

@@ -21,9 +21,9 @@
 **항목 1 배송소 — 완료.** 배달 3개를 끝내면(같은 세션에서 결과 팝업을 닫거나 '계속 실험하기', 또는 다시 들어오면) 1단계 자유 실험으로 바뀐다. 자유 실험은 같은 조건 반복도 허용. 장면 위 '눌러서 밀기/당기기' 버튼(같은 `experiment()`), 힘 안 고르고 누르면 힘 줄로 안내. 검증 `D:/iscreammedia_sc34/_scratch/udang-shots/cargo_free.py W H`(1180×757·1024×768 통과). 남은 한계: 자유 실험을 20번 넘게 3개로만 하면 runs가 잘려 완료 버튼이 꺼질 수 있음(완료 기록은 그대로).
 
 **항목 7 중 위치 확인된 것**
-- popstate(main.ts:420)가 `.modal-layer`를 그냥 지워서 스토리 모달 Escape 리스너(343행)·미션 카드 orientation 리스너(390행)가 남고, `dialog[open]`(결과 팝업·편지·완료 팝업)은 아예 안 닫는다 → 열린 모달의 close 함수를 Set에 모아 popstate에서 호출.
+- ✅ 뒤로가기 모달 정리: popstate가 `.modal-layer`마다 `modal-dismiss` 이벤트를 보낸 뒤 지운다. 스토리 모달(onDone 없이 영상·음악·Esc 정리)·미션 카드(orientation)·개념 영상(keydown)이 받아서 스스로 정리. `dialog[open]`은 화면 cleanup이 닫는다.
 - 완료 표시 위조: `stageIsOpen`(state.ts:182)이 `completed`만 믿고, `readSave`는 코어만 증거를 재검증(161행) → cargo·balance·scale·workshop도 저장 기록으로 재검증(옛 저장이 잠기지 않게 테스트 필수).
-- '더 해 보기 (선택)' 34px: main.ts:151 `.discovery-detail summary` → min-height 48px.
+- ✅ '더 해 보기 (선택)' 48px(polish.css `.discovery-detail summary`), 기록 글자 14→16px.
 
 **준비물**
 - dev 서버 5190이 다른 프로세스에 잡혀 있어 5191로 떴다(preview 설정도 5191이라 겹침). 시작 전에 5190을 비우거나 launch.json 포트 정리.

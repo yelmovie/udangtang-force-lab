@@ -163,6 +163,7 @@ export function openConceptClip(stage: ConceptStage): void {
   playButton.addEventListener('click', play);
   replayButton.addEventListener('click', () => { video.currentTime = 0; showCue(0); play(); });
   closeButton.addEventListener('click', close);
+  layer.addEventListener('modal-dismiss', close);
   layer.addEventListener('click', event => { if (event.target === layer) close(); });
   closeButton.focus();
 }

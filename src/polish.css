@@ -422,13 +422,13 @@ button.button:not(:disabled):active {
 .discovery-recap strong { font-size:18px; color:#1b6557; }
 .discovery-recap p { margin:5px 0 0; color:#315c4e; font-size:16px; line-height:1.4; word-break:keep-all; }
 .discovery-detail { margin-top:10px; color:#315c4e; text-align:left; font-size:16px; }
-.discovery-detail summary { cursor:pointer; font-weight:800; }
+.discovery-detail summary { cursor:pointer; font-weight:800; min-height:48px; box-sizing:border-box; padding-block:12px; }
 .discovery-detail p { line-height:1.4; }
 .discovery-recap .discovery-key { display:block; font-size:21px; line-height:1.4; color:#174f45; word-break:keep-all; }
 .discovery-guess { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:8px 0 0; font-size:16px; color:#315c4e; }
 .discovery-guess b { color:#1b6557; }
 .discovery-guess[data-matched="false"] b { color:#8a4b0e; }
-.discovery-detail .discovery-record { font-size:14px; color:#5b6f66; }
+.discovery-detail .discovery-record { font-size:16px; color:#5b6f66; }
 .discovery-challenge, .mission-extra { margin:12px 0 0; padding:9px 12px; border-radius:10px; background:#fff0c9; color:#6d4d22; font-size:16px; font-weight:800; line-height:1.35; text-align:left; word-break:keep-all; }
 .report-card .report-card-insight { color:#2b5e50; font-weight:800; }
 .report-card .report-first { margin-top:10px; padding:8px 10px; border-radius:10px; background:#eaf4e7; font-size:16px; color:#3b6455; }
@@ -499,7 +499,7 @@ button.button:not(:disabled):active {
 .modal-card:has(> #world-title) > .discovery-recap .discovery-key { font-size: 20px; line-height: 1.35; }
 .modal-card:has(> #world-title) > .discovery-recap .discovery-guess { margin-top: 6px; }
 .modal-card:has(> #world-title) > .discovery-detail { margin-top: 8px; }
-.modal-card:has(> #world-title) > .discovery-detail summary { padding: 8px 0; font-size: 17px; line-height: 1.4; }
+.modal-card:has(> #world-title) > .discovery-detail summary { padding: 12px 0; font-size: 17px; line-height: 1.4; }
 .modal-card:has(> #world-title) > .discovery-detail p { margin: 6px 0; }
 .modal-card:has(> #world-title) > .discovery-detail .discovery-record { font-size: 16px; }
 .modal-card:has(> #world-title) > .discovery-detail .button { margin-top: 6px; min-height: 48px; }
