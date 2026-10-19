@@ -576,7 +576,7 @@ function openSettings() {
       if (adminUnlocked) content += `<div class="settings-links" aria-label="미리 볼 실험">${stages.map(stage=>`<button data-preview-stage="${stage.id}">${stage.mission}. ${stage.title}</button>`).join('')}<button data-preview-stage="complete">결과 화면</button></div>`;
     } else if (section === 'reset') {
       content = '<p class="settings-lead">이 브라우저의 모든 실험 기록과 복구 진행을 지울까요? 지운 기록은 되돌릴 수 없어요. 소리 설정은 유지해요.</p><button class="button button-secondary settings-danger" data-settings="confirm-reset">기록을 지우고 처음으로</button>';
-    } else content = infoContent[section] + (section === 'teacher' ? `<p class="settings-offline" id="offline-status" role="status">${offlineMessage()}</p>` : '');
+    } else content = infoContent[section];
     overlay.innerHTML = `<div class="modal-card settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
       <div class="settings-heading"><h2 id="settings-title">${headings[section]}</h2><button class="settings-close" data-settings="close" aria-label="설정 닫기">×</button></div>
       ${content}${section === 'menu' ? '' : '<button class="button button-secondary settings-back" data-settings="back">설정으로 돌아가기</button>'}
