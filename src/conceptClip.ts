@@ -35,6 +35,9 @@ const clips: Record<ConceptStage, Clip> = {
   ] },
 };
 
+export const conceptClipTitle = (stage: ConceptStage) => clips[stage].title;
+export const conceptPoster = (stage: ConceptStage) => asset(stage, 'webp');
+
 const asset = (stage: ConceptStage, ext: string) => `${import.meta.env.BASE_URL}assets/concepts/${stage}.${ext}`;
 
 /** 발견 뒤에만 '왜 그럴까?' 버튼을 host 안(before 앞)에 둔다. show가 false면 치운다. */
