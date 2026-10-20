@@ -24,7 +24,7 @@
 | 도토리 박사 손 흔들기·생각·가리키기 변형 | `village/npc/wave.webp`, `think.webp`, `point.webp` | 도토리 박사 그림의 자세 변형(생성형 AI 제작 추정). 개별 생성 기록 없음 — 출처 기록 필요 | 앱 제작자 보유 |
 | 제목 로고 | `ui/title.webp` | 생성형 AI 제작 | 앱 제작자 보유 |
 | 중앙 동력실 실내 배경 | `backgrounds/core-hall-v2.webp` | 2026-10-08 내장 이미지 생성 도구로 제작. 원본·프롬프트는 `references/design/core-studio-v2/`에 보관 | 프로젝트를 위해 생성한 이미지. 조작 모델과 UI는 별도로 구현 |
-| 코어·빈 중앙 장치 3D | `models/core/*.glb` | 사용자가 Meshy로 생성해 전달한 GLB를 폴리곤·텍스처 최적화 | Meshy 계정의 생성·이용 조건은 별도 확인. CC0 등 별도 라이선스를 추정하지 않음 |
+| 코어·빈 중앙 장치 3D | `models/core/*.glb` | 사용자가 Meshy로 생성해 전달한 GLB를 폴리곤·텍스처 최적화(2026-10-20 UV 경계를 고정해 다시 축소: 코어 5만·장치 1.2만 삼각형, 2048 텍스처. `npm run assets:core`) | Meshy 계정의 생성·이용 조건은 별도 확인. CC0 등 별도 라이선스를 추정하지 않음 |
 | 배경음악 2곡 (스테이지 반복 `Curious Discovery`·점등식 `Magical Power-Up`) | `audio/bgm-stage.mp3`, `audio/bgm-ending.mp3` | 2026-10-19 사용자가 Suno로 생성해 전달(연주곡) | 생성형 AI 음악. Suno 요금제별 상업적 이용 조건은 별도 확인 |
 | 효과음 3종 (`click_003`, `error_001`, `confirmation_002`) | `audio/*.ogg` | Kenney — Interface Sounds (kenney.nl/assets/interface-sounds) | CC0 1.0. 원문 `audio/LICENSE-Kenney.txt` 동봉 |
 | 제목·버튼 글꼴 | `fonts/jua-*.woff2` | Jua, Woowahan Brothers Corp. (Google Fonts 배포본) | SIL OFL 1.1. 원문 `fonts/Jua-OFL.txt` 동봉. Reserved Font Name "Jua" |

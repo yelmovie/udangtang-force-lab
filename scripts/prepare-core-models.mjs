@@ -10,6 +10,9 @@ const assets = [
   { id: 'dock', source: 'references/models/original/core-dock-source.glb', output: 'public/assets/models/core/dock.glb' },
 ];
 await MeshoptSimplifier.ready;
+// 2026-10-20: 22k triangles with free UV seams tore the core's surface. Seams are now locked (LockBorder)
+// and more triangles are kept; the texture stays at 2048 so the baked panels stay sharp.
+const TARGET = { core: 50000, dock: 12000 }, TEXTURE = 2048, OUT_DIR = process.env.CORE_OUT_DIR ?? 'public/assets/models/core';
 const report = [];
 for (const asset of assets) {
   const source = await readFile(resolve(asset.source));
@@ -30,7 +33,7 @@ for (const asset of assets) {
   const indices = readAccessor(primitive.indices, Uint32Array, 1);
   // Keep atlas seams: collapsing them makes Meshy's baked texture visibly smear.
   // The core has many small UV islands, so its safe triangle count can exceed the target.
-  const [reduced, error] = MeshoptSimplifier.simplifyWithAttributes(indices, positions, 3, uv, 2, [.5, .5], null, 4000 * 3, .015, ['Sparse']);
+  const [reduced, error] = MeshoptSimplifier.simplifyWithAttributes(indices, positions, 3, uv, 2, [.5, .5], null, TARGET[asset.id] * 3, .004, ['LockBorder']);
   const [remap, vertexCount] = MeshoptSimplifier.compactMesh(reduced);
   function compact(input, components) {
     const out = new Float32Array(vertexCount * components);
@@ -46,7 +49,7 @@ for (const asset of assets) {
   const imageView = original.bufferViews[image.bufferView];
   const imageBytes = binary.subarray(imageView.byteOffset ?? 0, (imageView.byteOffset ?? 0) + imageView.byteLength);
   const sourceTexture = await sharp(imageBytes).metadata();
-  const texture = await sharp(imageBytes).resize(1024, 1024, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 84, mozjpeg: true }).toBuffer();
+  const texture = await sharp(imageBytes).resize(TEXTURE, TEXTURE, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 86, mozjpeg: true }).toBuffer();
   const chunks = [], views = []; let offset = 0;
   function append(bytes, target) {
     const data = Buffer.from(bytes.buffer ?? bytes, bytes.byteOffset ?? 0, bytes.byteLength ?? bytes.length);
@@ -77,11 +80,11 @@ for (const asset of assets) {
   output.writeUInt32LE(0x46546c67, 0); output.writeUInt32LE(2, 4); output.writeUInt32LE(output.length, 8);
   output.writeUInt32LE(paddedJson.length, 12); output.writeUInt32LE(0x4e4f534a, 16); paddedJson.copy(output, 20);
   const binOffset = 20 + paddedJson.length; output.writeUInt32LE(bin.length, binOffset); output.writeUInt32LE(0x004e4942, binOffset + 4); bin.copy(output, binOffset + 8);
-  if (output.length > 1500000 || reduced.length / 3 > 25000) throw new Error(`Tablet model budget exceeded: ${asset.id} (${output.length} bytes, ${reduced.length / 3} triangles)`);
-  await mkdir(resolve('public/assets/models/core'), { recursive: true });
-  await writeFile(resolve(asset.output), output);
-  const result = { ...asset, sourceBytes: source.length, sourceTriangles: indices.length / 3, sourceSha256: createHash('sha256').update(source).digest('hex'), bytes: output.length, triangles: reduced.length / 3, vertices: vertexCount, simplificationError: error, texture: { sourceWidth: sourceTexture.width, sourceHeight: sourceTexture.height, width: 1024, height: 1024, bytes: texture.length, maps: 1 }, bounds: { min, max }, sha256: createHash('sha256').update(output).digest('hex') };
+  if (output.length > 4500000 || reduced.length / 3 > 120000) throw new Error(`Tablet model budget exceeded: ${asset.id} (${output.length} bytes, ${reduced.length / 3} triangles)`);
+  await mkdir(resolve(OUT_DIR), { recursive: true });
+  await writeFile(resolve(OUT_DIR, `${asset.id}.glb`), output);
+  const result = { ...asset, sourceBytes: source.length, sourceTriangles: indices.length / 3, sourceSha256: createHash('sha256').update(source).digest('hex'), bytes: output.length, triangles: reduced.length / 3, vertices: vertexCount, simplificationError: error, texture: { sourceWidth: sourceTexture.width, sourceHeight: sourceTexture.height, width: Math.min(TEXTURE, sourceTexture.width), height: Math.min(TEXTURE, sourceTexture.height), bytes: texture.length, maps: 1 }, bounds: { min, max }, sha256: createHash('sha256').update(output).digest('hex') };
   report.push(result); console.log(JSON.stringify(result));
 }
-if (report.reduce((sum, item) => sum + item.bytes, 0) > 2000000) throw new Error('Combined tablet model budget exceeded');
-await writeFile(resolve('references/models/core-models.json'), JSON.stringify({ prepared: '2026-10-08', assets: report }, null, 2) + '\n');
+if (report.reduce((sum, item) => sum + item.bytes, 0) > 6000000) throw new Error('Combined tablet model budget exceeded');
+await writeFile(resolve('references/models/core-models.json'), JSON.stringify({ prepared: '2026-10-20', assets: report }, null, 2) + '\n');
