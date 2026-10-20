@@ -26,7 +26,7 @@ import { abilityStatements, challenges } from './challenges';
 import { openLearningReview } from './learningReview';
 import { openConceptClip, syncConceptButton } from './conceptClip';
 import { learningTask, learningRecordComplete, learningSummary } from './learningModel';
-import { stageStars, totalStars, type StageStars } from './stars';
+import { stageStars, type StageStars } from './stars';
 import { inquiryPlans, predictionRecap, predictionVerdict, type PredictionRecap } from './inquiryPlan';
 import { earnedToolCards, toolCardInfo, toolCards } from './toolCards';
 import { bagIcon, openToolBag, toolCardRevealMarkup, toolCardRowMarkup } from './toolBag';
@@ -548,7 +548,7 @@ function renderComplete(root: HTMLElement) {
   const save = adminSave ?? context.save;
   const completed = save.completed.length;
   root.innerHTML = `<section class="complete-screen">
-    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1>${(({ earned, max }) => `<p class="ending-stars" aria-label="모은 별 ${earned}개, 전체 ${max}개">★ ${earned} / ${max}</p>`)(totalStars(save))}<p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 장착했어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button></div></div>
+    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1><p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 장착했어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button></div></div>
     <details class="complete-details"><summary>내 실험과 발견 살펴보기 · ${completed} / 5</summary>
     <div class="report-grid">${stages.map(stage => {
       const task = learningTask(save, stage.id), record = save.learning?.[stage.id];
