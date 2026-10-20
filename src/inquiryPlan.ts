@@ -25,7 +25,7 @@ export const inquiryPlans: Record<StageId, InquiryPlan> = {
   },
   scale: {
     prompt: '사과 모형과 책 모형, 어느 쪽이 더 무거울까?',
-    choices: [{ id: 'apple', label: '사과 모형' }, { id: 'book', label: '책 모형' }, { id: 'same', label: '비슷할 것 같아' }],
+    choices: [{ id: 'apple', label: '사과 모형' }, { id: 'book', label: '책 모형' }, { id: 'same', label: '무게가 같을 것 같아' }],
     observation: '빈 저울의 숫자를 먼저 0으로 맞춘 뒤 하나씩 올려 봐.',
     expected: 'apple',
     result: '저울로 재 보니 사과 모형 80 g, 책 모형 70 g이었어. 사과 모형이 10 g 더 무거웠어.',

@@ -10,7 +10,19 @@ export type LifeObservation = {
   /** Cards first dropped in the other basket: a note for the teacher, never a penalty. */
   missed: string[];
   object: string; use: string; shared: boolean;
+  /** Optional: one sorted tool the student will introduce to a partner. Saying it aloud is never recorded as done. */
+  intro?: LifeIntro;
 };
+export type LifeIntro = { card: string; where: string; help: string; note: string };
+export const introWhere = ['학교·놀이터', '집·부엌', '길·건물 앞', '공사장·가게'] as const;
+export const introHelp = ['작은 힘으로 들어 올리게', '적은 힘으로 높은 곳에 올라가게', '작은 힘으로 자르거나 열게'] as const;
+/** The sentence the student can read to a partner; empty until a tool, a place and a help are chosen. */
+export function introSentence(intro: LifeIntro | undefined): string {
+  const card = intro && lifeCard(intro.card);
+  if (!card || !intro.where || !intro.help) return '';
+  const note = intro.note.trim();
+  return `나는 ${card.name}${hasFinal(card.name) ? '을' : '를'} 골랐어. ${intro.where}에서 써. ${intro.help} 도와줘. ${card.tool === 'lever' ? '받침점이 있는 지레' : '비스듬한 면이 있는 빗면'}야.${note ? ` ${note}` : ''}`;
+}
 
 /* ===== Picture cards: each one is a real use of a lever or a ramp. Art: public/assets/life-tools/{id}.webp (320x240). ===== */
 export type LifeCard = { id: string; name: string; tool: LifeTool; why: string; hint: string };
@@ -45,7 +57,16 @@ export function retainLifeObservation(value: unknown): LifeObservation | undefin
   if (!value || typeof value !== 'object') return;
   const raw = value as Record<string, unknown>;
   const sorted = cardIds(raw.sorted), missed = cardIds(raw.missed);
-  if (sorted.length || missed.length) return lifeRecord(sorted, missed);
+  if (sorted.length || missed.length) {
+    const intro = raw.intro as Partial<LifeIntro> | undefined, rebuilt = lifeRecord(sorted, missed);
+    if (intro && typeof intro.card === 'string' && sorted.includes(intro.card)) rebuilt.intro = {
+      card: intro.card,
+      where: introWhere.find(item => item === intro.where) ?? '',
+      help: introHelp.find(item => item === intro.help) ?? '',
+      note: typeof intro.note === 'string' ? intro.note.trim().slice(0, 40) : '',
+    };
+    return rebuilt;
+  }
   const text = (item: unknown, max: number) => typeof item === 'string' ? item.trim().slice(0, max) : '';
   const object = text(raw.object, 80), use = text(raw.use, 160);
   return object || use ? { sorted: [], missed: [], object, use, shared: raw.shared === true } : undefined;
@@ -99,7 +120,15 @@ export function openLifeObservation(options: {
     <div class="life-board">
       <div class="life-middle">
         <div class="life-tray" role="group" aria-label="생활 속 도구 그림 카드">${lifeCards.map(card => `<div class="life-slot"><button type="button" class="life-tool" data-card="${card.id}" aria-pressed="false">${image(card.id)}<span>${card.name}</span></button></div>`).join('')}</div>
-        <div class="life-finish" id="life-finish" hidden><p><strong>다 찾았어요!</strong> ${lifeSummary}</p><button type="button" class="button button-primary" id="life-done">관찰 기록으로 마치기</button></div>
+        <div class="life-finish" id="life-finish" hidden><p><strong>다 찾았어요!</strong> ${lifeSummary}</p>
+          <section class="life-intro" aria-labelledby="life-intro-title"><h3 id="life-intro-title">짝에게 소개할 도구 하나 <small>(선택)</small></h3>
+            <div class="life-intro-row" role="group" aria-label="소개할 도구"><span>① 도구</span><div class="life-intro-cards"></div></div>
+            <div class="life-intro-row" role="group" aria-label="어디서 쓰나요"><span>② 어디서</span>${introWhere.map(item => `<button type="button" class="life-chip" data-intro-where="${item}" aria-pressed="false">${item}</button>`).join('')}</div>
+            <div class="life-intro-row" role="group" aria-label="무엇을 도와주나요"><span>③ 무엇을</span>${introHelp.map(item => `<button type="button" class="life-chip" data-intro-help="${item}" aria-pressed="false">${item}</button>`).join('')}</div>
+            <label class="life-intro-row"><span>한마디 더</span><input id="life-intro-note" maxlength="40" placeholder="안 써도 돼요" autocomplete="off"></label>
+            <p class="life-intro-sentence" id="life-intro-sentence" role="status"></p>
+          </section>
+          <button type="button" class="button button-primary" id="life-done">관찰 기록으로 마치기</button></div>
       </div>
       ${(['lever', 'ramp'] as const).map(tool => `<div class="life-basket is-${tool}" data-basket="${tool}">
         <button type="button" class="life-basket-head" data-basket="${tool}"><svg viewBox="0 0 64 40" aria-hidden="true" focusable="false">${toolIcons[tool]}</svg><strong>${lifeBaskets[tool].name}</strong><small>${lifeBaskets[tool].idea}</small></button>
@@ -132,6 +161,15 @@ export function openLifeObservation(options: {
     }
     field('life-count').textContent = `찾은 도구 ${record.sorted.length} / ${lifeCards.length}`;
     field('life-finish').hidden = !done;
+    if (done) {
+      const cards = modal.querySelector<HTMLElement>('.life-intro-cards')!;
+      if (!cards.childElementCount) cards.innerHTML = record.sorted.map(id => `<button type="button" class="life-chip" data-intro-card="${id}" aria-pressed="false">${lifeCard(id)!.name}</button>`).join('');
+      modal.querySelectorAll<HTMLButtonElement>('[data-intro-card]').forEach(b => b.setAttribute('aria-pressed', String(record.intro?.card === b.dataset.introCard)));
+      modal.querySelectorAll<HTMLButtonElement>('[data-intro-where]').forEach(b => b.setAttribute('aria-pressed', String(record.intro?.where === b.dataset.introWhere)));
+      modal.querySelectorAll<HTMLButtonElement>('[data-intro-help]').forEach(b => b.setAttribute('aria-pressed', String(record.intro?.help === b.dataset.introHelp)));
+      const sentence = introSentence(record.intro);
+      field('life-intro-sentence').textContent = sentence ? `짝에게 이렇게 소개해 봐요: “${sentence}”` : '도구, 어디서, 무엇을 고르면 소개할 문장이 만들어져요.';
+    }
     modal.querySelector<HTMLElement>('.life-tray')!.hidden = done;
     const status = field('life-feedback');
     const text = feedback.text || (done ? '' : '카드를 골라 지레 바구니나 빗면 바구니에 놓아요.');
@@ -215,6 +253,11 @@ export function openLifeObservation(options: {
     const button = target.closest<HTMLButtonElement>('button');
     if (button?.id === 'life-close') { close(); return; }
     if (button?.id === 'life-done') { if (!lifeSortDone(record)) return; options.onSave(record); close(); options.onDone(); return; }
+    if (button?.dataset.introCard || button?.dataset.introWhere || button?.dataset.introHelp) {
+      const intro = record.intro ?? { card: '', where: '', help: '', note: '' };
+      record = { ...record, intro: { ...intro, card: button.dataset.introCard ?? intro.card, where: button.dataset.introWhere ?? intro.where, help: button.dataset.introHelp ?? intro.help } };
+      render(); return;
+    }
     const card = target.closest<HTMLButtonElement>('.life-tool');
     if (card) {
       pick(card.dataset.card!);
@@ -229,6 +272,12 @@ export function openLifeObservation(options: {
     feedback = { text: '먼저 그림 카드를 하나 골라요. 그다음 바구니를 눌러요.', tone: '' };
     render();
     flash(modal.querySelector('.life-tray'), 'is-nudge');
+  });
+  modal.addEventListener('input', event => {
+    if (!(event.target instanceof HTMLInputElement) || event.target.id !== 'life-intro-note') return;
+    const intro = record.intro ?? { card: '', where: '', help: '', note: '' };
+    record = { ...record, intro: { ...intro, note: event.target.value.slice(0, 40) } };
+    render();
   });
   modal.addEventListener('keydown', e => {
     if (e.key === 'Escape') {

@@ -126,7 +126,7 @@ test('core touch projection ignores sideward motion and allows reversal', () => 
   assert.equal(coreScene.coreDragProgress({x:100,y:0}, start, start), 0);
 });
 test('shipped core GLBs embed textures and remain within the combined tablet budget', () => {
-  const manifest = JSON.parse(fs.readFileSync('references/models/core-models.json', 'utf8'));
+  const manifest = JSON.parse(fs.readFileSync('scripts/core-models.json', 'utf8'));
   let bytes = 0, triangles = 0;
   for (const asset of manifest.assets) {
     const file = fs.readFileSync(asset.output);

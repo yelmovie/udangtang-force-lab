@@ -87,4 +87,4 @@ for (const asset of assets) {
   report.push(result); console.log(JSON.stringify(result));
 }
 if (report.reduce((sum, item) => sum + item.bytes, 0) > 6000000) throw new Error('Combined tablet model budget exceeded');
-await writeFile(resolve('references/models/core-models.json'), JSON.stringify({ prepared: '2026-10-20', assets: report }, null, 2) + '\n');
+await writeFile(resolve('scripts/core-models.json'), JSON.stringify({ prepared: '2026-10-20', assets: report }, null, 2) + '\n');

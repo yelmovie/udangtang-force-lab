@@ -1,4 +1,5 @@
 import type { AppContext } from '../appTypes';
+import { cargoRunKey, keepEvidence } from '../runHistory';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { showPredictionChip } from '../predictionChip';
 import { letterOnce } from '../requestLetter';
@@ -207,7 +208,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     function recordRun(run: CargoRun) {
         const hadBoth = !!latestRun(1) && !!latestRun(5);
         state.runs.push(run);
-        state.runs = state.runs.slice(-20);
+        state.runs = keepEvidence(state.runs, cargoRunKey);
         railRuns.push(run);
         needsSetup = !deliveredAll();
         context.commit();

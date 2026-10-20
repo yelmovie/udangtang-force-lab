@@ -5,6 +5,7 @@ import { retainLearningRecords, type LearningRecords } from './learningModel';
 import { retainInquiryPlans, type InquiryPlans } from './inquiryPlan';
 import { retainLifeObservation, type LifeObservation } from './lifeObservation';
 import { retainCargoOrders } from './cargoModel';
+import { balanceRunKey, cargoRunKey, keepEvidence } from './runHistory';
 import { retainSpringReads, type SpringRead } from './scaleModel';
 
 export type CargoRun = { parts: number; action: 'push' | 'pull'; gesture: number; distance: number };
@@ -51,6 +52,9 @@ export interface SaveData {
   rescue: RescueState;
   abilities?: number[];
   learning?: LearningRecords;
+  /** The experiment is finished but its required questions are not solved yet. The stage is
+   * completed (stars, tool card, next mission) only after they are, so a reload never skips them. */
+  pendingStage?: { id: StageId; summary: string };
   inquiryPlans?: InquiryPlans;
   lifeObservation?: LifeObservation;
   /** Optional level 2 requests (balance mystery blocks, scale fake part, workshop force budget). */
@@ -113,18 +117,18 @@ export function readSave(): SaveData | null {
       cargo: {
         parts: [1, 3, 5].includes(item.cargo?.parts ?? 0) ? item.cargo!.parts : 1,
         action: item.cargo?.action === 'pull' ? 'pull' : 'push',
-        runs: Array.isArray(item.cargo?.runs) ? item.cargo.runs.filter((run): run is CargoRun =>
+        runs: Array.isArray(item.cargo?.runs) ? keepEvidence(item.cargo.runs.filter((run): run is CargoRun =>
           !!run && [1, 3, 5].includes(run.parts) && ['push', 'pull'].includes(run.action) &&
-          Number.isFinite(run.gesture) && Number.isFinite(run.distance) && run.distance >= 0 && run.distance <= 100).slice(-20) : [],
+          Number.isFinite(run.gesture) && Number.isFinite(run.distance) && run.distance >= 0 && run.distance <= 100), cargoRunKey) : [],
         ...(Array.isArray(item.cargo?.orders) ? { orders: retainCargoOrders(item.cargo.orders) } : {}),
       },
       balance: {
         left: ['A', 'B', 'C'].includes(item.balance?.left ?? '') ? item.balance!.left : null,
         right: ['A', 'B', 'C'].includes(item.balance?.right ?? '') ? item.balance!.right : null,
         prediction: ['left', 'right', 'level'].includes(item.balance?.prediction ?? '') ? item.balance!.prediction : null,
-        runs: Array.isArray(item.balance?.runs) ? item.balance.runs.filter((run): run is BalanceRun =>
+        runs: Array.isArray(item.balance?.runs) ? keepEvidence(item.balance.runs.filter((run): run is BalanceRun =>
           !!run && ['A', 'B', 'C'].includes(run.left) && ['A', 'B', 'C'].includes(run.right) &&
-          ['left', 'right', 'level'].includes(run.prediction) && ['left', 'right', 'level'].includes(run.actual)).slice(-20) : [],
+          ['left', 'right', 'level'].includes(run.prediction) && ['left', 'right', 'level'].includes(run.actual)), balanceRunKey) : [],
       },
       scale: {
         zeroed: item.scale?.zeroed === true,
@@ -149,6 +153,8 @@ export function readSave(): SaveData | null {
       },
       abilities: Array.isArray(item.abilities) ? [...new Set(item.abilities.filter((n): n is number => Number.isInteger(n) && n >= 0 && n < 5))] : [],
       learning: retainLearningRecords(item.learning),
+      ...(stageIds.includes(item.pendingStage?.id as StageId) && typeof item.pendingStage?.summary === 'string' && !completed.includes(item.pendingStage!.id)
+        ? { pendingStage: { id: item.pendingStage!.id, summary: item.pendingStage!.summary } } : {}),
       inquiryPlans: retainInquiryPlans(item.inquiryPlans),
       lifeObservation: retainLifeObservation(item.lifeObservation),
       levels: retainLevels(item.levels),
@@ -199,7 +205,15 @@ export function nextIncomplete(save: SaveData): StageId | 'complete' {
   return stageIds.find(id => !save.completed.includes(id)) ?? 'complete';
 }
 
+/** Experiment finished, required questions still open: keep the student on this stage. */
+export function markExperimentDone(save: SaveData, id: StageId, summary: string): boolean {
+  save.pendingStage = { id, summary };
+  save.currentPage = id;
+  return writeSave(save);
+}
+
 export function completeStage(save: SaveData, id: StageId, summary: string): boolean {
+  if (save.pendingStage?.id === id) delete save.pendingStage;
   if (!save.completed.includes(id)) save.completed.push(id);
   save.evidence[id] = summary;
   save.currentPage = 'map';

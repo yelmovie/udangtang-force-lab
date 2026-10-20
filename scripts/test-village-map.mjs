@@ -26,7 +26,9 @@ function moduleUrl(filename) {
 const { canStandInVillage, createVillageNavigation, createVillageInput, moveVillagePoint, createVillageEntrances, villageLights, villageLightRoutes, withDirectionParticle, withParticle, requestBoardSpot, requesterSpots } = await import(moduleUrl('src/screens/village.ts'));
 
 const map = JSON.parse(fs.readFileSync('public/assets/village/world-map.json', 'utf8'));
-const prepared = JSON.parse(fs.readFileSync('references/pixel-village-v1/prepared/world-map.json', 'utf8'));
+// The prepared source lives in references/ (not versioned); a clean checkout checks the published map alone.
+const preparedPath = 'references/pixel-village-v1/prepared/world-map.json';
+const prepared = fs.existsSync(preparedPath) ? JSON.parse(fs.readFileSync(preparedPath, 'utf8')) : null;
 const STEP = 12;
 const EPS = 1e-6;
 const cross = (a, b) => a[0] * b[1] - a[1] * b[0];
@@ -141,7 +143,7 @@ function assertSafePath(start, route, label) {
 }
 
 test('published map matches prepared source and includes exactly five mission entrances', () => {
-  assert.deepEqual(map, prepared);
+  if (prepared) assert.deepEqual(map, prepared);
   assert.equal(map.radius, 9);
   assert.deepEqual(map.buildings.map(building => building.id).sort(), ['balance', 'cargo', 'rescue', 'scale', 'workshop']);
   for (const polygon of [...map.walkable, ...map.blocked]) {
@@ -279,7 +281,7 @@ test('visible routes and door approaches on the redrawn terrain are reachable', 
 });
 
 test('redrawn sandy ground agrees with the navigation area', async t => {
-  const { data, info } = await sharp('references/pixel-village-v1/raw/terrain.png').removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { data, info } = await sharp('public/assets/village/terrain.webp').removeAlpha().raw().toBuffer({ resolveWithObject: true });
   assert.equal(info.width, map.width);
   assert.equal(info.height, map.height);
   let sandy = 0, reachableSand = 0;
@@ -304,7 +306,7 @@ test('redrawn sandy ground agrees with the navigation area', async t => {
 });
 
 test('expanded navigation stays off painted water and dense tree canopy', async t => {
-  const { data, info } = await sharp('references/pixel-village-v1/raw/terrain.png').removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { data, info } = await sharp('public/assets/village/terrain.webp').removeAlpha().raw().toBuffer({ resolveWithObject: true });
   const water = [], canopy = [];
   for (let y = 36; y < map.height - 36; y += 24) for (let x = 36; x < map.width - 36; x += 24) {
     if (!canStand(x, y)) continue;

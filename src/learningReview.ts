@@ -57,7 +57,8 @@ export function openLearningReview(options: {
       ${correct && step === task.questions.length - 1 ? `<p class="learning-talk">함께 말해봐요 · ${escape(task.talk)}</p>` : ''}
       <div class="learning-actions"><button class="button button-secondary" data-learning="back">결과로 돌아가기</button><button class="button button-primary" data-learning="next" ${correct ? '' : 'disabled'}>${step === task.questions.length - 1 ? '문제 다 풀었어요 →' : '다음 발견 →'}</button></div>
     </section>`;
-    modal.querySelector<HTMLButtonElement>(correct ? '[data-learning="next"]' : '[data-learning-choice]')?.focus();
+    // Keep the evidence picture in view: focus the control without scrolling the card down.
+    modal.querySelector<HTMLButtonElement>(correct ? '[data-learning="next"]' : '[data-learning-choice]')?.focus({ preventScroll: true });
   };
   const abort = () => { close(); options.onClose(); };
   modal.addEventListener('click', event => {

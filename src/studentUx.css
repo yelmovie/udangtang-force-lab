@@ -139,3 +139,17 @@
 @media (max-width:700px) {
   .scale-comparison { gap:6px; }
 }
+/* 짝에게 소개할 도구 하나 (선택): 고르기만 하면 문장이 만들어진다. 긴 글쓰기·글자 수 조건 없음 */
+.life-intro { display:grid; gap:8px; width:100%; padding:12px 14px; border:2px dashed #b9d3c1; border-radius:16px; background:#fbfdf8; }
+.life-intro h3 { margin:0; color:#0d5d5f; font-size:19px; }
+.life-intro h3 small { color:#5f7d73; font-size:15px; }
+.life-intro-row { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+.life-intro-row > span { flex:none; min-width:4.5em; color:#466359; font-size:16px; font-weight:900; }
+.life-intro-cards { display:flex; flex-wrap:wrap; gap:6px; }
+.life-chip { min-height:44px; padding:6px 12px; border:2px solid #c4a66d; border-radius:999px; background:#fffdf5; color:#3d2a14; font:inherit; font-size:16px; font-weight:800; cursor:pointer; }
+.life-chip[aria-pressed="true"] { border-color:#0d5655; background:#146f6d; color:#fff9e8; }
+.life-chip:focus-visible { outline:3px solid #ffc247; outline-offset:2px; }
+.life-intro-row input { flex:1; min-width:180px; min-height:44px; padding:6px 12px; border:2px solid #c4a66d; border-radius:12px; font:inherit; font-size:16px; }
+.life-intro-sentence { margin:0; color:#254e46; font-size:17px; font-weight:800; line-height:1.45; word-break:keep-all; }
+/* The finish button stays at the bottom edge of the scrolling card, so the next step is always visible. */
+.life-card .life-finish #life-done { position:sticky; bottom:8px; z-index:2; box-shadow:0 6px 0 #a76a1d, 0 0 0 6px #eef6ecee; }

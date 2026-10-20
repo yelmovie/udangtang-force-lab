@@ -1,6 +1,9 @@
 import type { RescueState, RescueRun } from './state';
 
 export const coreWeight = 180;
+/** Too little force: the core only budges this far and stops at once, on every input path (drag, tap, key, 2D, 3D).
+ * One small value, so force never looks like fuel that carries the core part way up the ramp. */
+export const stallTravel = .08;
 export const forceNames = ['작은 힘', '중간 힘', '큰 힘'];
 export const routeNames = { short: '짧고 가파른 빗면', long: '길고 완만한 빗면' };
 // Same load, height and surface. Qualitative model; these are not measured newtons.

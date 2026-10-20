@@ -119,8 +119,11 @@
  .workshop-choice p, .workshop-empty { font-size:20px; }
 }
 @media (max-height:600px) and (orientation:landscape) {
- .workshop-redesign { min-height:730px; }
- .workshop-world { min-height:300px; }
+ /* Fit in the screen: the bench shrinks, the bottom controls stay in view (no page scroll). */
+ #app .workshop-redesign.experiment-screen { height:100dvh; min-height:540px; }
+ .workshop-world { min-height:220px; }
+ #app .workshop-design-dock { padding:6px 14px; }
+ #app .workshop-design-dock .design-stop, #app .workshop-design-dock .workshop-tap-run { min-height:46px; }
 }
 
 .workshop-choice .workshop-finding { padding:8px 10px; border-radius:10px; background:#e9f6e4; color:#1c5a43; font-weight:900; }
@@ -404,3 +407,31 @@
 @keyframes design-dock-glow { 50% { box-shadow:inset 0 0 0 3px #ffb938, 0 -10px 26px #ffcf6a44; } }
 @media (prefers-reduced-motion:reduce) { .workshop-design-dock[data-attention="true"] { animation:none; } }
 @media (max-width:900px) { .design-dock-title small { display:none; } .design-stop { padding:0 12px; font-size:16px; } }
+
+/* 평면(2D) 작업대: 3D 를 못 켤 때 같은 자리에 SVG 로 그린다 */
+.workshop-canvas .workshop-flat { display:block; width:100%; height:100%; }
+.workshop-world.is-flat .workshop-view { display:none; }
+/* 눌러서 시험하기: 끌기 대신 한 번 눌러도 같은 실험이 된다 */
+#app .workshop-design-dock .workshop-tap-run { flex:none; min-height:52px; padding:0 20px; margin-left:auto; font-size:18px; }
+#app .workshop-design-dock[hidden] { display:none; }
+/* Record popup: legend in one compact line so the question and both choices fit on a 757px-high tablet. */
+.workshop-record-popup .workshop-force-legend { margin-top:6px; padding:6px 12px; gap:10px; font-size:15px; line-height:1.3; }
+.workshop-record-popup .workshop-force-legend strong { display:inline; margin-right:6px; font-size:16px; }
+.workshop-record-popup .workshop-force-legend .legend-baseline { display:inline-flex; margin:0 0 0 8px; }
+.workshop-record-popup .workshop-force-legend .legend-bar { width:52px; height:12px; }
+.workshop-record-popup .workshop-quiz-prompt { margin-top:6px; padding:6px 12px; }
+.workshop-record-popup .workshop-quiz-prompt h2 { font-size:21px; }
+.workshop-record-popup .workshop-notebook:not(.is-request) .workshop-run { padding:6px 12px; }
+/* Short tablets (≤640px high): the question and both choices must fit without scrolling the popup. */
+@media (max-height:640px) {
+  .workshop-record-popup .stage-popup-card { padding-top:12px; padding-bottom:12px; }
+  .workshop-record-popup .stage-popup-card h2 { font-size:22px; margin:2px 0 4px; }
+  .workshop-record-popup .stage-popup-lead { margin:0; font-size:17px; line-height:1.35; }
+  .workshop-record-popup .notebook-heading { display:none; }
+  .workshop-record-popup .workshop-force-legend { margin-top:4px; padding:4px 10px; font-size:14px; }
+  .workshop-record-popup .workshop-quiz-prompt { margin-top:4px; padding:4px 10px; }
+  .workshop-record-popup .workshop-quiz-prompt h2 { font-size:19px; margin:2px 0; }
+  .workshop-record-popup .workshop-quiz-prompt .answer-label { margin:2px 0 0; font-size:15px; }
+  .workshop-record-popup .workshop-records { margin-top:6px; gap:6px; }
+  .workshop-record-popup .workshop-notebook:not(.is-request) .workshop-run { padding:4px 10px; }
+}

@@ -1,4 +1,5 @@
 import type { AppContext } from '../appTypes';
+import type { LevelRecord } from '../state';
 import { icons } from '../icons';
 import { scaleParts, targetWeight } from '../data';
 import { mountCompanion } from '../sprites';
@@ -34,9 +35,17 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   let reading: number | null = last && last.zeroed === state.zeroed && [...last.parts].sort().join(',') === [...state.parts].sort().join(',') ? last.reading : null;
   let feedback = '겉모습만으로 무게를 정확히 알 수 있을까요? 사과와 책 모형을 하나씩 재 봐요.';
   // Level 2 request: positions are shuffled per visit; measurements are session play, only judgements are saved.
-  const record = () => context.save.levels?.scale;
+  // A replay of a finished request runs on a session-only record; the saved one never changes.
+  let replay: LevelRecord | null = null;
+  const savedRecord = () => context.save.levels?.scale;
+  const record = () => replay ?? savedRecord();
   const fakeSeed = Math.floor(Math.random()*1000);
-  let level: 1|2 = canCompleteScale(state) && record() ? 2 : 1;
+  // Revisiting after the request is done opens the free bench, with paths back to every activity.
+  let level: 1|2 = canCompleteScale(state) && record() && !fakeRequestComplete(record()) ? 2 : 1;
+  let challengeOn = false;
+  // Visible next-step note beside the scale (also a status for screen readers); cleared when acted on.
+  let callout: { text: string; until: 'empty' | 'part' } | null = null;
+  const comboCount = () => new Set(state.runs.filter(run => run.zeroed && run.reading === 150).map(run => [...run.parts].sort().join(','))).size;
   let fakeZeroed = false;
   let fakeOn: number | null = null;
   let waiting = false;
@@ -60,6 +69,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
       <div class="scale-target">하나씩 재고 <strong>비교해요</strong></div>
       <div class="scale-basket" id="scale-basket" aria-label="전자저울 위 쟁반"><span class="basket-label">모형 부품을 여기에 놓아요</span><div class="basket-items" id="basket-items"></div></div>
       <div class="scale-platform"></div><div class="scale-body"><div class="scale-display"><span class="scale-stability" id="scale-stability">측정값</span><strong id="scale-reading">15</strong><span>g</span></div><button class="zero-button" id="zero-button" aria-label="빈 저울 영점 맞추기">0 맞추기</button><button id="scale-measure" class="scale-measure-button">모두 내리기</button></div>
+      <p class="scale-callout" id="scale-callout" role="status" hidden></p>
       <div class="scale-difference" id="scale-difference" role="status"></div>
       <div class="instrument-companion" id="scale-companion" aria-hidden="true"></div>
       <div class="spring-lab" id="spring-lab" hidden aria-label="용수철저울 선택 탐구">
@@ -95,7 +105,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     if(level===2) return (fakeOn===null ? 0 : fakeLayout(round(),fakeSeed)[fakeOn])+(fakeZeroed?0:emptyScaleReading);
     return state.parts.reduce((sum,id)=>sum+scaleParts.find(p=>p.id===id)!.weight,0)+(state.zeroed?0:15);
   }
-  function canFinish() { return canCompleteScale(state) && requestDone(); }
+  function canFinish() { return canCompleteScale(state) && fakeRequestComplete(savedRecord()); }
   function renderFakeDock() {
     if(dockRound===round()) return;
     dockRound=round();
@@ -106,14 +116,17 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   }
   function requestBar() {
     const springButton=`<button class="scale-heft" id="scale-spring-open">${springDone(state.springReads) ? '용수철저울 다시 보기' : '용수철저울도 읽어 볼까?'}</button>`;
+    const challengeButton=`<button class="scale-heft${challengeOn?' is-on':''}" id="scale-challenge" aria-pressed="${challengeOn}">150 g 도전 (선택) · ${Math.min(2,comboCount())}/2</button>`;
+    if(level===1&&canCompleteScale(state)&&fakeRequestComplete(savedRecord())) return `<div class="scale-request is-done"><span class="scale-request-from">의뢰 완료 ✓</span><button class="scale-heft" id="scale-replay">완료한 의뢰 다시 하기</button>${challengeButton}${springButton}</div>`;
     if(level===1) return canCompleteScale(state) ? `<div class="scale-request"><span class="scale-request-from">보급소 직원의 의뢰</span><button class="button button-primary" id="scale-request-open">${record() ? '의뢰 이어 하기' : '의뢰 받기'}</button>${springButton}</div>` : '';
-    if(requestDone()&&!waiting) return `<div class="scale-request is-done"><span class="scale-request-from">의뢰 완료 ✓</span><p>가짜 ${fakeRounds.length}개를 저울 숫자로 찾았어요</p>${springButton}</div>`;
+    if(requestDone()&&!waiting) return `<div class="scale-request is-done"><span class="scale-request-from">${replay ? '다시 하기 완료 ✓' : '의뢰 완료 ✓'}</span><p>가짜 ${fakeRounds.length}개를 저울 숫자로 찾았어요</p><button class="scale-heft" id="scale-basic">기본 물체 실험으로</button>${springButton}</div>`;
     const r=fakeRounds[round()];
-    return `<div class="scale-request is-active"><span class="scale-request-from">의뢰 ${round()+1} / ${fakeRounds.length}</span><p>가짜 1개 · 진짜는 모두 <strong>${r.real} g</strong></p><button class="scale-heft" id="scale-heft">손으로 들어 보기</button></div>`;
+    return `<div class="scale-request is-active"><span class="scale-request-from">${replay ? '다시 하기 ' : '의뢰 '}${round()+1} / ${fakeRounds.length}</span><p>가짜 1개 · 진짜는 모두 <strong>${r.real} g</strong></p><button class="scale-heft" id="scale-heft">손으로 들어 보기</button>${replay ? '<button class="scale-heft" id="scale-basic">기본 물체 실험으로</button>' : ''}</div>`;
   }
   function phaseText() {
     if(busy) return '숫자가 멈출 때까지 살펴봐요';
-    if(level===1) return !state.zeroed ? state.parts.length ? '모두 내리고 빈 저울을 0으로 맞춰요' : '빈 저울을 0으로 맞춰요' : canCompleteScale(state) ? '보급소 직원의 의뢰를 받아요' : state.parts.length ? '모두 내린 뒤 다른 모형을 하나만 올려요' : '사과와 책 모형을 하나씩 재 봐요';
+    if(level===1&&challengeOn) return !state.zeroed ? '150 g 도전: 먼저 빈 저울을 0으로 맞춰요' : `150 g 도전 · 모형 여러 개로 150 g 만들기 · 서로 다른 조합 ${Math.min(2,comboCount())}/2`;
+    if(level===1) return !state.zeroed ? state.parts.length ? '모두 내리고 빈 저울을 0으로 맞춰요' : '빈 저울을 0으로 맞춰요' : canCompleteScale(state) ? fakeRequestComplete(savedRecord()) ? '의뢰 완료! 더 탐구하거나 비교 기록을 저장해요' : '보급소 직원의 의뢰를 받아요' : state.parts.length ? '모두 내린 뒤 다른 모형을 하나만 올려요' : '사과와 책 모형을 하나씩 재 봐요';
     if(waiting) return '가짜를 찾았어요! 다음 의뢰를 준비해요';
     if(requestDone()) return '의뢰 완료! 비교 기록을 저장해요';
     if(!fakeZeroed&&fakeOn===null&&!measured.size) return '빈 저울의 숫자부터 확인해요';
@@ -229,6 +242,10 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     measure.disabled=busy||waiting||!items.length; finish.disabled=busy||waiting||!canFinish();
     root.querySelector('#scale-phase')!.textContent=phaseText();
     root.querySelector('#scale-feedback')!.textContent=feedback;
+    if(callout&&((callout.until==='empty'&&!items.length)||(callout.until==='part'&&items.length))) callout=null;
+    const calloutNode=root.querySelector<HTMLElement>('#scale-callout')!;
+    if(calloutNode.textContent!==(callout?.text??'')) calloutNode.textContent=callout?.text??'';
+    calloutNode.hidden=!callout;
     const difference=root.querySelector<HTMLElement>('#scale-difference')!;
     difference.classList.toggle('matched',level===1 ? !!state.zeroed&&reading===targetWeight : found!==null);
     difference.textContent=differenceText();
@@ -305,9 +322,26 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     context.commit(); context.sound(620); companion.setMood('observe'); update();
     root.querySelector<HTMLElement>('#scale-phase')!.focus({preventScroll:true});
   }
+  /** Back to the basic models (apple, book …). Saved runs, the request and rewards are untouched. */
+  function toBasic() {
+    if(busy) return;
+    popup?.close();
+    level=1; replay=null; waiting=false; fakeOn=null; found=null; measured.clear(); misses=0; lastResult=null; reading=null; callout=null;
+    feedback='기본 물체 실험이에요. 모형을 올려 무게를 재 봐요. 잰 기록은 그대로 남아 있어요.';
+    context.sound(520); update();
+  }
+  /** Play the finished request again for practice, on a copy; the saved request stays complete. */
+  function startReplay() {
+    if(busy||level!==1||!fakeRequestComplete(savedRecord())) return;
+    replay={cleared:[],attempts:0}; challengeOn=false; callout=null;
+    openRequest();
+    feedback='연습으로 의뢰를 다시 해요. 완료한 의뢰 기록은 그대로예요. 빈 저울의 숫자부터 확인해요.';
+    update();
+  }
   function heft() {
     if(busy||waiting||level!==2) return;
-    feedback='손으로 들어 보니 모두 비슷해요. 몇 g 차이는 손으로 알기 어려워요. 저울로 재 봐요.';
+    feedback='손으로는 비슷하게 느껴져요. 저울로 재어 비교해 볼까요?';
+    callout={ text: '손으로는 비슷하게 느껴져요. 저울로 재어 비교해 볼까요?', until: 'part' };
     context.sound(400); update();
     root.querySelectorAll('.fake-part img').forEach((image,i)=>animate(image,[{transform:'translateY(0) rotate(0)'},{transform:`translateY(-7px) rotate(${i%2?4:-4}deg)`,offset:.3},{transform:`translateY(-3px) rotate(${i%2?-3:3}deg)`,offset:.6},{transform:'translateY(0) rotate(0)'}],600));
   }
@@ -324,7 +358,8 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
       pickButton.setAttribute('aria-describedby','scale-difference');
       return;
     }
-    context.save.levels!.scale=recordFakePick(record()!,current,result);
+    const nextRecord=recordFakePick(record()!,current,result);
+    if(replay) replay=nextRecord; else context.save.levels!.scale=nextRecord;
     context.commit();
     if(result==='real') {
       misses++;
@@ -425,14 +460,17 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     if(button.dataset.pick) pick(Number(button.dataset.pick));
     if(button.id==='scale-request-open') openRequest();
     if(button.id==='scale-heft') heft();
+    if(button.id==='scale-replay') startReplay();
+    if(button.id==='scale-basic') toBasic();
+    if(button.id==='scale-challenge') { challengeOn=!challengeOn; feedback=challengeOn ? `150 g 도전 (선택): 영점을 맞추고 모형 여러 개를 올려 150 g을 만들어요. 서로 다른 조합 2개를 찾으면 성공! 지금 ${Math.min(2,comboCount())}/2` : '150 g 도전을 잠깐 멈췄어요. 언제든 다시 할 수 있어요.'; update(); }
     if(button.id==='scale-spring-open') openSpring();
     if(button.id==='scale-record-open') openPopup(lastResult ? '다시 보기' : '나의 기록');
     if(button.id==='zero-button') {
-      if(loaded().length) {feedback='부품이 올라가 있어요! 모두 내려놓고 빈 저울의 0을 맞춰요.'; context.sound(340); update(); return;}
+      if(loaded().length) {feedback='물체를 모두 내려놓고 0을 맞춰요.'; callout={ text: '물체를 모두 내려놓고 0을 맞춰요.', until: 'empty' }; context.sound(340); update(); return;}
       if(level===2) fakeZeroed=true; else state.zeroed=true;
       reading=null; feedback='빈 저울이 0 g이에요! 이제 부품의 무게만 잴 수 있어요.';context.commit();context.sound(700);update();
     }
-    if(button.id==='scale-measure') { if(level===2) fakeOn=null; else state.parts=[]; reading=null; feedback=level===2 ? '빈 저울이에요. 다른 부품 하나를 올려요.' : '빈 저울이에요. 다른 모형 하나를 올려요.'; context.commit(); update(); }
+    if(button.id==='scale-measure') { if(level===2) fakeOn=null; else state.parts=[]; reading=null; feedback=level===2 ? '빈 저울이에요. 다른 부품 하나를 올려요. 잰 기록은 그대로예요.' : '빈 저울이에요. 잰 기록은 그대로예요. 다른 모형 하나를 올려요.'; context.commit(); update(); }
     if(button.id==='scale-finish'&&canFinish()) {
       context.finish('scale',`빈 저울을 0으로 맞추고 사과 모형 80 g과 책 모형 70 g을 하나씩 재었어요. 사과 모형이 10 g 더 무거웠어요. 겉모습으로 헷갈리던 무게를 저울의 숫자로 정확히 비교했어요. ${fakeSummary(record()!)}${springDone(state.springReads) ? ' '+springSummary(state.springReads) : ''}`);
     }

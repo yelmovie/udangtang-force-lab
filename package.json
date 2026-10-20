@@ -9,7 +9,7 @@
     "assets:core": "node scripts/prepare-core-models.mjs",
     "concepts:render": "node tools/concept-clips/render.mjs",
     "build": "tsc --noEmit && vite build",
-    "test": "node --test scripts/test-model.mjs scripts/test-village-story.mjs scripts/test-village-map.mjs scripts/test-rescue-flow.mjs scripts/test-cargo-l2.mjs scripts/test-scale-l2.mjs scripts/test-workshop-l2.mjs scripts/test-balance-l2.mjs scripts/test-stars.mjs scripts/test-life-cards.mjs scripts/test-tool-cards.mjs scripts/test-request-board.mjs",
+    "test": "node --test scripts/test-model.mjs scripts/test-village-story.mjs scripts/test-village-map.mjs scripts/test-rescue-flow.mjs scripts/test-cargo-l2.mjs scripts/test-scale-l2.mjs scripts/test-workshop-l2.mjs scripts/test-balance-l2.mjs scripts/test-stars.mjs scripts/test-life-cards.mjs scripts/test-tool-cards.mjs scripts/test-request-board.mjs scripts/test-pending-review.mjs scripts/test-run-history.mjs",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {

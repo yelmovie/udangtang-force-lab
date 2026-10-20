@@ -8,9 +8,9 @@ import './missionProgress.css';
 import './questionUI.css';
 import './storyVideo.css';
 import './stagePopup.css';
-import { openLifeObservation } from './lifeObservation';
+import { introSentence, openLifeObservation } from './lifeObservation';
 import { stages, type PageId, type StageId } from './data';
-import { completeStage, freshSave, readSave, stageIsOpen, writeSave, type SaveData } from './state';
+import { completeStage, freshSave, markExperimentDone, readSave, stageIsOpen, writeSave, type SaveData } from './state';
 import { mountCargo } from './screens/cargo';
 import { mountBalance } from './screens/balance';
 import { mountScale } from './screens/scale';
@@ -120,14 +120,26 @@ function finish(stageId: StageId, summary: string) {
       onSave: value => { activeSave.lifeObservation = value; if (!adminUnlocked) persist(); },
       onDone: () => {
         const observation = activeSave.lifeObservation!;
-        finishWithEvidence(stageId, `${summary} 생활 속 도구 분류: ${observation.object.trim()} / ${observation.use.trim()}`);
+        const intro = introSentence(observation.intro);
+        finishWithEvidence(stageId, `${summary} 생활 속 도구 분류: ${observation.object.trim()} / ${observation.use.trim()}${intro ? ` 짝에게 소개할 말: ${intro}` : ''}`);
       },
     });
   } else finishWithEvidence(stageId, summary);
 }
 
+/** Required questions first: the stage is completed only once they are solved (see openReviewGate). */
+function questionsSolved(target: SaveData, stageId: StageId) {
+  const task = learningTask(target, stageId);
+  return !task || learningRecordComplete(task, target.learning?.[stageId]);
+}
+
 function finishWithEvidence(stageId: StageId, summary: string) {
   const activeSave = adminSave ?? save;
+  if (!adminUnlocked && !activeSave.completed.includes(stageId) && !questionsSolved(activeSave, stageId)) {
+    if (!markExperimentDone(save, stageId, summary)) toast('기록을 저장하지 못했어요. 브라우저 저장 설정을 확인해 주세요.');
+    openReviewGate(stageId);
+    return;
+  }
   const firstCompletion = !activeSave.completed.includes(stageId);
   if (adminUnlocked && adminSave) {
     // Preview the village restoration in memory without writing a student's save.
@@ -226,8 +238,8 @@ const prologueLines = [
 ];
 type StoryVideo = { src: string; cues: number[]; duration: number; poster?: string };
 type StoryOptions = { lines: { who: string; text: string }[]; finishLabel: string; onDone?: () => void; skippable?: boolean; scenes?: string[]; video?: StoryVideo; music?: MusicName };
-const introVideo: StoryVideo = { src: '/assets/story/intro.mp4', cues: [0, 6, 12], duration: 16 };
-const endingVideo: StoryVideo = { src: '/assets/story/ending.mp4', cues: [0, 4, 10], duration: 16 };
+const introVideo: StoryVideo = { src: '/assets/story/intro.mp4', cues: [0, 6, 12], duration: 16, poster: '/assets/story/intro-01.webp' };
+const endingVideo: StoryVideo = { src: '/assets/story/ending.mp4', cues: [0, 4, 10], duration: 16, poster: '/assets/story/final-01.webp' };
 function storyCueIndex(cues: number[], time: number): number {
   let found = 0;
   cues.forEach((start, i) => { if (time >= start) found = i; });
@@ -273,6 +285,7 @@ function openStoryModal(options: StoryOptions) {
         <video class="story-video" playsinline controls preload="auto" ${video.poster ? `poster="${video.poster}"` : ''} aria-label="${options.scenes ? '엔딩 영상' : '프롤로그 영상'}" src="${video.src}"></video>
         <img class="story-end-frame" src="${options.scenes?.at(-1) ?? `/assets/story/intro-0${options.lines.length}.webp`}" alt="" hidden>
         <button type="button" class="button button-primary story-play" data-story="play" hidden>${icons.play} 영상 재생</button>
+        <p class="story-video-loading" role="status">영상 준비 중…</p>
       </div>
       <div class="story-finish-banner" aria-hidden="true"><span>★</span>${options.scenes ? '마을에 불이 켜졌어!' : '코어를 옮길 방법을 찾자!'}<span>★</span></div>
       <p class="eyebrow" id="story-title"></p>
@@ -318,7 +331,11 @@ function openStoryModal(options: StoryOptions) {
     };
     const timer = window.setTimeout(() => { if (!settled && el.readyState < 1) fallback(); }, 8000);
     const onMeta = () => { window.clearTimeout(timer); settled = true; if (reduced) playBtn.hidden = false; else tryPlay(); };
-    const onPlay = () => { playBtn.hidden = true; };
+    // The poster and a "준비 중" note cover the wait; both go once the first frame is ready.
+    const loadingNote = modal.querySelector<HTMLElement>('.story-video-loading');
+    const onReady = () => { if (loadingNote) loadingNote.hidden = true; };
+    el.addEventListener('loadeddata', onReady, { once: true });
+    const onPlay = () => { playBtn.hidden = true; onReady(); };
     const onPause = () => { if (!el.ended && !el.seeking) playBtn.hidden = false; };
     el.addEventListener('loadedmetadata', onMeta);
     el.addEventListener('error', fallback);
@@ -382,6 +399,41 @@ const missionLearn: Record<StageId, string> = {
   rescue: '배운 방법으로 배터리 코어를 옮겨 중앙 장치에 다시 끼우기',
 };
 const missionCardShown = new Set<StageId>();
+/** Experiment done, questions open: a card that only leads to the questions (or back to the experiment). */
+function openReviewGate(stageId: StageId) {
+  if (closeLearningReview || document.querySelector('#world-title')) return;
+  const stage = stages.find(item => item.id === stageId)!;
+  const modal = document.createElement('div');
+  modal.className = 'modal-layer';
+  modal.innerHTML = `<div class="modal-card review-gate" role="dialog" aria-modal="true" aria-labelledby="world-title">
+      <div class="modal-emblem">${icons.check}</div>
+      <p class="eyebrow">MISSION 0${stage.mission} · 실험 완료!</p>
+      <h2 id="world-title">마지막으로 문제를 풀어요</h2>
+      <section class="world-review question-zone question-zone-compact"><span class="question-label">마을로 가기 전 문제</span><p class="question-prompt">내 실험 기록을 보고 문제를 풀어요</p><button class="button button-primary" id="gate-review">문제 풀기</button></section>
+      <p class="world-lock-note">문제를 다 풀면 별과 도구 카드를 받고, 달라진 마을을 볼 수 있어요.</p>
+      <button class="button button-secondary" id="gate-back">실험 더 해 보기</button>
+    </div>`;
+  document.body.append(modal);
+  const appWasInert = app.inert;
+  app.inert = true;
+  const review = modal.querySelector<HTMLButtonElement>('#gate-review')!;
+  const close = () => { app.inert = appWasInert; modal.remove(); };
+  review.addEventListener('click', () => {
+    modal.hidden = true;
+    const back = () => {
+      closeLearningReview = null;
+      const pending = save.pendingStage;
+      if (pending?.id === stageId && questionsSolved(save, stageId)) { close(); finishWithEvidence(stageId, pending.summary); return; }
+      modal.hidden = false; review.focus();
+    };
+    closeLearningReview = openLearningReview({ app, save, stage: stageId, commit: () => persist(), onClose: back, onDone: back });
+    if (!closeLearningReview) back();
+  });
+  modal.querySelector('#gate-back')!.addEventListener('click', close);
+  modal.addEventListener('modal-dismiss', close);
+  review.focus();
+}
+
 function openMissionCard(stageId: StageId) {
   const stage = stages.find(item => item.id === stageId)!;
   const plan = inquiryPlans[stageId];
@@ -743,7 +795,9 @@ function render() {
     case 'complete': renderComplete(screen); break;
   }
   const entered = stages.find(item => item.id === viewPage);
-  if (entered && !missionCardShown.has(entered.id)) { missionCardShown.add(entered.id); openMissionCard(entered.id); }
+  // Came back (or reloaded) with the questions still open: resume them before anything else.
+  if (entered && !adminUnlocked && save.pendingStage?.id === entered.id && !save.completed.includes(entered.id)) { missionCardShown.add(entered.id); openReviewGate(entered.id); }
+  else if (entered && !missionCardShown.has(entered.id)) { missionCardShown.add(entered.id); openMissionCard(entered.id); }
   if (entered) watchFinish(screen, entered.id);
 }
 

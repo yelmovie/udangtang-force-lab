@@ -1,6 +1,6 @@
 import type { AppContext } from '../appTypes';
 import { icons } from '../icons';
-import { canLift, comparisonHint, comparisonSummary, coreWeight, firstFairComparison, forceNames, hasFairComparison, rescueReady, retainRescueRuns, routeNames } from '../rescueModel';
+import { canLift, stallTravel, comparisonHint, comparisonSummary, coreWeight, firstFairComparison, forceNames, hasFairComparison, rescueReady, retainRescueRuns, routeNames } from '../rescueModel';
 import type { RescueRun } from '../state';
 import { mountCompanion } from '../sprites';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
@@ -289,7 +289,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   function recordRun(success: boolean) {
     const knew = hasFairComparison(state.runs);
     state.runs = retainRescueRuns([...state.runs,{ route:state.route, force:state.force, success }]); state.delivered = success; flashRecord = true;
-    restProgress = success ? 1 : .05; // too little force barely moves it; force is not a fuel that runs out part way
+    restProgress = success ? 1 : stallTravel; // the same point the input stopped at: no jump at the verdict
     const found = !knew && hasFairComparison(state.runs), hint = comparisonHint(state.runs, state.force);
     if (success) tell(found ? `코어 도착! ${hint} 이제 중앙 장치에 코어를 다시 끼워요!` : knew ? '코어 도착! 이제 중앙 장치에 코어를 다시 끼워요!' : `도착했어요! ${hint}`);
     else tell(found ? `이 힘으로는 올라가지 못했어요! ${hint} 이제 도착하는 길로 옮겨요.` : knew ? '이 힘으로는 올라가지 못했어요. 도착하는 길로 코어를 옮겨요.' : `이 힘으로는 올라가지 못했어요. 손가락을 더 세게 누를 필요는 없어요. ${hint}`);
@@ -326,7 +326,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   function drawTravel(amount: number) {
     travel = amount;
     if (phase() === 1) { pose(Math.max(-.07, Math.min(1, amount))); return; }
-    pose(Math.max(0, Math.min(canLift(state.route,state.force) ? 1 : .32, amount)));
+    pose(Math.max(0, Math.min(canLift(state.route,state.force) ? 1 : stallTravel, amount)));
   }
   function finishTravel(cancelled = false) {
     if (cancelled) { restProgress = 0; tell('조작이 멈춰 출발점으로 돌아왔어요. 다시 움직여 봐요.'); companion.setMood('observe'); }
@@ -335,7 +335,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
       else { restProgress = 0; tell(travel < 0 ? '왼쪽은 벽이라 막혔어요. 내 쪽인 오른쪽으로 당겨 봐요.' : '오른쪽으로 조금 더 당겨 길을 열어요.'); companion.setMood('observe'); }
     } else if (phase() === 2) {
       if (canLift(state.route,state.force) && travel >= .95) recordRun(true);
-      else if (!canLift(state.route,state.force) && travel >= .32) recordRun(false);
+      else if (!canLift(state.route,state.force) && travel >= stallTravel) recordRun(false);
       else { restProgress = 0; tell('아직 도착하지 않았어요. 코어를 빗면을 따라 조금 더 끌어 봐요.'); companion.setMood('observe'); }
     }
   }
@@ -399,7 +399,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     if (inspecting) overview();
     if (phase() === 1 && gateAction === 'push') { drawTravel(-.07); finishTravel(); commit(); return; }
     restProgress = Math.min(1, restProgress + .2); drawTravel(restProgress); companion.setMood('effort');
-    const threshold = phase() === 1 || canLift(state.route,state.force) ? .95 : .32;
+    const threshold = phase() === 1 || canLift(state.route,state.force) ? .95 : stallTravel;
     if (travel >= threshold) { finishTravel(); commit(); }
   }
   handle.addEventListener('click', event => { if (phase() === 2 && scene && event.detail > 0) return; stepAlternative(); }, { signal });
@@ -410,7 +410,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     if (cancelled) finishTravel(true);
     else {
       if (tap) drawTravel(Math.min(1, restProgress + .2));
-      const threshold = canLift(state.route, state.force) ? .95 : .32;
+      const threshold = canLift(state.route, state.force) ? .95 : stallTravel;
       if (travel >= threshold) finishTravel();
       else { restProgress = travel; tell('코어가 움직였어요. 눌러서 조금 더 밀어 봐요.'); }
     }
@@ -426,7 +426,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     const tick = (now: number) => {
       if (!active || buttonPointer === null) return;
       drawTravel(initial + (now - buttonStarted) / duration);
-      const threshold = canLift(state.route, state.force) ? .95 : .32;
+      const threshold = canLift(state.route, state.force) ? .95 : stallTravel;
       if (travel >= threshold) stopButton(false); else buttonFrame = requestAnimationFrame(tick);
     };
     buttonFrame = requestAnimationFrame(tick);
@@ -444,7 +444,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     if (inspecting) overview();
     keyHeld = true; busy = true; restProgress = 0; travel = 0; companion.setMood('effort'); controls.inert = true; finish.disabled = true;
     const started = performance.now(), duration = phase() === 1 ? 1000 : state.route === 'long' ? 2500 : 1400;
-    const tick = (now: number) => { if (!active || !keyHeld) return; drawTravel(phase() === 1 && gateAction === 'push' ? -.07 : (now-started)/duration); const threshold = phase() === 1 || canLift(state.route,state.force) ? .95 : .32; if (travel >= threshold || travel < 0) stopKey(false); else frame = requestAnimationFrame(tick); };
+    const tick = (now: number) => { if (!active || !keyHeld) return; drawTravel(phase() === 1 && gateAction === 'push' ? -.07 : (now-started)/duration); const threshold = phase() === 1 || canLift(state.route,state.force) ? .95 : stallTravel; if (travel >= threshold || travel < 0) stopKey(false); else frame = requestAnimationFrame(tick); };
     frame = requestAnimationFrame(tick);
   }, { signal });
   root.addEventListener('keyup', event=>{ if (['Enter',' '].includes(event.key) && (keyHeld || [art,gate,handle,grip].includes(event.target as typeof art))) { event.preventDefault(); if (keyHeld) stopKey(false); } }, { signal });
