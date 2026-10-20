@@ -20,6 +20,7 @@
 | 첫 이야기·마지막 이야기 장면 그림 6장 | `story/intro-01~03.webp`, `story/final-01~03.webp` | 2026-10-12 이미지 생성 서비스로 제작한 PNG(인물 기준표 포함)를 WebP로 변환. 원본·프롬프트는 `references/video/20261012/` (생성 모델명은 기록 없음 — 출처 기록 필요) | 앱 제작자 보유 |
 | 프롤로그 영상 `intro.mp4`·점등식 영상 `ending.mp4` | `story/intro.mp4`, `story/ending.mp4` | 2026-10-12 Google Flow(Veo 3.1 Fast)로 위 장면 PNG를 시작 프레임 삼아 생성·편집(각 16초). 화면 오른쪽 아래에 Veo 워터마크가 남아 있음. 2026-10-18 H.264 crf 26·1280px·AAC 96k로 재인코딩(원본은 `_scratch/video-orig/`) | 생성형 AI 영상. Google Flow·Veo 이용 조건과 워터마크 표기를 따름 |
 | 개념 클립 5편(배송소·균형·저울·공방·코어) | `concepts/{cargo,balance,scale,workshop,rescue}.{webp,mp4,webm}` (15개) | 2026-10-16 직접 코딩한 SVG 장면. 2026-10-19 Remotion 없이 다시 렌더: SVG 프레임 → sharp(Apache-2.0, librsvg) → FFmpeg(로컬 개발 도구, 배포물에 미포함)로 WebM·MP4 인코딩(`tools/concept-clips/`, `npm run concepts:render`). webp는 마지막 프레임 포스터 | 앱 제작자 보유. 제작 도구에 상업 제한 라이선스 없음 |
+| 의뢰 게시판 | `village/props/request-board.webp` | 2026-10-20 Higgsfield GPT Image 2.5(high, 투명 배경)로 생성(마을 소품 그림 4종을 화풍 참고). 알파 기준 크롭 후 240px WebP. 글자 없음, 의뢰 쪽지는 코드로 그림 | 프로젝트를 위해 생성한 이미지 |
 | 도토리 박사 NPC | `village/npc/guide.webp` | 마을 픽셀아트 NPC 시트에서 분리(생성형 AI 제작 추정). 원본 시트 검수 기록은 `doc/asset-review` — 출처 기록 필요 | 앱 제작자 보유 |
 | 도토리 박사 손 흔들기·생각·가리키기 변형 | `village/npc/wave.webp`, `think.webp`, `point.webp` | 도토리 박사 그림의 자세 변형(생성형 AI 제작 추정). 개별 생성 기록 없음 — 출처 기록 필요 | 앱 제작자 보유 |
 | 제목 로고 | `ui/title.webp` | 생성형 AI 제작 | 앱 제작자 보유 |

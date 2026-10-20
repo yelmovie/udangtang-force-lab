@@ -413,20 +413,23 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     ctx.drawImage(sheet, Math.round(p.x - anchor.x * scale), Math.round(p.y - anchor.y * scale), Math.round(image.naturalWidth * scale), Math.round(image.naturalHeight * scale));
     ctx.restore();
   }
-  /** Wooden notice board; each paper note shows its request: grey locked, cream open, green solved. */
+  /** Generated pixel-art notice board; each paper note on its cork panel shows a request: grey locked, cream open, green solved. */
   function drawBoard() {
-    const { x, y } = requestBoardSpot;
-    ctx.fillStyle = '#1d362c55'; ctx.beginPath(); ctx.ellipse(x, y, 42, 9, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#5b3b22'; ctx.fillRect(x - 32, y - 76, 8, 76); ctx.fillRect(x + 24, y - 76, 8, 76);
-    ctx.fillStyle = '#6f4a2b'; ctx.fillRect(x - 43, y - 88, 86, 60);
-    ctx.fillStyle = '#b98252'; ctx.fillRect(x - 39, y - 84, 78, 52);
-    ctx.fillStyle = '#2f5f48'; ctx.fillRect(x - 48, y - 95, 96, 9);
+    const { x, y } = requestBoardSpot, image = images.get('props/request-board.webp');
+    ctx.fillStyle = '#1d362c55'; ctx.beginPath(); ctx.ellipse(x, y, 46, 9, 0, 0, Math.PI * 2); ctx.fill();
+    if (!image) return;
+    // Cork panel measured on the source art (fractions of the cropped image).
+    const h = 112, w = h * image.naturalWidth / image.naturalHeight, left = x - w / 2, top = y - h;
+    ctx.drawImage(image, Math.round(left), Math.round(top), Math.round(w), h);
+    const corkX = left + w * .231, corkW = w * .447, corkY = top + h * .371, corkH = h * .31;
+    const nw = corkW / 4 - 2, nh = Math.min(corkH - 7, nw * 1.35);
     cards.forEach((card, i) => {
-      const nx = x - 35 + i * 18, ny = y - 78 + (i % 2) * 5;
-      ctx.fillStyle = card.status === 'solved' ? '#cfeebb' : card.status === 'open' ? '#fff6d8' : '#cbc5b3'; ctx.fillRect(nx, ny, 15, 20);
-      ctx.fillStyle = ['#d9534f', '#3f7fd0', '#e0a21b', '#8c5bc0'][i]; ctx.fillRect(nx + 6, ny - 2, 3, 3);
-      if (card.status === 'solved') { ctx.strokeStyle = '#2f7a3d'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(nx + 3, ny + 10); ctx.lineTo(nx + 6, ny + 14); ctx.lineTo(nx + 12, ny + 5); ctx.stroke(); }
-      else { ctx.fillStyle = '#8b7a5c'; ctx.fillRect(nx + 3, ny + 7, 9, 2); ctx.fillRect(nx + 3, ny + 12, 7, 2); }
+      const nx = Math.round(corkX + 1 + i * (nw + 2)), ny = Math.round(corkY + 4 + (i % 2) * 3);
+      ctx.fillStyle = '#3b2a1a55'; ctx.fillRect(nx + 1, ny + 1, nw, nh);
+      ctx.fillStyle = card.status === 'solved' ? '#cfeebb' : card.status === 'open' ? '#fff6d8' : '#cbc5b3'; ctx.fillRect(nx, ny, nw, nh);
+      ctx.fillStyle = ['#d9534f', '#3f7fd0', '#e0a21b', '#8c5bc0'][i]; ctx.fillRect(nx + nw / 2 - 1.5, ny - 2, 3, 3);
+      if (card.status === 'solved') { ctx.strokeStyle = '#2f7a3d'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(nx + nw * .2, ny + nh * .5); ctx.lineTo(nx + nw * .42, ny + nh * .72); ctx.lineTo(nx + nw * .82, ny + nh * .25); ctx.stroke(); }
+      else { ctx.fillStyle = '#8b7a5c'; ctx.fillRect(nx + 2, ny + nh * .35, nw - 4, 2); ctx.fillRect(nx + 2, ny + nh * .62, nw - 6, 2); }
     });
   }
   /** 0→1 while the newly restored building's light travels to the core; 1 when nothing plays. */
@@ -745,7 +748,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       const candidate=validateMap(await responses[0].json());const manifest=await responses[1].json() as {outputs:AssetMeta[]};
       if(!alive||token!==generation)return;if(!ctx)throw new Error('canvas');
       if(!Array.isArray(manifest.outputs))throw new Error('manifest');metadata=new Map(manifest.outputs.map(item=>[item.file,item]));
-      const files=[...new Set(['terrain.webp',...candidate.buildings.map(b=>b.asset),...candidate.npcs.map(n=>n.asset),...['guide','wave','think','point','baker','inspector','clerk','crafter'].map(pose=>`npc/${pose}.webp`),...['student','corgi'].flatMap(person=>directions.flatMap(direction=>[1,2,3,4].map(i=>`${person}/${direction}-${i}.webp`))),...[1,4,5,9,10,11,12].map(i=>`props/prop-${String(i).padStart(2,'0')}.webp`)])];
+      const files=[...new Set(['terrain.webp',...candidate.buildings.map(b=>b.asset),...candidate.npcs.map(n=>n.asset),...['guide','wave','think','point','baker','inspector','clerk','crafter'].map(pose=>`npc/${pose}.webp`),...['student','corgi'].flatMap(person=>directions.flatMap(direction=>[1,2,3,4].map(i=>`${person}/${direction}-${i}.webp`))),...[1,4,5,9,10,11,12].map(i=>`props/prop-${String(i).padStart(2,'0')}.webp`),'props/request-board.webp'])];
       let count=0;
       const loaded=await Promise.all(files.map(async file=>{const image=await loadImage(file);if(alive&&token===generation){count++;progress.value=Math.round(count/files.length*95);detail.textContent='마을 그림을 준비하는 중이에요';}return [file,image] as const;}));
       if(!alive||token!==generation)return;
