@@ -16,7 +16,10 @@ function cargo(f) {
   const bars = sp(f, 90, { damping: 7, stiffness: 90 });
   const drop = progress(f, 118, 134), bracket = progress(f, 132, 150);
   const fly = sp(f, 160, { damping: 15, stiffness: 110 }), flying = f >= 158;
-  const ring = progress(f, 186, 204), glow = pulse(f, 186, 20);
+  // Ending: both push arrows stand one above the other on a board, and two guide lines at their
+  // tails and heads show they are the same length (overlapping them hid one arrow from 3rd graders).
+  const board = progress(f, 156, 168), guides = progress(f, 180, 198), glow = pulse(f, 196, 20);
+  const BX = 985, TOP = 335, BOTTOM = 415;
   const heavyEnd = START - SIZE / 2 + lanes[1].distance, lightEnd = START - SIZE / 2 + lanes[0].distance;
   return Stage(
     lanes.map(lane => {
@@ -31,12 +34,16 @@ function cargo(f) {
     DottedLine({ x1: heavyEnd, y1: lanes[1].y + SIZE / 2 + 25, x2: heavyEnd, y2: lanes[0].y + SIZE / 2 + 25, progress: drop, color: C.tealDark, width: 5, dash: '3 12' }),
     DrawPath({ d: `M${heavyEnd} ${lanes[0].y + 98} Q${(heavyEnd + lightEnd) / 2} ${lanes[0].y + 140} ${lightEnd} ${lanes[0].y + 98}`, progress: bracket, color: C.orangeDark, width: 6 }),
     Sparkle({ x: lightEnd, y: lanes[0].y + 90, size: 22 * bracket, opacity: bracket }),
+    g({ opacity: board },
+      el('rect', { x: BX - 92, y: TOP - 52, width: ARROW + 152, height: BOTTOM - TOP + 104, rx: 22, fill: C.surface, stroke: C.border, strokeWidth: 4 }),
+      Crate({ x: BX - 46, y: TOP, size: 44, parts: 1 }), Crate({ x: BX - 46, y: BOTTOM, size: 44, parts: 5 })),
     flying && g({},
-      Arrow({ x: lerp(tailX + 30, 565, fly), y: lerp(lanes[0].y, 355, fly), length: ARROW, thickness: 28 }),
-      Arrow({ x: lerp(tailX + 30, 565, fly), y: lerp(lanes[1].y, 355, fly), length: ARROW, thickness: 28, outline: true, stroke: C.tealDark }),
-      DrawPath({ d: 'M545 355 C545 310 735 310 735 355 C735 400 545 400 545 355 Z', progress: ring, color: C.teal, width: 5, opacity: 0.9 }),
-      Sparkle({ x: 565, y: 355, size: 18 * ring * (1 + glow * 0.4), color: C.teal, opacity: ring }),
-      Sparkle({ x: 715, y: 355, size: 18 * ring * (1 + glow * 0.4), color: C.teal, opacity: ring })),
+      Arrow({ x: lerp(tailX + 30, BX, fly), y: lerp(lanes[0].y, TOP, fly), length: ARROW, thickness: 28 }),
+      Arrow({ x: lerp(tailX + 30, BX, fly), y: lerp(lanes[1].y, BOTTOM, fly), length: ARROW, thickness: 28 }),
+      DottedLine({ x1: BX, y1: TOP - 38, x2: BX, y2: BOTTOM + 38, progress: guides, color: C.tealDark, width: 5, dash: '3 11' }),
+      DottedLine({ x1: BX + ARROW, y1: TOP - 38, x2: BX + ARROW, y2: BOTTOM + 38, progress: guides, color: C.tealDark, width: 5, dash: '3 11' }),
+      Sparkle({ x: BX, y: TOP - 44, size: 16 * guides * (1 + glow * 0.4), color: C.teal, opacity: guides }),
+      Sparkle({ x: BX + ARROW, y: TOP - 44, size: 16 * guides * (1 + glow * 0.4), color: C.teal, opacity: guides })),
   );
 }
 
