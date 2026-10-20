@@ -750,7 +750,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       if(!Array.isArray(manifest.outputs))throw new Error('manifest');metadata=new Map(manifest.outputs.map(item=>[item.file,item]));
       const files=[...new Set(['terrain.webp',...candidate.buildings.map(b=>b.asset),...candidate.npcs.map(n=>n.asset),...['guide','wave','think','point','baker','inspector','clerk','crafter'].map(pose=>`npc/${pose}.webp`),...['student','corgi'].flatMap(person=>directions.flatMap(direction=>[1,2,3,4].map(i=>`${person}/${direction}-${i}.webp`))),...[1,4,5,9,10,11,12].map(i=>`props/prop-${String(i).padStart(2,'0')}.webp`)])];
       let count=0;
-      const loaded=await Promise.all(files.map(async file=>{const image=await loadImage(file);if(alive&&token===generation){count++;progress.value=Math.round(count/files.length*95);detail.textContent=`마을 그림 ${count} / ${files.length}장 준비`;}return [file,image] as const;}));
+      const loaded=await Promise.all(files.map(async file=>{const image=await loadImage(file);if(alive&&token===generation){count++;progress.value=Math.round(count/files.length*95);detail.textContent='마을 그림을 준비하는 중이에요';}return [file,image] as const;}));
       if(!alive||token!==generation)return;
       detail.textContent='안전하게 걸을 수 있는 길을 찾는 중이에요';
       const nav=createVillageNavigation(candidate);const returned=candidate.buildings.find(b=>b.id===options.returnedFrom);

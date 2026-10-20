@@ -50,3 +50,13 @@
 .question-zone .question-prompt { display:block; }
 .question-zone .question-choices { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin:4px 0 0; }
 .question-zone [role="status"] { text-align:center; }
+/* Stage result card: the question box stands between the result and the village button. */
+.world-review { margin:14px 0 4px; }
+.world-review .question-prompt { margin:6px 0 10px; }
+.world-review #world-review { min-width:200px; }
+.world-review.is-solved { border-color:#8ab793; background:linear-gradient(135deg,#e3f3df,#f4fbf1); }
+.world-review.is-solved .question-label { background:#bfe3c6; color:#1c5a43; }
+.world-review.is-solved .question-label::before { content:"✓"; color:#2f8a62; }
+.world-lock-note { margin:8px 0 0; color:#8a4a12; font-size:16px; font-weight:800; text-align:center; }
+.world-lock-note:empty { display:none; }
+#world-continue:disabled { opacity:.5; box-shadow:none; cursor:not-allowed; }

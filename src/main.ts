@@ -140,6 +140,9 @@ function finishWithEvidence(stageId: StageId, summary: string) {
   const challenge = challenges(activeSave).find(item => item.id === stageId)!;
   // A tool card is shown only the first time a mission is completed; it is recomputed, never stored.
   const newCard = firstCompletion && activeSave.completed.includes(stageId) ? toolCards(activeSave).find(card => card.stage === stageId) : undefined;
+  // The changed village opens only after the stage's questions are solved.
+  const reviewTask = learningTask(activeSave, stageId);
+  const reviewSolved = () => !reviewTask || learningRecordComplete(reviewTask, activeSave.learning?.[stageId] ?? { signature: '', answers: [], completed: false });
   const modal = document.createElement('div');
   modal.className = 'modal-layer';
   modal.innerHTML = `<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="world-title">
@@ -148,19 +151,28 @@ function finishWithEvidence(stageId: StageId, summary: string) {
       <h2 id="world-title">${stage.evidence}</h2>${starRow(stageStars(activeSave, stageId), true)}
       ${newCard ? toolCardRevealMarkup(newCard) : ''}
       <div class="discovery-recap"><img src="/assets/game/corgi-success.webp" alt=""><div><strong class="discovery-key">${escapeHtml(toolCardInfo[stageId].idea)}</strong>${guessMarkup(predictionRecap(activeSave, stageId))}</div></div>
-      ${learningTask(activeSave, stageId) ? '<button class="button button-secondary" id="optional-review">근거 설명하기</button>' : ''}<details class="discovery-detail"><summary>도전 과제 (선택)</summary><p>${challenge.done ? `★ ${challenge.label}` : challenge.hint}</p><p class="discovery-record">${escapeHtml(summary)}</p></details>
+      ${reviewTask ? `<section class="world-review question-zone question-zone-compact"><span class="question-label">마을로 가기 전 문제</span><p class="question-prompt">내 실험 기록을 보고 문제를 풀어요</p><button class="button button-primary" id="world-review">문제 풀기</button></section>` : ''}<details class="discovery-detail"><summary>도전 과제 (선택)</summary><p>${challenge.done ? `★ ${challenge.label}` : challenge.hint}</p><p class="discovery-record">${escapeHtml(summary)}</p></details>
       ${adminUnlocked ? '<p class="small-note">미리보기 결과는 학생 진행 기록에 반영되지 않습니다.</p>' : `<div class="world-meter"><span style="width:${save.completed.length * 20}%"></span></div><p class="small-note">전체 실험실 복구 ${save.completed.length * 20}% · 미션 ${save.completed.length}/5 완료</p>`}
-      <button class="button button-primary" id="world-continue">${stageId === 'rescue' ? '마을 점등식 보러 가기 ✦' : '달라진 마을 보러 가기'}</button>
+      <button class="button button-primary" id="world-continue">${stageId === 'rescue' ? '마을 점등식 보러 가기 ✦' : '달라진 마을 보러 가기'}</button><p class="world-lock-note" id="world-lock-note" role="status"></p>
     </div>`;
   document.body.append(modal);
   confetti(modal.querySelector<HTMLElement>('.modal-card')!);
   const appWasInert = app.inert;
   app.inert = true;
   const next = modal.querySelector<HTMLButtonElement>('#world-continue')!;
+  const reviewButton = modal.querySelector<HTMLButtonElement>('#world-review');
+  const syncLock = () => {
+    const solved = reviewSolved() || adminUnlocked;
+    next.disabled = !solved;
+    modal.querySelector<HTMLElement>('#world-lock-note')!.textContent = solved ? '' : '위의 문제를 풀면 달라진 마을을 볼 수 있어요.';
+    modal.querySelector('.world-review')?.classList.toggle('is-solved', solved);
+    if (reviewButton) { reviewButton.textContent = solved ? '✓ 문제 다시 보기' : '문제 풀기'; reviewButton.className = `button ${solved ? 'button-secondary' : 'button-primary'}`; }
+  };
+  syncLock();
   const close = () => { app.inert = appWasInert; modal.remove(); navigate('map'); if(stageId==='rescue'&&activeSave.completed.length===stages.length)openEndingCeremony(); };
-  modal.querySelector('#optional-review')?.addEventListener('click', () => {
+  reviewButton?.addEventListener('click', () => {
     modal.hidden = true;
-    const restore = () => { closeLearningReview = null; modal.hidden = false; next.focus(); };
+    const restore = () => { closeLearningReview = null; modal.hidden = false; syncLock(); (next.disabled ? reviewButton : next).focus(); };
     closeLearningReview = openLearningReview({ app, save: activeSave, stage: stageId, commit: () => { if (!adminUnlocked) persist(); }, onClose: restore, onDone: restore });
     if (!closeLearningReview) restore();
   });
@@ -171,7 +183,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
     else if (!event.shiftKey && document.activeElement === items.at(-1)) { event.preventDefault(); items[0]?.focus(); }
   });
   next.addEventListener('click', close, { once: true });
-  next.focus();
+  (next.disabled && reviewButton ? reviewButton : next).focus();
 }
 
 const context: AppContext = { save, commit: persist, navigate, finish, toast, sound: tone };
