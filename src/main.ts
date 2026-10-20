@@ -27,7 +27,7 @@ import { openLearningReview } from './learningReview';
 import { learningTask, learningRecordComplete, learningSummary } from './learningModel';
 import { stageStars, totalStars, type StageStars } from './stars';
 import { inquiryPlans, predictionRecap, predictionVerdict, type PredictionRecap } from './inquiryPlan';
-import { earnedToolCards, toolCardInfo, toolCards, toolCardsText } from './toolCards';
+import { earnedToolCards, toolCardInfo, toolCards } from './toolCards';
 import { bagIcon, openToolBag, toolCardRevealMarkup, toolCardRowMarkup } from './toolBag';
 import './studentUx.css';
 import './tabletUx.css';
@@ -544,7 +544,6 @@ function renderTitle(root: HTMLElement) {
 function renderComplete(root: HTMLElement) {
   const save = adminSave ?? context.save;
   const completed = save.completed.length;
-  const progress = completed * 20;
   root.innerHTML = `<section class="complete-screen">
     <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1>${(({ earned, max }) => `<p class="ending-stars" aria-label="모은 별 ${earned}개, 전체 ${max}개">★ ${earned} / ${max}</p>`)(totalStars(save))}<p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 장착했어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button></div></div>
     <details class="complete-details"><summary>내 실험과 발견 살펴보기 · ${completed} / 5</summary>
@@ -556,7 +555,7 @@ function renderComplete(root: HTMLElement) {
     </details><details class="complete-details"><summary>스스로 돌아보기 · 더 탐구하기 (선택)</summary><div class="ability-card"><h2>나는 이제 할 수 있어요!</h2><p>할 수 있게 된 것을 눌러 골라 봐. 연구 기록에 함께 저장돼.</p><div class="ability-list">${abilityStatements.map((text, i) => `<button class="ability-item" data-ability="${i}" aria-pressed="${(save.abilities ?? []).includes(i)}"><span>${(save.abilities ?? []).includes(i) ? '✓' : ''}</span>${text}</button>`).join('')}</div></div>
     <div class="challenge-card"><h2>도전 과제 <small id="challenge-count"></small></h2><p>실험실로 돌아가서 더 시험해 보면 배지가 켜져.</p><div class="challenge-list">${challenges(save).map(item => `<div class="challenge-item ${item.done ? 'done' : ''}"><span>${item.done ? '★' : '☆'}</span><div><strong>${item.label}</strong><small>${item.hint}</small></div></div>`).join('')}</div></div>
     </details>${toolCardRowMarkup(save)}<div class="transfer-card"><h2>내가 찾은 생활 속 도구</h2><p>${save.lifeObservation ? escapeHtml(save.lifeObservation.object) + ' · ' + escapeHtml(save.lifeObservation.use) : '주변에서 지레나 빗면을 찾아 어떻게 쓰이는지 살펴봐요.'}</p><p>이 기록을 보며 친구에게 도구의 쓰임을 설명해요.</p></div>
-    <div class="complete-footer"><p>${adminUnlocked ? '관리자 미리보기 결과는 학생의 기록에 반영되지 않아요.' : '이 기록을 가지고 교실에서 실제 도구도 관찰해 보세요.'}</p><button class="button button-secondary" id="download-report" ${adminUnlocked ? 'disabled' : ''}>내 연구 기록 저장 ${icons.download}</button><button class="button button-secondary" id="back-map">작전 지도로</button></div>
+    <div class="complete-footer"><p>${adminUnlocked ? '관리자 미리보기 결과는 학생의 기록에 반영되지 않아요.' : ''}</p><button class="button button-secondary" id="back-map">작전 지도로</button></div>
   </section>`;
   root.querySelector<HTMLButtonElement>('#back-map')?.addEventListener('click', () => navigate('map'));
   root.querySelectorAll<HTMLButtonElement>('[data-toolcard]').forEach(button => button.addEventListener('click', () => {
@@ -576,17 +575,6 @@ function renderComplete(root: HTMLElement) {
   const ending = root.querySelector<HTMLElement>('.ending-world')!;
   const replay = () => { ending.classList.remove('lit'); void ending.offsetWidth; ending.classList.add('lit'); tone(760); };
   root.querySelector('#replay-ending')?.addEventListener('click', openEndingCeremony);
-  root.querySelector('#download-report')?.addEventListener('click', () => {
-    const descriptions = stages.map(s => {
-      const task = learningTask(save, s.id), record = save.learning?.[s.id];
-      const answers = task && record && learningRecordComplete(task, record) ? `\n내 기록 확인과 새 문제 답변\n${learningSummary(task, record)}` : '';
-      return `${s.mission}. ${s.evidence}\n${save.evidence[s.id] ?? '아직 기록이 없어요.'}${answers}`;
-    }).join('\n\n');
-    const content = `우당탕 힘 실험실 · 나의 연구 기록\n실험실 복구 ${progress}%\n\n나는 이제 할 수 있어요\n` + (save.abilities?.length ? save.abilities.map(i => `- ${abilityStatements[i]}`).join('\n') : '- (아직 고르지 않았어요)') + `\n\n도전 과제 ${challenges(save).filter(item => item.done).length}/5\n` + challenges(save).map(item => `${item.done ? '★' : '☆'} ${item.label}`).join('\n') + '\n\n' + toolCardsText(save) + '\n\n' + descriptions + '\n\n나의 실제 실험 기록과 답변 과정\n' + JSON.stringify({ cargo: save.cargo.runs, balance: save.balance.runs, scale: save.scale.runs, workshop: save.workshop.trials, rescue: save.rescue.runs, learning: save.learning ?? {}, lifeObservation: save.lifeObservation }, null, 2);
-    const url = URL.createObjectURL(new Blob(['\uFEFF', content], { type: 'text/plain;charset=utf-8' }));
-    const link = document.createElement('a'); link.href = url; link.download = '나의-힘-연구-기록.txt'; link.hidden = true;
-    document.body.append(link); link.click(); link.remove(); window.setTimeout(() => URL.revokeObjectURL(url), 10000);
-  });
   replay();
 }
 
