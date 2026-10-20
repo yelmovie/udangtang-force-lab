@@ -139,11 +139,12 @@ test('shipped core GLBs embed textures and remain within the combined tablet bud
     assert.equal(index.count % 3, 0);
     assert.equal(file.length, asset.bytes);
     assert.equal(index.count / 3, asset.triangles);
-    assert.ok(asset.texture.width <= 1024 && asset.texture.height <= 1024);
+    assert.ok(asset.texture.width <= 2048 && asset.texture.height <= 2048);
     bytes += file.length; triangles += index.count / 3;
   }
-  assert.ok(bytes <= 2000000, 'models must fit the 2 MB combined envelope');
-  assert.ok(triangles <= 35000, 'model budget leaves room for the procedural stage');
+  // 2026-10-20: raised from 2 MB / 35k after the 22k core tore at its UV seams.
+  assert.ok(bytes <= 4200000, 'models must fit the 4.2 MB combined envelope');
+  assert.ok(triangles <= 65000, 'model budget leaves room for the procedural stage');
 });
 const key = 'udangtang-force-lab-save-v1';
 const memory = new Map();
