@@ -495,7 +495,6 @@ function confirmBox(title: string, body: string, okLabel: string): Promise<boole
 }
 
 /** Teacher check before the admin preview. Not a security feature: the value ships in the client. */
-const TEACHER_CODE = 'yelsam';
 
 function renderTitle(root: HTMLElement) {
   const hasSave = readSave() !== null;
@@ -589,7 +588,7 @@ function openSettings() {
   app.inert = true;
   const close = () => { app.inert = appWasInert; overlay.remove(); app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.focus(); };
   type Section = 'menu' | 'admin' | 'reset' | InfoSection;
-  const headings: Record<Section, string> = { menu: '설정', help: '학생 탐구 가이드', teacher: '교사 가이드', curriculum: '교육과정', info: '정보와 출처', admin: '관리자 해금', reset: '탐구 기록 초기화' };
+  const headings: Record<Section, string> = { menu: '설정', help: '학생 탐구 가이드', teacher: '교사 가이드', curriculum: '교육과정', info: '정보와 출처', admin: '전체 단계 해금', reset: '탐구 기록 초기화' };
   const show = (section: Section | 'concepts') => {
     let content: string;
     if (section === 'menu') {
@@ -597,21 +596,21 @@ function openSettings() {
         <button data-settings="home"><span>${icons.home}</span> 메인 화면</button>
         <button data-settings="help"><span>?</span> 학생 가이드</button><button data-settings="save"><span>${icons.check}</span> 지금 저장</button></div><details class="teacher-tools"><summary>선생님 도구 · 정보</summary><div class="settings-links"><button data-settings="teacher"><span>${icons.book}</span> 교사 가이드</button>
         <button data-settings="curriculum"><span>${icons.target}</span> 교육과정</button><button data-settings="info"><span>${icons.info}</span> 정보와 출처</button>
-        <button data-settings="admin"><span>${icons.gear}</span> 관리자 해금 <small>${adminUnlocked ? '사용 중' : ''}</small></button>
+        <button data-settings="admin"><span>${icons.gear}</span> 전체 단계 해금 <small>${adminUnlocked ? '사용 중' : ''}</small></button>
         <button data-settings="prologue"><span>${icons.play}</span> 프롤로그 다시 보기</button>
-        <button data-settings="concepts"><span>${icons.film}</span> 개념 영상 다시 보기</button>
         ${save.completed.length === stages.length || adminUnlocked ? `<button data-settings="ending"><span>${icons.sparkle}</span> 점등식 다시 보기</button>` : ''}
+        <button data-settings="concepts"><span>${icons.film}</span> 개념 영상 다시 보기</button>
         <button class="settings-danger" data-settings="reset"><span>${icons.reset}</span> 기록 초기화</button></div></details>
         <div class="settings-audio"><div class="settings-audio-switches"><button class="button button-secondary" data-settings="music" aria-pressed="${save.musicOn === true}">${switchLabel('배경음', save.musicOn === true)}</button><button class="button button-secondary" data-settings="sound" aria-pressed="${save.soundOn}">${switchLabel('효과음', save.soundOn)}</button></div><label for="sound-volume">소리 크기 <output id="volume-value">${Math.round((save.soundVolume ?? 0.3) * 100)}%</output></label><input id="sound-volume" type="range" min="0" max="100" step="5" value="${Math.round((save.soundVolume ?? 0.3) * 100)}" aria-label="소리 크기"></div>`;
     } else if (section === 'admin') {
-      content = `<p class="settings-lead">${adminUnlocked ? '실험 5개가 모두 열려 있어요.' : '실험 5개와 결과 화면을 미리 볼 수 있어요.'} 미리보기 조작은 학생 기록에 반영되지 않아요.</p>${adminUnlocked ? '' : '<label class="settings-code"><span>교사용 확인 코드</span><input id="teacher-code" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"></label>'}<button class="button button-primary full" data-settings="toggle-admin">${adminUnlocked ? '관리자 해금 종료' : '전체 화면 한꺼번에 해금'}</button><p class="settings-lead">해금은 이 탭에서만 유지되고 새로고침하면 종료돼요.${adminUnlocked ? '' : ' 확인 코드는 저장되지 않으며 이 화면에서만 검사해요. 계정이나 개인정보를 보호하는 보안 비밀번호는 아니에요.'}</p>`;
+      content = `<p class="settings-lead">${adminUnlocked ? '실험 5개가 모두 열려 있어요.' : '실험 5개와 결과 화면을 미리 볼 수 있어요.'} 미리보기 조작은 학생 기록에 반영되지 않아요.</p><button class="button button-primary full" data-settings="toggle-admin">${adminUnlocked ? '전체 단계 해금 종료' : '전체 단계 해금'}</button><p class="settings-lead">해금은 이 탭에서만 유지되고 새로고침하면 종료돼요.</p>`;
+      if (adminUnlocked) content += `<div class="settings-links" aria-label="미리 볼 실험">${stages.map(stage=>`<button data-preview-stage="${stage.id}">${stage.mission}. ${stage.title}</button>`).join('')}<button data-preview-stage="complete">결과 화면</button></div>`;
     } else if (section === 'concepts') {
       // One clip per mission; a clip opens only after its mission, so it never spoils the discovery.
       content = `<p class="settings-lead">미션을 마치면 그 미션의 개념 영상이 열려요. 보고 싶은 영상을 골라요.</p><div class="concept-gallery">${stages.map(stage => {
         const open = adminUnlocked || save.completed.includes(stage.id);
         return `<button type="button" class="concept-gallery-item" data-concept-open="${stage.id}"${open ? '' : ' disabled'}><img src="${conceptPoster(stage.id)}" alt=""><span><small>MISSION 0${stage.mission} · ${stage.concept}</small><strong>${conceptClipTitle(stage.id)}</strong><em>${open ? '▶ 영상 보기' : `미션 ${stage.mission}을 마치면 열려요`}</em></span></button>`;
       }).join('')}</div>`;
-      if (adminUnlocked) content += `<div class="settings-links" aria-label="미리 볼 실험">${stages.map(stage=>`<button data-preview-stage="${stage.id}">${stage.mission}. ${stage.title}</button>`).join('')}<button data-preview-stage="complete">결과 화면</button></div>`;
     } else if (section === 'reset') {
       content = '<p class="settings-lead">이 브라우저의 모든 실험 기록과 복구 진행을 지울까요? 지운 기록은 되돌릴 수 없어요. 소리 설정은 유지해요.</p><button class="button button-secondary settings-danger" data-settings="confirm-reset">기록을 지우고 처음으로</button>';
     } else content = infoContent[section];
@@ -624,9 +623,9 @@ function openSettings() {
   overlay.addEventListener('click', event => {
     if (event.target === overlay) { close(); return; }
     const preview = (event.target as Element).closest<HTMLButtonElement>('[data-preview-stage]')?.dataset.previewStage;
+    if (preview && adminUnlocked) { close(); navigate(preview as PageId); return; }
     const concept = (event.target as Element).closest<HTMLButtonElement>('[data-concept-open]')?.dataset.conceptOpen;
     if (concept) { openConceptClip(concept as StageId); return; }
-    if (preview && adminUnlocked) { close(); navigate(preview as PageId); return; }
     const button = (event.target as Element).closest<HTMLButtonElement>('button[data-settings]');
     if (!button) return;
     const action = button.dataset.settings;
@@ -660,14 +659,10 @@ function openSettings() {
     else if (action === 'prologue') { close(); openStoryModal({ lines: prologueLines, finishLabel: '닫기', video: introVideo }); }
     else if (action === 'toggle-admin') {
       const enable = !adminUnlocked;
-      if (enable && overlay.querySelector<HTMLInputElement>('#teacher-code')?.value.trim() !== TEACHER_CODE) { toast('교사용 확인 코드가 맞지 않아요.'); overlay.querySelector<HTMLInputElement>('#teacher-code')?.focus(); return; }
       close(); setAdminMode(enable); navigate('map');
     }
     else if (action === 'save') { if (persist()) toast('진행 기록을 저장했어요.'); }
     else if (action === 'home') { close(); setAdminMode(false); viewPage = 'title'; render(); }
-  });
-  overlay.addEventListener('keydown', event => {
-    if (event.key === 'Enter' && (event.target as Element).id === 'teacher-code') overlay.querySelector<HTMLButtonElement>('[data-settings="toggle-admin"]')?.click();
   });
   overlay.addEventListener('input', event => {
     if (!(event.target instanceof HTMLInputElement) || event.target.id !== 'sound-volume') return;

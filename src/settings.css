@@ -37,7 +37,3 @@
 .settings-layer .settings-lead { font-size: 20px; }
 .settings-layer .settings-danger { border-color: #c99d79; background: #fff1df; }
 @media (max-width: 600px) { .settings-layer .settings-links { grid-template-columns: 1fr; } }
-/* Teacher check code above the admin unlock button: label on top, full-width 48px input. */
-.settings-layer .settings-code { display: grid; gap: 6px; margin: 4px 0 12px; font-size: 18px; font-weight: 800; }
-.settings-layer .settings-code input { box-sizing: border-box; width: 100%; min-height: 48px; padding: 8px 12px; font-size: 18px; border: 2px solid #b99b6c; border-radius: 10px; background: #fffdf6; color: inherit; }
-.settings-layer .settings-code input:focus-visible { outline: 3px solid #e3a33a; outline-offset: 2px; }
