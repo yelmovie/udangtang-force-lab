@@ -9,9 +9,9 @@ type Clip = { title: string; cues: { at: number; text: string }[] };
 // at은 초. 렌더 장면(tools/concept-clips/clips.mjs)의 프레임 구간과 맞춘다.
 const clips: Record<ConceptStage, Clip> = {
   cargo: { title: '같은 힘, 다른 무게', cues: [
-    { at: 0, text: '같은 힘으로 부품 1개 상자와 5개 상자를 밀어요.' },
-    { at: 2.9, text: '가벼운 상자가 더 멀리 갔어요. 흔적 막대의 길이를 비교해 봐요.' },
-    { at: 5.2, text: '두 화살표를 위아래로 놓아 보니 길이가 똑같아요. 두 상자를 같은 힘으로 밀었어요!' },
+    { at: 0, text: '부품 1개 상자와 5개 상자를 밀어요. 두 화살표 길이가 똑같지요? 똑같은 힘이에요.' },
+    { at: 2.7, text: '똑같은 힘으로 동시에 밀어요!' },
+    { at: 4.9, text: '같은 힘으로 밀면 가벼운 상자가 더 멀리 가요. 무거운 상자는 조금만 가요.' },
   ] },
   balance: { title: '수평대가 기우는 까닭', cues: [
     { at: 0, text: '받침점에서 양쪽 접시까지의 거리가 같아요.' },

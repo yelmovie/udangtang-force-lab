@@ -4,23 +4,24 @@ import { Arrow, C, Crate, DottedLine, DrawPath, Easing, H, Sparkle, Stage, el, g
 
 const sp = (frame, delay, config) => spring(frame, delay, config);
 
-/* ---------- 배송소: 같은 힘으로 부품 1개·5개 상자를 동시에 밀기 ---------- */
+/* ---------- 배송소: ① 같은 힘 확인 → ② 동시에 밀기 → ③ 가벼운 상자가 더 멀리 ---------- */
+// Order matters for 3rd graders: show the equal pushes first, then the result, then the rule.
 function cargo(f) {
   const START = 270, SIZE = 110, ARROW = 150;
   const lanes = [{ y: 190, parts: 1, distance: 620, bar: C.orange }, { y: 520, parts: 5, distance: 250, bar: C.teal }];
-  const tailX = START - SIZE / 2 - ARROW - 8;
-  const enter = sp(f, 0, { damping: 11 }), arrowIn = sp(f, 20, { damping: 13 });
-  const move = progress(f, 40, 88, Easing.out(Easing.cubic));
+  const tailX = START - SIZE / 2 - ARROW - 8, headX = tailX + ARROW;
+  const enter = sp(f, 0, { damping: 11 }), arrowIn = sp(f, 14, { damping: 13 });
+  // ① two orange guide lines through both arrows: same start, same end = same push
+  const guides = progress(f, 30, 52), guideFade = interpolate(f, [78, 90], [1, 0]), glow = pulse(f, 52, 22);
+  // ② push together
+  const move = progress(f, 82, 126, Easing.out(Easing.cubic));
   const contact = Math.min(move * 620, 30);
-  const ghost = interpolate(f, [60, 76], [1, 0.3]);
-  const bars = sp(f, 90, { damping: 7, stiffness: 90 });
-  const drop = progress(f, 118, 134), bracket = progress(f, 132, 150);
-  const fly = sp(f, 160, { damping: 15, stiffness: 110 }), flying = f >= 158;
-  // Ending: both push arrows stand one above the other on a board, and two guide lines at their
-  // tails and heads show they are the same length (overlapping them hid one arrow from 3rd graders).
-  const board = progress(f, 156, 168), guides = progress(f, 180, 198), glow = pulse(f, 196, 20);
-  const BX = 985, TOP = 335, BOTTOM = 415;
+  const ghost = interpolate(f, [100, 114], [1, 0.3]);
+  // ③ trail bars, then the gap between them
+  const bars = sp(f, 128, { damping: 7, stiffness: 90 });
+  const drop = progress(f, 148, 162), bracket = progress(f, 160, 178), win = pulse(f, 178, 24);
   const heavyEnd = START - SIZE / 2 + lanes[1].distance, lightEnd = START - SIZE / 2 + lanes[0].distance;
+  const guideTop = lanes[0].y - 46, guideBottom = lanes[1].y + 46;
   return Stage(
     lanes.map(lane => {
       const ground = lane.y + SIZE / 2;
@@ -28,22 +29,18 @@ function cargo(f) {
         el('line', { x1: 40, x2: 1240, y1: ground, y2: ground, stroke: C.woodDark, strokeWidth: 6, strokeLinecap: 'round', opacity: 0.45 }),
         el('line', { x1: START - SIZE / 2 - 4, x2: START - SIZE / 2 - 4, y1: lane.y - 110, y2: ground + 44, stroke: C.teal, strokeWidth: 5, strokeDasharray: '12 9' }),
         el('rect', { x: START - SIZE / 2, y: ground + 16, width: Math.max(0, lane.distance * bars), height: 18, rx: 9, fill: lane.bar }),
-        Arrow({ x: tailX + contact, y: lane.y, length: ARROW * arrowIn, thickness: 28, opacity: arrowIn > 0.02 ? (flying ? 0.28 : ghost) : 0 }),
+        Arrow({ x: tailX + contact, y: lane.y, length: ARROW * arrowIn, thickness: 28 * (1 + glow * 0.12), opacity: arrowIn > 0.02 ? ghost : 0 }),
         Crate({ x: START + lane.distance * move, y: lane.y + (1 - enter) * -40, size: SIZE, parts: lane.parts }));
     }),
+    g({ opacity: guideFade },
+      DottedLine({ x1: tailX, y1: guideTop, x2: tailX, y2: guideBottom, progress: guides, color: C.orangeDark, width: 5, dash: '3 11' }),
+      DottedLine({ x1: headX, y1: guideTop, x2: headX, y2: guideBottom, progress: guides, color: C.orangeDark, width: 5, dash: '3 11' }),
+      Sparkle({ x: tailX, y: guideTop - 10, size: 16 * guides, opacity: guides }),
+      Sparkle({ x: headX, y: guideTop - 10, size: 16 * guides, opacity: guides })),
     DottedLine({ x1: heavyEnd, y1: lanes[1].y + SIZE / 2 + 25, x2: heavyEnd, y2: lanes[0].y + SIZE / 2 + 25, progress: drop, color: C.tealDark, width: 5, dash: '3 12' }),
     DrawPath({ d: `M${heavyEnd} ${lanes[0].y + 98} Q${(heavyEnd + lightEnd) / 2} ${lanes[0].y + 140} ${lightEnd} ${lanes[0].y + 98}`, progress: bracket, color: C.orangeDark, width: 6 }),
     Sparkle({ x: lightEnd, y: lanes[0].y + 90, size: 22 * bracket, opacity: bracket }),
-    g({ opacity: board },
-      el('rect', { x: BX - 92, y: TOP - 52, width: ARROW + 152, height: BOTTOM - TOP + 104, rx: 22, fill: C.surface, stroke: C.border, strokeWidth: 4 }),
-      Crate({ x: BX - 46, y: TOP, size: 44, parts: 1 }), Crate({ x: BX - 46, y: BOTTOM, size: 44, parts: 5 })),
-    flying && g({},
-      Arrow({ x: lerp(tailX + 30, BX, fly), y: lerp(lanes[0].y, TOP, fly), length: ARROW, thickness: 28 }),
-      Arrow({ x: lerp(tailX + 30, BX, fly), y: lerp(lanes[1].y, BOTTOM, fly), length: ARROW, thickness: 28 }),
-      DottedLine({ x1: BX, y1: TOP - 38, x2: BX, y2: BOTTOM + 38, progress: guides, color: C.tealDark, width: 5, dash: '3 11' }),
-      DottedLine({ x1: BX + ARROW, y1: TOP - 38, x2: BX + ARROW, y2: BOTTOM + 38, progress: guides, color: C.tealDark, width: 5, dash: '3 11' }),
-      Sparkle({ x: BX, y: TOP - 44, size: 16 * guides * (1 + glow * 0.4), color: C.teal, opacity: guides }),
-      Sparkle({ x: BX + ARROW, y: TOP - 44, size: 16 * guides * (1 + glow * 0.4), color: C.teal, opacity: guides })),
+    Sparkle({ x: START + lanes[0].distance + SIZE / 2 + 18, y: lanes[0].y - SIZE / 2 - 8, size: 26 * bracket * (1 + win * 0.5), opacity: bracket }),
   );
 }
 
