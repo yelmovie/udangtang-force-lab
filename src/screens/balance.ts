@@ -198,7 +198,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       };
     }
     const cards = records.map((record, i) => `<span class="mystery-record${i === clue ? ' is-clue' : ''}" data-actual="${record.actual === 'level' ? 'level' : 'tilt'}" aria-label="기록 ${i + 1}: ${recordReason(record)}">${relationText(record)}</span>`).join('') || `<p>${round ? '수평대로 비교하면 기록 카드가 쌓여요.' : '모든 상자 꾸러미를 해결했어요.'}</p>`;
-    const picks = round && !mysteryDone() ? `<div class="mystery-pick"><span>② 어느 상자가 제일 무거울까요?</span><div class="mystery-picks">${round.boxes.map(id => `<button data-pick="${id}" aria-label="${id} 상자가 제일 무거워요"${frozen() || !records.length ? ' disabled' : ''}>${id}</button>`).join('')}</div></div>` : '';
+    const picks = round && !mysteryDone() ? `<div class="mystery-pick question-zone question-zone-compact"><span class="question-label">생각해 볼 문제</span><strong class="question-prompt">② 어느 상자가 제일 무거울까요?</strong><div class="mystery-picks question-choices">${round.boxes.map(id => `<button data-pick="${id}" aria-label="${id} 상자가 제일 무거워요"${frozen() || !records.length ? ' disabled' : ''}>${id}</button>`).join('')}</div></div>` : '';
     return {
       label: '의뢰 기록',
       title: mysteryDone() ? '의뢰를 모두 해결했어요!' : waiting && found ? `찾았어요! ${found} 상자` : shownRecord ? `기록 「${relationText(shownRecord)}」` : '비교 기록 카드',

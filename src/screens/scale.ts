@@ -138,7 +138,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   }
   function questionMarkup(q:PopQuestion, answer?:string) {
     const solved=answer===q.correct;
-    return `<section class="scale-pop-question"><p class="scale-pop-prompt"><span>생각해 봐요</span>${q.prompt}</p><div class="scale-pop-choices">${q.choices.map(([id,label])=>`<button type="button" data-answer="${id}" class="${answer===id ? solved ? 'is-right' : 'is-wrong' : ''}"${solved?' disabled':''}>${label}</button>`).join('')}</div><p class="scale-pop-answer${solved?' is-right':''}" role="status">${answer===undefined ? '' : solved ? q.right : q.hint}</p></section>`;
+    return `<section class="scale-pop-question question-zone"><span class="question-label">생각해 볼 문제</span><p class="scale-pop-prompt question-prompt">${q.prompt}</p><div class="scale-pop-choices question-choices">${q.choices.map(([id,label])=>`<button type="button" data-answer="${id}" class="${answer===id ? solved ? 'is-right' : 'is-wrong' : ''}"${solved?' disabled':''}>${label}</button>`).join('')}</div><p class="scale-pop-answer${solved?' is-right':''}" role="status">${answer===undefined ? '' : solved ? q.right : q.hint}</p></section>`;
   }
   function openPopup(label:string) {
     if(!active) return;

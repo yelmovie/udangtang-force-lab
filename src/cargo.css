@@ -96,9 +96,9 @@
 .cargo-direction{color:#3d5f4a;font-weight:700}
 .cargo-dock [hidden],.rail-end[hidden]{display:none}
 .cargo-trace{display:grid;grid-template-columns:3em 1fr 4.2em;align-items:center;gap:10px;font-size:18px;font-weight:800;white-space:nowrap;margin:8px 0}.cargo-trace b{height:16px;border-radius:8px;background:#ece2cc;overflow:hidden}.cargo-trace i{display:block;height:100%;border-radius:8px;background:var(--trace)}
-.cargo-discovery>div{display:flex;gap:8px;margin-top:8px}.cargo-discovery button{min-height:52px;min-width:120px;font-size:18px;cursor:pointer;border:2px solid #8eb8a6;background:#e6f4e7;color:#164c49;border-radius:12px;padding:8px 12px;font:inherit;font-weight:700;box-shadow:0 4px 0 #6f9d8f;transition:transform .12s ease,box-shadow .12s ease,background .12s ease}
-.cargo-discovery button:not(:disabled):hover{background:#f3fbf3}
-.cargo-discovery button:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 #6f9d8f}
+.cargo-discovery>div{display:flex;gap:8px;margin-top:8px}.cargo-discovery button{min-height:52px;min-width:120px;font-size:18px;cursor:pointer;border:2px solid #c4a66d;background:#fffdf5;color:#3d2a14;border-radius:12px;padding:8px 12px;font:inherit;font-weight:700;box-shadow:0 4px 0 #a98448;transition:transform .12s ease,box-shadow .12s ease,background .12s ease}
+.cargo-discovery button:not(:disabled):hover{background:#fff7e2}
+.cargo-discovery button:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 #a98448}
 .cargo-discovery button:focus-visible{outline:3px solid #ffc247;outline-offset:3px}
 .cargo-discovery button:disabled{opacity:.55;box-shadow:none}
 .cargo-load-ghost{position:fixed;z-index:1500;width:90px;pointer-events:none;transform:translate(-50%,-50%);text-align:center;background:#fff7ddbd;border-radius:14px;padding:5px;color:#184945}
@@ -130,8 +130,7 @@
 .cargo-popup .cargo-traces{display:grid;gap:2px}
 .cargo-popup .cargo-trace{grid-template-columns:3.2em min(420px,48vw) 4.6em;margin:2px 0;font-size:22px}
 .cargo-popup .cargo-direction{font-size:22px}
-.cargo-popup .cargo-discovery{margin-top:10px;padding:10px 16px;border-radius:20px;background:#eef7f0;border:2px solid #8eb8a6}
-.cargo-popup .cargo-discovery>strong{font-size:24px;color:#174b4c}
+.cargo-popup .cargo-discovery{margin:12px 0 0}
 .cargo-popup .cargo-discovery button{min-height:56px;min-width:140px;font-size:22px}
 .cargo-popup .cargo-finding{font-size:22px;font-weight:800;color:#136e70}
 .cargo-popup-next{padding:6px 14px;border-radius:16px;background:#fff1cf;border:2px solid #f2c45a;color:#4b3405;font-size:22px}

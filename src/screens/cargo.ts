@@ -442,7 +442,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     }
     function questionMarkup() {
         if (!ready()) return '';
-        return `<div class="cargo-discovery"><strong>같은 힘으로 움직였을 때, 더 멀리 간 상자는?</strong>${finding ? '' : '<div><button data-finding="light">부품 1개</button><button data-finding="heavy">부품 5개</button></div>'}<p class="cargo-finding" role="status">${findingNote || findingMessage(finding)}</p></div>`;
+        return `<div class="cargo-discovery question-zone"><span class="question-label">생각해 볼 문제</span><strong class="question-prompt">같은 힘으로 움직였을 때, 더 멀리 간 상자는?</strong>${finding ? '' : '<div class="question-choices"><button data-finding="light">부품 1개</button><button data-finding="heavy">부품 5개</button></div>'}<p class="cargo-finding" role="status">${findingNote || findingMessage(finding)}</p></div>`;
     }
     function nextHint() {
         if (finding && deliveredAll()) return '배달은 끝났어요. 부품 개수나 힘을 주는 쪽을 바꿔 더 실험해 봐요.';

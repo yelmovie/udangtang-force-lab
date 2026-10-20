@@ -183,8 +183,7 @@
 }
 .balance-screen .mystery-record[data-actual="level"] { border-color:#57a57d; background:#ecf8e6; }
 .balance-screen .mystery-record.is-clue { border-color:#e07b1e; background:#fff0c4; outline:3px solid #ffbf4a; outline-offset:2px; }
-.balance-screen .mystery-pick { display:grid; gap:5px; }
-.balance-screen .mystery-pick > span { color:#523b23; font-size:16px; font-weight:900; }
+.balance-screen .mystery-pick { display:block; }
 .balance-screen .mystery-picks { display:flex; gap:8px; }
 .balance-screen .mystery-picks button {
   flex:1 1 0; min-height:52px; border:2px solid #b9955c; border-radius:12px;

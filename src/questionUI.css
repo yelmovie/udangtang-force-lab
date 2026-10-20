@@ -45,3 +45,8 @@
 @keyframes tap-hint-pulse { 0%,65%,100%{transform:translateY(0) rotate(-8deg)}35%{transform:translateY(4px) rotate(2deg)} }
 @media(prefers-reduced-motion:reduce) { .tap-hint-icon { animation:none; } }
 @media(max-width:650px) { .question-zone { padding:12px; } .mission-answer-grid { grid-template-columns:1fr; } }
+/* Stage popups reuse the same question box: "?" badge on the label, choices centred under the prompt. */
+.question-label::before { content:"?"; display:inline-grid; place-items:center; width:20px; height:20px; border-radius:50%; background:#fffaf0; color:#a5671a; font-size:14px; line-height:1; }
+.question-zone .question-prompt { display:block; }
+.question-zone .question-choices { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin:4px 0 0; }
+.question-zone [role="status"] { text-align:center; }

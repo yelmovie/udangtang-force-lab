@@ -155,8 +155,6 @@
 .scale-popup .scale-pop-runs li { display:inline-flex; gap:8px; padding:2px 10px; border:1px solid #d9c28f; border-radius:10px; background:#fff; font-size:20px; }
 .scale-popup .scale-pop-note { margin:6px 0 0; font-size:20px; color:#5a4a30; }
 .scale-popup .scale-pop-question { margin-top:12px; }
-.scale-popup .scale-pop-prompt { margin:0 0 8px; font-weight:900; color:#244d47; }
-.scale-popup .scale-pop-prompt span { display:inline-block; margin-right:8px; padding:2px 12px; border-radius:999px; background:#21776e; color:#fff; font-size:20px; vertical-align:2px; }
 .scale-popup .scale-pop-choices { display:flex; flex-wrap:wrap; gap:8px; }
 .scale-popup .scale-pop-choices button { flex:1 1 auto; min-height:56px; padding:8px 16px; border:2px solid #b98a4f; border-radius:12px; background:#fff7e2; color:#3d2a14; font-size:22px; font-weight:900; word-break:keep-all; box-shadow:0 4px 0 #8d6b3f; cursor:pointer; transition:transform .12s ease, box-shadow .12s ease; }
 .scale-popup .scale-pop-choices button:not(:disabled):hover { background:#fffcf0; }
