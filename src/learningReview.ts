@@ -6,10 +6,18 @@ import { fingerIcon } from './interactionHints';
 
 const escape = (text: string) => text.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
-const balancePair = (pair: [string, string]) => `<div class="learning-block-pair">${pair.map((id, index) => {
-  const object = balanceObjects.find(item => item.id === id);
-  return object ? `<div class="learning-block"><small>${index ? '오른쪽' : '왼쪽'}</small><img src="${object.image}" alt=""><strong>${escape(object.label)}</strong></div>` : '';
-}).join('')}</div>`;
+/** The balance-stage parts (base, beam, pans) rebuilt small: a record tilts, a question waits level with a "?". */
+const balancePair = (pair: [string, string], tilt?: 'left' | 'right' | 'level') => {
+  const objects = pair.map(id => balanceObjects.find(item => item.id === id));
+  if (objects.some(o => !o)) return '';
+  const [left, right] = objects.map(o => escape(o!.label));
+  const state = tilt === 'left' ? '왼쪽이 내려갔어요' : tilt === 'right' ? '오른쪽이 내려갔어요' : tilt === 'level' ? '수평이에요' : '어떻게 될까요?';
+  return `<div class="learning-balance" data-tilt="${tilt ?? 'ask'}" role="img" aria-label="수평대: 왼쪽 ${left}, 오른쪽 ${right}. ${state}">
+    <img class="lb-base" src="/assets/game/balance-base.webp" alt=""><span class="lb-arm"><i class="lb-beam"></i>
+    ${objects.map((o, i) => `<span class="lb-side lb-${i ? 'right' : 'left'}"><img src="${o!.image}" alt=""></span>`).join('')}</span>
+    ${tilt ? '' : '<b class="lb-ask" aria-hidden="true">?</b>'}
+    <span class="lb-names"><span><small>왼쪽</small>${left}</span><span><small>오른쪽</small>${right}</span></span></div>`;
+};
 
 /** A short observation-to-explanation check. Wrong first thoughts are kept, never penalized. */
 export function openLearningReview(options: {
@@ -37,7 +45,7 @@ export function openLearningReview(options: {
     const q = task.questions[step];
     const answer = record.answers[step];
     const correct = answer?.chosen === q.correct;
-    const cards = task.cards.map(card => `<article class="learning-evidence"><strong>${escape(card.title)}</strong>${card.pair ? balancePair(card.pair) : ''}<p>${escape(card.detail)}</p>${card.bars?.map((bar, i) => `<div class="learning-measure"><span>${escape(bar.label)}</span><div class="learning-bar ${i ? 'learning-bar-distance' : ''}" role="img" aria-label="${escape(bar.label)}, 비교 막대"><i style="width:${Math.max(4, Math.min(100, bar.value / bar.maximum * 100))}%"></i></div></div>`).join('') ?? ''}</article>`).join('');
+    const cards = task.cards.map(card => `<article class="learning-evidence"><strong>${escape(card.title)}</strong>${card.pair ? balancePair(card.pair, card.tilt) : ''}<p>${escape(card.detail)}</p>${card.bars?.map((bar, i) => `<div class="learning-measure"><span>${escape(bar.label)}</span><div class="learning-bar ${i ? 'learning-bar-distance' : ''}" role="img" aria-label="${escape(bar.label)}, 비교 막대"><i style="width:${Math.max(4, Math.min(100, bar.value / bar.maximum * 100))}%"></i></div></div>`).join('') ?? ''}</article>`).join('');
     modal.innerHTML = `<section class="modal-card learning-card" role="dialog" aria-modal="true" aria-labelledby="learning-title">
       <div class="learning-heading"><img src="/assets/village/corgi/down-1.webp" alt=""><div><p class="eyebrow">내 기록으로 설명하기 · ${step + 1} / ${task.questions.length}</p><h2 id="learning-title">${task.stage === 'balance' ? '그림을 보고 생각해 봐요' : '내가 발견한 것을 써볼까요?'}</h2></div><button class="learning-close" aria-label="실험으로 돌아가기">×</button></div>
       ${predicted ? `<p class="learning-first-thought"><strong>콩이가 간직한 내 첫 생각:</strong> ${escape(predicted)} <span>· ${escape(inquiryPlans[options.stage].observation)}</span></p>` : ''}

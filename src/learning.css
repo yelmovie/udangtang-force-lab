@@ -42,3 +42,18 @@
 @media (max-width: 1000px) { .learning-card { padding: 18px; } .learning-option { min-height: 66px; } }
 @media (max-width: 650px), (max-height: 540px) { .learning-heading img { display: none; } .learning-evidence-grid { gap: 8px; margin: 12px 0; } .learning-evidence { padding: 10px; } .learning-options { grid-template-columns: 1fr; } .learning-option { min-height: 48px; } .learning-actions { flex-wrap: wrap; } }
 @media (max-width:800px) { .learning-block { grid-template-columns:48px 1fr; gap:4px; padding:4px; } .learning-block img { width:48px; height:52px; } .learning-block strong { font-size:15px; } .learning-block-pair { gap:5px; } }
+/* Mini balance built from the balance-stage parts. The arm tilts; pans counter-rotate so blocks stay upright on the beam ends. */
+.learning-balance { --angle:0deg; position:relative; width:min(100%,340px); height:176px; margin:8px auto 0; }
+.learning-balance[data-tilt="left"] { --angle:-7deg; }
+.learning-balance[data-tilt="right"] { --angle:7deg; }
+.learning-balance .lb-base { position:absolute; left:50%; top:66px; width:100px; transform:translateX(-50%); }
+.learning-balance .lb-arm { position:absolute; left:3%; right:3%; top:0; height:78px; transform-origin:50% 70px; transform:rotate(var(--angle)); z-index:1; }
+.learning-balance .lb-beam { position:absolute; left:0; right:0; top:62px; height:16px; background:url('/assets/game/balance-beam.webp') center/100% 100%; }
+.learning-balance .lb-side { position:absolute; top:0; width:36%; height:66px; display:flex; justify-content:center; align-items:flex-end; padding-bottom:12px; background:url('/assets/game/balance-pan.webp') center bottom/100% 30px no-repeat; transform-origin:50% 100%; transform:rotate(calc(var(--angle) * -1)); }
+.learning-balance .lb-left { left:0; }
+.learning-balance .lb-right { right:0; }
+.learning-balance .lb-side img { width:62px; height:62px; object-fit:contain; filter:drop-shadow(0 3px 2px #33261340); }
+.learning-balance .lb-ask { position:absolute; left:50%; top:4px; width:38px; height:38px; display:grid; place-items:center; transform:translateX(-50%); border-radius:50%; background:#f3bd4f; color:#513715; font-size:24px; box-shadow:0 3px 0 #a97c36; z-index:3; }
+.learning-balance .lb-names { position:absolute; left:0; right:0; bottom:0; display:flex; justify-content:space-between; gap:8px; }
+.learning-balance .lb-names > span { width:42%; text-align:center; font-size:16px; font-weight:800; color:#21463f; line-height:1.2; word-break:keep-all; }
+.learning-balance .lb-names small { display:block; font-size:13px; color:#557368; }

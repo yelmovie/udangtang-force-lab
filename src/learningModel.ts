@@ -6,7 +6,7 @@ import { scaleComparison } from './scaleModel';
 export type LearningAnswer = { first: string; chosen: string; tries: number };
 export type LearningRecord = { signature: string; answers: LearningAnswer[]; completed: boolean };
 export type LearningRecords = Partial<Record<StageId, LearningRecord>>;
-export type EvidenceCard = { title: string; detail: string; pair?: [string, string]; bars?: { label: string; value: number; maximum: number }[] };
+export type EvidenceCard = { title: string; detail: string; pair?: [string, string]; tilt?: 'left' | 'right' | 'level'; bars?: { label: string; value: number; maximum: number }[] };
 export type LearningQuestion = {
   id: string; prompt: string; pair?: [string, string]; choices: { id: string; text: string }[];
   correct: string; hint: string; explanation: string;
@@ -38,7 +38,7 @@ export function learningTask(save: SaveData, stage: StageId): LearningTask | nul
     const level = save.balance.runs.find(r => r.actual === 'level');
     if (!tilted || !level) return null;
     const heavy = tilted.actual === 'left' ? tilted.left : tilted.right;
-    cards.push({ title: '기울어진 기록', pair: [tilted.left, tilted.right], detail: `${blockName(heavy)} 쪽이 내려갔어요.` }, { title: '수평이 된 기록', pair: [level.left, level.right], detail: '두 물체의 무게가 같았어요.' });
+    cards.push({ title: '기울어진 기록', pair: [tilted.left, tilted.right], tilt: tilted.actual, detail: `${blockName(heavy)} 쪽이 내려갔어요.` }, { title: '수평이 된 기록', pair: [level.left, level.right], tilt: 'level', detail: '두 물체의 무게가 같았어요.' });
     questions.push({ id: 'swap', prompt: `${blockName(tilted.right)}과 ${blockName(tilted.left)}의 자리만 바꾸면?`, pair: [tilted.right, tilted.left], choices: directionChoices, correct: tilted.actual === 'left' ? 'right' : 'left', hint: `더 무거운 ${blockName(heavy)}이 지금 어느 쪽에 있나요?`, explanation: `${blockName(heavy)}의 무게는 그대로예요. 그 물체가 있는 쪽이 내려가요.` });
     questions.push({ id: 'equal', prompt: `${blockName(level.left)}과 ${blockName(level.right)}을 놓았을 때 수평이었던 까닭은?`, pair: [level.left, level.right], choices: choices(['equal', '두 물체의 무게가 같아요'], ['look', '큰 물체가 반드시 무거워요'], ['side', '왼쪽에 놓인 물체가 무거워요']), correct: 'equal', why: { look: '크기가 커도 가벼운 물체가 있어요. 크기가 아니라 수평대가 어떻게 되었는지 봐요.', side: '놓은 쪽이 왼쪽인지 오른쪽인지는 무게와 상관없어요.' }, hint: '수평이었던 기록을 다시 봐요.', explanation: '같은 거리에서 수평이면 두 물체의 무게가 같아요.' });
     talk = '무거운 물체의 자리를 바꾸면 내려가는 쪽도 바뀔까요?';
