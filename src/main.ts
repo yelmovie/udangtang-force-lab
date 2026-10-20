@@ -24,6 +24,7 @@ import { prepareOffline } from './offline';
 import type { AppContext } from './appTypes';
 import { abilityStatements, challenges } from './challenges';
 import { openLearningReview } from './learningReview';
+import { openConceptClip, syncConceptButton } from './conceptClip';
 import { learningTask, learningRecordComplete, learningSummary } from './learningModel';
 import { stageStars, totalStars, type StageStars } from './stars';
 import { inquiryPlans, predictionRecap, predictionVerdict, type PredictionRecap } from './inquiryPlan';
@@ -151,6 +152,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
       <h2 id="world-title">${stage.evidence}</h2>${starRow(stageStars(activeSave, stageId), true)}
       ${newCard ? toolCardRevealMarkup(newCard) : ''}
       <div class="discovery-recap"><img src="/assets/game/corgi-success.webp" alt=""><div><strong class="discovery-key">${escapeHtml(toolCardInfo[stageId].idea)}</strong>${guessMarkup(predictionRecap(activeSave, stageId))}</div></div>
+      <div class="world-concept"><span class="world-concept-label">더 알아보고 싶다면 (선택)</span></div>
       ${reviewTask ? `<section class="world-review question-zone question-zone-compact"><span class="question-label">마을로 가기 전 문제</span><p class="question-prompt">내 실험 기록을 보고 문제를 풀어요</p><button class="button button-primary" id="world-review">문제 풀기</button></section>` : ''}<details class="discovery-detail"><summary>도전 과제 (선택)</summary><p>${challenge.done ? `★ ${challenge.label}` : challenge.hint}</p><p class="discovery-record">${escapeHtml(summary)}</p></details>
       ${adminUnlocked ? '<p class="small-note">미리보기 결과는 학생 진행 기록에 반영되지 않습니다.</p>' : `<div class="world-meter"><span style="width:${save.completed.length * 20}%"></span></div><p class="small-note">전체 실험실 복구 ${save.completed.length * 20}% · 미션 ${save.completed.length}/5 완료</p>`}
       <button class="button button-primary" id="world-continue">${stageId === 'rescue' ? '마을 점등식 보러 가기 ✦' : '달라진 마을 보러 가기'}</button><p class="world-lock-note" id="world-lock-note" role="status"></p>
@@ -161,6 +163,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
   app.inert = true;
   const next = modal.querySelector<HTMLButtonElement>('#world-continue')!;
   const reviewButton = modal.querySelector<HTMLButtonElement>('#world-review');
+  syncConceptButton(modal.querySelector('.world-concept')!, stageId, true);
   const syncLock = () => {
     const solved = reviewSolved() || adminUnlocked;
     next.disabled = !solved;
@@ -550,7 +553,7 @@ function renderComplete(root: HTMLElement) {
     <div class="report-grid">${stages.map(stage => {
       const task = learningTask(save, stage.id), record = save.learning?.[stage.id];
       const checked = task && record && learningRecordComplete(task, record);
-      return `<article class="report-card"><span>MISSION 0${stage.mission} · ${stage.concept}</span><h2>${stage.evidence}</h2>${starRow(stageStars(save, stage.id))}<p class="report-card-insight">${escapeHtml(villageRewards[stage.id].afterLines[1])}</p>${predictionMarkup(predictionRecap(save, stage.id), 'report-first')}<details class="report-detail"><summary>내 실험과 답변 살펴보기</summary><p>${escapeHtml(save.evidence[stage.id] ?? '아직 기록이 없습니다.')}</p>${checked ? `<p>${escapeHtml(learningSummary(task, record))}</p>` : ''}</details></article>`;
+      return `<article class="report-card"><span>MISSION 0${stage.mission} · ${stage.concept}</span><h2>${stage.evidence}</h2>${starRow(stageStars(save, stage.id))}<p class="report-card-insight">${escapeHtml(villageRewards[stage.id].afterLines[1])}</p>${predictionMarkup(predictionRecap(save, stage.id), 'report-first')}${save.completed.includes(stage.id) ? `<button type="button" class="report-concept" data-concept="${stage.id}">▶ 개념 영상 보기 <small>(선택)</small></button>` : ''}<details class="report-detail"><summary>내 실험과 답변 살펴보기</summary><p>${escapeHtml(save.evidence[stage.id] ?? '아직 기록이 없습니다.')}</p>${checked ? `<p>${escapeHtml(learningSummary(task, record))}</p>` : ''}</details></article>`;
     }).join('')}</div>
     </details><details class="complete-details"><summary>스스로 돌아보기 · 더 탐구하기 (선택)</summary><div class="ability-card"><h2>나는 이제 할 수 있어요!</h2><p>할 수 있게 된 것을 눌러 골라 봐. 연구 기록에 함께 저장돼.</p><div class="ability-list">${abilityStatements.map((text, i) => `<button class="ability-item" data-ability="${i}" aria-pressed="${(save.abilities ?? []).includes(i)}"><span>${(save.abilities ?? []).includes(i) ? '✓' : ''}</span>${text}</button>`).join('')}</div></div>
     <div class="challenge-card"><h2>도전 과제 <small id="challenge-count"></small></h2><p>실험실로 돌아가서 더 시험해 보면 배지가 켜져.</p><div class="challenge-list">${challenges(save).map(item => `<div class="challenge-item ${item.done ? 'done' : ''}"><span>${item.done ? '★' : '☆'}</span><div><strong>${item.label}</strong><small>${item.hint}</small></div></div>`).join('')}</div></div>
@@ -575,6 +578,7 @@ function renderComplete(root: HTMLElement) {
   const ending = root.querySelector<HTMLElement>('.ending-world')!;
   const replay = () => { ending.classList.remove('lit'); void ending.offsetWidth; ending.classList.add('lit'); tone(760); };
   root.querySelector('#replay-ending')?.addEventListener('click', openEndingCeremony);
+  root.querySelectorAll<HTMLButtonElement>('.report-concept').forEach(button => button.addEventListener('click', () => openConceptClip(button.dataset.concept as StageId)));
   replay();
 }
 
