@@ -95,9 +95,14 @@
 .scale-comparison strong { font-weight:800; }
 .instrument-screen.scale-screen .scale-target { display:none; }
 .instrument-screen.scale-screen #scale-phase { left:16px; top:12px; transform:none; max-width:28%; white-space:normal; text-align:left; }
-.instrument-screen.scale-screen .scale-basket { height:92px; }
-.instrument-screen.scale-screen .basket-part { height:88px; }
-.instrument-screen.scale-screen .basket-part img { height:64px; }
+/* Parts sit ON the plate: basket bottom = the plate's contact line, parts twice the old 64px, name tag on the front rim. */
+.instrument-screen.scale-screen .scale-basket { height:calc(var(--device-width) * .4); bottom:calc(43px + var(--device-width) * .54); overflow:visible; }
+.instrument-screen.scale-screen .basket-items { gap:0; }
+.instrument-screen.scale-screen .basket-part { height:calc(var(--device-width) * .34); max-width:calc(var(--device-width) * .34); padding:0; overflow:visible; }
+.instrument-screen.scale-screen .basket-part img { height:100%; object-position:center bottom; position:relative; z-index:1; }
+.instrument-screen.scale-screen .basket-part::before { content:''; position:absolute; left:14%; right:14%; bottom:-5px; height:14px; border-radius:50%; background:radial-gradient(closest-side,#1b2a2a55,#1b2a2a00); }
+.instrument-screen.scale-screen .basket-part span { position:absolute; left:50%; bottom:calc(var(--device-width) * -.07); transform:translateX(-50%); white-space:nowrap; z-index:2; }
+.instrument-screen.scale-screen .basket-part i { z-index:3; }
 .balance-screen .balance-goal { justify-content:flex-start; min-height:36px; padding:4px 12px; }
 .balance-screen .instrument-predictions { grid-template-columns:1fr auto; gap:6px 12px; padding:6px 10px; }
 .balance-screen .instrument-predictions .question-prompt { grid-column:1; font-size:18px; }
