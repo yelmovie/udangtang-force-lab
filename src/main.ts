@@ -589,7 +589,7 @@ function openSettings() {
   app.inert = true;
   const close = () => { app.inert = appWasInert; overlay.remove(); app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.focus(); };
   type Section = 'menu' | 'admin' | 'reset' | InfoSection;
-  const headings: Record<Section, string> = { menu: '설정', help: '학생 탐구 가이드', teacher: '교사 가이드', curriculum: '교육과정', info: '정보와 출처', admin: '전체 단계 해금', reset: '탐구 기록 초기화' };
+  const headings: Record<Section, string> = { menu: '설정', help: '학생 탐구 가이드', teacher: '교사 가이드', curriculum: '교육과정', info: '정보와 출처', admin: '관리자 해금', reset: '탐구 기록 초기화' };
   const show = (section: Section | 'concepts') => {
     let content: string;
     if (section === 'menu') {
