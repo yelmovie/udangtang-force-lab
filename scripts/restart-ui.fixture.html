@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0d7779" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="description" content="밀고 당기고, 무게를 비교하고, 도구를 조립하며 잠든 실험실을 복구하는 어린이 과학 탐구 게임. 기획·제작 옐샘." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="우당탕 힘 실험실 | 코어 복구 작전" />
+    <meta property="og:description" content="물체와 도구를 직접 움직여 증거를 모으고 잠든 실험실을 깨우는 과학 탐구 게임. 기획·제작 옐샘." />
+    <meta property="og:url" content="https://udangtang-force-lab.yelsam.workers.dev/" />
+    <meta property="og:image" content="https://udangtang-force-lab.yelsam.workers.dev/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="실험실 배경 위 우당탕 힘 실험실 제목 간판" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="preload" href="/assets/fonts/jua-korean-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/assets/ui/title.webp" as="image" />
+    <title>우당탕 힘 실험실 | 코어 복구 작전</title>
+  </head>
+  <body>
+    <div id="app"><p role="status" style="padding:20vh 24px;text-align:center;font:700 24px sans-serif;color:#176e70;background:#fff9e9">실험실 문을 열고 있어요…</p></div>
+    <noscript>이 실험실을 열려면 브라우저에서 JavaScript를 켜 주세요.</noscript>
+    <script type="module">
+import {freshSave,SAVE_KEY} from '/src/state.ts';
+// Disposable restart check uses sessionStorage-backed storage, never student localStorage.
+const trialStorage={getItem:key=>sessionStorage.getItem('restart-test:'+key),setItem:(key,value)=>sessionStorage.setItem('restart-test:'+key,value),removeItem:key=>sessionStorage.removeItem('restart-test:'+key)};
+Object.defineProperty(window,'localStorage',{value:trialStorage});
+const save=freshSave();save.currentPage='complete';save.completed=['cargo','balance','scale','workshop','rescue'];save.soundOn=false;save.musicOn=false;save.soundVolume=.2;
+save.evidence={cargo:'다시 시작 기능 검사 기록'};
+save.rescue={zeroed:true,loaded:true,measured:true,gate:true,route:'long',force:1,runs:[{route:'short',force:1,success:false},{route:'long',force:1,success:true}],delivered:true};
+trialStorage.setItem(SAVE_KEY,JSON.stringify(save));
+await import('/src/main.ts');
+</script>
+  </body>
+</html>

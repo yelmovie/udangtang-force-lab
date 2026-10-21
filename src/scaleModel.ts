@@ -9,13 +9,22 @@ export function scaleComparison(runs: ScaleRun[]): ScaleRun[] {
     return run ? [run] : [];
   });
 }
+export function scaleActivityMeasurements(runs: ScaleRun[]): ScaleRun[] {
+  return scaleParts.flatMap(part => {
+    const run = [...runs].reverse().find(run => run.zeroed && run.parts.length === 1 && run.parts[0] === part.id && run.reading === part.weight);
+    return run ? [run] : [];
+  });
+}
+export function scaleExplorationReady(state: {zeroed: boolean; runs: ScaleRun[]}): boolean {
+  return state.zeroed && scaleActivityMeasurements(state.runs).length === scaleParts.length;
+}
 export function canCompleteScale(state: { zeroed: boolean; runs: ScaleRun[] }): boolean {
   return state.zeroed && scaleComparison(state.runs).length === 2;
 }
 export function recordScaleRun(runs: ScaleRun[], run: ScaleRun): ScaleRun[] {
   const key = (r: ScaleRun) => `${r.zeroed}:${[...r.parts].sort().join(',')}`;
   const next = [...runs.filter(r => key(r) !== key(run)), run];
-  const required = scaleComparison(next);
+  const required = scaleActivityMeasurements(next);
   return [...required, ...next.filter(r => !required.includes(r)).slice(-(20 - required.length))];
 }
 
@@ -68,6 +77,11 @@ export function fakeHint(misses: number, zeroed: boolean): string {
     : '같은 숫자가 여러 번 나왔지요? 그 숫자와 다른 하나가 가짜예요.';
   return zeroed ? hint : `${hint} 빈 저울을 0으로 맞추면 부품 무게만 보여요.`;
 }
+export function fakeDiscoveryText(round: number, picked: number, zeroed: boolean): string {
+  const r = fakeRounds[round], name = `${fakeLabels[picked]} 부품`;
+  return zeroed ? `진짜는 ${r.real} g, ${name}만 ${r.fake} g이었어요.`
+    : `0을 맞추기 전에는 진짜가 ${r.real + emptyScaleReading} g, ${name}이 ${r.fake + emptyScaleReading} g으로 표시돼요. 빈 저울의 ${emptyScaleReading} g을 빼면 실제 값은 각각 ${r.real} g, ${r.fake} g이에요. 빈 저울을 0으로 맞춰 다시 확인해 봐요.`;
+}
 export function fakeSummary(record: LevelRecord): string {
   return `보급소 의뢰에서는 겉모습이 똑같은 부품 ${fakeRounds.map(r => r.count).join('개, ')}개 중 무게가 조금 다른 가짜를 저울 숫자로 가려냈어요(판정 ${record.attempts}번).`;
 }
@@ -75,7 +89,7 @@ export function fakeSummary(record: LevelRecord): string {
 // Optional inquiry "용수철저울 바르게 읽기": zero screw → hang one object → wait for the swing → read at eye level.
 // The scale is read in whole grams; marks grow downward, so an eye above the pointer reads a larger number.
 export type EyeLevel = 'above' | 'level' | 'below';
-export type SpringRead = { object: string; eye: EyeLevel; value: number; zeroed: boolean };
+export type SpringRead = { object: string; eye: EyeLevel; value: number; zeroed: boolean; offset?: number };
 export const springObjects = ['orange', 'blue'] as const;
 export const springEyeLabels: Record<EyeLevel, string> = { above: '위에서', level: '정면에서', below: '아래에서' };
 export const springParallax: Record<EyeLevel, number> = { above: 5, level: 0, below: -5 };
@@ -90,7 +104,7 @@ export function springReading(object: string, eye: EyeLevel, offset: number): nu
   return Math.max(0, weight + offset + springParallax[eye]);
 }
 export function recordSpringRead(reads: SpringRead[], read: SpringRead): SpringRead[] {
-  const key = (r: SpringRead) => `${r.object}:${r.eye}:${r.zeroed}`;
+  const key = (r: SpringRead) => `${r.object}:${r.eye}:${r.zeroed}:${r.offset ?? 'legacy'}`;
   return [...reads.filter(r => key(r) !== key(read)), read].slice(-12);
 }
 /** The inquiry is done once one object has been read at eye level on a zeroed scale. */
@@ -99,20 +113,20 @@ export function springDone(reads: readonly SpringRead[] | undefined): boolean {
 }
 /** A reading from above or below is kept as a comparison, never marked wrong. */
 export function springHint(reads: readonly SpringRead[], read: SpringRead): string {
-  const level = reads.find(r => r.object === read.object && r.eye === 'level' && r.zeroed === read.zeroed);
+  const level = reads.find(r => r.object === read.object && r.eye === 'level' && r.zeroed === read.zeroed && r.offset === read.offset);
   if (read.eye !== 'level') return level ? `${springEyeLabels[read.eye]} ${read.value} g, 정면에서 ${level.value} g. 눈높이가 다르면 숫자가 달라 보여요.` : `${springEyeLabels[read.eye]} 읽으니 ${read.value} g이에요. 정면에서 다시 읽어 볼까?`;
-  const other = reads.find(r => r.object === read.object && r.eye !== 'level' && r.zeroed === read.zeroed);
-  if (!read.zeroed) return `정면에서 ${read.value} g. 빈 저울이 0이 아니라 숫자가 더해져 있어요. 영점 나사를 돌려요.`;
+  const other = reads.find(r => r.object === read.object && r.eye !== 'level' && r.zeroed === read.zeroed && r.offset === read.offset);
+  if (!read.zeroed) return `정면에서 ${read.value} g. 영점이 맞지 않아 실제 무게와 다른 값이에요. 물체를 내린 뒤 영점 나사를 돌려요.`;
   return other ? `정면에서 ${read.value} g. ${springEyeLabels[other.eye]} 읽은 ${other.value} g과 달라요. 눈금은 정면에서 읽어야 해요.` : `정면에서 ${read.value} g이에요. 위나 아래에서도 읽어 비교해 봐요.`;
 }
 export function springSummary(reads: readonly SpringRead[] | undefined): string {
   if (!springDone(reads)) return '';
-  const compared = reads!.some(r => r.eye !== 'level');
+  const compared = reads!.some(r => r.eye !== 'level' && reads!.some(other => other.object === r.object && other.eye === 'level' && other.zeroed === r.zeroed && other.offset === r.offset && other.value !== r.value));
   return `용수철저울은 영점 나사를 맞추고 흔들림이 멈춘 뒤 정면에서 눈금을 읽었어요.${compared ? ' 위나 아래에서 읽은 숫자는 정면과 달랐어요.' : ''}`;
 }
 export function retainSpringReads(value: unknown): SpringRead[] {
   if (!Array.isArray(value)) return [];
   const objects: readonly string[] = springObjects;
   return value.filter((r): r is SpringRead => !!r && typeof r === 'object' && objects.includes((r as SpringRead).object) && (r as SpringRead).eye in springParallax &&
-    Number.isInteger((r as SpringRead).value) && (r as SpringRead).value >= 0 && (r as SpringRead).value <= 200 && typeof (r as SpringRead).zeroed === 'boolean').slice(-12);
+    Number.isInteger((r as SpringRead).value) && (r as SpringRead).value >= 0 && (r as SpringRead).value <= 200 && typeof (r as SpringRead).zeroed === 'boolean' && ((r as SpringRead).offset === undefined || (Number.isInteger((r as SpringRead).offset) && (r as SpringRead).offset! >= -10 && (r as SpringRead).offset! <= 15))).slice(-12);
 }

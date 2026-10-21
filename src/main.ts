@@ -164,7 +164,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
       <h2 id="world-title">${stage.evidence}</h2>${starRow(stageStars(activeSave, stageId), true)}
       ${newCard ? toolCardRevealMarkup(newCard) : ''}
       <div class="discovery-recap"><img src="/assets/game/corgi-success.webp" alt=""><div><strong class="discovery-key">${escapeHtml(toolCardInfo[stageId].idea)}</strong>${guessMarkup(predictionRecap(activeSave, stageId))}</div></div>
-      <div class="world-concept"><span class="world-concept-label">더 알아보고 싶다면 (선택)</span></div>
+      <div class="world-concept"></div>
       ${reviewTask ? `<section class="world-review question-zone question-zone-compact"><span class="question-label">마을로 가기 전 문제</span><p class="question-prompt">내 실험 기록을 보고 문제를 풀어요</p><button class="button button-primary" id="world-review">문제 풀기</button></section>` : ''}<details class="discovery-detail"><summary>도전 과제 (선택)</summary><p>${challenge.done ? `★ ${challenge.label}` : challenge.hint}</p><p class="discovery-record">${escapeHtml(summary)}</p></details>
       ${adminUnlocked ? '<p class="small-note">미리보기 결과는 학생 진행 기록에 반영되지 않습니다.</p>' : `<div class="world-meter"><span style="width:${save.completed.length * 20}%"></span></div><p class="small-note">전체 실험실 복구 ${save.completed.length * 20}% · 미션 ${save.completed.length}/5 완료</p>`}
       <button class="button button-primary" id="world-continue">${stageId === 'rescue' ? '마을 점등식 보러 가기 ✦' : '달라진 마을 보러 가기'}</button><p class="world-lock-note" id="world-lock-note" role="status"></p>
@@ -595,16 +595,25 @@ function renderTitle(root: HTMLElement) {
   });
 }
 
+async function restartFromBeginning() {
+  if(!await confirmBox('처음부터 다시 해볼까요?', '별, 도구 카드, 실험 기록을 지우고 처음부터 시작해요. 소리 설정은 그대로예요.', '처음부터 다시 시작')) return;
+  const previous=context.save;
+  save={...freshSave(),soundOn:previous.soundOn,musicOn:previous.musicOn,soundVolume:previous.soundVolume};
+  adminUnlocked=false; adminSave=null; context.save=save; missionCardShown.clear(); villageReturn=undefined; villageCelebration=undefined;
+  persist(); navigate('title');
+  openStoryModal({lines:prologueLines,finishLabel:'출발!',skippable:true,onDone:()=>navigate('map'),video:introVideo});
+}
+
 function renderComplete(root: HTMLElement) {
   const save = adminSave ?? context.save;
   const completed = save.completed.length;
   root.innerHTML = `<section class="complete-screen">
-    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1><p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 장착했어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button></div></div>
+    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1><p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 장착했어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><div class="ending-actions"><button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button><button class="button button-primary" id="restart-ending">처음부터 다시 해보기 ↻</button></div></div></div>
     <details class="complete-details"><summary>내 실험과 발견 살펴보기 · ${completed} / 5</summary>
     <div class="report-grid">${stages.map(stage => {
       const task = learningTask(save, stage.id), record = save.learning?.[stage.id];
       const checked = task && record && learningRecordComplete(task, record);
-      return `<article class="report-card"><span>MISSION 0${stage.mission} · ${stage.concept}</span><h2>${stage.evidence}</h2>${starRow(stageStars(save, stage.id))}<p class="report-card-insight">${escapeHtml(villageRewards[stage.id].afterLines[1])}</p>${predictionMarkup(predictionRecap(save, stage.id), 'report-first')}${save.completed.includes(stage.id) ? `<button type="button" class="report-concept" data-concept="${stage.id}">▶ 개념 영상 보기 <small>(선택)</small></button>` : ''}<details class="report-detail"><summary>내 실험과 답변 살펴보기</summary><p>${escapeHtml(save.evidence[stage.id] ?? '아직 기록이 없습니다.')}</p>${checked ? `<p>${escapeHtml(learningSummary(task, record))}</p>` : ''}</details></article>`;
+      return `<article class="report-card"><span>MISSION 0${stage.mission} · ${stage.concept}</span><h2>${stage.evidence}</h2>${starRow(stageStars(save, stage.id))}<p class="report-card-insight">${escapeHtml(villageRewards[stage.id].afterLines[1])}</p>${predictionMarkup(predictionRecap(save, stage.id), 'report-first')}${save.completed.includes(stage.id) ? `<button type="button" class="report-concept" data-concept="${stage.id}">▶ 개념 영상 보기</button>` : ''}<details class="report-detail"><summary>내 실험과 답변 살펴보기</summary><p>${escapeHtml(save.evidence[stage.id] ?? '아직 기록이 없습니다.')}</p>${checked ? `<p>${escapeHtml(learningSummary(task, record))}</p>` : ''}</details></article>`;
     }).join('')}</div>
     </details><details class="complete-details"><summary>스스로 돌아보기 · 더 탐구하기 (선택)</summary><div class="ability-card"><h2>나는 이제 할 수 있어요!</h2><p>할 수 있게 된 것을 눌러 골라 봐. 연구 기록에 함께 저장돼.</p><div class="ability-list">${abilityStatements.map((text, i) => `<button class="ability-item" data-ability="${i}" aria-pressed="${(save.abilities ?? []).includes(i)}"><span>${(save.abilities ?? []).includes(i) ? '✓' : ''}</span>${text}</button>`).join('')}</div></div>
     <div class="challenge-card"><h2>도전 과제 <small id="challenge-count"></small></h2><p>실험실로 돌아가서 더 시험해 보면 배지가 켜져.</p><div class="challenge-list">${challenges(save).map(item => `<div class="challenge-item ${item.done ? 'done' : ''}"><span>${item.done ? '★' : '☆'}</span><div><strong>${item.label}</strong><small>${item.hint}</small></div></div>`).join('')}</div></div>
@@ -629,6 +638,7 @@ function renderComplete(root: HTMLElement) {
   const ending = root.querySelector<HTMLElement>('.ending-world')!;
   const replay = () => { ending.classList.remove('lit'); void ending.offsetWidth; ending.classList.add('lit'); tone(760); };
   root.querySelector('#replay-ending')?.addEventListener('click', openEndingCeremony);
+  root.querySelector('#restart-ending')?.addEventListener('click', restartFromBeginning);
   root.querySelectorAll<HTMLButtonElement>('.report-concept').forEach(button => button.addEventListener('click', () => openConceptClip(button.dataset.concept as StageId)));
   replay();
 }

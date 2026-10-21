@@ -1,8 +1,8 @@
 import type { SaveData } from './state';
-import { cargoForceNames, cargoOrders, ordersComplete } from './cargoModel';
-import { mysteryComplete, mysteryRoundCount } from './balanceModel';
-import { canCompleteScale, fakeRequestComplete, fakeRounds } from './scaleModel';
-import { canFinishWorkshopExploration, workshopCargos, workshopL2Complete } from './workshopModel';
+import { cargoExplorationReady, cargoForceNames, cargoOrders, ordersComplete } from './cargoModel';
+import { balanceExplorationReady, mysteryComplete, mysteryRoundCount } from './balanceModel';
+import { scaleExplorationReady, fakeRequestComplete, fakeRounds } from './scaleModel';
+import { workshopExplorationReady, workshopCargos, workshopL2Complete } from './workshopModel';
 
 export type RequestStage = 'cargo' | 'balance' | 'scale' | 'workshop';
 /** locked: the mission's level 1 is not done yet · open: the request can be played · solved: level 2 finished. */
@@ -36,16 +36,16 @@ export function requestSolved(save: SaveData, stage: RequestStage): boolean {
   return workshopL2Complete(save.levels?.workshop);
 }
 
-/** Level 1 done: the mission was completed, its request was already taken, or its level 1 findings are in. */
+/** Level 1 done: all basic activities are recorded, or a previously completed mission is revisited. */
 function levelOneDone(save: SaveData, stage: RequestStage): boolean {
   if (save.completed.includes(stage)) return true;
-  if (stage === 'cargo') return Array.isArray(save.cargo?.orders);
+  if (stage === 'cargo') return Array.isArray(save.cargo?.orders) && cargoExplorationReady(save.cargo.runs);
   if (stage === 'balance') {
     const runs = save.balance?.runs ?? [];
-    return !!save.levels?.balance || (runs.some(run => run.actual === 'level') && runs.some(run => run.actual !== 'level'));
+    return balanceExplorationReady(runs);
   }
-  if (stage === 'scale') return !!save.levels?.scale || (!!save.scale && canCompleteScale(save.scale));
-  return !!save.levels?.workshop || (!!save.workshop && canFinishWorkshopExploration(save.workshop));
+  if (stage === 'scale') return !!save.scale && scaleExplorationReady(save.scale);
+  return !!save.workshop && workshopExplorationReady(save.workshop);
 }
 
 export function requestStatus(save: SaveData, stage: RequestStage): RequestStatus {

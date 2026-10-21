@@ -237,10 +237,20 @@ test('balance transfer depends on observed objects, rather than a memorized left
   const save = state.freshSave();
   save.balance.runs = [{ left: 'A', right: 'B', prediction: 'left', actual: 'right' }, { left: 'A', right: 'C', prediction: 'level', actual: 'level' }];
   const first = learning.learningTask(save, 'balance');
+  assert.deepEqual(first.questions[0].pair, ['A', 'B'], 'show the starting arrangement before asking to swap');
   assert.equal(first.questions[0].correct, 'left');
+  assert.match(first.questions[0].explanation, /금속 블록이 왼쪽으로 옮겨/);
   save.balance.runs[0] = { left: 'B', right: 'A', prediction: 'right', actual: 'left' };
   const swapped = learning.learningTask(save, 'balance');
+  assert.deepEqual(swapped.questions[0].pair, ['B', 'A']);
   assert.equal(swapped.questions[0].correct, 'right');
+  assert.match(swapped.questions[0].explanation, /금속 블록이 오른쪽으로 옮겨/);
+  for (const run of [{left:'C',right:'B',actual:'right'}, {left:'B',right:'C',actual:'left'}]) {
+    save.balance.runs[0] = {...run, prediction:'level'};
+    const question = learning.learningTask(save, 'balance').questions[0];
+    assert.deepEqual(question.pair, [run.left, run.right]);
+    assert.equal(question.correct, run.actual === 'left' ? 'right' : 'left');
+  }
   assert.notEqual(first.signature, swapped.signature);
 });
 
@@ -642,4 +652,31 @@ test('music has its own switch, and older saves keep music with the effect switc
   assert.equal(restored.soundOn, true);
   assert.equal(restored.musicOn, false, 'music stays off while effects are on');
   localStorage.setItem(state.SAVE_KEY, JSON.stringify(state.freshSave()));
+});
+
+
+test('cargo prediction recap compares the same action and names a pull accurately', () => {
+  const save=state.freshSave();
+  save.cargo.runs=[{parts:1,action:'pull',gesture:1,distance:66},{parts:5,action:'pull',gesture:1,distance:22},{parts:1,action:'push',gesture:1,distance:99}];
+  const recap=inquiry.predictionRecap(save,'cargo');
+  assert.match(recap.result, /같은 시간.*당겼더니.*66칸.*22칸/);
+  assert.doesNotMatch(recap.result, /99칸|밀었더니/);
+});
+
+test('spring eye comparisons keep zero settings fixed and describe negative offsets accurately', () => {
+  const above={object:'orange',eye:'above',value:80,zeroed:false,offset:-5};
+  const different={object:'orange',eye:'level',value:90,zeroed:false,offset:10};
+  assert.doesNotMatch(scaleModel.springHint([different],above), /정면에서 90/);
+  const level={...above,eye:'level',value:75};
+  assert.match(scaleModel.springHint([level],above), /정면에서 75/);
+  assert.doesNotMatch(scaleModel.springHint([],level), /숫자가 더해져/);
+  assert.match(scaleModel.springHint([],level), /물체를 내린 뒤/);
+  assert.equal(scaleModel.recordSpringRead([above],{...above,offset:10,value:95}).length,2);
+});
+
+test('spring summary does not attribute changed zero settings to eye position', () => {
+  const level={object:'orange',eye:'level',value:80,zeroed:true,offset:0};
+  const unrelated={object:'orange',eye:'above',value:95,zeroed:false,offset:10};
+  assert.doesNotMatch(scaleModel.springSummary([level,unrelated]), /정면과 달랐어요/);
+  assert.match(scaleModel.springSummary([level,{...level,eye:'above',value:85}]), /정면과 달랐어요/);
 });

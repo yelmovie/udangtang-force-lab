@@ -162,3 +162,16 @@ test('level 1 rules are unchanged: zeroed single apple and book measurements com
   assert.equal(scale.canCompleteScale({ zeroed: true, runs }), true);
   assert.equal(scale.canCompleteScale({ zeroed: true, runs: runs.slice(0, 2) }), false);
 });
+
+
+test('unzeroed discovery explains displayed readings instead of presenting true weights as observed', () => {
+  const before = scale.fakeDiscoveryText(0, 0, false);
+  assert.match(before, /65 g/);
+  assert.match(before, /62 g/);
+  assert.match(before, /15 g을 빼면/);
+  const after = scale.fakeDiscoveryText(0, 0, true);
+  assert.match(after, /50 g/);
+  assert.match(after, /47 g/);
+  assert.doesNotMatch(after, /65 g|62 g/);
+  assert.match(scale.fakeDiscoveryText(1, 0, false), /55 g.*57 g/);
+});

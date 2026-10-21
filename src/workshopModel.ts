@@ -83,6 +83,15 @@ export function canFinishWorkshopExploration(state: WorkshopState): boolean {
   return steps.direct && steps.lever && steps.ramp;
 }
 
+export function workshopActivitySteps(state: WorkshopState): {direct:boolean;lever:boolean;ramp:boolean} {
+  const runs = retainWorkshopRuns(state.trials);
+  return {direct:state.direct, lever:[0,1,2].every(setting => runs.some(run => run.tool === 'lever' && run.setting === setting)), ramp:[0,1].every(setting => runs.some(run => run.tool === 'ramp' && run.setting === setting))};
+}
+export function workshopExplorationReady(state: WorkshopState): boolean {
+  const steps = workshopActivitySteps(state);
+  return steps.direct && steps.lever && steps.ramp;
+}
+
 /* Level 2 "force budget": 콩이 can only give up to the 작은 힘 step. Heavier cargo
  * multiplies the same qualitative design forces; nothing here is a real unit. */
 export type WorkshopL2Tool = WorkshopTool | 'direct';

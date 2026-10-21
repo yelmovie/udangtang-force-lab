@@ -27,14 +27,3 @@ export function showRequestLetter(root: HTMLElement, stage: RequestStage, accept
   dialog.showModal();
   return dialog;
 }
-
-/** Shows the letter once per stage per app session so a screen re-render does not repeat it. */
-const shown = new Set<RequestStage>();
-export function letterOnce(root: HTMLElement, stage: RequestStage, accept: () => void): void {
-  if (shown.has(stage)) return;
-  shown.add(stage);
-  const screen = root.firstElementChild;
-  // The mission card (or another modal) may still be open on entry; the letter waits its turn instead of stacking on top.
-  const open = () => { if (!root.isConnected || !screen?.isConnected || screen.parentElement !== root) return; if (document.querySelector('.modal-layer, dialog[open]')) { window.setTimeout(open, 400); return; } showRequestLetter(root, stage, accept); };
-  open();
-}

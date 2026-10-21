@@ -62,8 +62,6 @@
 #world-continue:disabled { opacity:.5; box-shadow:none; cursor:not-allowed; }
 /* Optional concept clip: offered, never required. */
 .world-concept { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; margin:12px 0 0; }
-.world-concept-label { color:#5f6f63; font-size:15px; font-weight:800; }
 .report-concept { display:inline-flex; align-items:center; gap:6px; min-height:44px; margin:8px 0 4px; padding:6px 14px; border:2px solid #9fc4b6; border-radius:12px; background:#eef7f2; color:#165e57; font:inherit; font-size:16px; font-weight:900; cursor:pointer; }
-.report-concept small { color:#5f7d73; font-size:13px; font-weight:800; }
 .report-concept:hover { background:#f6fbf8; }
 .report-concept:focus-visible { outline:3px solid #ffc247; outline-offset:3px; }

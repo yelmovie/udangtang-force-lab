@@ -265,7 +265,8 @@ function rescue(f) {
     const shortUp = progress(f, 96, 128, Easing.out(Easing.quad)), slipBack = progress(f, 138, 154);
     const stop = sp(f, 130, { damping: 8 }), longUp = progress(f, 96, 168, Easing.inOut(Easing.sin));
     const rings = progress(f, 150, 172), arrive = sp(f, 168, { damping: 9 }), glow = pulse(f, 172, 18);
-    const short = along(ramps[0], lerp(0.3, 0.62, shortUp) - 0.1 * slipBack), long = along(ramps[1], lerp(0.3, 1, longUp));
+    // Too little force cannot lift a stationary core halfway up the steep ramp.
+    const short = along(ramps[0], 0.025 * shortUp * (1 - slipBack)), long = along(ramps[1], longUp);
     const runs = [short, long];
     return g({ opacity: enter, transform: t(0, (1 - enter) * 40) },
       ramps.map((ramp, i) => g({},

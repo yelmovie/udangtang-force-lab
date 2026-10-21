@@ -18,3 +18,4 @@ tools/remotion-concepts/node_modules/
 .tools/
 .claude/
 .project-memory/
+.wrangler/

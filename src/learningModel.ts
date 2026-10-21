@@ -31,16 +31,18 @@ export function learningTask(save: SaveData, stage: StageId): LearningTask | nul
     const max = Math.max(light.distance, heavy.distance, 1);
     for (const run of [light, heavy]) cards.push({ title: `부품 ${run.parts}개 상자`, detail: `${run.action === 'push' ? '밀기' : '당기기'} · 같은 힘 · 같은 시간`, bars: [{ label: `${run.distance}칸 이동`, value: run.distance, maximum: max }] });
     questions.push({ id: 'fair', prompt: '무게에 따른 움직임을 비교하려고 같게 둔 것은?', choices: choices(['force-time', '힘과 움직이는 시간'], ['weight', '담은 부품 수'], ['distance', '움직인 거리']), correct: 'force-time', hint: '두 기록에서 같은 것과 달라진 것을 찾아봐요.', explanation: '힘과 시간은 같게 두고 부품 수를 바꾸어 움직인 거리를 비교했어요.' });
-    questions.push({ id: 'effort', prompt: '두 상자를 같은 거리까지 옮기려면 어느 쪽에 더 큰 힘이 필요할까?', choices: choices(['heavy', '부품 5개 상자'], ['light', '부품 1개 상자'], ['same', '항상 힘이 같아요']), correct: 'heavy', why: { same: '두 상자가 같은 힘에 움직인 거리가 달랐어요.' }, hint: '같은 힘으로 움직였을 때 어느 상자가 더 짧게 움직였는지 봐요.', explanation: '내 실험 모형에서는 무거운 상자가 같은 힘으로 더 짧게 갔어요. 같은 거리까지 보내려면 더 큰 힘이 필요해요.' });
+    questions.push({ id: 'effort', prompt: '두 상자를 같은 시간 동안 밀어 같은 거리까지 옮기려면 어느 쪽에 더 큰 힘이 필요할까?', choices: choices(['heavy', '부품 5개 상자'], ['light', '부품 1개 상자'], ['same', '항상 힘이 같아요']), correct: 'heavy', why: { same: '두 상자가 같은 힘에 움직인 거리가 달랐어요.' }, hint: '같은 힘으로 움직였을 때 어느 상자가 더 짧게 움직였는지 봐요.', explanation: '내 실험 모형에서는 무거운 상자가 같은 힘으로 더 짧게 갔어요. 같은 시간 동안 밀어 같은 거리까지 보내려면 더 큰 힘이 필요해요.' });
     talk = '무거운 상자를 밀거나 당길 때 필요한 힘을 친구와 이야기해봐요.';
   } else if (stage === 'balance') {
     const tilted = save.balance.runs.find(r => r.actual !== 'level');
     const level = save.balance.runs.find(r => r.actual === 'level');
     if (!tilted || !level) return null;
     const heavy = tilted.actual === 'left' ? tilted.left : tilted.right;
+    const afterSwap = tilted.actual === 'left' ? 'right' : 'left';
+    const afterSide = afterSwap === 'left' ? '왼쪽' : '오른쪽';
     cards.push({ title: '기울어진 기록', pair: [tilted.left, tilted.right], tilt: tilted.actual, detail: `${blockName(heavy)} 쪽이 내려갔어요.` }, { title: '수평이 된 기록', pair: [level.left, level.right], tilt: 'level', detail: '두 물체의 무게가 같았어요.' });
-    questions.push({ id: 'swap', prompt: `${blockName(tilted.right)}과 ${blockName(tilted.left)}의 자리만 바꾸면?`, pair: [tilted.right, tilted.left], choices: directionChoices, correct: tilted.actual === 'left' ? 'right' : 'left', hint: `더 무거운 ${blockName(heavy)}이 지금 어느 쪽에 있나요?`, explanation: `${blockName(heavy)}의 무게는 그대로예요. 그 물체가 있는 쪽이 내려가요.` });
-    questions.push({ id: 'equal', prompt: `${blockName(level.left)}과 ${blockName(level.right)}을 놓았을 때 수평이었던 까닭은?`, pair: [level.left, level.right], choices: choices(['equal', '두 물체의 무게가 같아요'], ['look', '큰 물체가 반드시 무거워요'], ['side', '왼쪽에 놓인 물체가 무거워요']), correct: 'equal', why: { look: '크기가 커도 가벼운 물체가 있어요. 크기가 아니라 수평대가 어떻게 되었는지 봐요.', side: '놓은 쪽이 왼쪽인지 오른쪽인지는 무게와 상관없어요.' }, hint: '수평이었던 기록을 다시 봐요.', explanation: '같은 거리에서 수평이면 두 물체의 무게가 같아요.' });
+    questions.push({ id: 'swap', prompt: `그림 속 ${blockName(tilted.left)}과 ${blockName(tilted.right)}의 자리를 서로 바꾸면?`, pair: [tilted.left, tilted.right], choices: directionChoices, correct: afterSwap, hint: `자리를 바꾼 뒤 더 무거운 ${blockName(heavy)}이 어느 쪽으로 옮겨질지 생각해 봐요.`, explanation: `자리를 바꾸면 ${blockName(heavy)}이 ${afterSide}으로 옮겨져서 ${afterSide}이 내려가요. 물체의 무게는 그대로예요.` });
+    questions.push({ id: 'equal', prompt: `${blockName(level.left)}과 ${blockName(level.right)}을 놓았을 때 수평이었던 까닭은?`, pair: [level.left, level.right], choices: choices(['equal', '두 물체의 무게가 같아요'], ['look', '큰 물체가 반드시 무거워요'], ['side', '왼쪽에 놓인 물체가 무거워요']), correct: 'equal', why: { look: '크기가 커도 가벼운 물체가 있어요. 크기가 아니라 수평대가 어떻게 되었는지 봐요.', side: '놓은 쪽이 왼쪽인지 오른쪽인지는 무게와 상관없어요.' }, hint: '수평이었던 기록을 다시 봐요.', explanation: '받침점에서 같은 거리의 자리에 놓아 수평이면 두 물체의 무게가 같아요.' });
     talk = '무거운 물체의 자리를 바꾸면 내려가는 쪽도 바뀔까요?';
   } else if (stage === 'scale') {
     const compared = scaleComparison(save.scale.runs);

@@ -1,0 +1,39 @@
+PASS webgl: failure → retry → map, saved progress unchanged
+PASS asset: failure → retry → map, saved progress unchanged
+PASS context-lost → retry recovers interaction
+PASS context-lost during an open result exposes recovery without losing the result
+PASS balance pointercancel: outside drag cancels, tap placement still works
+PASS scale pointercancel: outside drag cancels, next measurement works
+PASS cargo pointercancel: outside drag cancels without experiment
+PASS workshop pointercancel: cancellation restores controls
+PASS rescue pointercancel: initial SVG drag restores controls
+PASS balance resize: outside drag cancels, tap placement still works
+PASS scale resize: outside drag cancels, next measurement works
+PASS cargo resize: outside drag cancels without experiment
+PASS workshop resize: cancellation restores controls
+PASS rescue resize: initial SVG drag restores controls
+PASS balance blur: outside drag cancels, tap placement still works
+PASS scale blur: outside drag cancels, next measurement works
+PASS cargo blur: outside drag cancels without experiment
+PASS workshop blur: cancellation restores controls
+PASS rescue blur: initial SVG drag restores controls
+PASS cargo: finish both push and pull comparisons before the bakery letter
+PASS balance: 3 boxes finish comparison before the question popup
+PASS balance: 4 boxes finish comparison before the question popup
+PASS village: locked buildings explain the prerequisite without changing progress
+PASS balance question pictures show the starting positions before a swap
+PASS spring zero screw works only after the object is removed
+PASS slide introduction offers descent and hides unrelated lifting claims
+PASS scale: all five models finish before summary; letter requires an explicit click
+PASS scale requests: measure every part before choosing; next round waits for a button
+PASS workshop: all six basic activities precede the request
+PASS rescue: short ramp at small force comes before the long ramp
+PASS balance: inline prediction and result popup can reopen without input lock
+PASS leaving a screen removes its explicit request letter
+PASS balance basics: compare all three pairs before summary and explicit letter
+PASS core weighing: loading waits for explicit measurement record
+
+Synthetic pointer events only; physical touch/iPad Safari not tested.
+
+
+Manual restart fixture (session storage only): complete screen two adjacent buttons; cancel preserves 5 cards; confirm opens prologue; skip returns to first mission with 0 cards, 0 stars, sound muted.

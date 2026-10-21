@@ -5,9 +5,9 @@ import { balanceObjects } from '../data';
 import type { BalanceRun } from '../state';
 import { mountCompanion } from '../sprites';
 import { setTapHint } from '../interactionHints';
-import { letterOnce } from '../requestLetter';
+import { showRequestLetter } from '../requestLetter';
 import { showPredictionChip } from '../predictionChip';
-import { isThrifty, judgePick, mysteryComplete, mysteryRound, mysteryRoundCount, nextMysteryRound, pickHint, relationText, thriftyBudget, weigh, type MysteryRecord, type MysteryRound } from '../balanceModel';
+import { balanceExplorationReady, candidates, mysteryComparisonReady, isThrifty, judgePick, mysteryComplete, mysteryRound, mysteryRoundCount, nextMysteryRound, pickHint, relationText, thriftyBudget, weigh, type MysteryRecord, type MysteryRound } from '../balanceModel';
 import '../instruments.css';
 import '../balance.css';
 
@@ -35,7 +35,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   let shownRun: BalanceRun | null = visibleOutcome ? last! : null;
   const hasLevel = () => state.runs.some(run => run.actual === 'level');
   const hasTilt = () => state.runs.some(run => run.actual !== 'level');
-  const canFinish = () => hasLevel() && hasTilt();
+  const canFinish = () => balanceExplorationReady(state.runs);
   // Level 2 (mystery boxes) is session play; only levels.balance { cleared, attempts } is saved.
   const levelRecord = () => context.save.levels?.balance;
   const mysteryDone = () => mysteryComplete(levelRecord());
@@ -47,6 +47,15 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   let records: MysteryRecord[] = [];
   let shownRecord: MysteryRecord | null = null;
   let uses = 0, clue = -1, thrifty = false, found: string | null = null;
+  const pickReady = () => !!round && mysteryComparisonReady(round.boxes, records);
+  const comparedBoxes = () => new Set(records.flatMap(record => [record.left, record.right]));
+  function mysteryNextHint() {
+    if (!round) return '';
+    const remaining = round.boxes.filter(id => !comparedBoxes().has(id));
+    if (remaining.length) return `${remaining.join('·')} 상자도 수평대에 올려 다른 상자와 비교해요.`;
+    if (!pickReady()) return `${candidates(round.boxes, records).join('·')} 상자끼리 비교해 제일 무거운 상자를 찾아요.`;
+    return '모든 상자를 비교했어요. 기록을 보고 제일 무거운 상자를 골라요.';
+  }
   const pans = (): { left: string | null; right: string | null } => level === 1 ? state : mystery;
   const itemIds = (): readonly string[] => level === 1 ? balanceObjects.map(object => object.id) : round?.boxes ?? [];
   const itemName = (id: string) => level === 1 ? objectName(id) : `${id} 상자`;
@@ -67,7 +76,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   root.innerHTML = `<section class="experiment-screen instrument-screen balance-screen">
     <div class="experiment-heading balance-topbar"><div><p class="eyebrow">02 · 균형 다리</p><h1>어느 물체가 더 무거울까?</h1></div>
       <div class="balance-goal" role="status" aria-live="polite"><span id="balance-tilt-goal">○ 기울기 발견</span><span id="balance-level-goal">○ 수평 발견</span><span id="balance-mystery-goal">○ 수수께끼 상자 0/${mysteryRoundCount}</span><span id="balance-uses" hidden></span></div>
-      <div class="balance-top-tools"><button class="button button-primary" id="balance-request-open" hidden>의뢰 받기 →</button><button class="balance-record-button" id="balance-record" aria-haspopup="dialog"><span id="balance-record-label">기록 보기</span><b id="balance-count">0</b></button></div>
+      <div class="balance-top-tools"><button class="button button-primary" id="balance-request-open" hidden>실험 마치고 의뢰 보기 →</button><button class="balance-record-button" id="balance-record" aria-haspopup="dialog"><span id="balance-record-label">기록 보기</span><b id="balance-count">0</b></button></div>
     </div>
     <div class="instrument-stage game-panel balance-field">
       <div class="instrument-phase" id="balance-phase" role="status"></div>
@@ -106,17 +115,21 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     const [heavy, light] = record.actual === 'left' ? [record.left, record.right] : [record.right, record.left];
     return `${heavy} 상자가 ${light} 상자보다 무거워요.`;
   }
+  function remainingPairs() {
+    return [['A','B'],['A','C'],['B','C']].filter(([a,b])=>!state.runs.some(run=>(run.left===a&&run.right===b)||(run.left===b&&run.right===a))).map(pair=>pair.map(objectName).join('·'));
+  }
+  function basicNext() { return canFinish() ? '세 짝을 모두 비교했어요. 실험 마치고 의뢰 보기를 눌러요.' : `아직 안 해 본 비교: ${remainingPairs().join(', ')}.`; }
   function phaseText() {
     const p = pans();
     if (busy) return '기울기를 살펴봐요';
     if (level === 1) {
-      if (canFinish()) return visibleOutcome ? '두 결과를 발견했어요! 의뢰를 받아요' : '다리 점검원의 의뢰를 받아요';
-      return visibleOutcome ? '한 물체를 바꾸어 다시 비교해요' : !p.left || !p.right ? '① 양쪽에 물체를 하나씩 놓아요' : !state.prediction ? '② 어느 쪽이 내려갈지 예상해요' : '③ 고리를 누르거나 오른쪽으로 뽑아요';
+      if (canFinish()) return visibleOutcome ? '세 짝을 모두 비교했어요! 의뢰를 받아요' : '다리 점검원의 의뢰를 받아요';
+      return visibleOutcome ? basicNext() : !p.left || !p.right ? '① 양쪽에 물체를 하나씩 놓아요' : !state.prediction ? '② 어느 쪽이 내려갈지 예상해요' : '③ 고리를 누르거나 오른쪽으로 뽑아요';
     }
     if (mysteryDone()) return '의뢰 완료! 발견 저장을 눌러요';
     if (waiting) return '찾았어요! 다음 꾸러미를 눌러요';
     const tag = `수수께끼 ${roundIndex + 1}/${mysteryRoundCount}`;
-    return !p.left || !p.right ? `${tag} · 상자 두 개를 양쪽에 놓아요` : visibleOutcome ? `${tag} · 다시 비교하거나 제일 무거운 상자를 골라요` : `${tag} · 고리를 누르거나 오른쪽으로 뽑아요`;
+    return !p.left || !p.right ? `${tag} · 상자 두 개를 양쪽에 놓아요` : visibleOutcome ? `${tag} · ${mysteryNextHint()}` : `${tag} · 고리를 누르거나 오른쪽으로 뽑아요`;
   }
   /** The student's guess and what the beam did stay in two separate boxes; the guess is never rewritten. */
   const compareMarkup = (run: BalanceRun) => `<span class="balance-compare"><span class="balance-guess">내 예상 <b>${names[run.prediction]}</b></span><span class="balance-seen">관찰 결과 <b>${names[run.actual]}</b></span></span>`;
@@ -151,7 +164,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     setTapHint(pin, !pin.disabled && !visibleOutcome);
     root.querySelectorAll<HTMLElement>('.instrument-dock > [data-level]').forEach(part => { part.hidden = Number(part.dataset.level) !== level; });
     requestButton.hidden = !requestOpen();
-    if (requestOpen() && !busy) letterOnce(root, 'balance', enterMystery);
+    // Request letters never interrupt an ongoing comparison.
     requestButton.disabled = busy;
     setTapHint(requestButton, requestOpen() && !busy);
     recordButton.disabled = busy;
@@ -178,7 +191,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     root.querySelector('#balance-count')!.textContent = String(level === 1 ? state.runs.length : records.length);
     const usesChip = root.querySelector<HTMLElement>('#balance-uses')!;
     usesChip.hidden = level !== 2 || !round;
-    usesChip.textContent = `수평대 ${uses}번${thrifty ? ' · 알뜰 탐정' : roundIndex === 0 ? ` · ${thriftyBudget}번 안에 알뜰 탐정` : ''}`;
+    usesChip.textContent = `상자 ${comparedBoxes().size}/${round?.boxes.length ?? 0}개 비교 · 수평대 ${uses}번${thrifty ? ' · 알뜰 탐정' : roundIndex === 0 ? ` · ${thriftyBudget}번 안에 알뜰 탐정` : ''}`;
     usesChip.classList.toggle('done', thrifty);
     if (popup) renderPopup();
   }
@@ -188,7 +201,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     const keepGoing = (primary: boolean) => `<button class="button ${primary ? 'button-primary' : 'button-secondary'}" id="balance-popup-close">계속 실험하기</button>`;
     if (level === 1) {
       const run = shownRun;
-      const next = canFinish() ? '무거운 쪽은 내려가고, 무게가 같으면 수평이에요.' : hasTilt() ? '이제 수평인 짝을 찾아봐요. 어떤 두 물체를 놓아 볼까요?' : hasLevel() ? '이제 기울어진 짝을 찾아봐요. 어떤 두 물체를 놓아 볼까요?' : '기울어진 짝과 수평인 짝을 하나씩 찾아요.';
+      const next = canFinish() ? '받침점에서 같은 거리에 놓으면 무거운 쪽이 내려가고, 무게가 같으면 수평이에요.' : basicNext();
       const rows = state.runs.slice(-5).reverse().map(item => `<div class="result-row"><span>${objectName(item.left)} : ${objectName(item.right)}</span><strong>${names[item.actual]}</strong></div>`).join('') || '<p>첫 발견을 기다리고 있어요.</p>';
       const request = requestOpen() ? '<div class="balance-request"><p class="balance-request-from">다리 점검원의 의뢰</p><p class="balance-request-text">똑같이 생긴 상자 중에 진짜 무거운 기둥 부품이 섞였어요. 찾아 주세요!</p></div>' : '';
       return {
@@ -196,11 +209,11 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
         title: run ? run.prediction === run.actual ? '이번 비교 예상과 같아요!' : '이번 비교 예상과 달라도 괜찮아요!' : '지금까지의 발견',
         lead: run ? `${compareMarkup(run)}${reason(run)}` : phaseText(),
         body: `<div class="balance-popup-runs"><strong>나의 발견 ${state.runs.length}</strong><div class="result-list">${rows}</div></div><p class="balance-popup-next">${next}</p>${request}`,
-        actions: requestOpen() ? `${keepGoing(false)}<button class="button button-primary" id="balance-popup-request"${busy ? ' disabled' : ''}>의뢰 받기 →</button>` : `${save ? keepGoing(false) : keepGoing(true)}${save}`,
+        actions: requestOpen() ? `${keepGoing(false)}<button class="button button-primary" id="balance-popup-request"${busy ? ' disabled' : ''}>실험 마치고 의뢰 보기 →</button>` : `${save ? keepGoing(false) : keepGoing(true)}${save}`,
       };
     }
     const cards = records.map((record, i) => `<span class="mystery-record${i === clue ? ' is-clue' : ''}" data-actual="${record.actual === 'level' ? 'level' : 'tilt'}" aria-label="기록 ${i + 1}: ${recordReason(record)}">${relationText(record)}</span>`).join('') || `<p>${round ? '수평대로 비교하면 기록 카드가 쌓여요.' : '모든 상자 꾸러미를 해결했어요.'}</p>`;
-    const picks = round && !mysteryDone() ? `<div class="mystery-pick question-zone question-zone-compact"><span class="question-label">생각해 볼 문제</span><strong class="question-prompt">② 어느 상자가 제일 무거울까요?</strong><div class="mystery-picks question-choices">${round.boxes.map(id => `<button data-pick="${id}" aria-label="${id} 상자가 제일 무거워요"${frozen() || !records.length ? ' disabled' : ''}>${id}</button>`).join('')}</div></div>` : '';
+    const picks = round && !mysteryDone() && pickReady() ? `<div class="mystery-pick question-zone question-zone-compact"><span class="question-label">생각해 볼 문제</span><strong class="question-prompt">② 어느 상자가 제일 무거울까요?</strong><div class="mystery-picks question-choices">${round.boxes.map(id => `<button data-pick="${id}" aria-label="${id} 상자가 제일 무거워요"${frozen() || !records.length ? ' disabled' : ''}>${id}</button>`).join('')}</div></div>` : '';
     return {
       label: '의뢰 기록',
       title: mysteryDone() ? '의뢰를 모두 해결했어요!' : waiting && found ? `찾았어요! ${found} 상자` : shownRecord ? `기록 「${relationText(shownRecord)}」` : '비교 기록 카드',
@@ -263,12 +276,12 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   function recordMystery(record: MysteryRecord) {
     records = [...records, record]; uses++; shownRecord = record; visibleOutcome = record.actual; clue = -1;
     countAttempt();
-    feedback = `「${relationText(record)}」 기록 카드가 생겼어요. ${recordReason(record)} 다른 상자와 더 비교하거나, 제일 무거운 상자를 골라요.`;
+    feedback = `「${relationText(record)}」 기록 카드가 생겼어요. ${recordReason(record)} ${mysteryNextHint()}`;
     busy = false; companion.setMood('observe'); context.commit(); context.sound(record.actual === 'level' ? 700 : 520); update();
-    openPopup();
+    if (pickReady()) openPopup();
   }
   function pick(id: string) {
-    if (frozen() || level !== 2 || !round || !records.length) return;
+    if (frozen() || level !== 2 || !round || !pickReady()) return;
     countAttempt();
     const verdict = judgePick(round.boxes, records, id);
     if (verdict.result !== 'found') {
@@ -353,10 +366,10 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       const firstTilt = actual !== 'level' && !hasTilt();
       const run = {left,right,prediction:prediction!,actual};
       state.runs = keepEvidence([...state.runs,run], balanceRunKey); state.prediction = null; visibleOutcome = actual; shownRun = run;
-      feedback = `${prediction === actual ? '예상과 같아요!' : '예상과 달라도 괜찮아요!'} ${reason(run)} ${canFinish() ? '두 가지를 모두 발견했어요. 다리 점검원의 의뢰가 도착했어요!' : hasTilt() ? '이제 수평인 짝을 찾아봐요.' : '이제 기울어진 짝을 찾아봐요.'}`;
+      feedback = `${prediction === actual ? '예상과 같아요!' : '예상과 달라도 괜찮아요!'} ${reason(run)} ${basicNext()}`;
       busy = false; companion.setMood(canFinish() ? 'success' : 'observe'); context.commit(); context.sound(actual === 'level' ? 700 : 520); update();
       if (firstTilt) showPredictionChip(root.querySelector<HTMLElement>('.instrument-stage')!, context.save, 'balance');
-      openPopup(); // skipped while the client's letter is open
+      if (canFinish()) openPopup();
     }
     animation.cancel(); animation = null;
   }
@@ -368,7 +381,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     if (button.dataset.pan) { if (selectedObject) place(selectedObject,button.dataset.pan as 'left'|'right'); else { feedback=`아래 ${level === 1 ? '물체' : '상자'}를 고른 다음 왼쪽 또는 오른쪽 자리를 눌러요.`; update(); } }
     if (button.dataset.predict) { state.prediction=button.dataset.predict as BalanceRun['prediction']; visibleOutcome=null; shownRun=null; feedback=`${names[state.prediction]}을 예상했어요. 가운데 잠금핀 고리를 뽑아 확인해요.`; context.commit(); update(); }
     if (button.dataset.pick) pick(button.dataset.pick);
-    if (button.id==='balance-request-open' || button.id==='balance-popup-request') enterMystery();
+    if ((button.id==='balance-request-open' || button.id==='balance-popup-request') && !busy && level === 1 && canFinish()) { closePopup(); showRequestLetter(root, 'balance', enterMystery); }
     if (button.id==='balance-record') openPopup();
     if (button.id==='balance-free-play') { exploreFreely(); return; }
     if (button.id==='balance-next-round' || button.id==='balance-popup-next') nextRound();

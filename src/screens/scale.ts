@@ -4,8 +4,8 @@ import { icons } from '../icons';
 import { scaleParts, targetWeight } from '../data';
 import { mountCompanion } from '../sprites';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
-import { canCompleteScale, comparisonParts, emptyScaleReading, fakeHint, fakeLabels, fakeLayout, fakeRequestComplete, fakeRounds, fakeSummary, judgeFakePick, nextFakeRound, recordFakePick, recordScaleRun, scaleComparison, recordSpringRead, springDone, springEyeLabels, springHint, springObjects, springParallax, springReading, springStartOffset, springSummary, turnSpringScrew, type EyeLevel } from '../scaleModel';
-import { letterOnce } from '../requestLetter';
+import { scaleActivityMeasurements, scaleExplorationReady, comparisonParts, emptyScaleReading, fakeDiscoveryText, fakeHint, fakeLabels, fakeLayout, fakeRequestComplete, fakeRounds, fakeSummary, judgeFakePick, nextFakeRound, recordFakePick, recordScaleRun, scaleComparison, recordSpringRead, springDone, springEyeLabels, springHint, springObjects, springParallax, springReading, springStartOffset, springSummary, turnSpringScrew, type EyeLevel } from '../scaleModel';
+import { showRequestLetter } from '../requestLetter';
 import { predictionRecap } from '../inquiryPlan';
 import '../instruments.css';
 import '../scalePolish.css';
@@ -33,7 +33,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   const motions = new Set<Animation>();
   const last = state.runs.at(-1);
   let reading: number | null = last && last.zeroed === state.zeroed && [...last.parts].sort().join(',') === [...state.parts].sort().join(',') ? last.reading : null;
-  let feedback = '겉모습만으로 무게를 정확히 알 수 있을까요? 사과와 책 모형을 하나씩 재 봐요.';
+  let feedback = '겉모습만으로 무게를 정확히 알 수 있을까요? 다섯 모형을 하나씩 모두 재 봐요.';
   // Level 2 request: positions are shuffled per visit; measurements are session play, only judgements are saved.
   // A replay of a finished request runs on a session-only record; the saved one never changes.
   let replay: LevelRecord | null = null;
@@ -41,7 +41,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   const record = () => replay ?? savedRecord();
   const fakeSeed = Math.floor(Math.random()*1000);
   // Revisiting after the request is done opens the free bench, with paths back to every activity.
-  let level: 1|2 = canCompleteScale(state) && record() && !fakeRequestComplete(record()) ? 2 : 1;
+  let level: 1|2 = scaleExplorationReady(state) && record() && !fakeRequestComplete(record()) ? 2 : 1;
   let challengeOn = false;
   // Visible next-step note beside the scale (also a status for screen readers); cleared when acted on.
   let callout: { text: string; until: 'empty' | 'part' } | null = null;
@@ -49,7 +49,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   let fakeZeroed = false;
   let fakeOn: number | null = null;
   let waiting = false;
-  let timer = 0;
+  let completedRound:number|null=null;
   let misses = 0;
   let found: number | null = null;
   const measured = new Map<number,{reading:number;zeroed:boolean}>();
@@ -58,11 +58,10 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   let popup: HTMLDialogElement | null = null;
   let popupPending = false;
   let lastResult: PopResult | null = null;
-  const popupBusy = () => !!popup || popupPending;
   if(level===2) { feedback='겉모습이 똑같은 부품 중 하나가 가짜예요. 저울로 하나씩 재 봐요.'; state.parts=[]; reading=null; }
 
   root.innerHTML = `<section class="experiment-screen instrument-screen scale-screen">
-    <div class="experiment-heading"><div><p class="eyebrow">03 · 재료 보급소</p><h1>저울로 무게를 비교해요</h1></div>${missionProgressMarkup('scale',['빈 저울 0 맞추기','사과 재기','책 재기','가짜 부품 찾기'])}</div>
+    <div class="experiment-heading"><div><p class="eyebrow">03 · 재료 보급소</p><h1>저울로 무게를 비교해요</h1></div>${missionProgressMarkup('scale',['빈 저울 0 맞추기','모형 5개 재기','가짜 부품 찾기'])}</div>
     <div class="instrument-stage game-panel scale-field">
       <div class="instrument-phase" id="scale-phase" tabindex="-1"></div>
       <div class="scale-toolbar"><div class="scale-comparison" id="scale-comparison" aria-label="두 모형의 측정 결과"></div><button class="scale-record-open" id="scale-record-open" type="button">기록 보기</button></div>
@@ -97,7 +96,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   const finish = root.querySelector<HTMLButtonElement>('#scale-finish')!;
   const measure = root.querySelector<HTMLButtonElement>('#scale-measure')!;
   const companion = mountCompanion(root.querySelector<HTMLElement>('#scale-companion')!);
-  const round = () => Math.min(nextFakeRound(record()), fakeRounds.length-1);
+  const round = () => completedRound ?? Math.min(nextFakeRound(record()), fakeRounds.length-1);
   const requestDone = () => fakeRequestComplete(record());
   const loaded = () => level===2 ? fakeOn===null ? [] : [`fake:${fakeOn}`] : state.parts;
   const zeroedNow = () => level===2 ? fakeZeroed : state.zeroed;
@@ -105,7 +104,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     if(level===2) return (fakeOn===null ? 0 : fakeLayout(round(),fakeSeed)[fakeOn])+(fakeZeroed?0:emptyScaleReading);
     return state.parts.reduce((sum,id)=>sum+scaleParts.find(p=>p.id===id)!.weight,0)+(state.zeroed?0:15);
   }
-  function canFinish() { return canCompleteScale(state) && fakeRequestComplete(savedRecord()); }
+  function canFinish() { return scaleExplorationReady(state) && fakeRequestComplete(savedRecord()); }
   function renderFakeDock() {
     if(dockRound===round()) return;
     dockRound=round();
@@ -117,16 +116,17 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   function requestBar() {
     const springButton=`<button class="scale-heft" id="scale-spring-open">${springDone(state.springReads) ? '용수철저울 다시 보기' : '용수철저울도 읽어 볼까?'}</button>`;
     const challengeButton=`<button class="scale-heft${challengeOn?' is-on':''}" id="scale-challenge" aria-pressed="${challengeOn}">150 g 도전 (선택) · ${Math.min(2,comboCount())}/2</button>`;
-    if(level===1&&canCompleteScale(state)&&fakeRequestComplete(savedRecord())) return `<div class="scale-request is-done"><span class="scale-request-from">의뢰 완료 ✓</span><button class="scale-heft" id="scale-replay">완료한 의뢰 다시 하기</button>${challengeButton}${springButton}</div>`;
-    if(level===1) return canCompleteScale(state) ? `<div class="scale-request"><span class="scale-request-from">보급소 직원의 의뢰</span><button class="button button-primary" id="scale-request-open">${record() ? '의뢰 이어 하기' : '의뢰 받기'}</button>${springButton}</div>` : '';
+    if(level===1&&scaleExplorationReady(state)&&fakeRequestComplete(savedRecord())) return `<div class="scale-request is-done"><span class="scale-request-from">의뢰 완료 ✓</span><button class="scale-heft" id="scale-replay">완료한 의뢰 다시 하기</button>${challengeButton}${springButton}</div>`;
+    if(level===1) return scaleExplorationReady(state) ? `<div class="scale-request"><span class="scale-request-from">보급소 직원의 의뢰</span><button class="button button-primary" id="scale-request-open">실험 마치고 의뢰 보기 →</button>${springButton}</div>` : '';
     if(requestDone()&&!waiting) return `<div class="scale-request is-done"><span class="scale-request-from">${replay ? '다시 하기 완료 ✓' : '의뢰 완료 ✓'}</span><p>가짜 ${fakeRounds.length}개를 저울 숫자로 찾았어요</p><button class="scale-heft" id="scale-basic">기본 물체 실험으로</button>${springButton}</div>`;
+    if(waiting) return '<div class="scale-request"><span>이번 의뢰 완료 ✓</span><button class="button button-primary" id="scale-next">다음 의뢰 →</button></div>';
     const r=fakeRounds[round()];
     return `<div class="scale-request is-active"><span class="scale-request-from">${replay ? '다시 하기 ' : '의뢰 '}${round()+1} / ${fakeRounds.length}</span><p>가짜 1개 · 진짜는 모두 <strong>${r.real} g</strong></p><button class="scale-heft" id="scale-heft">손으로 들어 보기</button>${replay ? '<button class="scale-heft" id="scale-basic">기본 물체 실험으로</button>' : ''}</div>`;
   }
   function phaseText() {
     if(busy) return '숫자가 멈출 때까지 살펴봐요';
     if(level===1&&challengeOn) return !state.zeroed ? '150 g 도전: 먼저 빈 저울을 0으로 맞춰요' : `150 g 도전 · 모형 여러 개로 150 g 만들기 · 서로 다른 조합 ${Math.min(2,comboCount())}/2`;
-    if(level===1) return !state.zeroed ? state.parts.length ? '모두 내리고 빈 저울을 0으로 맞춰요' : '빈 저울을 0으로 맞춰요' : canCompleteScale(state) ? fakeRequestComplete(savedRecord()) ? '의뢰 완료! 더 탐구하거나 비교 기록을 저장해요' : '보급소 직원의 의뢰를 받아요' : state.parts.length ? '모두 내린 뒤 다른 모형을 하나만 올려요' : '사과와 책 모형을 하나씩 재 봐요';
+    if(level===1) return !state.zeroed ? state.parts.length ? '모두 내리고 빈 저울을 0으로 맞춰요' : '빈 저울을 0으로 맞춰요' : scaleExplorationReady(state) ? fakeRequestComplete(savedRecord()) ? '의뢰 완료! 더 탐구하거나 비교 기록을 저장해요' : '보급소 직원의 의뢰를 받아요' : state.parts.length ? '모두 내린 뒤 다른 모형을 하나만 올려요' : '다섯 모형을 하나씩 모두 재 봐요';
     if(waiting) return '가짜를 찾았어요! 다음 의뢰를 준비해요';
     if(requestDone()) return '의뢰 완료! 비교 기록을 저장해요';
     if(!fakeZeroed&&fakeOn===null&&!measured.size) return '빈 저울의 숫자부터 확인해요';
@@ -135,7 +135,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   function differenceText() {
     if(busy) return '안정되면 자동으로 기록해요';
     if(!zeroedNow()) return `빈 저울의 ${emptyScaleReading} g이 더해져 있어요`;
-    if(level===1) return canCompleteScale(state) ? '사과 80 g > 책 70 g · 사과가 10 g 더 무거워요' : '겉모습만으로 정확한 무게는 알기 어려워요';
+    if(level===1) return scaleExplorationReady(state) ? '사과 80 g > 책 70 g · 사과가 10 g 더 무거워요' : '겉모습만으로 정확한 무게는 알기 어려워요';
     if(requestDone()&&!waiting) return '눈과 손으로 모르는 작은 차이도 저울은 숫자로 보여 줘요';
     return '진짜 부품끼리는 숫자가 같아요';
   }
@@ -147,7 +147,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     const compared=scaleComparison(state.runs);
     const pair=comparisonParts.map(id=>{const run=compared.find(run=>run.parts[0]===id);return `<span class="${run?'is-measured':''}">${props[id].name} <strong>${run ? run.reading+' g' : '아직 안 쟀어요'}</strong></span>`;}).join('<b class="scale-pop-vs" aria-hidden="true">vs</b>');
     const runs=state.runs.slice(-5).reverse().map(run=>`<li><span>${run.parts.map(shortName).join(' + ')}${run.zeroed ? '' : ' · 영점 전'}</span><strong>${run.reading} g</strong></li>`).join('');
-    return `<section class="scale-pop-records" aria-label="나의 측정 기록"><h3>두 모형 비교</h3><div class="scale-pop-rows scale-pop-pair">${pair}</div>${runs ? `<h3>최근 측정 <small>${state.runs.length}번 쟀어요</small></h3><ol class="scale-pop-runs">${runs}</ol>` : '<p class="scale-pop-note">하나씩 재면 부품의 무게를 발견할 수 있어요.</p>'}${canCompleteScale(state) ? '<p class="scale-pop-note">더 해 보기 (선택): 여러 모형으로 150 g 만들기. 실제 물체의 무게는 모형과 다를 수 있어요.</p>' : ''}</section>`;
+    return `<section class="scale-pop-records" aria-label="나의 측정 기록"><h3>두 모형 비교</h3><div class="scale-pop-rows scale-pop-pair">${pair}</div>${runs ? `<h3>최근 측정 <small>${state.runs.length}번 쟀어요</small></h3><ol class="scale-pop-runs">${runs}</ol>` : '<p class="scale-pop-note">하나씩 재면 부품의 무게를 발견할 수 있어요.</p>'}${scaleExplorationReady(state) ? '<p class="scale-pop-note">더 해 보기 (선택): 여러 모형으로 150 g 만들기. 실제 물체의 무게는 모형과 다를 수 있어요.</p>' : ''}</section>`;
   }
   function questionMarkup(q:PopQuestion, answer?:string) {
     const solved=answer===q.correct;
@@ -161,7 +161,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     dialog.className='stage-popup scale-popup';
     dialog.setAttribute('aria-labelledby','scale-popup-title');
     const render=()=>{
-      dialog.innerHTML=`<div class="stage-popup-card"><button class="stage-popup-close" type="button" aria-label="닫기">×</button><p class="stage-popup-label">${label}</p><h2 id="scale-popup-title">${result ? result.title : '나의 측정 기록'}</h2><div class="stage-popup-body">${result ? `<p class="scale-pop-text">${result.text}</p>` : ''}${result?.records ?? recordsMarkup()}${result?.question ? questionMarkup(result.question,result.answer) : ''}</div><div class="stage-popup-actions">${canFinish() ? '<button class="button button-primary stage-result-finish" type="button">비교 기록 저장 →</button>' : '<button class="button button-primary stage-popup-continue" type="button">계속 실험하기</button>'}</div></div>`;
+      dialog.innerHTML=`<div class="stage-popup-card"><button class="stage-popup-close" type="button" aria-label="닫기">×</button><p class="stage-popup-label">${label}</p><h2 id="scale-popup-title">${result ? result.title : '나의 측정 기록'}</h2><div class="stage-popup-body">${result ? `<p class="scale-pop-text">${result.text}</p>` : ''}${result?.records ?? recordsMarkup()}${result?.question&&(level===2||scaleExplorationReady(state)) ? questionMarkup(result.question,result.answer) : ''}</div><div class="stage-popup-actions">${waiting ? '<button class="button button-primary" data-scale-next>다음 의뢰 →</button>' : level===1&&scaleExplorationReady(state)&&!fakeRequestComplete(savedRecord()) ? '<button class="button button-primary" data-scale-request>실험 마치고 의뢰 보기 →</button>' : canFinish() ? '<button class="button button-primary stage-result-finish" type="button">비교 기록 저장 →</button>' : '<button class="button button-primary stage-popup-continue" type="button">계속 실험하기</button>'}</div></div>`;
     };
     render();
     dialog.addEventListener('click',event=>{
@@ -169,6 +169,8 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
       const button=(event.target as Element).closest<HTMLButtonElement>('button');
       if(!button||button.disabled) return;
       if(button.matches('.stage-popup-close, .stage-popup-continue')) { dialog.close(); return; }
+      if(button.hasAttribute('data-scale-request')) { dialog.close(); reviewRequest(); return; }
+      if(button.hasAttribute('data-scale-next')) { dialog.close(); advanceFakeRound(); return; }
       if(button.matches('.stage-result-finish')) { if(canFinish()) { dialog.close(); finish.click(); } return; }
       if(button.dataset.answer&&result?.question) {
         result.answer=button.dataset.answer;
@@ -188,26 +190,25 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     if(drag) { popupPending=true; return; }
     openPopup('실험 결과');
   }
-  // Level 1 opens a popup for each finished measurement until both models are compared; later free play stays in the footer.
+  // Basic measurements stay inline until every model has been weighed separately.
   function measureResult(parts:string[],value:number,zeroed:boolean):PopResult {
     if(!zeroed) return { title:`${value} g? 0을 맞추기 전 숫자예요`, text:`빈 저울이 이미 ${emptyScaleReading} g을 가리키고 있었어요. 그래서 모형의 무게보다 ${emptyScaleReading} g 더 크게 보여요.`, question:{ prompt:'정확한 무게를 재려면 먼저 무엇을 할까요?', choices:[['heavier','모형을 하나 더 올려요'],['zero','모두 내리고 0 맞추기를 눌러요']], correct:'zero', right:'맞아요! 빈 저울을 0으로 맞추면 모형의 무게만 숫자로 나와요.', hint:`숫자에 빈 저울의 ${emptyScaleReading} g이 더해져 있어요. 빈 저울부터 0으로 맞춰야 해요.` } };
     if(parts.length>1) return { title:`함께 올려서 ${value} g이에요`, text:`${parts.map(shortName).join(', ')} 모형을 한꺼번에 재었어요. 이 숫자로는 각각의 무게를 알 수 없어요.`, question:{ prompt:'두 모형의 무게를 비교하려면 어떻게 잴까요?', choices:[['one','하나씩 따로 재요'],['together','함께 올려 재요']], correct:'one', right:'맞아요! 하나씩 재야 두 숫자를 비교할 수 있어요. 모두 내리고 하나만 올려요.', hint:'함께 재면 두 무게가 더해진 숫자 하나만 나와요.' } };
     const name=props[parts[0]].name;
-    if(canCompleteScale(state)) {
+    if(scaleExplorationReady(state)) {
       const recap=predictionRecap(context.save,'scale');
-      return { title:'사과 80 g, 책 70 g!', text:`${name}은 ${value} g이에요. 이제 두 숫자를 비교할 수 있어요.${recap.predicted ? ` 처음 내 예상은 ‘${recap.predicted}’였어요. ${recap.matched ? '예상과 같아요!' : '예상과 달랐어요. 그래서 직접 재 보는 게 중요해요.'}` : ''}`, question:{ prompt:'어느 모형이 더 무거운가요?', choices:[['book','책 모형'],['apple','사과 모형'],['same','무게가 같아요']], correct:'apple', right:'맞아요! 80 g이 70 g보다 커요. 사과 모형이 10 g 더 무거워요. 겉모습이 아니라 숫자로 비교했어요.', hint:'기록한 두 숫자를 다시 봐요. 숫자가 더 큰 쪽이 더 무거워요.' } };
+      return { title:'모형 5개를 모두 재었어요!', text:`${name}은 ${value} g이에요. 다섯 모형의 기록을 비교해요. 사과는 80 g, 책은 70 g이에요.${recap.predicted ? ` 처음 내 예상은 ‘${recap.predicted}’였어요. ${recap.matched ? '예상과 같아요!' : '예상과 달랐어요. 그래서 직접 재 보는 게 중요해요.'}` : ''}`, question:{ prompt:'어느 모형이 더 무거운가요?', choices:[['book','책 모형'],['apple','사과 모형'],['same','무게가 같아요']], correct:'apple', right:'맞아요! 80 g이 70 g보다 커요. 사과 모형이 10 g 더 무거워요. 겉모습이 아니라 숫자로 비교했어요.', hint:'기록한 두 숫자를 다시 봐요. 숫자가 더 큰 쪽이 더 무거워요.' } };
     }
     const others=comparisonParts.filter(id=>id!==parts[0]).map(id=>props[id].name);
     return { title:`${name}은 ${value} g이에요`, text:(comparisonParts as readonly string[]).includes(parts[0]) ? `${others.join(', ')}의 무게도 재면 두 숫자를 비교할 수 있어요.` : `${name}의 무게를 발견했어요. 비교할 모형은 사과와 책 모형이에요.`, question:{ prompt:'다른 모형의 무게를 재려면 다음에 무엇을 할까요?', choices:[['stack','지금 모형 위에 하나 더 올려요'],['swap','모두 내리고 다른 모형 하나만 올려요']], correct:'swap', right:'맞아요! 저울에는 재고 싶은 모형 하나만 올려요.', hint:'두 개를 함께 올리면 무게가 더해져서 하나의 무게를 알 수 없어요.' } };
   }
   function update() {
-    const compared = scaleComparison(state.runs);
-    setMissionProgress(root,[state.zeroed,...comparisonParts.map(id=>compared.some(run=>run.parts[0]===id)),requestDone()],'');
-    const bar=level===1&&!canCompleteScale(state) ? comparisonParts.map(id=>{const run=compared.find(run=>run.parts[0]===id);return `<span>${props[id].name} <strong>${run ? run.reading+' g ✓' : '아직 안 쟀어요'}</strong></span>`;}).join('') : requestBar();
+    const compared = scaleActivityMeasurements(state.runs);
+    setMissionProgress(root,[state.zeroed,compared.length===scaleParts.length,requestDone()],'');
+    const bar=level===1&&!scaleExplorationReady(state) ? `<span>모형 측정 <strong>${compared.length}/${scaleParts.length}개 완료</strong></span><span>아직 안 잰 모형 <strong>${scaleParts.filter(part=>!compared.some(run=>run.parts[0]===part.id)).map(part=>shortName(part.id)).join(' · ')}</strong></span>` : requestBar();
     // Re-render only on change so a focused button (의뢰 받기, 손으로 들어 보기) keeps focus.
     if(bar!==requestMarkup) root.querySelector('#scale-comparison')!.innerHTML=requestMarkup=bar;
-    // The letter waits until the result popup is closed so two dialogs never stack.
-    if(level===1&&!busy&&!popupBusy()&&!record()&&canCompleteScale(state)) letterOnce(root,'scale',openRequest);
+    // The request letter opens only through the explicit request button.
     root.querySelector('#scale-comparison')!.setAttribute('aria-label',level===2 ? '보급소 의뢰' : '두 모형의 측정 결과');
     root.querySelectorAll<HTMLElement>('.scale-dock [data-level]').forEach(part=>{part.hidden=Number(part.dataset.level)!==level;});
     if(level===2) renderFakeDock();
@@ -233,6 +234,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
         slot.dataset.state=found===i ? 'fake' : value ? 'measured' : 'new';
         const pick=slot.querySelector<HTMLButtonElement>('[data-pick]')!;
         pick.disabled=busy||waiting||done;
+        pick.hidden=measured.size<fakeRounds[round()].count;
         pick.textContent=found===i ? '가짜 ✓' : '가짜예요';
         pick.removeAttribute('aria-describedby');
       });
@@ -288,7 +290,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     const measuredValue=loadReading();
     busy=true; feedback='쟁반이 조금 흔들려요. 숫자가 멈추면 기록해요.'; companion.setMood('observe'); update();
     const started=performance.now(); const duration=reducedMotion()?1:950;
-    const from=Number(readingNode.textContent)||0; const wasComplete=canCompleteScale(state);
+    const from=Number(readingNode.textContent)||0; const wasComplete=scaleExplorationReady(state);
     const tick=(now:number)=>{
       if(!active) return;
       const progress=Math.min(1,(now-started)/duration);
@@ -304,20 +306,31 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
         companion.setMood('observe'); context.sound(520); update();
       } else {
         state.runs=recordScaleRun(state.runs,{parts,reading:measuredValue,zeroed});
-        feedback=!zeroed ? '빈 저울을 0으로 맞춰야 정확히 잴 수 있어요. 이것을 영점 맞추기라고 해요.' : canCompleteScale(state) ? '저울로 어느 쪽이 얼마나 무거운지 알아냈어요! 보급소 직원의 의뢰가 도착했어요.' : parts.length>1 ? '비교할 때는 사과와 책 모형을 하나씩 올려요.' : `${props[parts[0]].name}은 ${measuredValue} g이에요. 다른 모형과 비교해요.`;
+        feedback=!zeroed ? '빈 저울을 0으로 맞춰야 정확히 잴 수 있어요. 이것을 영점 맞추기라고 해요.' : scaleExplorationReady(state) ? '저울로 어느 쪽이 얼마나 무거운지 알아냈어요! 보급소 직원의 의뢰가 도착했어요.' : parts.length>1 ? '비교할 때는 사과와 책 모형을 하나씩 올려요.' : `${props[parts[0]].name}은 ${measuredValue} g이에요. 다른 모형과 비교해요.`;
         companion.setMood(zeroed&&measuredValue===targetWeight?'success':'observe'); context.commit(); context.sound(zeroed&&measuredValue===targetWeight?730:520);
-        if(!wasComplete) showResult(measureResult(parts,measuredValue,zeroed));
+        lastResult=measureResult(parts,measuredValue,zeroed);
+        if(!wasComplete&&scaleExplorationReady(state)) showResult(lastResult);
         update();
       }
       if(zeroed) animate(root.querySelector('#scale-stability'),[{transform:'scale(1.35)'},{transform:'scale(1)'}],280);
     };
     frame=requestAnimationFrame(tick);
   }
+  function reviewRequest() {
+    if(busy||waiting||drag||level!==1||!scaleExplorationReady(state)||!spring.hidden) return;
+    popup?.close(); showRequestLetter(root,'scale',openRequest);
+  }
+  function advanceFakeRound() {
+    if(!waiting) return;
+    waiting=false; completedRound=null; fakeOn=null; reading=null; misses=0; found=null; measured.clear(); lastResult=null;
+    feedback=`다음 의뢰예요. 부품 ${fakeRounds[round()].count}개를 모두 재어 비교해요.`;
+    update();
+  }
   function openRequest() {
-    if(busy||level!==1||!canCompleteScale(state)) return;
+    if(busy||level!==1||!scaleExplorationReady(state)) return;
     context.save.levels ??= {};
     context.save.levels.scale ??= {cleared:[],attempts:0};
-    level=2; lastResult=null; state.parts=[]; reading=null; fakeZeroed=false; fakeOn=null; misses=0; found=null; measured.clear();
+    level=2; completedRound=null; lastResult=null; state.parts=[]; reading=null; fakeZeroed=false; fakeOn=null; misses=0; found=null; measured.clear();
     feedback='의뢰용 저울을 새로 켰어요. 빈 저울의 숫자부터 확인해요.';
     context.commit(); context.sound(620); companion.setMood('observe'); update();
     root.querySelector<HTMLElement>('#scale-phase')!.focus({preventScroll:true});
@@ -347,6 +360,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   }
   function pick(slot:number) {
     if(busy||waiting||level!==2||requestDone()) return;
+    if(measured.size<fakeRounds[round()].count) { feedback='부품을 모두 재어 본 뒤 가짜를 골라요.'; update(); return; }
     const current=round(), result=judgeFakePick(current,fakeSeed,slot,[...measured.keys()]);
     if(result==='unmeasured') {
       feedback=`${fakeLabels[slot]} 부품은 아직 안 쟀어요. 먼저 이 부품을 저울에 올려 무게를 재 봐요.`;
@@ -370,18 +384,13 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     }
     const r=fakeRounds[current];
     found=slot; companion.setMood('success'); context.sound(780);
-    feedback=`찾았어요! 진짜는 ${r.real} g, ${fakeLabels[slot]} 부품만 ${r.fake} g이었어요.${fakeZeroed ? '' : ' 0을 맞추면 진짜 무게도 바로 알 수 있어요.'}`;
+    const discovery = fakeDiscoveryText(current, slot, measured.get(slot)!.zeroed);
+    feedback=`찾았어요! ${discovery}`;
     animate(root.querySelector(`.fake-slot[data-slot="${slot}"]`),[{transform:'scale(1)'},{transform:'scale(1.08)'},{transform:'scale(1)'}],420);
-    showResult({ title:requestDone() ? '의뢰를 모두 해결했어요!' : `찾았어요! ${fakeLabels[slot]} 부품이 가짜예요`, text:`진짜는 ${r.real} g, ${fakeLabels[slot]} 부품만 ${r.fake} g이었어요.${fakeZeroed ? '' : ' 0을 맞추면 진짜 무게도 바로 알 수 있어요.'}${requestDone() ? ' 아래의 ‘비교 기록 저장’을 눌러 보급소에 알려요.' : ' 다음 의뢰는 부품이 더 많고 차이도 더 작아요.'}`, records:recordsMarkup(current), question:{ prompt:`가짜 부품은 진짜보다 ${r.fake<r.real ? '가벼웠나요, 무거웠나요' : '무거웠나요, 가벼웠나요'}?`, choices:[['light',`가벼웠어요 (${r.fake<r.real ? r.real-r.fake : r.fake-r.real} g 차이)`],['heavy',`무거웠어요 (${r.fake<r.real ? r.real-r.fake : r.fake-r.real} g 차이)`]], correct:r.fake<r.real ? 'light' : 'heavy', right:`맞아요! ${r.fake} g은 ${r.real} g보다 ${r.fake<r.real ? '작아서 가벼워요' : '커서 무거워요'}.`, hint:`${r.fake} g과 ${r.real} g 중 어느 숫자가 더 큰지 비교해 봐요.` } });
+    completedRound=current; waiting=!requestDone();
+    showResult({ title:requestDone() ? '의뢰를 모두 해결했어요!' : `찾았어요! ${fakeLabels[slot]} 부품이 가짜예요`, text:`${discovery}${requestDone() ? ' 아래의 ‘비교 기록 저장’을 눌러 보급소에 알려요.' : ' 다음 의뢰는 부품이 더 많고 차이도 더 작아요.'}`, records:recordsMarkup(current), question:{ prompt:`가짜 부품은 진짜보다 ${r.fake<r.real ? '가벼웠나요, 무거웠나요' : '무거웠나요, 가벼웠나요'}?`, choices:[['light',`가벼웠어요 (${r.fake<r.real ? r.real-r.fake : r.fake-r.real} g 차이)`],['heavy',`무거웠어요 (${r.fake<r.real ? r.real-r.fake : r.fake-r.real} g 차이)`]], correct:r.fake<r.real ? 'light' : 'heavy', right:`맞아요! ${r.fake} g은 ${r.real} g보다 ${r.fake<r.real ? '작아서 가벼워요' : '커서 무거워요'}.`, hint:`${r.fake} g과 ${r.real} g 중 어느 숫자가 더 큰지 비교해 봐요.` } });
     if(requestDone()) { feedback+=' 의뢰를 모두 해결했어요! 비교 기록을 저장해요.'; update(); return; }
-    waiting=true; update();
-    timer=window.setTimeout(()=>{
-      if(!active) return;
-      waiting=false; fakeOn=null; reading=null; misses=0; found=null; measured.clear();
-      feedback=`다음 의뢰예요. 이번에는 부품이 ${fakeRounds[round()].count}개, 차이도 더 작대요!`;
-      update();
-      root.querySelector<HTMLElement>('#scale-phase')!.focus({preventScroll:true});
-    },reducedMotion()?400:1600);
+    update();
   }
   // Optional inquiry: spring scale. Screw, hung object and eye level are session play; only readings are saved.
   const spring=root.querySelector<HTMLElement>('#spring-lab')!;
@@ -398,13 +407,13 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     spring.querySelector<HTMLElement>('#spring-scale')!.dataset.eye=springEye;
     spring.querySelector<HTMLElement>('#spring-eye-marker')!.dataset.eye=springEye;
     spring.querySelector<HTMLElement>('#spring-hook')!.innerHTML=springObject ? `${partArt(springObject)}<span>${props[springObject].name}</span>` : '<span class="spring-empty">빈 고리</span>';
-    spring.querySelector('#spring-zero')!.textContent=springOffset===0 ? '0 ✓' : `빈 저울 ${springOffset} g`;
+    spring.querySelector('#spring-zero')!.textContent=springObject ? '물체를 내려요' : springOffset===0 ? '0 ✓' : `빈 저울 ${springOffset} g`;
     spring.querySelector('#spring-zero')!.classList.toggle('is-zero',springOffset===0);
     spring.querySelector('#spring-swing')!.textContent=swinging ? '흔들리는 중… 기다려요' : springObject ? '멈췄어요 ✓' : '물체를 걸면 바늘이 흔들려요';
     spring.querySelector<HTMLInputElement>('#spring-eye')!.value=String(eyes.indexOf(springEye));
     spring.querySelectorAll<HTMLButtonElement>('[data-hang]').forEach(button=>{button.disabled=swinging||(button.dataset.hang||'')===springObject; button.classList.toggle('selected',!!button.dataset.hang&&button.dataset.hang===springObject);});
-    spring.querySelector<HTMLButtonElement>('#spring-screw-up')!.disabled=swinging||springOffset<=-10;
-    spring.querySelector<HTMLButtonElement>('#spring-screw-down')!.disabled=swinging||springOffset>=15;
+    spring.querySelector<HTMLButtonElement>('#spring-screw-up')!.disabled=swinging||!!springObject||springOffset<=-10;
+    spring.querySelector<HTMLButtonElement>('#spring-screw-down')!.disabled=swinging||!!springObject||springOffset>=15;
     spring.querySelector<HTMLButtonElement>('#spring-read')!.disabled=swinging||!springObject;
     spring.querySelector('#spring-badge')!.textContent=springDone(reads) ? '선택 탐구 완료 ✓' : '선택 탐구';
     spring.querySelector('#spring-feedback')!.textContent=springFeedback;
@@ -439,7 +448,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
       swingPointer(); return;
     }
     if(button.id==='spring-read') {
-      const read={object:springObject,eye:springEye,value:springReading(springObject,springEye,springOffset),zeroed:springOffset===0};
+      const read={object:springObject,eye:springEye,value:springReading(springObject,springEye,springOffset),zeroed:springOffset===0,offset:springOffset};
       state.springReads=recordSpringRead(state.springReads??[],read);
       springFeedback=springHint(state.springReads,read);
       companion.setMood(read.eye==='level'&&read.zeroed ? 'success' : 'observe'); context.commit(); context.sound(read.eye==='level'&&read.zeroed ? 730 : 520); renderSpring();
@@ -458,7 +467,8 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     if(button.dataset.part) addPart(button.dataset.part);
     if(button.dataset.remove) removePart(button.dataset.remove);
     if(button.dataset.pick) pick(Number(button.dataset.pick));
-    if(button.id==='scale-request-open') openRequest();
+    if(button.id==='scale-request-open') reviewRequest();
+    if(button.id==='scale-next') advanceFakeRound();
     if(button.id==='scale-heft') heft();
     if(button.id==='scale-replay') startReplay();
     if(button.id==='scale-basic') toBasic();
@@ -467,7 +477,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     if(button.id==='scale-record-open') openPopup(lastResult ? '다시 보기' : '나의 기록');
     if(button.id==='zero-button') {
       if(loaded().length) {feedback='물체를 모두 내려놓고 0을 맞춰요.'; callout={ text: '물체를 모두 내려놓고 0을 맞춰요.', until: 'empty' }; context.sound(340); update(); return;}
-      if(level===2) fakeZeroed=true; else state.zeroed=true;
+      if(level===2) { if(!fakeZeroed) measured.clear(); fakeZeroed=true; } else state.zeroed=true;
       reading=null; feedback='빈 저울이 0 g이에요! 이제 부품의 무게만 잴 수 있어요.';context.commit();context.sound(700);update();
     }
     if(button.id==='scale-measure') { if(level===2) fakeOn=null; else state.parts=[]; reading=null; feedback=level===2 ? '빈 저울이에요. 다른 부품 하나를 올려요. 잰 기록은 그대로예요.' : '빈 저울이에요. 잰 기록은 그대로예요. 다른 모형 하나를 올려요.'; context.commit(); update(); }
@@ -514,5 +524,5 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   window.addEventListener('blur',endDrag,{signal:events.signal});
   window.addEventListener('resize',endDrag,{signal:events.signal});
   update(); if(level===1&&state.parts.length) weigh();
-  return()=>{active=false;popup?.remove();clearTimeout(timer);clearTimeout(springTimer);endDrag();events.abort();cancelAnimationFrame(frame);motions.forEach(motion=>motion.cancel());companion.dispose();};
+  return()=>{active=false;popup?.remove();clearTimeout(springTimer);endDrag();events.abort();cancelAnimationFrame(frame);motions.forEach(motion=>motion.cancel());companion.dispose();};
 }

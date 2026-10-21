@@ -177,3 +177,25 @@ test('levels.balance survives a save round trip; old completed saves stay comple
   assert.equal(restored.evidence.balance, '예전 균형 기록');
   assert.equal(restored.levels.balance, undefined, 'the request opens again only when the student accepts it');
 });
+
+test('the question waits until every box was compared and one heaviest is supported', () => {
+  const three=['가','나','다'];
+  const equal=[{left:'가',right:'나',actual:'level'}];
+  assert.deepEqual(model.candidates(three,equal),['다']);
+  assert.equal(model.mysteryComparisonReady(three,equal),false,'even an inferable untouched box must be tried before the question');
+  assert.equal(model.mysteryComparisonReady(three,[...equal,{left:'나',right:'다',actual:'right'}]),true);
+  const four=['가','나','다','라'];
+  const pairs=[{left:'가',right:'나',actual:'left'},{left:'다',right:'라',actual:'left'}];
+  assert.equal(model.mysteryComparisonReady(four,pairs),false,'all touched is insufficient when two candidates remain');
+  assert.equal(model.mysteryComparisonReady(four,[...pairs,{left:'가',right:'다',actual:'right'}]),true);
+  assert.equal(model.mysteryComparisonReady([],[]),false);
+});
+
+test('both mystery sizes reach a supported question by comparing the winner with every box', () => {
+  for(const index of [0,1]) for(const seed of seeds){
+    const round=model.mysteryRound(index,seed),records=[];let best=round.boxes[0];
+    for(const id of round.boxes.slice(1)){const record=compare(round,best,id);records.push(record);if(record.actual==='right')best=id;}
+    assert.equal(model.mysteryComparisonReady(round.boxes,records),true,'round '+index+' seed '+seed);
+    assert.deepEqual(model.candidates(round.boxes,records),[heaviest(round)]);
+  }
+});

@@ -23,6 +23,14 @@ export const cargoOrders: readonly CargoOrder[] = [
   { parts: 5, target: [40, 48] },
 ];
 
+export function cargoActionCompared(runs: readonly { parts: number; action: string }[], action: 'push' | 'pull'): boolean {
+  return [1, 3, 5].every(parts => runs.some(run => run.parts === parts && run.action === action));
+}
+
+export function cargoExplorationReady(runs: readonly { parts: number; action: string }[]): boolean {
+  return cargoActionCompared(runs, 'push') && cargoActionCompared(runs, 'pull');
+}
+
 export function cargoDistance(parts: number, force: ForceLevel = 2): number {
   const row = distanceTable[force];
   return row[parts as 1 | 3 | 5] ?? row[5];

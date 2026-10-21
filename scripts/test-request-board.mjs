@@ -27,6 +27,13 @@ const balance = await import(moduleUrl('src/balanceModel.ts'));
 const scale = await import(moduleUrl('src/scaleModel.ts'));
 const workshop = await import(moduleUrl('src/workshopModel.ts'));
 
+const completeBase = save => {
+  save.cargo.orders=[]; save.cargo.runs=['push','pull'].flatMap(action=>[1,3,5].map(parts=>({parts,action,gesture:100,distance:cargo.cargoDistance(parts)})));
+  save.balance.runs=[{left:'A',right:'B',actual:'right'},{left:'A',right:'C',actual:'level'},{left:'B',right:'C',actual:'left'}].map(run=>({...run,prediction:run.actual}));
+  save.scale.zeroed=true;save.scale.runs=[['orange',80],['teal',45],['cream',25],['blue',70],['green',55]].map(([id,reading])=>({parts:[id],reading,zeroed:true}));
+  save.workshop.direct=true;save.workshop.trials=workshop.retainWorkshopRuns([0,1,2].map(setting=>({tool:'lever',setting})).concat([0,1].map(setting=>({tool:'ramp',setting}))));
+  return save;
+};
 const range = n => Array.from({ length: n }, (_, i) => i);
 const statuses = save => Object.fromEntries(board.requestBoard(save).map(card => [card.stage, card.status]));
 const solveAll = save => {
@@ -58,11 +65,8 @@ test('a fresh save has every request locked until its level 1', () => {
 
 test('level 1 findings open each request, even before the request is taken', () => {
   const save = state.freshSave();
-  save.cargo.orders = [];
-  save.balance.runs = [{ left: 'A', right: 'B', prediction: 'left', actual: 'left' }, { left: 'B', right: 'C', prediction: 'level', actual: 'level' }];
-  save.scale = { zeroed: true, parts: [], runs: scale.comparisonParts.map((id, i) => ({ parts: [id], reading: [80, 70][i], zeroed: true })) };
-  save.levels = { workshop: { cleared: [], attempts: 0 } };
-  assert.ok(scale.canCompleteScale(save.scale), 'fixture must be a finished scale level 1');
+  completeBase(save);
+  assert.ok(scale.scaleExplorationReady(save.scale));
   assert.deepEqual(statuses(save), { cargo: 'open', balance: 'open', scale: 'open', workshop: 'open' });
   assert.ok(board.requestBoard(save).every(card => card.statusText === '도와줄 수 있어요'));
 });
@@ -87,8 +91,9 @@ test('finished level 2 records solve each request from the saved records', () =>
 });
 
 test('partial level 2 progress is still open, not solved', () => {
-  const save = state.freshSave();
+  const save = completeBase(state.freshSave());
   save.cargo.orders = [cargo.orderSolution(cargo.cargoOrders[0])];
+  save.cargo.runs = ['push','pull'].flatMap(action => [1,3,5].map(parts => ({parts,action,gesture:100,distance:cargo.cargoDistance(parts)})));
   save.levels = { balance: { cleared: [0], attempts: 2 }, scale: { cleared: [1], attempts: 2 }, workshop: { cleared: [0, 1], attempts: 4 } };
   assert.deepEqual(statuses(save), { cargo: 'open', balance: 'open', scale: 'open', workshop: 'open' });
 });
@@ -114,4 +119,33 @@ test('board judgements never change the save', () => {
   board.requestBoard(save); board.solvedRequests(save);
   for (const stage of board.requestStages) { board.requestStatus(save, stage); board.requestThanks(save, stage); }
   assert.equal(JSON.stringify(save), before);
+});
+
+
+test('an old early cargo request does not bypass an unfinished pull comparison', () => {
+  const save=state.freshSave();save.cargo.orders=[];
+  save.cargo.runs=[{parts:1,action:'push',gesture:100,distance:66},{parts:5,action:'push',gesture:100,distance:22},{parts:5,action:'pull',gesture:100,distance:22}];
+  assert.equal(board.requestStatus(save,'cargo'),'locked');
+  save.cargo.runs.push({parts:1,action:'pull',gesture:100,distance:66},{parts:3,action:'push',gesture:100,distance:33},{parts:3,action:'pull',gesture:100,distance:33});
+  assert.equal(board.requestStatus(save,'cargo'),'open');
+});
+
+test('every missing basic activity keeps each request locked, including stale request records',()=>{
+  const required={cargo:6,balance:3,scale:5,workshop:6};
+  for(const [stage,count] of Object.entries(required)) for(let missing=0;missing<count;missing++) {
+    const save=completeBase(state.freshSave());save.levels={balance:{cleared:[],attempts:0},scale:{cleared:[],attempts:0},workshop:{cleared:[],attempts:0}};
+    if(stage==='workshop') {if(missing===5)save.workshop.direct=false;else save.workshop.trials.splice(missing,1);}
+    else save[stage].runs.splice(missing,1);
+    assert.equal(board.requestStatus(save,stage),'locked',stage+' missing '+missing);
+  }
+});
+test('all subsets of the scale models require five separate zeroed measurements',()=>{
+  const save=completeBase(state.freshSave()), all=save.scale.runs;
+  for(let mask=0;mask<32;mask++)assert.equal(scale.scaleExplorationReady({...save.scale,runs:all.filter((_,i)=>mask&(1<<i))}),mask===31);
+  assert.equal(scale.scaleExplorationReady({...save.scale,runs:all.map(run=>({...run,zeroed:false}))}),false);
+  assert.equal(scale.scaleExplorationReady({...save.scale,runs:[{parts:all.flatMap(run=>run.parts),reading:275,zeroed:true}]}),false);
+});
+test('workshop requires direct lift, all three fulcrums and both ramps',()=>{
+  const base=completeBase(state.freshSave()).workshop;
+  for(let mask=0;mask<64;mask++)assert.equal(workshop.workshopExplorationReady({...base,direct:!!(mask&32),trials:base.trials.filter((_,i)=>mask&(1<<i))}),mask===63);
 });

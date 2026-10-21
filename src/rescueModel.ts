@@ -56,3 +56,8 @@ export function retainRescueRuns(runs: RescueRun[]): RescueRun[] {
 export function rescueReady(state: RescueState): boolean {
   return state.zeroed && state.measured && state.gate && state.delivered && canLift(state.route, state.force) && state.runs.some(run => run.route === state.route && run.force === state.force && run.success) && hasFairComparison(state.runs);
 }
+
+/** Start with the short ramp at small force before comparing the longer route. */
+export function needsShortRampTrial(runs: RescueRun[]): boolean {
+  return !hasFairComparison(runs) && !runs.some(run => validRun(run) && run.route === 'short' && run.force === 1 && !run.success);
+}

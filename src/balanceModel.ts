@@ -1,3 +1,7 @@
+export function balanceExplorationReady(runs: readonly {left:string;right:string;actual:string}[]): boolean {
+  return [['A','B'],['A','C'],['B','C']].every(([a,b]) => runs.some(run => (run.left === a && run.right === b) || (run.left === b && run.right === a))) && runs.some(run => run.actual === 'level') && runs.some(run => run.actual !== 'level');
+}
+
 export type MysteryOutcome = 'left' | 'right' | 'level';
 /** One balance comparison: which side went down, or level. */
 export type MysteryRecord = { left: string; right: string; actual: MysteryOutcome };
@@ -55,6 +59,11 @@ function ruledOutBy(record: MysteryRecord, id: string): boolean {
  * went up and never balanced cannot be shown lighter than anything. */
 export function candidates(boxes: readonly string[], records: readonly MysteryRecord[]): string[] {
   return boxes.filter(id => !records.some(record => ruledOutBy(record, id)));
+}
+
+export function mysteryComparisonReady(boxes: readonly string[], records: readonly MysteryRecord[]): boolean {
+  const compared = new Set(records.flatMap(record => [record.left, record.right]));
+  return boxes.length > 0 && boxes.every(id => compared.has(id)) && candidates(boxes, records).length === 1;
 }
 
 /** A pick is found only when the records prove it, so a lucky guess still needs evidence. */

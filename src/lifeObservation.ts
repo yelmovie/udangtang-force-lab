@@ -15,11 +15,11 @@ export type LifeObservation = {
 };
 export type LifeIntro = { card: string; where: string; help: string; note: string };
 export const introWhere = ['학교·놀이터', '집·부엌', '길·건물 앞', '공사장·가게'] as const;
-export const introHelp = ['작은 힘으로 들어 올리게', '적은 힘으로 높은 곳에 올라가게', '작은 힘으로 자르거나 열게'] as const;
+export const introHelp = ['작은 힘으로 들어 올리게', '적은 힘으로 높은 곳에 올라가게', '작은 힘으로 자르거나 열게', '작은 힘으로 못을 뽑게', '높은 곳에서 미끄러져 내려오게'] as const;
 /** The sentence the student can read to a partner; empty until a tool, a place and a help are chosen. */
 export function introSentence(intro: LifeIntro | undefined): string {
   const card = intro && lifeCard(intro.card);
-  if (!card || !intro.where || !intro.help) return '';
+  if (!card || !intro.where || !introHelpFor(card.id).includes(intro.help)) return '';
   const note = intro.note.trim();
   return `나는 ${card.name}${hasFinal(card.name) ? '을' : '를'} 골랐어. ${intro.where}에서 써. ${intro.help} 도와줘. ${card.tool === 'lever' ? '받침점이 있는 지레' : '비스듬한 면이 있는 빗면'}야.${note ? ` ${note}` : ''}`;
 }
@@ -38,11 +38,20 @@ export const lifeCards: LifeCard[] = [
   { id: 'scissors', name: '가위', tool: 'lever', why: '가운데 못이 받침점이에요. 종이를 못 가까이에 넣으면 작은 힘으로도 잘 잘려요.', hint: '가위 가운데 동그란 못을 찾아봐요.' },
 ];
 export const lifeBaskets: Record<LifeTool, { name: string; idea: string }> = {
-  lever: { name: '지레', idea: '받침점이 물체에 가까울수록 작은 힘으로 들어요' },
-  ramp: { name: '빗면', idea: '비스듬한 면을 따라 적은 힘으로 높이 올려요' },
+  lever: { name: '지레', idea: '받침점을 중심으로 막대가 움직여요' },
+  ramp: { name: '빗면', idea: '높은 곳과 낮은 곳을 비스듬한 면으로 이어요' },
 };
-export const lifeSummary = '지레와 빗면을 쓰면 작은 힘으로 물체를 옮길 수 있어요. 대신 움직이는 거리는 길어져요.';
+export const lifeSummary = '지레와 빗면을 알맞게 쓰면 물체를 올릴 때 필요한 힘을 줄일 수 있어요. 대신 힘을 주며 움직이는 거리는 길어져요. 미끄럼틀은 빗면을 따라 내려오는 예예요.';
 export const lifeCard = (id: string) => lifeCards.find(card => card.id === id);
+
+/** Keep the introduction tied to what each pictured tool actually does. */
+export function introHelpFor(cardId: string): readonly string[] {
+  if (cardId === 'slide') return [introHelp[4]];
+  if (cardId === 'claw-hammer') return [introHelp[3]];
+  if (cardId === 'seesaw') return [introHelp[0]];
+  if (cardId === 'bottle-opener' || cardId === 'scissors') return [introHelp[2]];
+  return lifeCard(cardId)?.tool === 'ramp' ? [introHelp[1]] : [];
+}
 
 const cardIds = (items: unknown): string[] => Array.isArray(items)
   ? [...new Set(items.filter((id): id is string => typeof id === 'string' && !!lifeCard(id)))] : [];
@@ -62,7 +71,7 @@ export function retainLifeObservation(value: unknown): LifeObservation | undefin
     if (intro && typeof intro.card === 'string' && sorted.includes(intro.card)) rebuilt.intro = {
       card: intro.card,
       where: introWhere.find(item => item === intro.where) ?? '',
-      help: introHelp.find(item => item === intro.help) ?? '',
+      help: introHelpFor(intro.card).find(item => item === intro.help) ?? '',
       note: typeof intro.note === 'string' ? intro.note.trim().slice(0, 40) : '',
     };
     return rebuilt;
@@ -166,7 +175,11 @@ export function openLifeObservation(options: {
       if (!cards.childElementCount) cards.innerHTML = record.sorted.map(id => `<button type="button" class="life-chip" data-intro-card="${id}" aria-pressed="false">${lifeCard(id)!.name}</button>`).join('');
       modal.querySelectorAll<HTMLButtonElement>('[data-intro-card]').forEach(b => b.setAttribute('aria-pressed', String(record.intro?.card === b.dataset.introCard)));
       modal.querySelectorAll<HTMLButtonElement>('[data-intro-where]').forEach(b => b.setAttribute('aria-pressed', String(record.intro?.where === b.dataset.introWhere)));
-      modal.querySelectorAll<HTMLButtonElement>('[data-intro-help]').forEach(b => b.setAttribute('aria-pressed', String(record.intro?.help === b.dataset.introHelp)));
+      modal.querySelectorAll<HTMLButtonElement>('[data-intro-help]').forEach(b => {
+        b.hidden = !introHelpFor(record.intro?.card ?? '').includes(b.dataset.introHelp!);
+        b.disabled = b.hidden;
+        b.setAttribute('aria-pressed', String(record.intro?.help === b.dataset.introHelp));
+      });
       const sentence = introSentence(record.intro);
       field('life-intro-sentence').textContent = sentence ? `짝에게 이렇게 소개해 봐요: “${sentence}”` : '도구, 어디서, 무엇을 고르면 소개할 문장이 만들어져요.';
     }
@@ -255,7 +268,9 @@ export function openLifeObservation(options: {
     if (button?.id === 'life-done') { if (!lifeSortDone(record)) return; options.onSave(record); close(); options.onDone(); return; }
     if (button?.dataset.introCard || button?.dataset.introWhere || button?.dataset.introHelp) {
       const intro = record.intro ?? { card: '', where: '', help: '', note: '' };
-      record = { ...record, intro: { ...intro, card: button.dataset.introCard ?? intro.card, where: button.dataset.introWhere ?? intro.where, help: button.dataset.introHelp ?? intro.help } };
+      const card = button.dataset.introCard ?? intro.card;
+      const help = button.dataset.introHelp ?? intro.help;
+      record = { ...record, intro: { ...intro, card, where: button.dataset.introWhere ?? intro.where, help: introHelpFor(card).includes(help) ? help : '' } };
       render(); return;
     }
     const card = target.closest<HTMLButtonElement>('.life-tool');

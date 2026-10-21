@@ -112,3 +112,18 @@ test('older 3-step records stay readable until the student sorts again', () => {
   assert.equal(resorted.object, '지레: 가위', 'the first new drop replaces the old words with the sorted lists');
   assert.equal(resorted.shared, false, 'the old self-report checkbox does not carry over to the new sorting');
 });
+
+
+test('tool introductions cannot attach an unrelated scientific use to a picture', () => {
+  for (const card of life.lifeCards) {
+    const allowed = life.introHelpFor(card.id);
+    assert.ok(allowed.length > 0, card.id);
+    for (const help of life.introHelp) {
+      const intro = {card:card.id,where:life.introWhere[0],help,note:''};
+      assert.equal(!!life.introSentence(intro), allowed.includes(help), card.id + ': ' + help);
+    }
+  }
+  assert.match(life.introSentence({card:'slide',where:life.introWhere[0],help:life.introHelpFor('slide')[0],note:''}), /미끄러져 내려오게/);
+  const kept = life.retainLifeObservation({...sortAll(), intro:{card:'slide',where:life.introWhere[0],help:life.introHelp[0],note:''}});
+  assert.equal(kept.intro.help, '', 'old incompatible choices need a fresh choice');
+});

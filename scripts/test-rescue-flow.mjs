@@ -75,3 +75,10 @@ test('the finish summary names the force and which route stopped or arrived', ()
   assert.match(summary, /짧고 가파른 빗면에서는 코어가 올라가지 못하고/);
   assert.match(summary, /길고 완만한 빗면에서는 끝까지 도착했어요\.$/);
 });
+
+test('first comparison starts on the short ramp with small force',()=>{
+  assert.equal(model.needsShortRampTrial([]),true);
+  assert.equal(model.needsShortRampTrial([longArrive(1)]),true);
+  assert.equal(model.needsShortRampTrial([shortStop(1)]),false);
+  assert.equal(model.needsShortRampTrial([shortStop(2),longArrive(2)]),false);
+});

@@ -1,6 +1,6 @@
 import type { AppContext } from '../appTypes';
 import { icons } from '../icons';
-import { canLift, stallTravel, comparisonHint, comparisonSummary, coreWeight, firstFairComparison, forceNames, hasFairComparison, rescueReady, retainRescueRuns, routeNames } from '../rescueModel';
+import { needsShortRampTrial, canLift, stallTravel, comparisonHint, comparisonSummary, coreWeight, firstFairComparison, forceNames, hasFairComparison, rescueReady, retainRescueRuns, routeNames } from '../rescueModel';
 import type { RescueRun } from '../state';
 import { mountCompanion } from '../sprites';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
@@ -12,6 +12,8 @@ import './coreStudio.css';
 
 export function mountRescue(root: HTMLElement, context: AppContext): () => void {
   const state = context.save.rescue, previous = context.save;
+  const firstShort = () => needsShortRampTrial(state.runs);
+  if(firstShort()) { state.route='short'; state.force=1; state.delivered=false; }
   const events = new AbortController();
   let active = true, busy = false, gateAction: 'push' | 'pull' = 'pull';
   let held: number | null = null, keyHeld = false, frame = 0, buttonPointer: number | null = null, buttonFrame = 0;
@@ -19,7 +21,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   let usedClue = '';
   let feedback = '';
   let lastScaleReading:number|null=null;
-  let weightDialog: HTMLDialogElement | null = null, wasLoaded = false;
+  let weightDialog: HTMLDialogElement | null = null;
   // A short lock after each stage change so a repeated tap on the same button does not start the next stage.
   let stageLock = false, lastStep = -1, stageTimer = 0, stopTimer = 0, slideFrame = 0, flashRecord = false;
   let scene: CoreScene | undefined, sceneTried = false, sceneLoading = false, sceneFailed = false, use2D = false;
@@ -198,9 +200,11 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     if(lastScaleReading!==null&&lastScaleReading!==reading) digits.animate([{opacity:.35},{opacity:1}],{duration:matchMedia('(prefers-reduced-motion: reduce)').matches?1:180});
     lastScaleReading=reading;
     root.querySelector('#rescue-scale-zero')!.setAttribute('aria-disabled',String(busy));
-    if (step === 0) controls.innerHTML = `<button data-rescue="load">${state.loaded ? '코어 내려놓기' : '코어 올려놓기'}</button><button data-rescue="zero">0 맞추기</button>${state.loaded ? '<button data-rescue="reading">측정값 다시 보기</button>' : ''}`;
+    if (step === 0) controls.innerHTML = `<button data-rescue="load">${state.loaded ? '코어 내려놓기' : '코어 올려놓기'}</button><button data-rescue="zero">0 맞추기</button>${state.loaded ? '<button data-rescue="reading">측정값 확인·기록</button>' : ''}`;
     if (step === 1) controls.innerHTML = `<span>나는 상자의 오른쪽!</span><button data-rescue="push" aria-pressed="${gateAction === 'push'}">← 벽 쪽으로 밀기</button><button data-rescue="pull" aria-pressed="${gateAction === 'pull'}">내 쪽으로 당기기 →</button>`;
-    if (step === 2) controls.innerHTML = `<div class="rescue-route-controls">${(['short','long'] as const).map(route => `<button data-route="${route}" aria-label="${route === 'short' ? '짧은 빗면' : '긴 빗면'}" aria-pressed="${state.route === route}"><span>${route === 'short' ? 'A' : 'B'}</span>${route === 'short' ? '짧은 빗면' : '긴 빗면'}</button>`).join('')}</div><label class="rescue-force-control" for="rescue-force">미는 힘 <strong>${forceNames[state.force - 1]}</strong><i class="force-step-arrow" style="--level:${state.force}" aria-hidden="true"></i><input id="rescue-force" type="range" min="1" max="3" step="1" value="${state.force}" aria-label="게임 속 미는 힘"></label><button data-rescue="retry">다시 출발</button>`;
+    if (step === 2) controls.innerHTML = `<div class="rescue-route-controls">${(['short','long'] as const).map(route => `<button data-route="${route}" aria-label="${route === 'short' ? '짧은 빗면' : '긴 빗면'}" aria-pressed="${state.route === route}" ${route==='long'&&firstShort()?'disabled':''}><span>${route === 'short' ? 'A' : 'B'}</span>${route === 'short' ? '짧은 빗면' : '긴 빗면'}</button>`).join('')}</div><label class="rescue-force-control" for="rescue-force">미는 힘 <strong>${forceNames[state.force - 1]}</strong><i class="force-step-arrow" style="--level:${state.force}" aria-hidden="true"></i><input id="rescue-force" type="range" min="1" max="3" step="1" value="${state.force}" ${firstShort()?'disabled':''} aria-label="게임 속 미는 힘"></label><button data-rescue="retry">다시 출발</button>`;
+    for(const id of ['#core-long-tag']) root.querySelector<HTMLButtonElement>(id)!.disabled=firstShort();
+    if(step===2&&firstShort()) root.querySelector('#rescue-corgi-tip')!.textContent='먼저 A 짧은 빗면을 작은 힘으로 밀어 보자!';
     controls.inert = busy;
     handle.hidden = step === 0; handle.disabled = busy || stageLock || state.delivered || (coreMode && !scene);
     handle.textContent = step === 2 ? '코어 눌러서 밀기' : '상자 조금 움직이기 →';
@@ -211,10 +215,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     root.querySelector('#rescue-used-clue')!.textContent = usedClue;
     for (const route of ['short','long']) root.querySelector(`#${route}-path`)!.classList.toggle('route-selected', state.route === route);
     finish.disabled = busy || !rescueReady(state) || (coreMode && !scene); pose(state.delivered ? 1 : restProgress); tell(feedback);
-    const justLoaded = state.loaded && !wasLoaded;
-    wasLoaded = state.loaded;
     if (step !== 0 || !state.loaded) closeWeightDialog();
-    else if (justLoaded) openWeightDialog();
   }
   function closeWeightDialog() {
     const dialog = weightDialog;
@@ -251,7 +252,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   }
   function commit() { context.commit(); update(); }
   function reset() { mounted3D = false; overview(); restProgress = 0; travel = 0; state.delivered = false; pose(0); }
-  function selectRoute(route: RescueRun['route']) { state.route = route; reset(); tell(`${routeNames[route]}을 골랐어요. 코어를 길을 따라 끌어 봐요.`); companion.setMood('observe'); commit(); }
+  function selectRoute(route: RescueRun['route']) { if(route==='long'&&firstShort()) { tell('먼저 A 짧은 빗면을 작은 힘으로 끝까지 밀어 봐요. 그다음 같은 힘으로 B 긴 빗면을 비교해요.'); return; } state.route = route; reset(); tell(`${routeNames[route]}을 골랐어요. 코어를 길을 따라 끌어 봐요.`); companion.setMood('observe'); commit(); }
   controls.addEventListener('click', event => {
     if (busy) return;
     const button = (event.target as Element).closest<HTMLButtonElement>('button'); if (!button) return;
@@ -269,7 +270,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   scaleZero.addEventListener('click',pressZero,{signal});
   scaleZero.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();pressZero();}},{signal});
   controls.addEventListener('input', event => {
-    if (busy || (event.target as Element).id !== 'rescue-force') return;
+    if (busy || firstShort() || (event.target as Element).id !== 'rescue-force') return;
     state.force = Number((event.target as HTMLInputElement).value); reset();
     controls.querySelector('.rescue-force-control strong')!.textContent = forceNames[state.force - 1];
     controls.querySelector<HTMLElement>('.force-step-arrow')?.style.setProperty('--level', String(state.force));
@@ -282,7 +283,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     const clue = (event.target as Element).closest<HTMLButtonElement>('[data-clue]')?.dataset.clue; if (!clue) return;
     usedClue = clue === 'scale' ? '내 저울 기록 활용: 빈 저울의 영점부터 확인해요.' : clue === 'cargo' ? '내 당기기 기록 활용: 내 쪽으로 상자를 당겨요.' : `내 공방 기록 활용: ${clue === 'long' ? '긴' : '짧은'} 빗면을 작은 힘으로 시험해요.`;
     if (clue === 'cargo') gateAction = 'pull';
-    if (clue === 'short' || clue === 'long') { state.route = clue; state.force = 1; reset(); }
+    if (clue === 'short' || clue === 'long') { if(clue==='long'&&firstShort()) { tell('먼저 A 짧은 빗면을 작은 힘으로 시험해요.'); return; } state.route = clue; state.force = 1; reset(); }
     tell(usedClue); companion.setMood('observe'); (root.querySelector('.rescue-notebook') as HTMLDetailsElement).open = false; commit();
     if (clue === 'scale' && phase() === 0) controls.querySelector<HTMLButtonElement>('[data-rescue="zero"]')?.focus();
   }, { signal });

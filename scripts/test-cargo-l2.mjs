@@ -113,3 +113,15 @@ test('finishing cargo again after free experimenting does not add a second compl
   assert.deepEqual(save.completed.filter(id => id === 'cargo'), ['cargo']);
   assert.equal(save.evidence.cargo, 'again');
 });
+
+
+test('bakery request needs both light and heavy crates in both push and pull modes', () => {
+  const all=['push','pull'].flatMap(action=>[1,3,5].map(parts=>({parts,action})));
+  for(let mask=0;mask<64;mask++){
+    const runs=all.filter((_,index)=>mask&(1<<index));
+    assert.equal(cargo.cargoExplorationReady(runs),mask===63,'completed action subset '+mask);
+  }
+  assert.equal(cargo.cargoActionCompared(all.slice(0,3),'push'),true);
+  assert.equal(cargo.cargoActionCompared(all.slice(0,3),'pull'),false);
+  assert.equal(cargo.cargoExplorationReady([...all.slice(0,3),{parts:3,action:'pull'}]),false,'incomplete set cannot unlock the request');
+});

@@ -10,11 +10,11 @@ export type InquiryPlans = Partial<Record<StageId, string>>;
 /** A prediction is kept even when it changes; it is never scored as a failure. */
 export const inquiryPlans: Record<StageId, InquiryPlan> = {
   cargo: {
-    prompt: '같은 힘으로 밀면 어느 상자가 더 멀리 갈까?',
+    prompt: '같은 힘으로 같은 시간 동안 밀면 어느 상자가 더 멀리 갈까?',
     choices: [{ id: 'light', label: '부품 1개 상자' }, { id: 'heavy', label: '부품 5개 상자' }, { id: 'same', label: '똑같이 갈 것 같아' }],
     observation: '부품 수만 바꾸고 같은 힘·시간으로 움직인 자국을 비교해 봐.',
     expected: 'light',
-    result: '같은 힘으로 밀었더니 부품 1개 상자가 더 멀리 갔어.',
+    result: '같은 힘으로 같은 시간 동안 밀었더니 부품 1개 상자가 더 멀리 갔어.',
   },
   balance: {
     prompt: '크기가 같은 나무 블록과 금속 블록, 무게도 같을까?',
@@ -33,7 +33,7 @@ export const inquiryPlans: Record<StageId, InquiryPlan> = {
   workshop: {
     prompt: '받침점 위치나 빗면 길이를 잘 고르면 직접 들 때보다 필요한 힘이 어떻게 될까?',
     choices: [{ id: 'less', label: '힘이 줄어들 것 같아' }, { id: 'same', label: '똑같을 것 같아' }, { id: 'more', label: '힘이 더 들 것 같아' }],
-    observation: '같은 화물을 같은 높이까지 올릴 때 도구와 설정에 따라 필요한 힘을 비교해 봐.',
+    observation: '같은 화물로 시험해 봐. 지레에서는 받침점만, 빗면에서는 길이만 바꾸고 도착 높이는 그대로 둬.',
     expected: 'less',
     result: '받침점을 화물 가까이 두거나 빗면을 길게 하면 힘이 적게 들었어. 대신 움직인 거리는 길었어.',
   },
@@ -59,9 +59,10 @@ export function predictionRecap(save: SaveData, stage: StageId): PredictionRecap
   const predicted = planLabel(stage, choice);
   let result = plan.result;
   if (stage === 'cargo') {
-    const distance = (parts: number) => [...save.cargo.runs].reverse().find(run => run.parts === parts)?.distance;
-    const one = distance(1), five = distance(5);
-    if (one !== undefined && five !== undefined) result = `같은 힘으로 밀었더니 부품 1개 상자는 ${one}칸, 5개 상자는 ${five}칸 갔어.`;
+    const runs = [...save.cargo.runs].reverse();
+    const one = runs.find(run => run.parts === 1 && runs.some(other => other.parts === 5 && other.action === run.action));
+    const five = one && runs.find(run => run.parts === 5 && run.action === one.action);
+    if (one && five) result = `같은 힘으로 같은 시간 동안 ${one.action === 'push' ? '밀었더니' : '당겼더니'} 부품 1개 상자는 ${one.distance}칸, 5개 상자는 ${five.distance}칸 갔어.`;
   }
   if (stage === 'rescue') {
     const force = [1, 2, 3].find(level => hasFairComparison(save.rescue.runs.filter(run => run.force === level)));
