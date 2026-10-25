@@ -1,4 +1,8 @@
-# 우당탕 힘 실험실 인계 (2026-10-19)
+# 우당탕 힘 실험실 인계
+
+> **최신 인계는 `.project-memory/PROJECT_STATE.md` 맨 위 "작업 기록 — 2026-10-26"** (게임성 점검 8/10, 공방 화물 1.85·오답 잠금 적용, 운영 배포 `e14f8da` / Version `acb985e9`). 다음 할 일은 그 문서의 제안 3~6번. 아래 10-19 내용은 과거 기록.
+
+## (과거) 2026-10-19 인계
 
 ## 지금 상태
 - 위치: F:/iscreammedia_sc34/1udangtangtang (외장 SSD). GitHub yelmovie/udangtang-force-lab main, 운영 https://udangtang-force-lab.yelsam.workers.dev
