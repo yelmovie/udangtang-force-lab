@@ -33,6 +33,10 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     let force: ForceLevel | null = null;
     let misses = 0;
     let findingTried = false;
+    // After a wrong pick the two choices stay off for a moment, so the next pick follows a look at the bars.
+    const findingLockMs = 1500;
+    let findingLockUntil = 0;
+    let findingLockTimer = 0;
     let ghosts: { distance: number; force: ForceLevel }[] = [];
     // Level 1 rail traces: only tries made in the current direction since entering or switching,
     // because push and pull stop at the same spot and older traces read as leftover crates.
@@ -446,7 +450,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     }
     function questionMarkup() {
         if (!ready()) return '';
-        return `<div class="cargo-discovery question-zone"><span class="question-label">생각해 볼 문제</span><strong class="question-prompt">같은 힘·시간으로 움직였을 때, 더 멀리 간 상자는?</strong>${finding ? '' : '<div class="question-choices"><button data-finding="light">부품 1개</button><button data-finding="heavy">부품 5개</button></div>'}<p class="cargo-finding" role="status">${findingNote || findingMessage(finding)}</p></div>`;
+        return `<div class="cargo-discovery question-zone"><span class="question-label">생각해 볼 문제</span><strong class="question-prompt">같은 힘·시간으로 움직였을 때, 더 멀리 간 상자는?</strong>${finding ? '' : `<div class="question-choices"><button data-finding="light"${performance.now() < findingLockUntil ? ' disabled' : ''}>부품 1개</button><button data-finding="heavy"${performance.now() < findingLockUntil ? ' disabled' : ''}>부품 5개</button></div>`}<p class="cargo-finding" role="status">${findingNote || findingMessage(finding)}</p></div>`;
     }
     function nextHint() {
         if (finding && deliveredAll()) return '배달은 끝났어요. 부품 개수나 힘을 주는 쪽을 바꿔 더 실험해 봐요.';
@@ -472,7 +476,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     }
     root.addEventListener('click', event => {
         const button = (event.target as Element).closest<HTMLButtonElement>('[data-finding]');
-        if (!button || busy || drag) return;
+        if (!button || busy || drag || performance.now() < findingLockUntil) return;
         findingTried = true;
         const light = latestRun(1), heavy = latestRun(5);
         const correct = ready() && !!light && !!heavy && light.distance > heavy.distance && button.dataset.finding === 'light';
@@ -493,6 +497,11 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         }
         const note = popup?.querySelector('.cargo-finding');
         if (note) note.textContent = findingNote;
+        findingLockUntil = performance.now() + findingLockMs;
+        const choices = [...(popup?.querySelectorAll<HTMLButtonElement>('[data-finding]') ?? [])];
+        choices.forEach(choice => { choice.disabled = true; });
+        clearTimeout(findingLockTimer);
+        findingLockTimer = window.setTimeout(() => { if (active) choices.forEach(choice => { choice.disabled = false; }); }, findingLockMs);
         update();
     }, { signal: events.signal });
     finish.addEventListener('click', () => {
@@ -507,6 +516,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     return () => {
         active = false;
         clearTimeout(popupTimer);
+        clearTimeout(findingLockTimer);
         closePopup();
         stageResize.disconnect();
         clearDrag();

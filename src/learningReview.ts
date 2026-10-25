@@ -35,6 +35,9 @@ export function openLearningReview(options: {
   let step = 0;
   let closed = false;
   let feedback = '';
+  // After a wrong pick the choices stay off for a moment; the records above are what to look at.
+  const lockMs = 1500;
+  let lockUntil = 0;
   const modal = document.createElement('div');
   modal.className = 'modal-layer learning-layer';
   const wasInert = options.app.inert;
@@ -52,7 +55,7 @@ export function openLearningReview(options: {
       <p class="learning-record-label">▤ 내 실험에서 관찰한 기록</p><div class="learning-evidence-grid">${cards}</div>
       <section class="question-zone" aria-labelledby="learning-question"><span class="question-label">생각해 볼 문제 ${step + 1}</span><h3 id="learning-question" class="learning-question question-prompt">${escape(q.prompt)}</h3>
       ${q.pair ? `<div class="learning-question-pair">${balancePair(q.pair)}</div>` : ''}
-      <p class="answer-label">${fingerIcon} 아래에서 답을 하나 골라요</p><div class="learning-options">${q.choices.map((choice,index) => `<button data-learning-choice="${choice.id}" class="learning-option ${answer?.chosen === choice.id ? 'is-selected' : ''}" aria-pressed="${answer?.chosen === choice.id}" ${correct ? 'disabled' : ''}><span class="answer-number" aria-hidden="true">${index+1}</span><span>${escape(choice.text)}</span></button>`).join('')}</div></section>
+      <p class="answer-label">${fingerIcon} 아래에서 답을 하나 골라요</p><div class="learning-options">${q.choices.map((choice,index) => `<button data-learning-choice="${choice.id}" class="learning-option ${answer?.chosen === choice.id ? 'is-selected' : ''}" aria-pressed="${answer?.chosen === choice.id}" ${correct || performance.now() < lockUntil ? 'disabled' : ''}><span class="answer-number" aria-hidden="true">${index+1}</span><span>${escape(choice.text)}</span></button>`).join('')}</div></section>
       <p class="learning-feedback ${correct ? 'is-correct' : ''}" role="status"><strong class="feedback-label">${correct ? '✓ 선택 결과 · 내 발견' : answer ? '다시 살펴볼 단서' : '답을 고를 때 살펴봐요'}</strong>${escape(feedback || (correct ? q.explanation : '내 기록을 보고 골라봐요. 처음 생각이 달라도 괜찮아요.'))}</p>
       ${correct && step === task.questions.length - 1 ? `<p class="learning-talk">함께 말해봐요 · ${escape(task.talk)}</p>` : ''}
       <div class="learning-actions"><button class="button button-secondary" data-learning="back">결과로 돌아가기</button><button class="button button-primary" data-learning="next" ${correct ? '' : 'disabled'}>${step === task.questions.length - 1 ? '문제 다 풀었어요 →' : '다음 발견 →'}</button></div>
@@ -68,12 +71,17 @@ export function openLearningReview(options: {
     if (button.dataset.learningChoice) {
       const q = task.questions[step];
       const choice = button.dataset.learningChoice;
-      if (!q.choices.some(c => c.id === choice) || record.answers[step]?.chosen === q.correct) return;
+      if (!q.choices.some(c => c.id === choice) || record.answers[step]?.chosen === q.correct || performance.now() < lockUntil) return;
       const old = record.answers[step];
       record.answers[step] = { first: old?.first ?? choice, chosen: choice, tries: Math.min(100, (old?.tries ?? 0) + 1) };
       record.completed = learningRecordComplete(task, record);
       options.commit();
-      feedback = choice === q.correct ? `✓ ${q.explanation}` : `${q.why?.[choice] ?? '기록을 다시 살펴봐요.'} ${q.hint}`;
+      if (choice === q.correct) feedback = `✓ ${q.explanation}`;
+      else {
+        feedback = `${q.why?.[choice] ?? '기록을 다시 살펴봐요.'} ${q.hint} 위의 내 기록을 다시 본 뒤 골라요.`;
+        lockUntil = performance.now() + lockMs;
+        window.setTimeout(() => { if (!closed) draw(); }, lockMs);
+      }
       draw();
     } else if (button.dataset.learning === 'next' && record.answers[step]?.chosen === task.questions[step].correct) {
       if (step < task.questions.length - 1) { step++; feedback = ''; draw(); }

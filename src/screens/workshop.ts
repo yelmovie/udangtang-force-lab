@@ -31,6 +31,9 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   // One try (handle reaches the top, or the cargo stalls) opens the record popup once the scene is idle.
   let recordPending: { label: string; lead: string; tryMarkup: string } | null = null;
   let lastRun: { tool: WorkshopTool | 'direct'; setting: number } | null = null;
+  // After a wrong "which took less force" pick the choices stay off for a moment.
+  const choiceLockMs = 1500;
+  let choiceLockUntil = 0;
   // The cargo on the bench only changes after the success pause, not the moment it is saved.
   const savedCargo = () => Math.min(workshopCargos.length - 1, workshopL2Current(levelRecord()));
   let cargo = savedCargo();
@@ -252,7 +255,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     root.querySelector<HTMLElement>('#workshop-records')!.innerHTML = (state.direct ? `<article class="workshop-run baseline-run${isLatest('direct') ? ' is-latest' : ''}"><strong>${latestMark('direct')}직접 들기</strong>${bar(100, false)}<span>${forceWord(100)}</span></article>` : '') + entries.map((run,index) => {
       const content = `<strong>${latestMark(run.tool, run.setting)}${getWorkshopDesign(run.tool, run.setting).label}</strong>${bar(run.force)}<span>${forceWord(run.force)}</span>${finding ? `<span class="workshop-metric-label">${distanceLabel}</span><div class="workshop-distance" aria-hidden="true"><i style="width:${run.distance / distanceScale * 100}%"></i></div>` : ''}`;
       const latest = isLatest(run.tool, run.setting) ? ' is-latest' : '';
-      return choosing ? `<button class="workshop-run workshop-run-choice${latest}" data-finding="${run.setting}" ${busy ? 'disabled' : ''}><span class="workshop-answer-number">${index+1}</span>${content}</button>` : `<article class="workshop-run${latest}">${content}</article>`;
+      return choosing ? `<button class="workshop-run workshop-run-choice${latest}" data-finding="${run.setting}" ${busy || performance.now() < choiceLockUntil ? 'disabled' : ''}><span class="workshop-answer-number">${index+1}</span>${content}</button>` : `<article class="workshop-run${latest}">${content}</article>`;
     }).join('') || (state.direct ? '' : '<div class="workshop-empty">직접 들면<br>힘 막대가 생겨요</div>');
     root.querySelector<HTMLElement>('#workshop-choice')!.innerHTML = finding && tool !== 'direct' ? `<p class="finding-earned">✓ 작은 힘, 더 먼 길!</p><p class="workshop-finding">${tool === 'lever' ? '받침점이 화물에 가까울수록 힘은 작게 들고, 손잡이는 더 멀리 움직여요.' : '빗면이 길고 완만할수록 힘은 작게 들고, 화물은 더 먼 길을 가요.'}</p>` : '';
     const otherTool = tool === 'lever' ? 'ramp' : 'lever';
@@ -304,7 +307,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     context.commit();
     if (!result.success) {
       misses++;
-      setFeedback(`콩이 힘으로는 ${name}이 올라가지 않았어요. 필요한 힘보다 ${result.overCells}칸 모자랐어요. ${workshopL2Hint(workshopL2HintLevel(misses), tool)}`);
+      setFeedback(`콩이 힘으로는 ${name}이 올라가지 않았어요. 필요한 힘보다 ${result.overCells}칸 모자랐어요. ${workshopL2Hint(workshopL2HintLevel(misses), tool, currentSetting())}`);
       queueRecord(feedback); slideBack(); return;
     }
     misses = 0; context.sound(780);
@@ -494,13 +497,19 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     if (nextTool) { recordDialog?.close(); configure(nextTool); return; }
     if (level === 2) return;
     const button = (event.target as Element).closest<HTMLButtonElement>('[data-finding]');
-    if (!button || tool === 'direct' || keyHeld || heldPointer !== null || designPointer!==null) return;
+    if (!button || tool === 'direct' || keyHeld || heldPointer !== null || designPointer!==null || performance.now() < choiceLockUntil) return;
     if (isBestWorkshopDesign(state.trials, tool, Number(button.dataset.finding))) {
       if (tool === 'lever') state.leverFinding = state.lever = true; else state.rampFinding = state.ramp = true;
       const left = workshopActivitySteps(state);
       setFeedback((tool === 'lever' ? '관찰한 힘을 잘 비교했어요! 작은 힘을 쓰는 설계에서는 누르는 쪽이 더 멀리 움직였어요.' : '발견했어요! 같은 높이까지 더 긴 빗면으로 움직이면 더 작은 힘이 들어요.') + (tool === 'lever' && !left.ramp ? ' 이제 ③ 빗면 실험을 해요.' : tool === 'ramp' && !left.lever ? ' 이제 ② 지레 실험을 해요.' : ''));
       context.sound(740); context.commit(); update();
-    } else { const message='초록색 힘 막대가 더 짧은 설계를 찾아봐요. 다시 움직여 비교해도 좋아요.'; setFeedback(message); root.querySelector('#workshop-choice')!.textContent=message; }
+    } else {
+      // A miss pauses the choices briefly so the next pick follows a look at the bars, not a reflex.
+      const message='초록색 힘 막대가 더 짧은 설계를 찾아봐요. 막대 두 개의 끝을 견주어 보고 잠시 뒤 다시 골라요.';
+      choiceLockUntil = performance.now() + choiceLockMs; context.sound(520); setFeedback(message); update();
+      root.querySelector('#workshop-choice')!.textContent=message;
+      window.setTimeout(() => { if (active) update(); }, choiceLockMs);
+    }
   }, { signal });
   recordButton.addEventListener('click', () => { if (!recordButton.disabled) openRecord(level === 2 ? '의뢰 보기' : '기록 보기', feedback); }, { signal });
   root.querySelector('#turn-left')!.addEventListener('click', () => {scene?.turn(-1);positionHandle();}, { signal });

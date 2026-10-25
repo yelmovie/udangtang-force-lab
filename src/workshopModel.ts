@@ -100,12 +100,13 @@ export type WorkshopL2Result = { force: number; success: boolean; needCells: num
 
 export const workshopForcePerCell = 10;
 export const workshopBudget = 60;
-/** Light 0.8 · normal 1 · heavy 1.6. Only lever-near (53) or the long ramp (51) carry the
- * heavy cargo; the short ramp (90) and anything without a better arm stay over budget. */
+/** Light 0.8 · normal 1 · heavy 1.85. The heavy cargo fits only the long ramp (58.9);
+ * lever-near misses by one cell (61.7), so a student who kept one design through the first
+ * two cargos has to change tools once. The short ramp (103.6) stays far over budget. */
 export const workshopCargos = [
   { label: '가벼운 화물', weight: .8 },
   { label: '보통 화물', weight: 1 },
-  { label: '무거운 화물', weight: 1.6 },
+  { label: '무거운 화물', weight: 1.85 },
 ] as const;
 
 export function workshopL2Force(cargo: number, tool: WorkshopL2Tool, setting: number): number {
@@ -147,9 +148,11 @@ export function workshopL2HintLevel(misses: number): 0 | 1 | 2 | 3 {
 }
 
 /** Where to look → what to change → narrow the range. Never names the exact answer setting. */
-export function workshopL2Hint(level: number, tool: WorkshopL2Tool): string {
+export function workshopL2Hint(level: number, tool: WorkshopL2Tool, setting?: number): string {
   if (tool === 'direct') return '콩이 혼자서는 들 수 없어요. 지레나 빗면을 골라 봐요.';
   if (level <= 0) return '설계를 바꿔 다시 해 봐요.';
+  // The nearest fulcrum is the lever's best; when even that misses, the next move is the other tool.
+  if (tool === 'lever' && setting === 0) return '받침대를 화물에 제일 가까이 두어도 모자라요. 이번엔 빗면으로 바꿔 봐요.';
   if (level === 1) return '힘 막대의 빨간 칸을 보세요. 설계를 바꾸면 빨간 칸이 줄어드는지 살펴봐요.';
   if (level === 2) return tool === 'lever' ? '받침대 위치를 바꿔 보세요. 어느 쪽으로 옮기면 힘이 작아졌나요?' : '빗면 길이를 바꿔 보세요. 어떤 빗면에서 힘이 작았나요?';
   return '앞 화물을 올렸던 설계와 지금 설계를 비교해 봐요. 어느 쪽으로 바꿀 때 빨간 칸이 줄었나요?';

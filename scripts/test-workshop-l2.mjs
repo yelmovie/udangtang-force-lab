@@ -33,12 +33,15 @@ test('direct lifting never fits the budget', () => {
 test('every cargo has a passing design, and heavier cargo leaves fewer', () => {
   assert.deepEqual(passing(0), ['lever:0', 'ramp:0', 'ramp:1']);
   assert.deepEqual(passing(1), ['lever:0', 'ramp:0', 'ramp:1']);
-  assert.deepEqual(passing(2), ['lever:0', 'ramp:1']);
+  assert.deepEqual(passing(2), ['ramp:1']);
 });
 
-test('heavy cargo passes only with the fulcrum near the cargo or the long ramp', () => {
-  assert.equal(model.judgeWorkshopL2(2, 'lever', 0).success, true);
+test('only the long ramp carries every cargo: a lever student must change tools once', () => {
+  const always = designs.filter(([tool, setting]) => [0, 1, 2].every(cargo => model.judgeWorkshopL2(cargo, tool, setting).success));
+  assert.deepEqual(always, [['ramp', 1]], 'the request opens on the lever, so the usual path meets one forced redesign');
   assert.equal(model.judgeWorkshopL2(2, 'ramp', 1).success, true);
+  assert.equal(model.judgeWorkshopL2(2, 'lever', 0).success, false);
+  assert.equal(model.judgeWorkshopL2(2, 'lever', 0).overCells, 1, 'the lever misses by one cell, not by a mile');
   assert.equal(model.judgeWorkshopL2(2, 'ramp', 0).success, false);
   assert.equal(model.judgeWorkshopL2(2, 'lever', 1).success, false);
   assert.equal(model.judgeWorkshopL2(2, 'lever', 2).success, false);
@@ -56,11 +59,11 @@ test('force reuses getWorkshopDesign times the cargo weight', () => {
 test('a miss reports how many cells overflowed and barely moves the cargo', () => {
   const miss = model.judgeWorkshopL2(2, 'ramp', 0);
   assert.equal(miss.budgetCells, 6);
-  assert.equal(miss.needCells, 9);
-  assert.equal(miss.overCells, 3);
+  assert.equal(miss.needCells, 11);
+  assert.equal(miss.overCells, 5);
   assert.ok(miss.stallAt > 0 && miss.stallAt < 1);
   assert.equal(model.judgeWorkshopL2(2, 'lever', 2).stallAt, miss.stallAt, 'force is not a fuel: any shortfall only twitches the cargo');
-  const hit = model.judgeWorkshopL2(2, 'lever', 0);
+  const hit = model.judgeWorkshopL2(2, 'ramp', 1);
   assert.equal(hit.overCells, 0);
   assert.ok(hit.needCells <= hit.budgetCells);
   assert.equal(hit.stallAt, 1);
@@ -90,6 +93,9 @@ test('the clue gets one step more specific every two misses', () => {
   assert.match(model.workshopL2Hint(3, 'lever'), /앞 화물을 올렸던 설계/);
   assert.doesNotMatch(model.workshopL2Hint(3, 'lever'), /화물 가까이|길고 완만/, 'the last clue still never names the answer setting');
   assert.match(model.workshopL2Hint(0, 'direct'), /지레나 빗면/);
+  assert.match(model.workshopL2Hint(1, 'lever', 0), /빗면으로 바꿔/, 'when the best fulcrum still misses, the clue points at the other tool');
+  assert.doesNotMatch(model.workshopL2Hint(1, 'lever', 0), /길고 완만/);
+  assert.match(model.workshopL2Hint(1, 'lever', 1), /빨간 칸/, 'other fulcrum positions keep the ordinary clue');
 });
 
 test('saved workshop level records survive a reload as plain cleared/attempts', () => {
