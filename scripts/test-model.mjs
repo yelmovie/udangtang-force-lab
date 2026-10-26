@@ -204,6 +204,10 @@ test('optional badges require distinct comparison evidence rather than repeated 
   save.rescue.runs = structuredClone(comparison);
   assert.equal(earned('rescue'), false);
   save.rescue.runs.push({route:'short',force:2,success:false},{route:'long',force:2,success:true});
+  assert.equal(earned('rescue'), false, 'two forces are the second star; the badge also needs big force');
+  save.rescue.runs.push({route:'short',force:3,success:true},{route:'short',force:3,success:true});
+  assert.equal(earned('rescue'), false, 'repeating one route is not trying both');
+  save.rescue.runs.push({route:'long',force:3,success:true});
   assert.equal(earned('rescue'), true);
 });
 function restore(value) {
@@ -494,7 +498,8 @@ test('experiment history is bounded during restore', () => {
   const save = state.freshSave();
   save.rescue.runs = Array.from({length:30}, (_, index) => ({route:'short',force:index % 3 + 1,success:index % 3 === 2}));
   const restored = restore(save);
-  assert.deepEqual(restored.rescue.runs, save.rescue.runs.slice(-20));
+  // The first run of each route and force stays, then the latest trials.
+  assert.deepEqual(restored.rescue.runs, [...save.rescue.runs.slice(0, 3), ...save.rescue.runs.slice(-17)]);
 });
 
 test('long replay sessions preserve the earned comparison and latest trial through reload', () => {

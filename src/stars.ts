@@ -5,7 +5,7 @@ import { ordersComplete } from './cargoModel';
 import { mysteryComplete } from './balanceModel';
 import { fakeRequestComplete } from './scaleModel';
 import { workshopL2Complete } from './workshopModel';
-import { hasFairComparison } from './rescueModel';
+import { fairComparisonForces } from './rescueModel';
 
 export type StarSlot = { label: string; done: boolean };
 export type StageStars = { earned: number; slots: StarSlot[] };
@@ -23,12 +23,13 @@ function requestDone(save: SaveData, stage: Exclude<StageId, 'rescue'>): boolean
 /**
  * Up to three stars per mission, always recomputed from saved evidence (never stored,
  * never from speed, tap count or answer accuracy):
- * 1. mission completed, 2. level 2 request finished (the core has no request, so its
- * same-force route comparison counts instead), 3. the mission's challenge.
+ * 1. mission completed, 2. level 2 request finished (the core has no request, so the
+ * same route difference found again at a second force counts instead; the first one is
+ * already needed to finish), 3. the mission's challenge.
  */
 export function stageStars(save: SaveData, stage: StageId): StageStars {
   const second: StarSlot = stage === 'rescue'
-    ? { label: '같은 힘 비교 발견', done: hasFairComparison(save.rescue.runs) }
+    ? { label: '두 힘에서 같은 차이 확인', done: fairComparisonForces(save.rescue.runs).length >= 2 }
     : { label: '2단계 의뢰', done: requestDone(save, stage) };
   const slots: StarSlot[] = [
     { label: '미션 완료', done: save.completed.includes(stage) },

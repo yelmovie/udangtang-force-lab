@@ -81,12 +81,16 @@ test('each finished level 2 request adds the second star', () => {
   assert.equal(stars.stageStars(save, 'balance').earned, 1);
 });
 
-test('the core has no request: its second star is the same-force route comparison', () => {
+test('the core has no request: its second star is the same difference at a second force', () => {
   const save = state.freshSave();
-  assert.equal(stars.stageStars(save, 'rescue').slots[1].label, '같은 힘 비교 발견');
+  assert.equal(stars.stageStars(save, 'rescue').slots[1].label, '두 힘에서 같은 차이 확인');
   save.rescue.runs = [fairRescue[0]];
   assert.equal(stars.stageStars(save, 'rescue').slots[1].done, false);
   save.rescue.runs = fairRescue;
+  assert.equal(stars.stageStars(save, 'rescue').slots[1].done, false, 'the first comparison is needed to finish, so it is not a star of its own');
+  save.rescue.runs = [...fairRescue, { route: 'short', force: 3, success: true }, { route: 'long', force: 3, success: true }];
+  assert.equal(stars.stageStars(save, 'rescue').slots[1].done, false, 'big force shows no difference');
+  save.rescue.runs = [...fairRescue, { route: 'long', force: 2, success: true }, { route: 'short', force: 2, success: false }];
   assert.equal(stars.stageStars(save, 'rescue').slots[1].done, true);
 });
 
@@ -103,7 +107,8 @@ test('stars are computed, never written into the save', () => {
   save.completed = [...stageIds];
   save.rescue.runs = fairRescue;
   const before = JSON.stringify(save);
-  assert.deepEqual(stars.totalStars(save), { earned: 10, max: 15 });
+  // Core: mission only. Its first comparison is part of finishing, not the second star.
+  assert.deepEqual(stars.totalStars(save), { earned: 9, max: 15 });
   assert.equal(JSON.stringify(save), before);
 });
 

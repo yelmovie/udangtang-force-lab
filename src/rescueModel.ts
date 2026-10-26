@@ -18,6 +18,16 @@ export function hasFairComparison(runs: RescueRun[]): boolean {
   const valid = runs.filter(validRun);
   return valid.some(a => valid.some(b => a.route !== b.route && a.force === b.force && a.success !== b.success));
 }
+/** Forces at which one route stopped and the other arrived. Only small and medium force can differ. */
+export function fairComparisonForces(runs: RescueRun[]): number[] {
+  const valid = runs.filter(validRun);
+  return [1, 2, 3].filter(force => valid.some(a => a.force === force && valid.some(b => b.force === force && a.route !== b.route && a.success !== b.success)));
+}
+/** Both routes tried at every force, so the student also sees the difference vanish at big force. */
+export function triedEveryForce(runs: RescueRun[]): boolean {
+  const valid = runs.filter(validRun);
+  return [1, 2, 3].every(force => (['short', 'long'] as const).every(route => valid.some(run => run.force === force && run.route === route)));
+}
 export type RescueComparison = { force: number; stopped: RescueRun; arrived: RescueRun };
 // The first same-force pair with different results. retainRescueRuns keeps this pair, so it stays fixed.
 export function firstFairComparison(runs: RescueRun[]): RescueComparison | null {
@@ -29,29 +39,33 @@ export function firstFairComparison(runs: RescueRun[]): RescueComparison | null 
   return null;
 }
 const routeLetters = { short: 'A 짧은 빗면', long: 'B 긴 빗면' };
-// What the student should try next at the selected force, or the discovery once it exists.
+// How to keep the test fair at the selected force, or the discovery once it exists.
+// Before the discovery it names the variable to keep (force), never the route that arrives or the force to pick.
 export function comparisonHint(runs: RescueRun[], force: number): string {
   const found = firstFairComparison(runs);
   if (found) return `${forceNames[found.force - 1]}에서 ${routeLetters[found.stopped.route]}은 멈추고 ${routeLetters[found.arrived.route]}은 도착했어요.`;
   const name = forceNames[force - 1], here = runs.filter(run => validRun(run) && run.force === force);
   const routes = new Set(here.map(run => run.route));
-  if (!routes.size) return `${name}으로 A 짧은 빗면과 B 긴 빗면을 하나씩 시험해요.`;
-  if (routes.size === 1) return `같은 ${name}으로 ${routeLetters[routes.has('short') ? 'long' : 'short']}도 시험해요.`;
-  return here.every(run => run.success) ? `${name}에서는 두 길 모두 도착했어요. 힘을 줄여서 다시 비교해요.` : `${name}에서는 두 길 모두 멈췄어요. 힘을 키워서 다시 비교해요.`;
+  if (!routes.size) return `${name}으로 두 길을 모두 시험해야 공정하게 비교할 수 있어요.`;
+  if (routes.size === 1) return '힘은 그대로 두고 길만 바꾸면 어떻게 될까요?';
+  return `${name}에서는 두 길 모두 ${here.every(run => run.success) ? '도착해서' : '멈춰서'} 차이가 보이지 않아요. 다른 힘으로 다시 비교해 봐요.`;
+}
+/** After the first discovery: an optional nudge to check the same difference at another force. */
+export function secondComparisonHint(runs: RescueRun[]): string {
+  return fairComparisonForces(runs).length === 1 ? '다른 힘에서도 같은 차이가 날까요? 비교해 보면 별을 하나 더 받아요.' : '';
 }
 export function comparisonSummary(runs: RescueRun[]): string {
   const found = firstFairComparison(runs);
   return found ? `${forceNames[found.force - 1]}으로 똑같이 밀었을 때 ${routeNames[found.stopped.route]}에서는 코어가 올라가지 못하고, ${routeNames[found.arrived.route]}에서는 끝까지 도착했어요.` : '';
 }
-// Keep the first discovery as evidence, plus recent trials, without growing the save forever.
+// Keep the first run of each route and force, plus recent trials, without growing the save forever.
+// A result depends only on route and force, so those first runs hold every comparison (and the first discovery) the stars read.
 export function retainRescueRuns(runs: RescueRun[]): RescueRun[] {
   const valid = runs.filter(validRun);
   if (valid.length <= 20) return valid;
-  for (let second = 1; second < valid.length; second++) {
-    const first = valid.findIndex((run, index) => index < second && run.route !== valid[second].route && run.force === valid[second].force && run.success !== valid[second].success);
-    if (first !== -1) return valid.filter((_run, index) => index === first || index === second || index >= valid.length - 18);
-  }
-  return valid.slice(-20);
+  const keep = new Set(valid.map(run => valid.findIndex(other => other.route === run.route && other.force === run.force)));
+  for (let index = valid.length - 1; index >= 0 && keep.size < 20; index--) keep.add(index);
+  return valid.filter((_run, index) => keep.has(index));
 }
 export function rescueReady(state: RescueState): boolean {
   return state.zeroed && state.measured && state.gate && state.delivered && canLift(state.route, state.force) && state.runs.some(run => run.route === state.route && run.force === state.force && run.success) && hasFairComparison(state.runs);

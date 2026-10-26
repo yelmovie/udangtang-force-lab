@@ -1,6 +1,6 @@
 import type { AppContext } from '../appTypes';
 import { icons } from '../icons';
-import { needsShortRampTrial, canLift, stallTravel, comparisonHint, comparisonSummary, coreWeight, firstFairComparison, forceNames, hasFairComparison, rescueReady, retainRescueRuns, routeNames } from '../rescueModel';
+import { needsShortRampTrial, canLift, stallTravel, comparisonHint, comparisonSummary, coreWeight, firstFairComparison, forceNames, hasFairComparison, rescueReady, retainRescueRuns, routeNames, secondComparisonHint } from '../rescueModel';
 import type { RescueRun } from '../state';
 import { mountCompanion } from '../sprites';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
@@ -148,7 +148,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     const ramps = previous.workshop.trials.filter(run => run.tool === 'ramp');
     root.querySelector('#rescue-clues')!.innerHTML = `${zeroed ? `<button data-clue="scale"><strong>내 저울 기록 · ${zeroed.reading} g</strong><span>영점을 맞추고 잰 기록을 다시 써요</span></button>` : ''}${cargo ? `<button data-clue="cargo"><strong>내 당기기 · 부품 ${cargo.parts}개, ${cargo.distance}칸</strong><span>내 쪽으로 당기는 방법 떠올리기</span></button>` : ''}${ramps.map(run => `<button data-clue="${run.setting === 1 ? 'long' : 'short'}"><strong>내 공방 · ${run.setting === 1 ? '긴 빗면' : '짧은 빗면'}</strong><span>${run.setting === 1 ? '더 긴 길에서 더 작은 힘을 관찰했어요' : '같은 높이를 더 짧은 길로 올렸어요'} · 이 길로 시험하기</span></button>`).join('')}` || '<p>앞선 탐구 기록이 아직 없어요. 지금 직접 비교해도 좋아요.</p>';
   }
-  function nextHint() { return hasFairComparison(state.runs) ? '도착하는 길로 코어를 끝까지 옮겨요.' : comparisonHint(state.runs, state.force); }
+  function nextHint() { return hasFairComparison(state.runs) ? `도착하는 길로 코어를 끝까지 옮겨요. ${secondComparisonHint(state.runs)}`.trim() : comparisonHint(state.runs, state.force); }
   // Once a fair comparison exists, its two runs stay in the table; later trials only appear as "최근 시험".
   function renderRecords() {
     const found = firstFairComparison(state.runs), force = found?.force ?? state.force, latest = state.runs.at(-1);
@@ -161,7 +161,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     const recent = root.querySelector<HTMLElement>('#core-recent')!;
     recent.hidden = !found || !latest || latest.force === found.force;
     recent.textContent = latest ? `최근 시험 · ${forceNames[latest.force - 1]} · ${latest.route === 'long' ? 'B 긴 빗면' : 'A 짧은 빗면'} ${latest.success ? '도착 ✓' : '멈춤'}` : '';
-    root.querySelector('.core-record-help')!.textContent = comparisonHint(state.runs, state.force);
+    root.querySelector('.core-record-help')!.textContent = secondComparisonHint(state.runs) || comparisonHint(state.runs, state.force);
     flashRecord = false;
   }
   function lockStage() {
@@ -252,7 +252,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   }
   function commit() { context.commit(); update(); }
   function reset() { mounted3D = false; overview(); restProgress = 0; travel = 0; state.delivered = false; pose(0); }
-  function selectRoute(route: RescueRun['route']) { if(route==='long'&&firstShort()) { tell('먼저 A 짧은 빗면을 작은 힘으로 끝까지 밀어 봐요. 그다음 같은 힘으로 B 긴 빗면을 비교해요.'); return; } state.route = route; reset(); tell(`${routeNames[route]}을 골랐어요. 코어를 길을 따라 끌어 봐요.`); companion.setMood('observe'); commit(); }
+  function selectRoute(route: RescueRun['route']) { if(route==='long'&&firstShort()) { tell('먼저 A 짧은 빗면을 작은 힘으로 끝까지 밀어 봐요. 그다음 같은 힘으로 다른 길과 비교해요.'); return; } state.route = route; reset(); tell(`${routeNames[route]}을 골랐어요. 코어를 길을 따라 끌어 봐요.`); companion.setMood('observe'); commit(); }
   controls.addEventListener('click', event => {
     if (busy) return;
     const button = (event.target as Element).closest<HTMLButtonElement>('button'); if (!button) return;

@@ -58,14 +58,44 @@ test('the fixed comparison survives save trimming', () => {
   assert.equal(model.firstFairComparison(kept).force, 1);
 });
 
-test('next-step hint follows what has been tried at the selected force', () => {
-  assert.match(model.comparisonHint([], 1), /작은 힘으로 A 짧은 빗면과 B 긴 빗면을 하나씩/);
-  assert.match(model.comparisonHint([shortStop(1)], 1), /같은 작은 힘으로 B 긴 빗면도/);
-  assert.match(model.comparisonHint([longArrive(2)], 2), /같은 중간 힘으로 A 짧은 빗면도/);
-  assert.match(model.comparisonHint([shortArrive, longArrive(3)], 3), /두 길 모두 도착했어요\. 힘을 줄여서/);
-  assert.match(model.comparisonHint([shortStop(1)], 3), /큰 힘으로 A 짧은 빗면과 B 긴 빗면을/, 'runs at another force do not count');
+test('next-step hint keeps the force fixed without naming the route that arrives', () => {
+  assert.match(model.comparisonHint([], 1), /작은 힘으로 두 길을 모두 시험해야 공정하게/);
+  for (const hint of [model.comparisonHint([shortStop(1)], 1), model.comparisonHint([longArrive(2)], 2)]) {
+    assert.equal(hint, '힘은 그대로 두고 길만 바꾸면 어떻게 될까요?');
+    assert.doesNotMatch(hint, /[AB] |짧은|긴|작은|중간|큰/, 'no route or force named before the discovery');
+  }
+  const same = model.comparisonHint([shortArrive, longArrive(3)], 3);
+  assert.match(same, /두 길 모두 도착해서 차이가 보이지 않아요. 다른 힘으로/);
+  assert.doesNotMatch(same, /줄여|키워/, 'does not say which way to change the force');
+  assert.match(model.comparisonHint([shortStop(1)], 3), /큰 힘으로 두 길을 모두 시험해야/, 'runs at another force do not count');
   const found = model.comparisonHint([shortStop(1), longArrive(1), shortArrive], 3);
   assert.match(found, /작은 힘에서 A 짧은 빗면은 멈추고 B 긴 빗면은 도착/, 'after the discovery the hint names the comparison force, not the selected one');
+});
+
+test('a second force with the same difference is counted and nudged once', () => {
+  assert.deepEqual(model.fairComparisonForces([shortStop(1), longArrive(2)]), []);
+  assert.deepEqual(model.fairComparisonForces([shortStop(1), longArrive(1), shortArrive, longArrive(3)]), [1], 'big force shows no difference');
+  assert.deepEqual(model.fairComparisonForces([shortStop(1), longArrive(1), longArrive(2), shortStop(2)]), [1, 2]);
+  assert.equal(model.secondComparisonHint([shortStop(1)]), '');
+  assert.match(model.secondComparisonHint([shortStop(1), longArrive(1)]), /다른 힘에서도 같은 차이가 날까요/);
+  assert.equal(model.secondComparisonHint([shortStop(1), longArrive(1), shortStop(2), longArrive(2)]), '');
+});
+
+test('every force on both routes is the core challenge', () => {
+  const four = [shortStop(1), longArrive(1), shortStop(2), longArrive(2)];
+  assert.equal(model.triedEveryForce(four), false);
+  assert.equal(model.triedEveryForce([...four, shortArrive]), false);
+  assert.equal(model.triedEveryForce([...four, shortArrive, longArrive(3)]), true);
+  assert.equal(model.triedEveryForce([...four, { route: 'short', force: 3, success: false }, longArrive(3)]), false, 'impossible results are ignored');
+});
+
+test('trimming keeps the second-force comparison too', () => {
+  const runs = [shortStop(1), longArrive(1), shortStop(2), longArrive(2)];
+  for (let i = 0; i < 30; i++) runs.push(longArrive(1));
+  const kept = model.retainRescueRuns(runs);
+  assert.equal(kept.length, 20);
+  assert.deepEqual(model.fairComparisonForces(kept), [1, 2]);
+  assert.deepEqual(kept.slice(0, 4), runs.slice(0, 4));
 });
 
 test('the finish summary names the force and which route stopped or arrived', () => {
