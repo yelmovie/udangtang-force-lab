@@ -14,6 +14,8 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   const state = context.save.rescue, previous = context.save;
   const firstShort = () => needsShortRampTrial(state.runs);
   if(firstShort()) { state.route='short'; state.force=1; state.delivered=false; }
+  // An arrival before the fair comparison is only a trial; older saves may still hold it as delivered.
+  if(!hasFairComparison(state.runs)) state.delivered=false;
   const events = new AbortController();
   let active = true, busy = false, gateAction: 'push' | 'pull' = 'pull';
   let held: number | null = null, keyHeld = false, frame = 0, buttonPointer: number | null = null, buttonFrame = 0;
@@ -148,6 +150,8 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     const ramps = previous.workshop.trials.filter(run => run.tool === 'ramp');
     root.querySelector('#rescue-clues')!.innerHTML = `${zeroed ? `<button data-clue="scale"><strong>내 저울 기록 · ${zeroed.reading} g</strong><span>영점을 맞추고 잰 기록을 다시 써요</span></button>` : ''}${cargo ? `<button data-clue="cargo"><strong>내 당기기 · 부품 ${cargo.parts}개, ${cargo.distance}칸</strong><span>내 쪽으로 당기는 방법 떠올리기</span></button>` : ''}${ramps.map(run => `<button data-clue="${run.setting === 1 ? 'long' : 'short'}"><strong>내 공방 · ${run.setting === 1 ? '긴 빗면' : '짧은 빗면'}</strong><span>${run.setting === 1 ? '더 긴 길에서 더 작은 힘을 관찰했어요' : '같은 높이를 더 짧은 길로 올렸어요'} · 이 길로 시험하기</span></button>`).join('')}` || '<p>앞선 탐구 기록이 아직 없어요. 지금 직접 비교해도 좋아요.</p>';
   }
+  // Both routes tried at this force with the same result: the only way forward is another force.
+  function needsOtherForce() { return !hasFairComparison(state.runs) && (['short', 'long'] as const).every(route => state.runs.some(run => run.route === route && run.force === state.force)); }
   function nextHint() { return hasFairComparison(state.runs) ? `도착하는 길로 코어를 끝까지 옮겨요. ${secondComparisonHint(state.runs)}`.trim() : comparisonHint(state.runs, state.force); }
   // Once a fair comparison exists, its two runs stay in the table; later trials only appear as "최근 시험".
   function renderRecords() {
@@ -202,7 +206,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     root.querySelector('#rescue-scale-zero')!.setAttribute('aria-disabled',String(busy));
     if (step === 0) controls.innerHTML = `<button data-rescue="load">${state.loaded ? '코어 내려놓기' : '코어 올려놓기'}</button><button data-rescue="zero">0 맞추기</button>${state.loaded ? '<button data-rescue="reading">측정값 확인·기록</button>' : ''}`;
     if (step === 1) controls.innerHTML = `<span>나는 상자의 오른쪽!</span><button data-rescue="push" aria-pressed="${gateAction === 'push'}">← 벽 쪽으로 밀기</button><button data-rescue="pull" aria-pressed="${gateAction === 'pull'}">내 쪽으로 당기기 →</button>`;
-    if (step === 2) controls.innerHTML = `<div class="rescue-route-controls">${(['short','long'] as const).map(route => `<button data-route="${route}" aria-label="${route === 'short' ? '짧은 빗면' : '긴 빗면'}" aria-pressed="${state.route === route}" ${route==='long'&&firstShort()?'disabled':''}><span>${route === 'short' ? 'A' : 'B'}</span>${route === 'short' ? '짧은 빗면' : '긴 빗면'}</button>`).join('')}</div><label class="rescue-force-control" for="rescue-force">미는 힘 <strong>${forceNames[state.force - 1]}</strong><i class="force-step-arrow" style="--level:${state.force}" aria-hidden="true"></i><input id="rescue-force" type="range" min="1" max="3" step="1" value="${state.force}" ${firstShort()?'disabled':''} aria-label="게임 속 미는 힘"></label><button data-rescue="retry">다시 출발</button>`;
+    if (step === 2) controls.innerHTML = `<div class="rescue-route-controls">${(['short','long'] as const).map(route => `<button data-route="${route}" aria-label="${route === 'short' ? '짧은 빗면' : '긴 빗면'}" aria-pressed="${state.route === route}" ${route==='long'&&firstShort()?'disabled':''}><span>${route === 'short' ? 'A' : 'B'}</span>${route === 'short' ? '짧은 빗면' : '긴 빗면'}</button>`).join('')}</div><label class="rescue-force-control${needsOtherForce() ? ' is-nudge' : ''}" for="rescue-force">미는 힘 <strong>${forceNames[state.force - 1]}</strong><i class="force-step-arrow" style="--level:${state.force}" aria-hidden="true"></i><input id="rescue-force" type="range" min="1" max="3" step="1" value="${state.force}" ${firstShort()?'disabled':''} aria-label="게임 속 미는 힘"></label><button data-rescue="retry">다시 출발</button>`;
     for(const id of ['#core-long-tag']) root.querySelector<HTMLButtonElement>(id)!.disabled=firstShort();
     if(step===2&&firstShort()) root.querySelector('#rescue-corgi-tip')!.textContent='먼저 A 짧은 빗면을 작은 힘으로 밀어 보자!';
     controls.inert = busy;
@@ -274,6 +278,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     state.force = Number((event.target as HTMLInputElement).value); reset();
     controls.querySelector('.rescue-force-control strong')!.textContent = forceNames[state.force - 1];
     controls.querySelector<HTMLElement>('.force-step-arrow')?.style.setProperty('--level', String(state.force));
+    controls.querySelector('.rescue-force-control')!.classList.toggle('is-nudge', needsOtherForce());
     handle.disabled = stageLock || (!use2D && !scene); finish.disabled = true;
     renderRecords();
     tell(`힘을 바꿨어요. ${nextHint()}`); context.commit();
@@ -289,18 +294,21 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   }, { signal });
   function recordRun(success: boolean) {
     const knew = hasFairComparison(state.runs);
-    state.runs = retainRescueRuns([...state.runs,{ route:state.route, force:state.force, success }]); state.delivered = success; flashRecord = true;
+    state.runs = retainRescueRuns([...state.runs,{ route:state.route, force:state.force, success }]); flashRecord = true;
+    // Without a fair comparison an arrival is just a trial: the core returns to the start so the next push stays possible.
+    state.delivered = success && hasFairComparison(state.runs);
     restProgress = success ? 1 : stallTravel; // the same point the input stopped at: no jump at the verdict
     const found = !knew && hasFairComparison(state.runs), hint = comparisonHint(state.runs, state.force);
     if (success) tell(found ? `코어 도착! ${hint} 이제 중앙 장치에 코어를 다시 끼워요!` : knew ? '코어 도착! 이제 중앙 장치에 코어를 다시 끼워요!' : `도착했어요! ${hint}`);
     else tell(found ? `이 힘으로는 올라가지 못했어요! ${hint} 이제 도착하는 길로 옮겨요.` : knew ? '이 힘으로는 올라가지 못했어요. 도착하는 길로 코어를 옮겨요.' : `이 힘으로는 올라가지 못했어요. 손가락을 더 세게 누를 필요는 없어요. ${hint}`);
     companion.setMood(success ? 'success' : 'observe'); context.sound(success ? 740 : 350);
     if (!success) { showStopMark(); slideBack(); }
+    else if (!state.delivered) slideBack(1400);
     if (found) showPredictionChip(root.querySelector<HTMLElement>('.rescue-playfield')!, context.save, 'rescue');
   }
-  // A stopped core pauses at the stop point, then slides back to the start so the next push is a new trial.
-  function slideBack() {
-    const stopAt = restProgress, hold = 650, slide = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 500, started = performance.now();
+  // A stopped core (or a trial arrival) pauses where it ended, then slides back to the start so the next push is a new trial.
+  function slideBack(hold = 650) {
+    const stopAt = restProgress, slide = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 500, started = performance.now();
     busy = true; cancelAnimationFrame(slideFrame);
     const tick = (now: number) => {
       if (!active) return;
