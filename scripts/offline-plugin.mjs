@@ -3,7 +3,8 @@ import { createHash } from 'node:crypto';
 import { join, relative, resolve, sep } from 'node:path';
 
 async function filesIn(directory) {
-  const entries = await readdir(directory, { withFileTypes: true });
+  // macOS writes ._* metadata files next to every file on exFAT drives; they are not part of the build.
+  const entries = (await readdir(directory, { withFileTypes: true })).filter(entry => !entry.name.startsWith('._'));
   return (await Promise.all(entries.map(entry => entry.isDirectory() ? filesIn(join(directory, entry.name)) : [join(directory, entry.name)]))).flat();
 }
 
