@@ -19,3 +19,6 @@ tools/remotion-concepts/node_modules/
 .claude/
 .project-memory/
 .wrangler/
+.tmp/
+output/
+graphify-out/
