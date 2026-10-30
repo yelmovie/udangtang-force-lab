@@ -8,6 +8,7 @@ import { fingerIcon } from '../interactionHints';
 import { showPredictionChip } from '../predictionChip';
 import { requestOpenLabel, showRequestLetter } from '../requestLetter';
 import { corgiHintButton, mountCorgiHint } from '../corgiHint';
+import { autoPause, autoWait, syncAutoButton } from '../autoPlay';
 import '../workshop.css';
 
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -22,6 +23,9 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   let progress = 0, heldPointer: number | null = null, keyHeld = false, frame = 0, startX = 0, startY = 0, completedGesture = false;
   let designPointer: number | null = null, designStartX = 0, designAnchorX = 0;
   let designInitialSetting: LeverSetting = state.fulcrumPosition;
+  // "자동으로 보기" runs the level 1 tries (direct, three fulcrums, two ramps); the force question and the
+  // level 2 design choice stay with the student.
+  let autoPlaying = false;
   // Level 2 (force budget) opens after the three level 1 findings. Its record is
   // save.levels.workshop; misses and traces are session play for the current cargo.
   const levelRecord = () => context.save.levels?.workshop;
@@ -44,7 +48,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     <div class="experiment-heading"><div><p class="eyebrow">04 · 운반 공방</p><h1>내 손으로 바꾸는 도구</h1></div>${missionProgressMarkup('workshop',['직접 들기','지레 비교','빗면 비교','의뢰 화물 3개'])}</div>
     <div class="workshop-studio">
       <div class="workshop-stage">
-        <div class="workshop-drawer" role="group" aria-label="실험 도구"><button data-tool="direct">① 직접 들기</button><button data-tool="lever">② 지레</button><button data-tool="ramp">③ 빗면</button><span class="workshop-cargo-chip" id="workshop-cargo-chip" hidden></span><p class="workshop-instruction" id="workshop-instruction">${fingerIcon}<span></span></p><button id="workshop-open-record" class="workshop-record-button" aria-haspopup="dialog">기록 보기</button><div class="workshop-view"><button class="camera-button" id="turn-left" aria-label="시점 왼쪽">${icons.rotateLeft}</button><button class="camera-button" id="turn-right" aria-label="시점 오른쪽">${icons.rotateRight}</button></div></div>
+        <div class="workshop-drawer" role="group" aria-label="실험 도구"><button data-tool="direct">① 직접 들기</button><button data-tool="lever">② 지레</button><button data-tool="ramp">③ 빗면</button><span class="workshop-cargo-chip" id="workshop-cargo-chip" hidden></span><p class="workshop-instruction" id="workshop-instruction">${fingerIcon}<span></span></p><button class="button button-secondary stage-auto-go" id="workshop-auto-go" aria-pressed="false" hidden>▶ 자동으로 보기</button><button id="workshop-open-record" class="workshop-record-button" aria-haspopup="dialog">기록 보기</button><div class="workshop-view"><button class="camera-button" id="turn-left" aria-label="시점 왼쪽">${icons.rotateLeft}</button><button class="camera-button" id="turn-right" aria-label="시점 오른쪽">${icons.rotateRight}</button></div></div>
         <div class="workshop-world" data-tool="direct"><div class="workshop-budget" id="workshop-budget" role="img" hidden><div class="budget-head"><img src="/assets/game/corgi-effort.webp" alt="" draggable="false"><strong>콩이가 낼 수 있는 힘</strong><span class="budget-status"></span></div><div class="budget-cells">${'<i></i>'.repeat(budgetCellCount)}</div><div class="budget-scale"><span>콩이 힘 끝</span><span class="budget-more"></span></div></div><div id="workshop-canvas" class="workshop-canvas"><div class="scene-loading">작업대 준비 중…</div></div><button id="workshop-fulcrum" class="workshop-fulcrum-grip" aria-label="그림의 받침대. 잡고 좌우로 옮기기. 방향키로도 위치 변경" hidden><span class="fulcrum-grab-label">${fingerIcon} 받침대 옮기기</span></button><div class="workshop-actor" id="workshop-actor" role="img" aria-label="아이가 직접 화물을 들어 올려요"><img id="workshop-actor-main" src="/assets/game/workshop-direct-start.webp" alt="" draggable="false"><img id="workshop-actor-lift" src="/assets/game/workshop-direct-lift.webp" alt="" draggable="false"><div class="workshop-effort" aria-hidden="true"><span class="effort-face"><i></i><i></i></span><b class="effort-word"></b></div></div><button id="workshop-handle" class="workshop-handle" aria-label="손잡이를 움직여 실험하기"><i class="handle-force" aria-hidden="true"></i><i class="handle-budget" aria-hidden="true"></i><span class="handle-arrow">↑</span><span class="handle-label">상자를 잡고 위로</span></button><div class="workshop-height-ruler" aria-label="화물이 올라갈 높이 눈금자"><div class="height-ruler-track"><i class="height-current-marker"></i></div><span class="height-arrival" hidden>✓ 도착</span></div><div class="workshop-move-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="목표 지점까지 이동"><div class="workshop-travel"><i id="workshop-progress"></i></div><strong id="workshop-move-text">0%</strong></div></div>
         <div class="workshop-design-dock" id="lever-adjustment" hidden><span class="design-dock-title">받침점 위치<small>골라서 바꿔요</small></span>${([0, 1, 2] as const).map(i => `<button type="button" class="design-stop" data-lever="${i}">${getWorkshopDesign('lever', i).label}</button>`).join('')}<button type="button" class="button button-primary workshop-tap-run" data-tap-run>눌러서 시험하기</button></div><div class="workshop-design-dock" id="design-adjustment"><span class="design-dock-title">빗면 길이<small>골라서 바꿔요</small></span><button type="button" class="design-stop" data-ramp="0">짧고 가파르게</button><input type="range" id="workshop-design" min="0" max="1" step="1" value="0" aria-label="빗면 길이 조절"><button type="button" class="design-stop" data-ramp="1">길고 완만하게</button><button type="button" class="button button-primary workshop-tap-run" data-tap-run>눌러서 시험하기</button><span class="design-dock-hint" aria-hidden="true">↓ 다른 길이로 바꿔 다시 밀어 봐요</span></div><div class="workshop-design-dock" id="direct-adjustment" hidden><span class="design-dock-title">직접 들기<small>끌거나 눌러요</small></span><button type="button" class="button button-primary workshop-tap-run" data-tap-run>눌러서 시험하기</button></div>
       </div>
@@ -64,6 +68,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   const notebookStore = root.querySelector<HTMLElement>('.workshop-record-store')!;
   const notebookBoard = root.querySelector<HTMLElement>('.workshop-notebook')!;
   const recordButton = root.querySelector<HTMLButtonElement>('#workshop-open-record')!;
+  const autoGo = root.querySelector<HTMLButtonElement>('#workshop-auto-go')!;
   let recordDialog: HTMLDialogElement | null = null;
   const hint = mountCorgiHint(root, {
     now: () => instruction(),
@@ -272,6 +277,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     if (workshopExplorationReady(state)) root.querySelector<HTMLElement>('#workshop-choice')!.insertAdjacentHTML('beforeend', workshopL2Complete(levelRecord()) ? '<p class="finding-earned">✓ 공방 친구의 의뢰도 끝냈어요</p>' : `<div class="workshop-request-invite"><img src="/assets/game/corgi-observe.webp" alt="" draggable="false"><p><strong>공방 친구의 의뢰가 왔어요!</strong>콩이 힘으로 화물 3개를 올려 줄래요?</p><button id="workshop-open-request" class="button button-primary" ${busy ? 'disabled' : ''}>${requestOpenLabel} →</button></div>`);
     }
     finish.disabled = busy || !workshopExplorationReady(state) || !workshopL2Complete(levelRecord());
+    syncAutoButton(autoGo, root.querySelector<HTMLElement>('.workshop-redesign')!, autoPlaying, level === 1 && !!scene && !workshopExplorationReady(state), busy);
     const leverRuns=state.trials.filter(r=>r.tool==='lever'), rampRuns=state.trials.filter(r=>r.tool==='ramp');
     setMissionProgress(root,[steps.direct,steps.lever,steps.ramp,workshopL2Complete(levelRecord())],
       !steps.direct?'먼저 직접 들어요'
@@ -522,6 +528,39 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
       window.setTimeout(() => { if (active) update(); }, choiceLockMs);
     }
   }, { signal });
+  const autoAlive = () => active && autoPlaying && !!scene;
+  /** One try through the same autoRun() as "눌러서 시험하기", with a pause before and after to watch it. */
+  async function autoTry() {
+    await autoPause(600);
+    if (!autoAlive()) return;
+    autoRun();
+    await autoWait(() => !keyHeld && !sliding && !waiting, autoAlive);
+    await autoPause(900);
+  }
+  async function autoPlay() {
+    if (autoPlaying || level !== 1 || !scene || heldPointer !== null || keyHeld || designPointer !== null || waiting || sliding) return;
+    autoPlaying = true; recordDialog?.close();
+    setFeedback('자동으로 직접 들기, 지레, 빗면을 차례로 시험해요. 힘 막대를 지켜봐요.'); update();
+    const tried = (name: WorkshopTool, setting: number) => state.trials.some(run => run.tool === name && run.setting === setting);
+    if (!state.direct) { configure('direct'); await autoTry(); }
+    for (const setting of [0, 1, 2] as const) {
+      if (!autoAlive()) break;
+      if (tried('lever', setting)) continue;
+      if (tool !== 'lever') configure('lever');
+      resetGesture(); changeFulcrum(setting); context.commit(); update();
+      await autoTry();
+    }
+    for (const setting of [0, 1] as const) {
+      if (!autoAlive()) break;
+      if (tried('ramp', setting)) continue;
+      if (tool !== 'ramp') configure('ramp');
+      if (state.rampLength !== setting) { slider.value = String(setting); slider.dispatchEvent(new Event('input')); }
+      await autoTry();
+    }
+    if (!active) return;
+    autoPlaying = false; update();
+  }
+  autoGo.addEventListener('click', () => { if (autoPlaying) { autoPlaying = false; setFeedback('자동 진행을 멈췄어요. 직접 이어서 해도 돼요.'); update(); } else void autoPlay(); }, { signal });
   recordButton.addEventListener('click', () => { if (!recordButton.disabled) openRecord(level === 2 ? '의뢰 보기' : '기록 보기', feedback); }, { signal });
   root.querySelector('#turn-left')!.addEventListener('click', () => {scene?.turn(-1);positionHandle();}, { signal });
   root.querySelector('#turn-right')!.addEventListener('click', () => {scene?.turn(1);positionHandle();}, { signal });

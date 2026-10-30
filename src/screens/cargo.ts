@@ -4,7 +4,7 @@ import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { showPredictionChip } from '../predictionChip';
 import { requestOpenLabel, showRequestLetter } from '../requestLetter';
 import { corgiHintButton, mountCorgiHint } from '../corgiHint';
-import { cargoActionCompared, cargoExplorationReady, cargoDistance, cargoForceNames, cargoOrders, orderHint, orderResult, ordersComplete, type ForceLevel } from '../cargoModel';
+import { cargoActionCompared, cargoExplorationReady, cargoDistance, cargoForceNames, cargoOrders, orderHint, orderResult, orderSolution, ordersComplete, type ForceLevel } from '../cargoModel';
 import type { CargoRun } from '../state';
 import '../cargo.css';
 const imagePath = (name: string) => `${import.meta.env.BASE_URL}assets/game/${name}.webp`;
@@ -15,7 +15,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     for (const run of state.runs) run.distance = cargoDistance(run.parts, 2);
     const events = new AbortController();
     let active = true, busy = false, waiting = false, needsSetup = false;
-    // "자동으로 보기" runs the missing level 1 tries by itself; the student only watches.
+    // "자동으로 보기" runs the missing level 1 tries, or delivers the open level 2 orders, by itself; the student only watches.
     let autoPlaying = false;
     let animation: Animation | null = null;
     let suppressClickUntil = 0;
@@ -116,7 +116,9 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     }
     function stepText() {
         if (busy) return level === 1 ? '같은 힘으로 출발! 어디서 멈출까?' : `${forceName(force!)}으로 출발!`;
-        if (autoPlaying) return `자동 실험 중 · 다음은 ${state.action === 'push' ? '밀기' : '당기기'} 부품 ${state.parts}개`;
+        if (autoPlaying) return level === 1
+            ? `자동 실험 중 · 다음은 ${state.action === 'push' ? '밀기' : '당기기'} 부품 ${state.parts}개`
+            : `자동 배달 중 · 주문 ${orders().length + 1} · 부품 ${currentOrder().parts}개${force ? ` · ${forceName(force)}` : ''}`;
         if (level === 2) {
             if (deliveredAll()) return '배달 완료! 운반 레일 복구하기를 눌러요';
             if (waiting) return misses ? '흔적을 보고 힘을 다시 골라요' : '배달 성공! 다음 주문이 와요';
@@ -178,7 +180,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         handle.disabled = !canPush();
         tapGo.textContent = `${tapLabel()} →`;
         tapGo.disabled = !canPush() && !needsForce();
-        autoGo.hidden = level !== 1 || (ready() && !autoPlaying);
+        autoGo.hidden = !autoPlaying && (level === 1 ? ready() : deliveredAll());
         autoGo.disabled = !autoPlaying && (busy || waiting || !!drag);
         autoGo.textContent = autoPlaying ? '■ 자동 멈추기' : '▶ 자동으로 보기';
         autoGo.setAttribute('aria-pressed', String(autoPlaying));
@@ -201,7 +203,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         finish.disabled = locked || !ready() || !finding || !deliveredAll();
     }
     async function experiment(gesture: number, preview = 0, auto = false) {
-        if (auto ? busy || waiting || level !== 1 : !canPush())
+        if (auto ? busy || waiting || (level === 2 && force === null) : !canPush())
             return;
         busy = true;
         const parts = shownParts(), push: ForceLevel = level === 2 ? force! : 2, distance = cargoDistance(parts, push);
@@ -266,6 +268,8 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
                 schedulePopup(() => openPopup('배달 결과', '배달 완료! 오븐을 고칠 수 있어요', `<p>부품 ${order.parts}개는 ${forceName(push)}으로 빵집 문 앞에 딱 멈췄어요.</p>${ordersMarkup()}<p class="cargo-popup-next"><strong>운반 레일 복구하기</strong>를 누르거나, 더 실험해 봐도 돼요.</p>`, exploreFreely), 700);
                 return;
             }
+            // Auto delivery moves on to the next order itself, without stopping at a popup.
+            if (autoPlaying) { update(); return; }
             waiting = true;
             update();
             schedulePopup(() => openPopup('배달 결과', '배달 성공!', `<p>부품 ${order.parts}개는 ${forceName(push)}으로 빵집 문 앞에 딱 멈췄어요.</p>${ordersMarkup()}<p class="cargo-popup-next">다음은 부품 ${currentOrder().parts}개! 더 무거워요.</p>`, () => {
@@ -439,15 +443,33 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         return (['push', 'pull'] as const).flatMap(action => [1, 3, 5].map(parts => ({ action, parts })))
             .filter(step => !state.runs.some(run => run.parts === step.parts && run.action === step.action));
     }
-    /** Runs the missing tries through the same experiment() and record as a drag, one after another, with a pause to look. */
+    /** Runs the missing tries (level 1) or the open orders with their fitting force (level 2)
+     * through the same experiment() as a drag, one after another, with a pause to look. */
     async function autoPlay() {
-        if (autoPlaying || busy || waiting || drag || level !== 1) return;
+        if (autoPlaying || busy || waiting || drag || (level === 2 && deliveredAll())) return;
         autoPlaying = true;
         closePopup();
-        feedback = '자동으로 실험해요. 상자가 어디서 멈추는지 지켜봐요.';
+        feedback = level === 1 ? '자동으로 실험해요. 상자가 어디서 멈추는지 지켜봐요.' : '자동으로 배달해요. 부품 개수마다 어떤 힘을 고르는지 지켜봐요.';
         update();
         const pause = (ms: number) => new Promise<void>(resolve => window.setTimeout(resolve, reducedMotion() ? Math.min(ms, 250) : ms));
-        for (const step of missingTries()) {
+        while (level === 2 && !deliveredAll()) {
+            if (!active || !autoPlaying) break;
+            force = null; misses = 0; ghosts = [];
+            resetCrate();
+            update();
+            await pause(700);
+            if (!active || !autoPlaying) break;
+            force = orderSolution(currentOrder());
+            if (force) context.sound(380 + force * 60);
+            update();
+            await pause(700);
+            if (!active || !autoPlaying) break;
+            await experiment(travel(), 0, true);
+            // The last delivery ends auto mode at once, so its result card offers the finish button.
+            if (deliveredAll()) break;
+            await pause(1100);
+        }
+        for (const step of level === 1 ? missingTries() : []) {
             if (!active || !autoPlaying) break;
             if (state.action !== step.action) railRuns = [];
             state.action = step.action;

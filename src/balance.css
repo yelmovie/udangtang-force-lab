@@ -194,6 +194,8 @@
 .balance-screen .mystery-picks button:not(:disabled):active { transform:translateY(3px); box-shadow:0 1px 0 #b9955c; }
 .balance-screen .mystery-picks button:focus-visible { outline:3px solid #ffc247; outline-offset:3px; }
 .balance-screen .mystery-picks button:disabled { opacity:.55; box-shadow:none; }
+/* After a correct pick the round waits for 다음 꾸러미: the chosen box stays marked, the others dim. */
+.balance-screen .mystery-picks button.is-picked:disabled { opacity:1; background:#d8f1d2; border-color:#287953; color:#145a37; box-shadow:0 4px 0 #287953; }
 .balance-screen .balance-request { display:grid; gap:6px; padding:10px 14px; border:3px solid #c48b1d; border-radius:14px; background:#fff3c9; box-shadow:0 4px 0 #81552533; }
 .balance-screen .balance-request-from { margin:0; color:#8a5a12; font-size:15px; font-weight:900; }
 .balance-screen .balance-request-text { margin:0; color:#2b4a40; font-size:18px; font-weight:800; line-height:1.35; }

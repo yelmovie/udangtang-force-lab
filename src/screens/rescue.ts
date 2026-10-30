@@ -7,6 +7,7 @@ import { corgiHintButton, mountCorgiHint } from '../corgiHint';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { showPredictionChip } from '../predictionChip';
 import { coreDragProgress } from '../coreSceneModel';
+import { autoPause, autoWait, syncAutoButton } from '../autoPlay';
 import type { CoreScene, CoreProjection } from '../three/coreScene';
 import './rescue.css';
 import './coreStudio.css';
@@ -30,9 +31,12 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   let scene: CoreScene | undefined, sceneTried = false, sceneLoading = false, sceneFailed = false, use2D = false;
   let inspecting = false, mounted3D = false;
   let corePointer: number | null = null, suppressGripClick = false, coreStart = { x: 0, y: 0 }, projection: CoreProjection | undefined;
+  // "자동으로 보기" weighs the core, pulls the crate and pushes the core up both ramps with the same small force;
+  // putting the core back in (the finish button) stays with the student.
+  let autoPlaying = false;
   root.innerHTML = `<section class="experiment-screen rescue-screen rescue-redesign core-studio">
     <div class="experiment-heading"><div class="core-title"><span class="core-eyebrow">배터리 다시 끼우기 · 마지막 작전</span><h1>중앙 코어</h1></div>${missionProgressMarkup('rescue',['무게 확인','길 열기','같은 힘 비교','코어 도착'])}</div>
-    <div class="rescue-stage"><div class="rescue-stage-head"><strong id="rescue-phase"></strong><span id="rescue-readout"></span><details class="rescue-notebook"><summary>내 발견 꺼내 쓰기 ▾</summary><div class="rescue-notes-body"><div id="rescue-clues"></div><p id="rescue-used-clue"></p><div id="rescue-checks" class="rescue-checks"></div><div id="rescue-runs" class="result-list"></div><p id="rescue-insight"></p></div></details></div>
+    <div class="rescue-stage"><div class="rescue-stage-head"><strong id="rescue-phase"></strong><span id="rescue-readout"></span><button class="button button-secondary stage-auto-go" id="rescue-auto-go" aria-pressed="false" hidden>▶ 자동으로 보기</button><details class="rescue-notebook"><summary>내 발견 꺼내 쓰기 ▾</summary><div class="rescue-notes-body"><div id="rescue-clues"></div><p id="rescue-used-clue"></p><div id="rescue-checks" class="rescue-checks"></div><div id="rescue-runs" class="result-list"></div><p id="rescue-insight"></p></div></details></div>
       <div class="rescue-playfield">
         <svg class="rescue-world" viewBox="0 90 720 350" aria-label="코어와 장애물을 직접 움직이는 운반 작업대">
           <defs><linearGradient id="rescue-platform" x2="0" y2="1"><stop stop-color="#cda776"/><stop offset="1" stop-color="#77593e"/></linearGradient></defs>
@@ -70,6 +74,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   const controls = root.querySelector<HTMLElement>('#rescue-controls')!;
   const handle = root.querySelector<HTMLButtonElement>('#core-handle')!;
   const finish = root.querySelector<HTMLButtonElement>('#rescue-finish')!;
+  const autoGo = root.querySelector<HTMLButtonElement>('#rescue-auto-go')!;
   // The phase line is the stage's own "what now"; in the 3D bench the companion is hidden, so a corgi of its own stands in.
   const hint = mountCorgiHint(root, { now: () => root.querySelector('#rescue-phase')!.textContent ?? '' });
   const companion = mountCompanion(root.querySelector<HTMLElement>('#rescue-companion')!, 'idle', {}, hint.attach);
@@ -230,6 +235,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     root.querySelector('#rescue-used-clue')!.textContent = usedClue;
     for (const route of ['short','long']) root.querySelector(`#${route}-path`)!.classList.toggle('route-selected', state.route === route);
     finish.disabled = busy || !rescueReady(state) || (coreMode && !scene); pose(state.delivered ? 1 : restProgress); tell(feedback);
+    syncAutoButton(autoGo, root.querySelector<HTMLElement>('.rescue-screen')!, autoPlaying, !state.delivered && !mounted3D, busy || stageLock || (coreMode && !scene));
     if (step !== 0 || !state.loaded) closeWeightDialog();
   }
   function closeWeightDialog() {
@@ -469,6 +475,57 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   }, { signal });
   root.addEventListener('keyup', event=>{ if (['Enter',' '].includes(event.key) && (keyHeld || [art,gate,handle,grip].includes(event.target as typeof art))) { event.preventDefault(); if (keyHeld) stopKey(false); } }, { signal });
   root.addEventListener('focusout', event=>{ if (keyHeld && [art,gate,handle,grip].includes(event.target as typeof art)) stopKey(true); }, { signal });
+  const autoAlive = () => active && autoPlaying;
+  /** Moves the crate or the core like holding Enter, then settles the try through finishTravel(). */
+  function autoDrive(): Promise<void> {
+    return new Promise(resolve => {
+      if (inspecting) overview();
+      busy = true; restProgress = 0; travel = 0; companion.setMood('effort'); controls.inert = true; finish.disabled = true;
+      const started = performance.now(), duration = phase() === 1 ? 1000 : state.route === 'long' ? 2500 : 1400;
+      const tick = (now: number) => {
+        if (!active) { resolve(); return; }
+        drawTravel((now - started) / duration);
+        const threshold = phase() === 1 || canLift(state.route, state.force) ? .95 : stallTravel;
+        if (travel < threshold) { frame = requestAnimationFrame(tick); return; }
+        busy = false; finishTravel(); commit(); resolve();
+      };
+      frame = requestAnimationFrame(tick);
+    });
+  }
+  const idle = () => !busy && !stageLock;
+  /** Zero, load and record the weight; pull the crate; then the short and the long ramp with the same small force. */
+  async function autoPlay() {
+    if (autoPlaying || busy || stageLock || state.delivered) return;
+    autoPlaying = true; closeWeightDialog();
+    tell('자동으로 작전을 진행해요. 마지막에 코어를 다시 끼우는 건 직접 해요.'); update();
+    const press = (action: string) => controls.querySelector<HTMLButtonElement>(`[data-rescue="${action}"]`)?.click();
+    if (phase() === 0) {
+      if (!state.zeroed) {
+        if (state.loaded) { press('load'); await autoPause(700); }
+        if (autoAlive()) { press('zero'); await autoPause(800); }
+      }
+      if (autoAlive() && !state.loaded) { press('load'); await autoPause(900); }
+      if (autoAlive()) { openWeightDialog(); await autoPause(1200); }
+      if (autoAlive()) weightDialog?.querySelector<HTMLButtonElement>('[data-weight="record"]')?.click();
+    }
+    if (phase() === 1 && await autoWait(idle, autoAlive)) {
+      press('pull'); await autoPause(600);
+      if (autoAlive()) await autoDrive();
+    }
+    if (phase() === 2 && await autoWait(() => idle() && (use2D || !!scene || sceneFailed), autoAlive) && (use2D || !!scene)) {
+      for (const route of ['short', 'long'] as const) {
+        if (!autoAlive() || state.delivered) break;
+        if (route === 'short' && (hasFairComparison(state.runs) || state.runs.some(run => run.route === 'short' && run.force === 1))) continue;
+        state.force = 1; selectRoute(route); await autoPause(700);
+        if (!autoAlive()) break;
+        await autoDrive();
+        await autoWait(() => !busy, autoAlive); await autoPause(600);
+      }
+    }
+    if (!active) return;
+    autoPlaying = false; update();
+  }
+  autoGo.addEventListener('click', () => { if (autoPlaying) { autoPlaying = false; tell('자동 진행을 멈췄어요. 직접 이어서 해도 돼요.'); update(); } else void autoPlay(); }, { signal });
   function cancelInput() {
     stopKey(true); stopButton(true);
     if (held !== null) endPointer({ pointerId: held }, true);

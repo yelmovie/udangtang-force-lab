@@ -8,6 +8,7 @@ import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { scaleActivityMeasurements, scaleExplorationReady, comparisonParts, emptyScaleReading, fakeDiscoveryText, fakeHint, fakeLabels, fakeLayout, fakeRequestComplete, fakeRounds, fakeSummary, judgeFakePick, nextFakeRound, recordFakePick, recordScaleRun, scaleComparison, recordSpringRead, springDone, springEyeLabels, springHint, springObjects, springParallax, springReading, springStartOffset, springSummary, turnSpringScrew, type EyeLevel } from '../scaleModel';
 import { requestOpenLabel, showRequestLetter } from '../requestLetter';
 import { predictionRecap } from '../inquiryPlan';
+import { autoPause, autoWait, syncAutoButton } from '../autoPlay';
 import '../instruments.css';
 import '../scalePolish.css';
 
@@ -59,13 +60,15 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   let popup: HTMLDialogElement | null = null;
   let popupPending = false;
   let lastResult: PopResult | null = null;
+  // "자동으로 보기" zeroes the scale and weighs each part one by one; answers and the fake pick stay with the student.
+  let autoPlaying = false;
   if(level===2) { feedback='겉모습이 똑같은 부품 중 하나가 가짜예요. 저울로 하나씩 재 봐요.'; state.parts=[]; reading=null; }
 
   root.innerHTML = `<section class="experiment-screen instrument-screen scale-screen">
     <div class="experiment-heading"><div><p class="eyebrow">03 · 재료 보급소</p><h1>저울로 무게를 비교해요</h1></div>${missionProgressMarkup('scale',['빈 저울 0 맞추기','모형 5개 재기','가짜 부품 찾기'])}</div>
     <div class="instrument-stage game-panel scale-field">
       <div class="instrument-phase" id="scale-phase" tabindex="-1"></div>
-      <div class="scale-toolbar"><div class="scale-comparison" id="scale-comparison" aria-label="두 모형의 측정 결과"></div><button class="scale-record-open" id="scale-record-open" type="button">기록 보기</button></div>
+      <div class="scale-toolbar"><div class="scale-comparison" id="scale-comparison" aria-label="두 모형의 측정 결과"></div><button class="button button-secondary stage-auto-go" id="scale-auto-go" type="button" aria-pressed="false" hidden>▶ 자동으로 보기</button><button class="scale-record-open" id="scale-record-open" type="button">기록 보기</button></div>
       <div class="scale-target">하나씩 재고 <strong>비교해요</strong></div>
       <div class="scale-basket" id="scale-basket" aria-label="전자저울 위 쟁반"><span class="basket-label">모형 부품을 여기에 놓아요</span><div class="basket-items" id="basket-items"></div></div>
       <div class="scale-platform"></div><div class="scale-body"><div class="scale-display"><span class="scale-stability" id="scale-stability">측정값</span><strong id="scale-reading">15</strong><span>g</span></div><button class="zero-button" id="zero-button" aria-label="빈 저울 영점 맞추기">0 맞추기</button><button id="scale-measure" class="scale-measure-button">모두 내리기</button></div>
@@ -96,6 +99,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   const readingNode = root.querySelector<HTMLElement>('#scale-reading')!;
   const finish = root.querySelector<HTMLButtonElement>('#scale-finish')!;
   const measure = root.querySelector<HTMLButtonElement>('#scale-measure')!;
+  const autoGo = root.querySelector<HTMLButtonElement>('#scale-auto-go')!;
   const unmeasured = () => { const compared = scaleActivityMeasurements(state.runs); return scaleParts.filter(part=>!compared.some(run=>run.parts[0]===part.id)).map(part=>shortName(part.id)).join(' · '); };
   const hint = mountCorgiHint(root, { now: () => phaseText(), missing: () => level===1&&!scaleExplorationReady(state) ? `아직 안 잰 모형: ${unmeasured()}` : '' });
   const companion = mountCompanion(root.querySelector<HTMLElement>('#scale-companion')!, 'idle', {}, hint.attach);
@@ -164,7 +168,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     dialog.className='stage-popup scale-popup';
     dialog.setAttribute('aria-labelledby','scale-popup-title');
     const render=()=>{
-      dialog.innerHTML=`<div class="stage-popup-card"><button class="stage-popup-close" type="button" aria-label="닫기">×</button><p class="stage-popup-label">${label}</p><h2 id="scale-popup-title">${result ? result.title : '나의 측정 기록'}</h2><div class="stage-popup-body">${result ? `<p class="scale-pop-text">${result.text}</p>` : ''}${result?.records ?? recordsMarkup()}${result?.question&&(level===2||scaleExplorationReady(state)) ? questionMarkup(result.question,result.answer) : ''}</div><div class="stage-popup-actions">${waiting ? '<button class="button button-primary" data-scale-next>다음 의뢰 →</button>' : level===1&&scaleExplorationReady(state)&&!fakeRequestComplete(savedRecord()) ? '<button class="button button-primary" data-scale-request>${requestOpenLabel} →</button>' : canFinish() ? '<button class="button button-primary stage-result-finish" type="button">비교 기록 저장 →</button>' : '<button class="button button-primary stage-popup-continue" type="button">계속 실험하기</button>'}</div></div>`;
+      dialog.innerHTML=`<div class="stage-popup-card"><button class="stage-popup-close" type="button" aria-label="닫기">×</button><p class="stage-popup-label">${label}</p><h2 id="scale-popup-title">${result ? result.title : '나의 측정 기록'}</h2><div class="stage-popup-body">${result ? `<p class="scale-pop-text">${result.text}</p>` : ''}${result?.records ?? recordsMarkup()}${result?.question&&(level===2||scaleExplorationReady(state)) ? questionMarkup(result.question,result.answer) : ''}</div><div class="stage-popup-actions">${waiting ? '<button class="button button-primary" data-scale-next>다음 의뢰 →</button>' : level===1&&scaleExplorationReady(state)&&!fakeRequestComplete(savedRecord()) ? `<button class="button button-primary" data-scale-request>${requestOpenLabel} →</button>` : canFinish() ? '<button class="button button-primary stage-result-finish" type="button">비교 기록 저장 →</button>' : '<button class="button button-primary stage-popup-continue" type="button">계속 실험하기</button>'}</div></div>`;
     };
     render();
     dialog.addEventListener('click',event=>{
@@ -255,6 +259,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     difference.classList.toggle('matched',level===1 ? !!state.zeroed&&reading===targetWeight : found!==null);
     difference.textContent=differenceText();
     root.querySelector<HTMLButtonElement>('#scale-record-open')!.disabled=busy;
+    syncAutoButton(autoGo,section,autoPlaying,autoSteps().length>0,busy||!!drag);
   }
   function animate(target:Element|null,keyframes:Keyframe[],duration:number) {
     if(!target||reducedMotion()) return;
@@ -488,6 +493,37 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
       context.finish('scale',`빈 저울을 0으로 맞추고 사과 모형 80 g과 책 모형 70 g을 하나씩 재었어요. 사과 모형이 10 g 더 무거웠어요. 겉모습으로 헷갈리던 무게를 저울의 숫자로 정확히 비교했어요. ${fakeSummary(record()!)}${springDone(state.springReads) ? ' '+springSummary(state.springReads) : ''}`);
     }
   },{signal:events.signal});
+  /** Parts still to weigh on a zeroed scale: the five models (level 1) or this request's parts (level 2). */
+  function autoSteps():string[] {
+    if(!spring.hidden) return [];
+    if(level===1) { const done=scaleActivityMeasurements(state.runs); return scaleExplorationReady(state) ? [] : scaleParts.map(part=>part.id).filter(id=>!done.some(run=>run.parts[0]===id)); }
+    if(waiting||requestDone()) return [];
+    return Array.from({length:fakeRounds[round()].count},(_,i)=>i).filter(i=>!measured.get(i)?.zeroed).map(i=>`fake:${i}`);
+  }
+  const autoAlive=()=>active&&autoPlaying;
+  /** Uses the same buttons and addPart() as the student: empty the scale, zero it, then one part at a time. */
+  async function autoPlay() {
+    if(autoPlaying||busy||waiting||drag||!autoSteps().length) return;
+    autoPlaying=true; popup?.close();
+    feedback=level===1 ? '자동으로 빈 저울을 0으로 맞추고 모형을 하나씩 재요.' : '자동으로 부품을 하나씩 재요. 가짜는 숫자를 보고 직접 골라요.'; update();
+    const press=(id:string)=>root.querySelector<HTMLButtonElement>(id)!.click();
+    if(!zeroedNow()) {
+      if(loaded().length) { press('#scale-measure'); await autoPause(600); }
+      if(autoAlive()) { press('#zero-button'); await autoPause(800); }
+    }
+    for(const id of autoSteps()) {
+      if(!autoAlive()) break;
+      if(level===1&&loaded().length) { press('#scale-measure'); await autoPause(500); }
+      if(!autoAlive()) break;
+      addPart(id);
+      if(!await autoWait(()=>!busy,autoAlive)) break;
+      await autoPause(900);
+    }
+    if(!active) return;
+    if(autoPlaying&&level===2&&!autoSteps().length&&!waiting) feedback='부품을 모두 재었어요. 숫자가 다른 부품의 ‘가짜예요’를 눌러요.';
+    autoPlaying=false; update();
+  }
+  autoGo.addEventListener('click',event=>{ event.stopPropagation(); if(autoPlaying) { autoPlaying=false; feedback='자동 진행을 멈췄어요. 직접 이어서 해도 돼요.'; update(); } else void autoPlay(); },{signal:events.signal});
   let drag:{pointer:number;source:HTMLElement;id:string;fromBasket:boolean;x:number;y:number;moved:boolean;ghost:HTMLElement|null}|null=null;
   function endDrag() {
     if(!drag)return;

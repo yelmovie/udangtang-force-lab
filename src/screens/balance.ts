@@ -8,6 +8,7 @@ import { mountCorgiHint } from '../corgiHint';
 import { setTapHint } from '../interactionHints';
 import { requestOpenLabel, showRequestLetter } from '../requestLetter';
 import { showPredictionChip } from '../predictionChip';
+import { autoPause, autoWait, syncAutoButton } from '../autoPlay';
 import { balanceExplorationReady, candidates, mysteryComparisonReady, isThrifty, judgePick, mysteryComplete, mysteryRound, mysteryRoundCount, nextMysteryRound, pickHint, relationText, thriftyBudget, weigh, type MysteryRecord, type MysteryRound } from '../balanceModel';
 import '../instruments.css';
 import '../balance.css';
@@ -31,6 +32,8 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   let waiting = false;
   let animation: Animation | null = null;
   let suppressClickUntil = 0;
+  // "자동으로 보기" places the pairs and pulls the pin; the prediction and the final pick stay with the student.
+  let autoPlaying = false;
   const last = state.runs.at(-1);
   let visibleOutcome: BalanceRun['actual'] | null = last && last.left === state.left && last.right === state.right && state.prediction === null ? last.actual : null;
   let shownRun: BalanceRun | null = visibleOutcome ? last! : null;
@@ -77,7 +80,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   root.innerHTML = `<section class="experiment-screen instrument-screen balance-screen">
     <div class="experiment-heading balance-topbar"><div><p class="eyebrow">02 · 균형 다리</p><h1>어느 물체가 더 무거울까?</h1></div>
       <div class="balance-goal" role="status" aria-live="polite"><span id="balance-tilt-goal">○ 기울기 발견</span><span id="balance-level-goal">○ 수평 발견</span><span id="balance-mystery-goal">○ 수수께끼 상자 0/${mysteryRoundCount}</span><span id="balance-uses" hidden></span></div>
-      <div class="balance-top-tools"><button class="button button-primary" id="balance-request-open" hidden>${requestOpenLabel} →</button><button class="balance-record-button" id="balance-record" aria-haspopup="dialog"><span id="balance-record-label">기록 보기</span><b id="balance-count">0</b></button></div>
+      <div class="balance-top-tools"><button class="button button-secondary stage-auto-go" id="balance-auto-go" aria-pressed="false" hidden>▶ 자동으로 보기</button><button class="button button-primary" id="balance-request-open" hidden>${requestOpenLabel} →</button><button class="balance-record-button" id="balance-record" aria-haspopup="dialog"><span id="balance-record-label">기록 보기</span><b id="balance-count">0</b></button></div>
     </div>
     <div class="instrument-stage game-panel balance-field">
       <div class="instrument-phase" id="balance-phase" role="status"></div>
@@ -103,6 +106,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   const finish = root.querySelector<HTMLButtonElement>('#balance-finish')!;
   const requestButton = root.querySelector<HTMLButtonElement>('#balance-request-open')!;
   const recordButton = root.querySelector<HTMLButtonElement>('#balance-record')!;
+  const autoGo = root.querySelector<HTMLButtonElement>('#balance-auto-go')!;
   let popup: HTMLDialogElement | null = null;
   let popupTimer = 0;
   // Weighing pose (one object in each hand) instead of the scale-holding art the other stages use.
@@ -117,9 +121,10 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     const [heavy, light] = record.actual === 'left' ? [record.left, record.right] : [record.right, record.left];
     return `${heavy} 상자가 ${light} 상자보다 무거워요.`;
   }
-  function remainingPairs() {
-    return [['A','B'],['A','C'],['B','C']].filter(([a,b])=>!state.runs.some(run=>(run.left===a&&run.right===b)||(run.left===b&&run.right===a))).map(pair=>pair.map(objectName).join('·'));
+  function missingPairs() {
+    return [['A','B'],['A','C'],['B','C']].filter(([a,b])=>!state.runs.some(run=>(run.left===a&&run.right===b)||(run.left===b&&run.right===a)));
   }
+  function remainingPairs() { return missingPairs().map(pair=>pair.map(objectName).join('·')); }
   function basicNext() { return canFinish() ? `세 짝을 모두 비교했어요. ‘${requestOpenLabel}’를 눌러요.` : `아직 안 해 본 비교: ${remainingPairs().join(', ')}.`; }
   function phaseText() {
     const p = pans();
@@ -138,7 +143,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   function resultMarkup() {
     const p = pans();
     if (level === 1) {
-      if (predictOpen()) return `<span class="balance-ask">${state.prediction ? `내 예상: ${names[state.prediction]} · 잠금핀을 뽑아 확인해요` : '② 어느 쪽이 내려갈까요?'}</span><span class="predict-options balance-stage-predict">${(['left','level','right'] as const).map(id => `<button data-predict="${id}" aria-pressed="${id === state.prediction}" aria-label="${names[id]} 예상"${busy ? ' disabled' : ''}>${id === 'left' ? icons.arrowDownLeft : id === 'right' ? icons.arrowDownRight : '═'} <span>${id === 'left' ? '왼쪽' : id === 'right' ? '오른쪽' : '수평'}</span></button>`).join('')}</span><button class="instrument-text-button" id="balance-swap"${busy ? ' disabled' : ''}>${icons.swap} 자리 바꾸기</button>`;
+      if (predictOpen()) return `<span class="balance-ask">${state.prediction ? `내 예상: ${names[state.prediction]} · 잠금핀을 뽑아 확인해요` : '② 어느 쪽이 내려갈까요?'}</span><span class="predict-options balance-stage-predict auto-keep">${(['left','level','right'] as const).map(id => `<button data-predict="${id}" aria-pressed="${id === state.prediction}" aria-label="${names[id]} 예상"${busy ? ' disabled' : ''}>${id === 'left' ? icons.arrowDownLeft : id === 'right' ? icons.arrowDownRight : '═'} <span>${id === 'left' ? '왼쪽' : id === 'right' ? '오른쪽' : '수평'}</span></button>`).join('')}</span><button class="instrument-text-button" id="balance-swap"${busy ? ' disabled' : ''}>${icons.swap} 자리 바꾸기</button>`;
       return shownRun ? `${compareMarkup(shownRun)}<span class="balance-reason">${reason(shownRun)}</span>` : p.left && p.right ? '아직 잠겨 있어요. 예상한 뒤 핀을 뽑아 확인해요.' : '같은 크기, 다른 재질! 무게를 비교해요.';
     }
     if (mysteryDone()) return '<span>진짜 기둥 부품을 모두 찾았어요!</span><button class="button button-secondary balance-next-round" id="balance-free-play">블록으로 더 실험하기</button>';
@@ -171,6 +176,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     setTapHint(requestButton, requestOpen() && !busy);
     recordButton.disabled = busy;
     finish.disabled = !canSave();
+    syncAutoButton(autoGo, root.querySelector<HTMLElement>('.balance-screen')!, autoPlaying, level === 1 ? !canFinish() : !!round && !mysteryDone() && !waiting && !pickReady(), busy);
     root.querySelector('#balance-phase')!.textContent = phaseText();
     root.querySelectorAll<HTMLElement>('.balance-dock .dock-label').forEach(label => { label.textContent = phaseText(); });
     const html = resultMarkup();
@@ -215,7 +221,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       };
     }
     const cards = records.map((record, i) => `<span class="mystery-record${i === clue ? ' is-clue' : ''}" data-actual="${record.actual === 'level' ? 'level' : 'tilt'}" aria-label="기록 ${i + 1}: ${recordReason(record)}">${relationText(record)}</span>`).join('') || `<p>${round ? '수평대로 비교하면 기록 카드가 쌓여요.' : '모든 상자 꾸러미를 해결했어요.'}</p>`;
-    const picks = round && !mysteryDone() && pickReady() ? `<div class="mystery-pick question-zone question-zone-compact"><span class="question-label">생각해 볼 문제</span><strong class="question-prompt">② 어느 상자가 제일 무거울까요?</strong><div class="mystery-picks question-choices">${round.boxes.map(id => `<button data-pick="${id}" aria-label="${id} 상자가 제일 무거워요"${frozen() || !records.length ? ' disabled' : ''}>${id}</button>`).join('')}</div></div>` : '';
+    const picks = round && !mysteryDone() && pickReady() ? `<div class="mystery-pick question-zone question-zone-compact"><span class="question-label">생각해 볼 문제</span><strong class="question-prompt">② 어느 상자가 제일 무거울까요?</strong><div class="mystery-picks question-choices">${round.boxes.map(id => id === found ? `<button class="is-picked" data-pick="${id}" aria-label="${id} 상자, 정답으로 고른 상자" disabled>${id} ✓</button>` : `<button data-pick="${id}" aria-label="${id} 상자가 제일 무거워요"${frozen() || !records.length ? ' disabled' : ''}>${id}</button>`).join('')}</div></div>` : '';
     return {
       label: '의뢰 기록',
       title: mysteryDone() ? '의뢰를 모두 해결했어요!' : waiting && found ? `찾았어요! ${found} 상자` : shownRecord ? `기록 「${relationText(shownRecord)}」` : '비교 기록 카드',
@@ -396,6 +402,41 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       context.finish('balance',`${objectName(levelRun.left)}과 ${objectName(levelRun.right)}가 수평임을 관찰했어요. ${reason(tilted)} 예상과 관찰을 ${state.runs.length}번 비교하며 잠금핀을 뽑아 확인했어요. 똑같이 생긴 수수께끼 상자 3개와 4개에서는 수평대 비교 기록을 이어 보고 진짜 기둥 부품을 찾아냈어요.`);
     }
   },{signal:events.signal});
+
+  const autoAlive = () => active && autoPlaying;
+  /** Places one pair and pulls the pin, the same place() and release() a student's taps use. */
+  async function autoCompare(left: string, right: string) {
+    place(left, 'left'); await autoPause(500);
+    if (!autoAlive()) return;
+    place(right, 'right'); await autoPause(600);
+    if (level === 1 && !state.prediction) {
+      feedback = `${itemName(left)}과 ${itemName(right)}을 올렸어요. 어느 쪽이 내려갈지 예상을 골라 주면 잠금핀을 뽑을게요.`; update();
+      if (!await autoWait(() => !!state.prediction, autoAlive)) return;
+      await autoPause(500);
+    }
+    if (!autoAlive()) return;
+    await release(); await autoPause(1200);
+  }
+  /** Level 1: the pairs not compared yet. Level 2: keep the heavier box and compare it with each next one until the records point to one box. */
+  async function autoPlay() {
+    if (autoPlaying || frozen() || drag) return;
+    autoPlaying = true; closePopup();
+    feedback = level === 1 ? '자동으로 블록을 올려요. 어느 쪽이 내려갈지는 직접 예상해요.' : '자동으로 상자를 비교해요. 제일 무거운 상자는 기록을 보고 직접 골라요.';
+    update();
+    if (level === 1) for (const [a, b] of missingPairs()) { if (!autoAlive()) break; await autoCompare(a, b); }
+    else if (round) {
+      let heaviest = round.boxes[0];
+      for (const box of round.boxes.slice(1)) {
+        if (!autoAlive() || pickReady()) break;
+        await autoCompare(heaviest, box);
+        if (records.at(-1)?.actual === 'right') heaviest = box;
+      }
+    }
+    if (!active) return;
+    if (autoPlaying && level === 2 && pickReady()) feedback = '모든 상자를 비교했어요. 기록 카드를 보고 제일 무거운 상자를 골라요.';
+    autoPlaying = false; update();
+  }
+  autoGo.addEventListener('click', () => { if (autoPlaying) { autoPlaying = false; feedback = '자동 진행을 멈췄어요. 직접 이어서 해도 돼요.'; update(); } else void autoPlay(); }, { signal: events.signal });
 
   let drag: {pointer:number; source:HTMLElement; startX:number; startY:number; id:string|null; pin:boolean; moved:boolean; ghost:HTMLElement|null} | null = null;
   function dropPan(x:number,y:number) {
