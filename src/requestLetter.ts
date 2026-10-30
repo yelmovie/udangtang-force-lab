@@ -3,6 +3,9 @@ import { villageRequests, type RequestStage } from './requestBoard';
 import { villageRewards } from './villageStory';
 import { withParticle } from './screens/village';
 
+/** Label of the button that ends level 1 and opens the letter. Guide lines quote this, so they never name a button that is not there. */
+export const requestOpenLabel = '실험 마치고 의뢰 보기';
+
 /** The client's letter that arrives when a request opens on a mission screen.
  * "의뢰 받기" runs the screen's own entry function; closing keeps the screen's request bar as it was. */
 export function showRequestLetter(root: HTMLElement, stage: RequestStage, accept: () => void): HTMLDialogElement {

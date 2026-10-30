@@ -29,8 +29,10 @@ export function learningTask(save: SaveData, stage: StageId): LearningTask | nul
     const heavy = light && save.cargo.runs.find(r => r.parts === 5 && r.action === light.action);
     if (!light || !heavy) return null;
     const max = Math.max(light.distance, heavy.distance, 1);
-    for (const run of [light, heavy]) cards.push({ title: `부품 ${run.parts}개 상자`, detail: `${run.action === 'push' ? '밀기' : '당기기'} · 같은 힘 · 같은 시간`, bars: [{ label: `${run.distance}칸 이동`, value: run.distance, maximum: max }] });
-    questions.push({ id: 'fair', prompt: '무게에 따른 움직임을 비교하려고 같게 둔 것은?', choices: choices(['force-time', '힘과 움직이는 시간'], ['weight', '담은 부품 수'], ['distance', '움직인 거리']), correct: 'force-time', hint: '두 기록에서 같은 것과 달라진 것을 찾아봐요.', explanation: '힘과 시간은 같게 두고 부품 수를 바꾸어 움직인 거리를 비교했어요.' });
+    for (const run of [light, heavy]) cards.push({ title: `부품 ${run.parts}개 상자`, detail: `${run.action === 'push' ? '밀기' : '당기기'} · 같은 힘을 같은 시간 동안`, bars: [{ label: `${run.distance}칸 이동`, value: run.distance, maximum: max }] });
+    // "Time" here is how long the force is applied (the model fixes it), not how long the crate keeps moving.
+    const pushing = light.action === 'push' ? '미는' : '당기는';
+    questions.push({ id: 'fair', prompt: '무게에 따른 움직임을 비교하려고 같게 둔 것은?', choices: choices(['force-time', '힘과 힘을 준 시간'], ['weight', '담은 부품 수'], ['distance', '움직인 거리']), correct: 'force-time', hint: '두 기록에서 같은 것과 달라진 것을 찾아봐요.', explanation: `${pushing} 힘의 크기와 힘을 준 시간은 같게 두고, 부품 수만 바꾸어 움직인 거리를 비교했어요.` });
     questions.push({ id: 'effort', prompt: '두 상자를 같은 시간 동안 밀어 같은 거리까지 옮기려면 어느 쪽에 더 큰 힘이 필요할까?', choices: choices(['heavy', '부품 5개 상자'], ['light', '부품 1개 상자'], ['same', '항상 힘이 같아요']), correct: 'heavy', why: { same: '두 상자가 같은 힘에 움직인 거리가 달랐어요.' }, hint: '같은 힘으로 움직였을 때 어느 상자가 더 짧게 움직였는지 봐요.', explanation: '내 실험 모형에서는 무거운 상자가 같은 힘으로 더 짧게 갔어요. 같은 시간 동안 밀어 같은 거리까지 보내려면 더 큰 힘이 필요해요.' });
     talk = '무거운 상자를 밀거나 당길 때 필요한 힘을 친구와 이야기해봐요.';
   } else if (stage === 'balance') {

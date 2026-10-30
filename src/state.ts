@@ -1,6 +1,6 @@
 import type { PageId, StageId } from './data';
 import { hasFairComparison, retainRescueRuns } from './rescueModel';
-import { hasWorkshopComparison, retainWorkshopRuns, type WorkshopState } from './workshopModel';
+import { hasWorkshopComparison, retainWorkshopL2Tries, retainWorkshopRuns, type WorkshopL2Try, type WorkshopState } from './workshopModel';
 import { retainLearningRecords, type LearningRecords } from './learningModel';
 import { retainInquiryPlans, type InquiryPlans } from './inquiryPlan';
 import { retainLifeObservation, type LifeObservation } from './lifeObservation';
@@ -14,7 +14,7 @@ export type ScaleRun = { parts: string[]; reading: number; zeroed: boolean };
 export type { SpringRead };
 export type RescueRun = { route: 'short' | 'long'; force: number; success: boolean };
 /** Level 2 request progress for one mission: cleared round indices (0-based) and attempt count. */
-export type LevelRecord = { cleared: number[]; attempts: number };
+export type LevelRecord = { cleared: number[]; attempts: number; tries?: WorkshopL2Try[] };
 export type LevelStage = 'balance' | 'scale' | 'workshop';
 export type LevelRecords = Partial<Record<LevelStage, LevelRecord>>;
 const levelStages: LevelStage[] = ['balance', 'scale', 'workshop'];
@@ -28,6 +28,8 @@ export function retainLevels(value: unknown): LevelRecords {
     const cleared = Array.isArray(item.cleared) ? [...new Set(item.cleared.filter((n): n is number => Number.isInteger(n) && n >= 0 && n < 10))].sort((a, b) => a - b) : [];
     const attempts = Number.isInteger(item.attempts) && item.attempts! >= 0 ? Math.min(999, item.attempts!) : 0;
     kept[stage] = { cleared, attempts };
+    const tries = stage === 'workshop' ? retainWorkshopL2Tries((item as { tries?: unknown }).tries) : undefined;
+    if (tries) kept[stage] = { cleared, attempts, tries };
   }
   return kept;
 }

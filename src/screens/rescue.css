@@ -27,6 +27,11 @@
 .rescue-world .route-selected { stroke:#fff0a2; stroke-width:25px; filter:drop-shadow(0 0 5px #ffda7180); }
 .rescue-route-label rect { fill:#fff6de; stroke:#977e54; stroke-width:1; }
 .rescue-route-label text { fill:#244b43; font-size:21px; font-weight:850; text-anchor:middle; }
+.rescue-route-label[data-route="long"] rect { stroke:#4a9d8e; stroke-width:3; }
+.rescue-route-label[data-route="short"] rect { stroke:#c58243; stroke-width:3; }
+.rescue-route-pointer { fill:none; stroke-width:3; stroke-dasharray:5 6; stroke-linecap:round; pointer-events:none; }
+.rescue-route-pointer[data-route="long"] { stroke:#4a9d8e; }
+.rescue-route-pointer[data-route="short"] { stroke:#c58243; }
 .rescue-companion { position:absolute; left:10px; bottom:15px; z-index:2; width:145px; pointer-events:none; }
 .rescue-companion .game-companion { --companion-height:118px; }
 .rescue-progress-track { position:absolute; bottom:49px; left:30%; right:25%; height:9px; border-radius:8px; background:#183e4166; overflow:hidden; pointer-events:none; }

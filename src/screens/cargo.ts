@@ -2,7 +2,7 @@ import type { AppContext } from '../appTypes';
 import { cargoRunKey, keepEvidence } from '../runHistory';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { showPredictionChip } from '../predictionChip';
-import { showRequestLetter } from '../requestLetter';
+import { requestOpenLabel, showRequestLetter } from '../requestLetter';
 import { cargoActionCompared, cargoExplorationReady, cargoDistance, cargoForceNames, cargoOrders, orderHint, orderResult, ordersComplete, type ForceLevel } from '../cargoModel';
 import type { CargoRun } from '../state';
 import '../cargo.css';
@@ -45,7 +45,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     const fingerIcon = `<svg viewBox="0 0 32 36" fill="none" aria-hidden="true"><path d="M11 18V6a3 3 0 0 1 6 0v9l2-1 4 2 3 2v9c0 5-3 7-8 7h-2c-4 0-6-2-8-6l-5-8c-2-3 2-6 4-3l4 5" fill="#fff5d7" stroke="#76512a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 16v6m6-5v6" stroke="#76512a" stroke-width="1.6" stroke-linecap="round"/></svg>`;
     let feedback = level === 1 ? '같은 힘으로 상자를 움직이고, 멈춘 곳을 비교해요.' : '빵집 문 앞 노란 칸에 딱 멈추게 보내요.';
     root.innerHTML = `<section class="experiment-screen cargo-expedition">
-    <div class="experiment-heading"><div><p class="eyebrow">01 · 물자 배송소</p><h1>멈춘 화물을 움직여라!</h1><p>같은 힘·시간으로 밀면, 무거운 상자도 같은 곳에 도착할까?</p></div><div class="cargo-tools"><button class="cargo-record-open" id="cargo-record-open">기록 보기 <span id="cargo-record-count">0</span></button><button class="button button-primary cargo-bakery-open" id="cargo-open-orders" hidden>실험 마치고 의뢰 보기 →</button></div>${missionProgressMarkup('cargo', ['밀기 1·3·5개', '당기기 1·3·5개', '더 멀리 간 상자', '빵집 주문 3장'])}</div>
+    <div class="experiment-heading"><div><p class="eyebrow">01 · 물자 배송소</p><h1>멈춘 화물을 움직여라!</h1><p>같은 힘·시간으로 밀면, 무거운 상자도 같은 곳에 도착할까?</p></div><div class="cargo-tools"><button class="cargo-record-open" id="cargo-record-open">기록 보기 <span id="cargo-record-count">0</span></button><button class="button button-primary cargo-bakery-open" id="cargo-open-orders" hidden>${requestOpenLabel} →</button></div>${missionProgressMarkup('cargo', ['밀기 1·3·5개', '당기기 1·3·5개', '더 멀리 간 상자', '빵집 주문 3장'])}</div>
     <div class="cargo-adventure"><div class="cargo-scene" aria-label="화물 실험 무대">
       <div class="cargo-scene-caption"><span class="instrument-phase cargo-step" id="cargo-step" tabindex="-1"></span><button class="button button-primary cargo-tap-go" id="cargo-tap-go">눌러서 밀기 →</button></div>
       <div class="cargo-finding-cta" hidden><p>실험 끝! 1·3·5개 상자를 모두 밀고 당겨 봤어요.</p><button class="button button-primary" id="cargo-finding-go">비교하고 의뢰 받기 →</button></div>
@@ -75,6 +75,8 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     const deliveredAll = () => ordersComplete(state.orders);
     const currentOrder = () => cargoOrders[Math.min(orders().length, cargoOrders.length - 1)];
     const shownParts = () => level === 2 ? currentOrder().parts : state.parts;
+    /** The tap button's own words, also quoted by the drag hint. Level 2 always pushes. */
+    const tapLabel = () => level === 1 && state.action === 'pull' ? '눌러서 당기기' : '눌러서 밀기';
     function latestRun(parts: number, action?: CargoRun['action']) { return [...state.runs].reverse().find(run => run.parts === parts && (!action || run.action === action)); }
     function pushCompared() { return cargoActionCompared(state.runs, 'push'); }
     function pullCompared() { return cargoActionCompared(state.runs, 'pull'); }
@@ -105,7 +107,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             return force ? `${label} · 아이를 옮기거나 눌러서 밀기` : `${label} · 아래에서 힘을 고른 뒤 움직여 보세요`;
         }
         if (finding && deliveredAll()) return '배달 완료! 부품과 방향을 바꿔 더 실험해 봐요';
-        if (finding) return '위의 빵집 배달 가기를 눌러요';
+        if (finding) return `위의 ‘${requestOpenLabel}’를 눌러요`;
         if (ready()) return '실험은 끝! 가운데 비교하고 의뢰 받기를 눌러요';
         if (needsSetup) return !pushCompared() ? '뒤에서 밀기로 1·3·5개 상자를 모두 비교해요' : '앞에서 당기기로 1·3·5개 상자를 모두 비교해요';
         return '아이를 오른쪽 표시까지 옮기거나 눌러서 움직여요';
@@ -157,7 +159,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         zone.style.left = endPosition(lo);
         zone.style.setProperty('--zone-span', `${(hi - lo) * .7}%`);
         handle.disabled = !canPush();
-        tapGo.textContent = action === 'pull' ? '눌러서 당기기 →' : '눌러서 밀기 →';
+        tapGo.textContent = `${tapLabel()} →`;
         tapGo.disabled = !canPush() && !needsForce();
         handle.setAttribute('aria-label', level === 1
             ? `남자아이를 잡고 오른쪽 표시까지 ${action === 'push' ? '밀기' : '당기기'}. Enter로도 실험`
@@ -378,7 +380,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
                 void experiment(current.travel, Math.min(dx, current.travel));
             else {
                 setActorMood('idle');
-                feedback = '아이를 오른쪽 표시까지 옮겨야 출발해요. 위의 눌러서 움직이기 버튼을 눌러도 돼요. 빠르게 옮겨도 천천히 옮겨도 힘은 같아요.';
+                feedback = `아이를 오른쪽 표시까지 옮겨야 출발해요. 위의 ‘${tapLabel()}’ 버튼을 눌러도 돼요. 빠르게 옮겨도 천천히 옮겨도 힘은 같아요.`;
                 update();
             }
         }
@@ -454,7 +456,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     }
     function nextHint() {
         if (finding && deliveredAll()) return '배달은 끝났어요. 부품 개수나 힘을 주는 쪽을 바꿔 더 실험해 봐요.';
-        if (finding) return level === 1 ? '위의 <strong>빵집 배달 가기</strong>를 눌러 의뢰를 받아요.' : '';
+        if (finding) return level === 1 ? `이 창을 닫고 화면 위쪽의 <strong>${requestOpenLabel}</strong>를 눌러 의뢰를 받아요.` : '';
         if (ready()) return '위에서 <strong>더 멀리 간 상자</strong>를 고르면 빵집에서 도와 달라는 부탁(의뢰)이 와요.';
         if (!pushCompared()) return '<strong>뒤에서 밀기</strong>로 1·3·5개 상자를 모두 움직여 봐요.';
         return '<strong>앞에서 당기기</strong>로 1·3·5개 상자를 모두 움직여 봐요.';
@@ -491,7 +493,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         context.sound(correct ? 720 : 520);
         if (correct) {
             // Leave the stage free; the student opens the request when ready.
-            feedback = `${findingNote} 위의 ‘실험 마치고 의뢰 보기’를 눌러요.`;
+            feedback = `${findingNote} 위의 ‘${requestOpenLabel}’를 눌러요.`;
             closePopup();
             return;
         }

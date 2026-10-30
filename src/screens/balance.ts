@@ -5,7 +5,7 @@ import { balanceObjects } from '../data';
 import type { BalanceRun } from '../state';
 import { mountCompanion } from '../sprites';
 import { setTapHint } from '../interactionHints';
-import { showRequestLetter } from '../requestLetter';
+import { requestOpenLabel, showRequestLetter } from '../requestLetter';
 import { showPredictionChip } from '../predictionChip';
 import { balanceExplorationReady, candidates, mysteryComparisonReady, isThrifty, judgePick, mysteryComplete, mysteryRound, mysteryRoundCount, nextMysteryRound, pickHint, relationText, thriftyBudget, weigh, type MysteryRecord, type MysteryRound } from '../balanceModel';
 import '../instruments.css';
@@ -76,7 +76,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   root.innerHTML = `<section class="experiment-screen instrument-screen balance-screen">
     <div class="experiment-heading balance-topbar"><div><p class="eyebrow">02 · 균형 다리</p><h1>어느 물체가 더 무거울까?</h1></div>
       <div class="balance-goal" role="status" aria-live="polite"><span id="balance-tilt-goal">○ 기울기 발견</span><span id="balance-level-goal">○ 수평 발견</span><span id="balance-mystery-goal">○ 수수께끼 상자 0/${mysteryRoundCount}</span><span id="balance-uses" hidden></span></div>
-      <div class="balance-top-tools"><button class="button button-primary" id="balance-request-open" hidden>실험 마치고 의뢰 보기 →</button><button class="balance-record-button" id="balance-record" aria-haspopup="dialog"><span id="balance-record-label">기록 보기</span><b id="balance-count">0</b></button></div>
+      <div class="balance-top-tools"><button class="button button-primary" id="balance-request-open" hidden>${requestOpenLabel} →</button><button class="balance-record-button" id="balance-record" aria-haspopup="dialog"><span id="balance-record-label">기록 보기</span><b id="balance-count">0</b></button></div>
     </div>
     <div class="instrument-stage game-panel balance-field">
       <div class="instrument-phase" id="balance-phase" role="status"></div>
@@ -118,7 +118,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   function remainingPairs() {
     return [['A','B'],['A','C'],['B','C']].filter(([a,b])=>!state.runs.some(run=>(run.left===a&&run.right===b)||(run.left===b&&run.right===a))).map(pair=>pair.map(objectName).join('·'));
   }
-  function basicNext() { return canFinish() ? '세 짝을 모두 비교했어요. 실험 마치고 의뢰 보기를 눌러요.' : `아직 안 해 본 비교: ${remainingPairs().join(', ')}.`; }
+  function basicNext() { return canFinish() ? `세 짝을 모두 비교했어요. ‘${requestOpenLabel}’를 눌러요.` : `아직 안 해 본 비교: ${remainingPairs().join(', ')}.`; }
   function phaseText() {
     const p = pans();
     if (busy) return '기울기를 살펴봐요';
@@ -209,7 +209,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
         title: run ? run.prediction === run.actual ? '이번 비교 예상과 같아요!' : '이번 비교 예상과 달라도 괜찮아요!' : '지금까지의 발견',
         lead: run ? `${compareMarkup(run)}${reason(run)}` : phaseText(),
         body: `<div class="balance-popup-runs"><strong>나의 발견 ${state.runs.length}</strong><div class="result-list">${rows}</div></div><p class="balance-popup-next">${next}</p>${request}`,
-        actions: requestOpen() ? `${keepGoing(false)}<button class="button button-primary" id="balance-popup-request"${busy ? ' disabled' : ''}>실험 마치고 의뢰 보기 →</button>` : `${save ? keepGoing(false) : keepGoing(true)}${save}`,
+        actions: requestOpen() ? `${keepGoing(false)}<button class="button button-primary" id="balance-popup-request"${busy ? ' disabled' : ''}>${requestOpenLabel} →</button>` : `${save ? keepGoing(false) : keepGoing(true)}${save}`,
       };
     }
     const cards = records.map((record, i) => `<span class="mystery-record${i === clue ? ' is-clue' : ''}" data-actual="${record.actual === 'level' ? 'level' : 'tilt'}" aria-label="기록 ${i + 1}: ${recordReason(record)}">${relationText(record)}</span>`).join('') || `<p>${round ? '수평대로 비교하면 기록 카드가 쌓여요.' : '모든 상자 꾸러미를 해결했어요.'}</p>`;

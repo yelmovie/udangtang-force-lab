@@ -95,7 +95,9 @@ export function workshopExplorationReady(state: WorkshopState): boolean {
 /* Level 2 "force budget": 콩이 can only give up to the 작은 힘 step. Heavier cargo
  * multiplies the same qualitative design forces; nothing here is a real unit. */
 export type WorkshopL2Tool = WorkshopTool | 'direct';
-export type WorkshopL2Record = { cleared: number[]; attempts: number };
+/** One distinct design tried on one request cargo, and whether it went up. Older saves have none. */
+export type WorkshopL2Try = { cargo: number; tool: WorkshopL2Tool; setting: number; success: boolean };
+export type WorkshopL2Record = { cleared: number[]; attempts: number; tries?: WorkshopL2Try[] };
 export type WorkshopL2Result = { force: number; success: boolean; needCells: number; budgetCells: number; overCells: number; stallAt: number };
 
 export const workshopForcePerCell = 10;
@@ -134,12 +136,51 @@ export function workshopL2Complete(record: WorkshopL2Record | undefined): boolea
   return workshopL2Current(record) >= workshopCargos.length;
 }
 
-export function applyWorkshopL2Attempt(record: WorkshopL2Record | undefined, cargo: number, success: boolean): WorkshopL2Record {
+export function workshopL2DesignLabel(tool: WorkshopL2Tool, setting: number): string {
+  return tool === 'direct' ? '직접 들기' : `${tool === 'lever' ? '지레' : '빗면'} · ${getWorkshopDesign(tool, setting).label}`;
+}
+
+/** Keeps each (cargo, design) once, so the list stays small however many times a design is retried. */
+export function retainWorkshopL2Tries(value: unknown): WorkshopL2Try[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const kept = new Map<string, WorkshopL2Try>();
+  for (const item of value) {
+    if (!item || typeof item !== 'object') continue;
+    const { cargo, tool, setting, success } = item as Partial<WorkshopL2Try>;
+    if (!Number.isInteger(cargo) || cargo! < 0 || cargo! >= workshopCargos.length || typeof success !== 'boolean') continue;
+    if (tool !== 'direct' && tool !== 'lever' && tool !== 'ramp') continue;
+    const max = tool === 'lever' ? 2 : tool === 'ramp' ? 1 : 0;
+    if (!Number.isInteger(setting) || setting! < 0 || setting! > max) continue;
+    kept.set(`${cargo}:${tool}:${setting}`, { cargo: cargo!, tool, setting: setting!, success });
+  }
+  return [...kept.values()];
+}
+
+export function applyWorkshopL2Attempt(record: WorkshopL2Record | undefined, cargo: number, success: boolean, design?: { tool: WorkshopL2Tool; setting: number }): WorkshopL2Record {
   const cleared = record?.cleared ?? [];
-  return {
+  const next: WorkshopL2Record = {
     cleared: success && !cleared.includes(cargo) ? [...cleared, cargo].sort((a, b) => a - b) : [...cleared],
     attempts: Math.min(999, (record?.attempts ?? 0) + 1),
   };
+  const tries = design ? retainWorkshopL2Tries([...(record?.tries ?? []), { cargo, ...design, success }]) : record?.tries;
+  if (tries) next.tries = tries;
+  return next;
+}
+
+/** What the student actually did in the request, from the saved tries only: the design that lifted
+ * each cargo and the designs that stalled on it. Returns '' when a cleared cargo has no saved try
+ * (older saves), so callers fall back to a neutral sentence instead of guessing a change. */
+export function workshopL2Recap(record: WorkshopL2Record | undefined): string {
+  const tries = record?.tries ?? [];
+  const label = (t: WorkshopL2Try) => `'${workshopL2DesignLabel(t.tool, t.setting)}'`;
+  const perCargo = workshopCargos.map((cargo, index) => {
+    const won = tries.find(t => t.cargo === index && t.success);
+    const stalled = tries.filter(t => t.cargo === index && !t.success).map(label);
+    return { name: cargo.label, won: won && label(won), stalled };
+  });
+  if (perCargo.some(c => !c.won)) return '';
+  if (new Set(perCargo.map(c => c.won)).size === 1 && perCargo.every(c => !c.stalled.length)) return `화물 ${perCargo.length}개를 모두 ${perCargo[0].won} 설계로 올렸어요.`;
+  return perCargo.map(c => `${c.name}은 ${c.stalled.length ? `${c.stalled.join(', ')}로는 멈췄고 ` : ''}${c.won}로 올렸어요.`).join(' ');
 }
 
 /** Every two misses on the same cargo the clue gets one step more specific. */

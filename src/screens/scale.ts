@@ -5,7 +5,7 @@ import { scaleParts, targetWeight } from '../data';
 import { mountCompanion } from '../sprites';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { scaleActivityMeasurements, scaleExplorationReady, comparisonParts, emptyScaleReading, fakeDiscoveryText, fakeHint, fakeLabels, fakeLayout, fakeRequestComplete, fakeRounds, fakeSummary, judgeFakePick, nextFakeRound, recordFakePick, recordScaleRun, scaleComparison, recordSpringRead, springDone, springEyeLabels, springHint, springObjects, springParallax, springReading, springStartOffset, springSummary, turnSpringScrew, type EyeLevel } from '../scaleModel';
-import { showRequestLetter } from '../requestLetter';
+import { requestOpenLabel, showRequestLetter } from '../requestLetter';
 import { predictionRecap } from '../inquiryPlan';
 import '../instruments.css';
 import '../scalePolish.css';
@@ -117,7 +117,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     const springButton=`<button class="scale-heft" id="scale-spring-open">${springDone(state.springReads) ? '용수철저울 다시 보기' : '용수철저울도 읽어 볼까?'}</button>`;
     const challengeButton=`<button class="scale-heft${challengeOn?' is-on':''}" id="scale-challenge" aria-pressed="${challengeOn}">150 g 도전 (선택) · ${Math.min(2,comboCount())}/2</button>`;
     if(level===1&&scaleExplorationReady(state)&&fakeRequestComplete(savedRecord())) return `<div class="scale-request is-done"><span class="scale-request-from">의뢰 완료 ✓</span><button class="scale-heft" id="scale-replay">완료한 의뢰 다시 하기</button>${challengeButton}${springButton}</div>`;
-    if(level===1) return scaleExplorationReady(state) ? `<div class="scale-request"><span class="scale-request-from">보급소 직원의 의뢰</span><button class="button button-primary" id="scale-request-open">실험 마치고 의뢰 보기 →</button>${springButton}</div>` : '';
+    if(level===1) return scaleExplorationReady(state) ? `<div class="scale-request"><span class="scale-request-from">보급소 직원의 의뢰</span><button class="button button-primary" id="scale-request-open">${requestOpenLabel} →</button>${springButton}</div>` : '';
     if(requestDone()&&!waiting) return `<div class="scale-request is-done"><span class="scale-request-from">${replay ? '다시 하기 완료 ✓' : '의뢰 완료 ✓'}</span><p>가짜 ${fakeRounds.length}개를 저울 숫자로 찾았어요</p><button class="scale-heft" id="scale-basic">기본 물체 실험으로</button>${springButton}</div>`;
     if(waiting) return '<div class="scale-request"><span>이번 의뢰 완료 ✓</span><button class="button button-primary" id="scale-next">다음 의뢰 →</button></div>';
     const r=fakeRounds[round()];
@@ -161,7 +161,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     dialog.className='stage-popup scale-popup';
     dialog.setAttribute('aria-labelledby','scale-popup-title');
     const render=()=>{
-      dialog.innerHTML=`<div class="stage-popup-card"><button class="stage-popup-close" type="button" aria-label="닫기">×</button><p class="stage-popup-label">${label}</p><h2 id="scale-popup-title">${result ? result.title : '나의 측정 기록'}</h2><div class="stage-popup-body">${result ? `<p class="scale-pop-text">${result.text}</p>` : ''}${result?.records ?? recordsMarkup()}${result?.question&&(level===2||scaleExplorationReady(state)) ? questionMarkup(result.question,result.answer) : ''}</div><div class="stage-popup-actions">${waiting ? '<button class="button button-primary" data-scale-next>다음 의뢰 →</button>' : level===1&&scaleExplorationReady(state)&&!fakeRequestComplete(savedRecord()) ? '<button class="button button-primary" data-scale-request>실험 마치고 의뢰 보기 →</button>' : canFinish() ? '<button class="button button-primary stage-result-finish" type="button">비교 기록 저장 →</button>' : '<button class="button button-primary stage-popup-continue" type="button">계속 실험하기</button>'}</div></div>`;
+      dialog.innerHTML=`<div class="stage-popup-card"><button class="stage-popup-close" type="button" aria-label="닫기">×</button><p class="stage-popup-label">${label}</p><h2 id="scale-popup-title">${result ? result.title : '나의 측정 기록'}</h2><div class="stage-popup-body">${result ? `<p class="scale-pop-text">${result.text}</p>` : ''}${result?.records ?? recordsMarkup()}${result?.question&&(level===2||scaleExplorationReady(state)) ? questionMarkup(result.question,result.answer) : ''}</div><div class="stage-popup-actions">${waiting ? '<button class="button button-primary" data-scale-next>다음 의뢰 →</button>' : level===1&&scaleExplorationReady(state)&&!fakeRequestComplete(savedRecord()) ? '<button class="button button-primary" data-scale-request>${requestOpenLabel} →</button>' : canFinish() ? '<button class="button button-primary stage-result-finish" type="button">비교 기록 저장 →</button>' : '<button class="button button-primary stage-popup-continue" type="button">계속 실험하기</button>'}</div></div>`;
     };
     render();
     dialog.addEventListener('click',event=>{
