@@ -4,6 +4,7 @@ import { icons } from '../icons';
 import { balanceObjects } from '../data';
 import type { BalanceRun } from '../state';
 import { mountCompanion } from '../sprites';
+import { mountCorgiHint } from '../corgiHint';
 import { setTapHint } from '../interactionHints';
 import { requestOpenLabel, showRequestLetter } from '../requestLetter';
 import { showPredictionChip } from '../predictionChip';
@@ -105,7 +106,8 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   let popup: HTMLDialogElement | null = null;
   let popupTimer = 0;
   // Weighing pose (one object in each hand) instead of the scale-holding art the other stages use.
-  const companion = mountCompanion(root.querySelector<HTMLElement>('#balance-companion')!, 'idle', { student: 'balance-student', corgi: 'balance-corgi' });
+  const hint = mountCorgiHint(root, { now: () => phaseText(), missing: () => level === 1 && !canFinish() && remainingPairs().length ? `아직 안 해 본 비교: ${remainingPairs().join(', ')}` : '' });
+  const companion = mountCompanion(root.querySelector<HTMLElement>('#balance-companion')!, 'idle', { student: 'balance-student', corgi: 'balance-corgi' }, hint.attach);
   const tilt = (outcome: BalanceRun['actual'] | null) => outcome === 'left' ? -9 : outcome === 'right' ? 9 : 0;
   function reason(run: BalanceRun) {
     return run.actual === 'level' ? `${objectName(run.left)}과 ${objectName(run.right)}의 무게가 같아서 수평이에요.` : `${objectName(run.actual === 'left' ? run.left : run.right)}이 더 무거워서 그쪽이 내려갔어요.`;
@@ -441,5 +443,5 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   window.addEventListener('resize',endDrag,{signal:events.signal});
   if (level === 2) startRound();
   update();
-  return()=>{active=false; closePopup(); endDrag(); events.abort(); animation?.cancel(); companion.dispose();};
+  return()=>{active=false; closePopup(); endDrag(); events.abort(); animation?.cancel(); companion.dispose(); hint.dispose();};
 }

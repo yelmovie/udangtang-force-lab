@@ -3,6 +3,7 @@ import type { LevelRecord } from '../state';
 import { icons } from '../icons';
 import { scaleParts, targetWeight } from '../data';
 import { mountCompanion } from '../sprites';
+import { mountCorgiHint } from '../corgiHint';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { scaleActivityMeasurements, scaleExplorationReady, comparisonParts, emptyScaleReading, fakeDiscoveryText, fakeHint, fakeLabels, fakeLayout, fakeRequestComplete, fakeRounds, fakeSummary, judgeFakePick, nextFakeRound, recordFakePick, recordScaleRun, scaleComparison, recordSpringRead, springDone, springEyeLabels, springHint, springObjects, springParallax, springReading, springStartOffset, springSummary, turnSpringScrew, type EyeLevel } from '../scaleModel';
 import { requestOpenLabel, showRequestLetter } from '../requestLetter';
@@ -95,7 +96,9 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   const readingNode = root.querySelector<HTMLElement>('#scale-reading')!;
   const finish = root.querySelector<HTMLButtonElement>('#scale-finish')!;
   const measure = root.querySelector<HTMLButtonElement>('#scale-measure')!;
-  const companion = mountCompanion(root.querySelector<HTMLElement>('#scale-companion')!);
+  const unmeasured = () => { const compared = scaleActivityMeasurements(state.runs); return scaleParts.filter(part=>!compared.some(run=>run.parts[0]===part.id)).map(part=>shortName(part.id)).join(' · '); };
+  const hint = mountCorgiHint(root, { now: () => phaseText(), missing: () => level===1&&!scaleExplorationReady(state) ? `아직 안 잰 모형: ${unmeasured()}` : '' });
+  const companion = mountCompanion(root.querySelector<HTMLElement>('#scale-companion')!, 'idle', {}, hint.attach);
   const round = () => completedRound ?? Math.min(nextFakeRound(record()), fakeRounds.length-1);
   const requestDone = () => fakeRequestComplete(record());
   const loaded = () => level===2 ? fakeOn===null ? [] : [`fake:${fakeOn}`] : state.parts;
@@ -205,7 +208,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   function update() {
     const compared = scaleActivityMeasurements(state.runs);
     setMissionProgress(root,[state.zeroed,compared.length===scaleParts.length,requestDone()],'');
-    const bar=level===1&&!scaleExplorationReady(state) ? `<span>모형 측정 <strong>${compared.length}/${scaleParts.length}개 완료</strong></span><span>아직 안 잰 모형 <strong>${scaleParts.filter(part=>!compared.some(run=>run.parts[0]===part.id)).map(part=>shortName(part.id)).join(' · ')}</strong></span>` : requestBar();
+    const bar=level===1&&!scaleExplorationReady(state) ? `<span>모형 측정 <strong>${compared.length}/${scaleParts.length}개 완료</strong></span><span>아직 안 잰 모형 <strong>${unmeasured()}</strong></span>` : requestBar();
     // Re-render only on change so a focused button (의뢰 받기, 손으로 들어 보기) keeps focus.
     if(bar!==requestMarkup) root.querySelector('#scale-comparison')!.innerHTML=requestMarkup=bar;
     // The request letter opens only through the explicit request button.
@@ -524,5 +527,5 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   window.addEventListener('blur',endDrag,{signal:events.signal});
   window.addEventListener('resize',endDrag,{signal:events.signal});
   update(); if(level===1&&state.parts.length) weigh();
-  return()=>{active=false;popup?.remove();clearTimeout(springTimer);endDrag();events.abort();cancelAnimationFrame(frame);motions.forEach(motion=>motion.cancel());companion.dispose();};
+  return()=>{active=false;popup?.remove();clearTimeout(springTimer);endDrag();events.abort();cancelAnimationFrame(frame);motions.forEach(motion=>motion.cancel());companion.dispose();hint.dispose();};
 }

@@ -48,6 +48,13 @@
 .village-pad [data-direction="left"] { grid-row: 2; grid-column: 1; }
 .village-pad [data-direction="down"] { grid-row: 2; grid-column: 2; }
 .village-pad [data-direction="right"] { grid-row: 2; grid-column: 3; }
+/* Hand mode: drag the map to look around. Building labels stay visible but don't take the touch. */
+.village-pan { flex: none; margin-right: auto; pointer-events: auto; display: inline-flex; align-items: center; gap: 6px; min-height: 52px; padding: 6px 14px 6px 8px; background: #fff6dbef; color: #4a3414; font-size: 16px; font-weight: 900; touch-action: manipulation; }
+.village-pan svg { width: 34px; height: 34px; flex: none; }
+#app .village-pan[aria-pressed="true"] { background: #245b46; color: #fffbe3; border-color: #f4dfa3; }
+.village-screen.is-panning .village-canvas { cursor: grab; }
+.village-screen.is-pan-dragging .village-canvas { cursor: grabbing; }
+.village-screen.is-panning .village-labels button { pointer-events: none; }
 .village-hint { margin: 0; padding: 10px 14px; max-width: 390px; background: #fffbecef; border: 2px solid #71774b; border-radius: 7px; font-size: 16px; line-height: 1.4; text-align: center; word-break: keep-all; }
 .village-actions { display: grid; gap: 10px; width: 230px; flex: none; pointer-events: auto; }
 .village-actions:has(#village-results:not([hidden])) { display: flex; align-items: stretch; width: 46%; max-width: 560px; gap: 8px; }

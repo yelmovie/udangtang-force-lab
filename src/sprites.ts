@@ -9,21 +9,32 @@ export interface CompanionController {
 /** Fixed sprite names (without .webp) that replace the per-mood art; the reaction animations still play. */
 export interface CompanionArt { student?: string; corgi?: string }
 
-/** A reaction to a real experiment event, not a looping walk animation. */
-export function mountCompanion(host: HTMLElement, initial: CompanionMood = 'idle', art: CompanionArt = {}): CompanionController {
+/** A reaction to a real experiment event, not a looping walk animation.
+ * With `onCorgiButton` the corgi becomes a button (the stage's hint), and the rest stays decorative. */
+export function mountCompanion(host: HTMLElement, initial: CompanionMood = 'idle', art: CompanionArt = {}, onCorgiButton?: (button: HTMLButtonElement) => void): CompanionController {
   const element = document.createElement('div');
   element.className = 'game-companion';
-  element.setAttribute('aria-hidden', 'true');
   const student = document.createElement('img');
   student.className = 'game-companion-student';
   const corgi = document.createElement('img');
-  corgi.className = 'game-companion-corgi';
   for (const image of [student, corgi]) {
     image.alt = '';
     image.draggable = false;
     image.decoding = 'async';
   }
-  element.append(student, corgi);
+  if (onCorgiButton) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'game-companion-corgi game-companion-corgi-button';
+    button.append(corgi);
+    host.removeAttribute('aria-hidden');
+    element.append(student, button);
+    onCorgiButton(button);
+  } else {
+    corgi.className = 'game-companion-corgi';
+    element.setAttribute('aria-hidden', 'true');
+    element.append(student, corgi);
+  }
   host.append(element);
   let disposed = false;
   const setMood = (mood: CompanionMood) => {

@@ -1,0 +1,37 @@
+/* 콩이 hint: a tappable corgi (companion or standalone) and its speech bubble. */
+.game-companion-corgi-button { pointer-events: auto; padding: 0; border: 0; background: none; cursor: pointer; touch-action: manipulation; position: relative; border-radius: 18px; }
+.game-companion-corgi-button > img { width: 100%; height: 100%; }
+.game-companion-corgi-button:focus-visible, .corgi-hint-solo:focus-visible { outline: 3px solid #f2b51f; outline-offset: 2px; }
+
+.corgi-hint-solo { position: absolute; z-index: 7; display: flex; align-items: flex-end; gap: 2px; width: 92px; height: 78px; padding: 0; border: 0; background: none; cursor: pointer; touch-action: manipulation; }
+.corgi-hint-solo img { width: 74px; height: 74px; object-fit: contain; object-position: bottom; filter: drop-shadow(0 3px 3px #3d2a1640); pointer-events: none; }
+.corgi-hint-tag { position: absolute; right: -2px; top: 0; padding: 2px 8px; border-radius: 999px; background: #fff6d8; border: 2px solid #d9a948; color: #5b3d12; font-size: 15px; font-weight: 900; line-height: 1.3; pointer-events: none; }
+
+/* Where the standalone corgi sits on stages without a companion corgi. */
+.cargo-dock { position: relative; }
+.cargo-hint-corgi { left: 10px; bottom: 2px; }
+.workshop-hint-corgi { left: 12px; bottom: 10px; }
+/* The core stage shows its companion corgi except on the 3D bench, where this one takes over. */
+.rescue-hint-corgi { left: 12px; bottom: 64px; }
+.rescue-playfield:not(.is-core-3d) > .rescue-hint-corgi { display: none; }
+
+/* Tap reaction and the idle "?" nudge. */
+.is-talking { animation: corgi-hint-hop .45s ease-out; }
+.is-nudging::after { content: '?'; position: absolute; left: 4px; top: -6px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: #ffd54a; border: 2px solid #8a5a12; color: #4b3405; font-size: 18px; font-weight: 900; pointer-events: none; }
+.is-nudging { animation: corgi-hint-wave 4s ease-in-out infinite; }
+@keyframes corgi-hint-hop { 40% { transform: translateY(-10px) rotate(-4deg); } 100% { transform: none; } }
+@keyframes corgi-hint-wave { 0%, 12%, 100% { transform: none; } 5% { transform: translateY(-8px) rotate(-5deg); } }
+@media (prefers-reduced-motion: reduce) { .is-talking, .is-nudging { animation: none; } }
+
+.corgi-hint-body { overflow-y: auto; overscroll-behavior: contain; }
+.corgi-hint-bubble { position: fixed; z-index: 40; width: min(380px, calc(100vw - 16px)); padding: 14px 18px 16px; border: 3px solid #d9a948; border-radius: 20px; background: #fffaf0; color: #244b43; box-shadow: 0 10px 26px #3d2a1638; font-size: 17px; line-height: 1.5; word-break: keep-all; overflow-wrap: break-word; }
+.corgi-hint-bubble[hidden] { display: none; }
+.corgi-hint-bubble::after { content: ''; position: absolute; left: var(--tail-x, 36px); bottom: -11px; width: 18px; height: 18px; background: #fffaf0; border-right: 3px solid #d9a948; border-bottom: 3px solid #d9a948; transform: translateX(-50%) rotate(45deg); }
+.corgi-hint-title { display: block; margin-right: 44px; color: #7a4d14; font-size: 18px; }
+.corgi-hint-close { position: absolute; top: 4px; right: 4px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: #7a5a2a; font-size: 26px; line-height: 1; cursor: pointer; }
+.corgi-hint-now { margin: 6px 0 8px; font-weight: 900; color: #134e4a; }
+.corgi-hint-steps { display: grid; gap: 4px; margin: 0 0 6px; padding: 0; list-style: none; }
+.corgi-hint-steps li { padding: 3px 10px; border-radius: 10px; background: #f3ead7; color: #5b4628; font-weight: 800; }
+.corgi-hint-steps li.done { background: #dcf1d8; color: #176248; }
+.corgi-hint-missing, .corgi-hint-finish { margin: 6px 0 0; }
+.corgi-hint-finish { color: #8a4b12; font-weight: 800; }

@@ -1,3 +1,5 @@
+/* A sub-pixel overhang during a run made the page scrollbar flicker on and off, so the whole stage jumped sideways. Nothing real sits outside the stage. */
+.experiment-screen.cargo-expedition{overflow:clip}
 .cargo-adventure{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}
 .cargo-scene{position:relative;min-height:300px;flex:1;border-radius:26px;overflow:hidden;background:url('/assets/backgrounds/cargo.webp') center/cover;box-shadow:inset 0 0 0 3px #dbb780}
 .cargo-scene::after{content:'';position:absolute;inset:35% 0 0;background:linear-gradient(transparent,#133c3630);pointer-events:none}

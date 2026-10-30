@@ -293,7 +293,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   const events = new AbortController();
   const base = `${import.meta.env.BASE_URL}assets/village/`;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  root.innerHTML = `<section class="village-screen"><div class="village-frame"><canvas class="village-canvas" tabindex="0" aria-label="힘 마을. 방향키나 WASD로 걷고, 땅이나 건물 이름을 누르면 길을 따라 이동해요. 열린 문에 닿으면 자동 입장해요. Enter로 안내원과 대화하거나 가까운 문에 들어갈 수도 있어요."></canvas><svg class="village-lights" aria-hidden="true" focusable="false"></svg><div class="village-labels"></div></div><header class="village-hud"><div class="village-objective"><span>우리의 힘 마을</span><strong id="village-goal"></strong></div><div class="village-tally"><span class="village-count" id="village-count"></span></div></header><div class="village-reveal" role="status" hidden></div><div class="village-bottom"><div class="village-pad" role="group" aria-label="이동 방향판"><button data-direction="up" aria-label="위로 걷기">↑</button><button data-direction="left" aria-label="왼쪽으로 걷기">←</button><button data-direction="down" aria-label="아래로 걷기">↓</button><button data-direction="right" aria-label="오른쪽으로 걷기">→</button></div><p class="village-hint" id="village-hint" role="status">길을 누르거나 방향판으로 걸어가 봐!</p><div class="village-actions"><button id="village-results" hidden>내 발견 모아 보기</button><button id="village-action" disabled>건물 이름을 눌러요</button></div></div><div class="village-loading"><strong>마을로 가는 길을 준비해요…</strong><progress max="100" value="0" aria-label="마을 그림 준비"></progress><span id="village-loading-detail">마을 지도를 읽는 중이에요</span><button id="village-retry" hidden>다시 불러오기</button></div><dialog class="village-dialog" aria-labelledby="village-dialog-title"><img class="village-portrait" alt=""><div class="village-dialog-heading"><div><span id="village-dialog-role">마을의 안내원</span><h2 id="village-dialog-title"></h2></div><button id="village-dialog-close" aria-label="대화 닫기">×</button></div><p id="village-dialog-line"></p><div class="village-dialog-bottom"><span id="village-dialog-page"></span><button id="village-dialog-next">이야기 더 듣기 →</button></div></dialog><dialog class="village-board" aria-labelledby="village-board-title"><div class="village-board-heading"><h2 id="village-board-title">의뢰 게시판</h2><button id="village-board-close" aria-label="게시판 닫기">×</button></div><p class="village-board-lead"></p><ul class="village-board-cards"></ul></dialog></section>`;
+  root.innerHTML = `<section class="village-screen"><div class="village-frame"><canvas class="village-canvas" tabindex="0" aria-label="힘 마을. 방향키나 WASD로 걷고, 땅이나 건물 이름을 누르면 길을 따라 이동해요. 열린 문에 닿으면 자동 입장해요. Enter로 안내원과 대화하거나 가까운 문에 들어갈 수도 있어요."></canvas><svg class="village-lights" aria-hidden="true" focusable="false"></svg><div class="village-labels"></div></div><header class="village-hud"><div class="village-objective"><span>우리의 힘 마을</span><strong id="village-goal"></strong></div><div class="village-tally"><span class="village-count" id="village-count"></span></div></header><div class="village-reveal" role="status" hidden></div><div class="village-bottom"><div class="village-pad" role="group" aria-label="이동 방향판"><button data-direction="up" aria-label="위로 걷기">↑</button><button data-direction="left" aria-label="왼쪽으로 걷기">←</button><button data-direction="down" aria-label="아래로 걷기">↓</button><button data-direction="right" aria-label="오른쪽으로 걷기">→</button></div><button class="village-pan" id="village-pan" aria-pressed="false"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 17V8.5a2 2 0 0 1 4 0V15m0-8a2 2 0 0 1 4 0v8m0-6.5a2 2 0 0 1 4 0V16m0-4a2 2 0 0 1 4 0v8.5C26 26 22.5 29 18 29h-1.5c-3.4 0-5.4-1.5-7.3-4.4L5.6 19c-1-1.6 1.2-3.4 2.6-2l1.8 2" fill="#fff5d7" stroke="#5a3d17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>손으로 둘러보기</span></button><p class="village-hint" id="village-hint" role="status">길을 누르거나 방향판으로 걸어가 봐!</p><div class="village-actions"><button id="village-results" hidden>내 발견 모아 보기</button><button id="village-action" disabled>건물 이름을 눌러요</button></div></div><div class="village-loading"><strong>마을로 가는 길을 준비해요…</strong><progress max="100" value="0" aria-label="마을 그림 준비"></progress><span id="village-loading-detail">마을 지도를 읽는 중이에요</span><button id="village-retry" hidden>다시 불러오기</button></div><dialog class="village-dialog" aria-labelledby="village-dialog-title"><img class="village-portrait" alt=""><div class="village-dialog-heading"><div><span id="village-dialog-role">마을의 안내원</span><h2 id="village-dialog-title"></h2></div><button id="village-dialog-close" aria-label="대화 닫기">×</button></div><p id="village-dialog-line"></p><div class="village-dialog-bottom"><span id="village-dialog-page"></span><button id="village-dialog-next">이야기 더 듣기 →</button></div></dialog><dialog class="village-board" aria-labelledby="village-board-title"><div class="village-board-heading"><h2 id="village-board-title">의뢰 게시판</h2><button id="village-board-close" aria-label="게시판 닫기">×</button></div><p class="village-board-lead"></p><ul class="village-board-cards"></ul></dialog></section>`;
   const shell = root.querySelector<HTMLElement>('.village-screen')!, frame = root.querySelector<HTMLElement>('.village-frame')!;
   const canvas = root.querySelector<HTMLCanvasElement>('.village-canvas')!;
   const ctx = canvas.getContext('2d')!;
@@ -346,6 +346,10 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   const input = createVillageInput(), pads = new Map<number,Direction>();
   const padButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-direction]')];
   const pad = root.querySelector<HTMLElement>('.village-pad')!;
+  const panButton = root.querySelector<HTMLButtonElement>('#village-pan')!;
+  // Hand mode: the student drags the map to look around. The camera stays where it was dragged
+  // until hand mode is switched off or the student starts walking again.
+  let camera = { x: 0, y: 0 }, panView: { x: number; y: number } | null = null, panDrag: { id: number; x: number; y: number; from: { x: number; y: number } } | null = null, hintBeforePan = '';
   let entrance: ReturnType<typeof createVillageEntrances> | null = null, entering = false;
   const vectors: Record<Direction,Point> = { up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0} };
   function paused() { return document.hidden || dialog.open || board.open || !!root.closest('[inert]') || !!document.querySelector('.modal-layer'); }
@@ -493,9 +497,12 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   let frameWidth=1,frameHeight=1;
   function follow() {
     const sw=shell.clientWidth,sh=shell.clientHeight,mw=map?.width??16,mh=map?.height??9;
-    const axis=(view:number,size:number,at:number)=>size<=view?(view-size)/2:Math.min(0,Math.max(view-size,view/2-at));
-    const y=axis(sh,frameHeight,actor.y/mh*frameHeight);
-    frame.style.transform=`translate(${axis(sw,frameWidth,actor.x/mw*frameWidth)}px,${y}px)`;
+    const clamp=(view:number,size:number,at:number)=>size<=view?(view-size)/2:Math.min(0,Math.max(view-size,at));
+    const axis=(view:number,size:number,at:number)=>clamp(view,size,view/2-at);
+    const x=panView?clamp(sw,frameWidth,panView.x):axis(sw,frameWidth,actor.x/mw*frameWidth);
+    const y=panView?clamp(sh,frameHeight,panView.y):axis(sh,frameHeight,actor.y/mh*frameHeight);
+    camera={x,y};
+    frame.style.transform=`translate(${x}px,${y}px)`;
     // Short screens: building labels keep clear of the top bar badges (village.css --label-floor uses this).
     labels.style.setProperty('--cam-y',`${y}px`);
   }
@@ -530,8 +537,19 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if(!story.next)return '마을에 불이 모두 켜졌어! 「내 발견 모아 보기」를 눌러 봐.';
     return `다음 목적지는 ${villageRewards[story.next].name}! 불이 켜진 이름표를 누르면 걸어가요.`;
   }
+  function setPan(on: boolean) {
+    if (on === !!panView) return;
+    panView = on ? { ...camera } : null; panDrag = null;
+    shell.classList.toggle('is-panning', on);
+    panButton.setAttribute('aria-pressed', String(on));
+    panButton.querySelector('span')!.textContent = on ? '둘러보기 끝' : '손으로 둘러보기';
+    if (on) { hintBeforePan = hint.textContent ?? ''; hint.textContent = '화면을 손으로 밀어서 마을을 둘러봐요. 다 보면 ‘둘러보기 끝’을 눌러요.'; }
+    else hint.textContent = hintBeforePan;
+    follow();
+  }
   function goTo(target: Point, name?: string) {
     if(!navigation||paused())return;
+    setPan(false);
     const building = map?.buildings.find(building => distance(target, building.entry) < 1);
     if (building && explainLockedBuilding(building)) return;
     const next=navigation.route(actor,target);
@@ -776,8 +794,19 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       loading.querySelector('strong')!.textContent='마을 그림을 불러오지 못했어요';detail.textContent='인터넷 연결을 확인하고 다시 불러와 주세요. 탐구 기록은 그대로예요.';progress.hidden=true;retry.hidden=false;retry.focus();
     }
   }
+  panButton.addEventListener('click',()=>{if(map&&!paused())setPan(!panView);},{signal:events.signal});
+  canvas.addEventListener('pointermove',event=>{
+    if(!panDrag||panDrag.id!==event.pointerId||!panView)return;
+    panView={x:panDrag.from.x+event.clientX-panDrag.x,y:panDrag.from.y+event.clientY-panDrag.y};follow();
+    // Keep the stored view inside the map, so the next drag starts from what is on screen.
+    panView={...camera};
+  },{signal:events.signal});
+  const endPan=(event:PointerEvent)=>{if(panDrag?.id===event.pointerId){panDrag=null;shell.classList.remove('is-pan-dragging');}};
+  canvas.addEventListener('pointerup',endPan,{signal:events.signal});canvas.addEventListener('pointercancel',endPan,{signal:events.signal});canvas.addEventListener('lostpointercapture',endPan,{signal:events.signal});
   canvas.addEventListener('pointerdown',event=>{
     if(!map||paused()||(event.pointerType==='mouse'&&event.button!==0))return;
+    // In hand mode a touch drags the view instead of walking.
+    if(panView){event.preventDefault();if(panDrag)return;panDrag={id:event.pointerId,x:event.clientX,y:event.clientY,from:{...panView}};if(event.pointerType==='mouse')canvas.setPointerCapture(event.pointerId);shell.classList.add('is-pan-dragging');return;}
     event.preventDefault();const bounds=canvas.getBoundingClientRect(),p={x:(event.clientX-bounds.left)/bounds.width*map.width,y:(event.clientY-bounds.top)/bounds.height*map.height};
     if(Math.abs(p.x-requestBoardSpot.x)<50&&p.y>requestBoardSpot.y-98&&p.y<requestBoardSpot.y+10){openBoard();return;}
     const client=visibleClients().find(stage=>{const c=requesterSpots[stage];return Math.abs(p.x-c.x)<30&&p.y>c.y-npcHeight()-5&&p.y<c.y+8;});if(client){openClient(client);return;}
@@ -788,14 +817,14 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   window.addEventListener('keydown',event=>{
     if(!map||paused())return;const target=event.target as Element;
     if(event.ctrlKey||event.altKey||event.metaKey||target.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="dialog"]'))return;
-    if(input.press(event.key,event.code)){event.preventDefault();path=[];destination=null;canvas.focus({preventScroll:true});syncPadFeedback();}
+    if(input.press(event.key,event.code)){event.preventDefault();setPan(false);path=[];destination=null;canvas.focus({preventScroll:true});syncPadFeedback();}
     else if((event.key==='Enter'||event.key===' ')&&!event.repeat&&!target.closest('button,a')){event.preventDefault();interact();}
   },{signal:events.signal});
   window.addEventListener('keyup',event=>{if(input.release(event.key,event.code)){event.preventDefault();syncPadFeedback();}},{signal:events.signal});
   window.addEventListener('blur',clearInput,{signal:events.signal});
   document.addEventListener('visibilitychange',()=>{clearInput();last=performance.now();},{signal:events.signal});
   padButtons.forEach(button=>{
-    button.addEventListener('pointerdown',event=>{if(!map||paused()||(event.pointerType==='mouse'&&event.button!==0))return;event.preventDefault();canvas.focus();path=[];destination=null;button.setPointerCapture(event.pointerId);pads.set(event.pointerId,button.dataset.direction as Direction);syncPadFeedback();},{signal:events.signal});
+    button.addEventListener('pointerdown',event=>{if(!map||paused()||(event.pointerType==='mouse'&&event.button!==0))return;event.preventDefault();setPan(false);canvas.focus();path=[];destination=null;button.setPointerCapture(event.pointerId);pads.set(event.pointerId,button.dataset.direction as Direction);syncPadFeedback();},{signal:events.signal});
     button.addEventListener('pointermove',event=>{
       if(!pads.has(event.pointerId)||paused())return;
       const hovered=document.elementFromPoint(event.clientX,event.clientY)?.closest<HTMLElement>('[data-direction]');

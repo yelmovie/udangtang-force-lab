@@ -7,6 +7,7 @@ import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { fingerIcon } from '../interactionHints';
 import { showPredictionChip } from '../predictionChip';
 import { requestOpenLabel, showRequestLetter } from '../requestLetter';
+import { corgiHintButton, mountCorgiHint } from '../corgiHint';
 import '../workshop.css';
 
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -40,7 +41,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   const cargoIndex = () => cargo;
   let feedback = level === 2 ? '콩이 힘은 6칸까지예요. 필요한 힘이 6칸보다 많으면 화물이 멈춰요. 빨간 칸만큼 힘이 모자란 거예요.' : state.direct ? '설계를 바꾸고 필요한 힘을 비교해 봐요.' : '먼저 화물을 직접 들어 봐요.';
   root.innerHTML = `<section class="experiment-screen workshop-screen workshop-redesign">
-    <div class="experiment-heading"><div><p class="eyebrow">04 · 운반 공방</p><h1>내 손으로 바꾸는 도구</h1></div>${missionProgressMarkup('workshop',['직접 들기','지레 비교','빗면 비교'])}</div>
+    <div class="experiment-heading"><div><p class="eyebrow">04 · 운반 공방</p><h1>내 손으로 바꾸는 도구</h1></div>${missionProgressMarkup('workshop',['직접 들기','지레 비교','빗면 비교','의뢰 화물 3개'])}</div>
     <div class="workshop-studio">
       <div class="workshop-stage">
         <div class="workshop-drawer" role="group" aria-label="실험 도구"><button data-tool="direct">① 직접 들기</button><button data-tool="lever">② 지레</button><button data-tool="ramp">③ 빗면</button><span class="workshop-cargo-chip" id="workshop-cargo-chip" hidden></span><p class="workshop-instruction" id="workshop-instruction">${fingerIcon}<span></span></p><button id="workshop-open-record" class="workshop-record-button" aria-haspopup="dialog">기록 보기</button><div class="workshop-view"><button class="camera-button" id="turn-left" aria-label="시점 왼쪽">${icons.rotateLeft}</button><button class="camera-button" id="turn-right" aria-label="시점 오른쪽">${icons.rotateRight}</button></div></div>
@@ -64,6 +65,14 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   const notebookBoard = root.querySelector<HTMLElement>('.workshop-notebook')!;
   const recordButton = root.querySelector<HTMLButtonElement>('#workshop-open-record')!;
   let recordDialog: HTMLDialogElement | null = null;
+  const hint = mountCorgiHint(root, {
+    now: () => instruction(),
+    missing: () => level === 1 ? state.direct ? nextHint() : '' : workshopL2Complete(levelRecord()) ? '' : `${workshopCargos[cargoIndex()].label}을 콩이 힘 6칸 안에서 올려요. 빨간 칸이 남으면 설계를 바꿔 봐요.`,
+  });
+  const hintCorgi = corgiHintButton();
+  hintCorgi.classList.add('workshop-hint-corgi');
+  world.append(hintCorgi);
+  hint.attach(hintCorgi);
   for(let index=0;index<5;index++) { const image=new Image();image.src=`/assets/game/workshop-lever-press-${index}.webp`; const face=new Image();face.src=`/assets/game/workshop-lever-press-${index}${index<3?'-hard':'-easy'}.webp`; }
   const signal = events.signal;
   const currentSetting = () => tool === 'lever' ? state.fulcrumPosition : state.rampLength;
@@ -264,7 +273,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     }
     finish.disabled = busy || !workshopExplorationReady(state) || !workshopL2Complete(levelRecord());
     const leverRuns=state.trials.filter(r=>r.tool==='lever'), rampRuns=state.trials.filter(r=>r.tool==='ramp');
-    setMissionProgress(root,[steps.direct,steps.lever,steps.ramp],
+    setMissionProgress(root,[steps.direct,steps.lever,steps.ramp,workshopL2Complete(levelRecord())],
       !steps.direct?'먼저 직접 들어요'
       :!steps.lever?(leverRuns.length===0?'받침대를 옮기고 지레로 들어 봐요':leverRuns.length===1?'받침대를 다른 곳으로 옮겨 한 번 더 들어 봐요':'아직 안 해 본 받침대 위치에서도 들어 봐요')
       :!steps.ramp?(rampRuns.length===0?'빗면으로도 같은 높이까지 올려 봐요':'이번엔 길이를 바꿔 같은 높이까지 올려 봐요')
@@ -574,5 +583,5 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   }
   loadScene();
   update();
-  return () => { active = false; recordDialog?.close(); clearTimeout(waitTimer); endDesign(true); resetGesture(); resizeObserver.disconnect(); events.abort(); scene?.dispose(); };
+  return () => { active = false; recordDialog?.close(); clearTimeout(waitTimer); endDesign(true); resetGesture(); resizeObserver.disconnect(); events.abort(); scene?.dispose(); hint.dispose(); };
 }

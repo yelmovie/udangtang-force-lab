@@ -3,6 +3,7 @@ import { icons } from '../icons';
 import { needsShortRampTrial, canLift, stallTravel, comparisonHint, comparisonSummary, coreWeight, firstFairComparison, forceNames, hasFairComparison, rescueReady, retainRescueRuns, routeNames, secondComparisonHint } from '../rescueModel';
 import type { RescueRun } from '../state';
 import { mountCompanion } from '../sprites';
+import { corgiHintButton, mountCorgiHint } from '../corgiHint';
 import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { showPredictionChip } from '../predictionChip';
 import { coreDragProgress } from '../coreSceneModel';
@@ -69,7 +70,13 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   const controls = root.querySelector<HTMLElement>('#rescue-controls')!;
   const handle = root.querySelector<HTMLButtonElement>('#core-handle')!;
   const finish = root.querySelector<HTMLButtonElement>('#rescue-finish')!;
-  const companion = mountCompanion(root.querySelector<HTMLElement>('#rescue-companion')!);
+  // The phase line is the stage's own "what now"; in the 3D bench the companion is hidden, so a corgi of its own stands in.
+  const hint = mountCorgiHint(root, { now: () => root.querySelector('#rescue-phase')!.textContent ?? '' });
+  const companion = mountCompanion(root.querySelector<HTMLElement>('#rescue-companion')!, 'idle', {}, hint.attach);
+  const hintCorgi = corgiHintButton();
+  hintCorgi.classList.add('rescue-hint-corgi');
+  root.querySelector('.rescue-playfield')!.append(hintCorgi);
+  hint.attach(hintCorgi);
   const sceneHost = root.querySelector<HTMLElement>('#core-scene-host')!;
   const grip = root.querySelector<HTMLButtonElement>('#core-grip')!;
   const loading = root.querySelector<HTMLElement>('#core-loading')!;
@@ -488,5 +495,5 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   }, { signal });
   tell(state.delivered ? '코어가 도착했어요. 비교 기록을 확인하고 중앙 장치에 다시 끼워요.' : state.gate ? '같은 힘으로 두 빗면을 비교해요. 길을 고른 뒤 코어를 직접 끌어 보세요.' : state.measured ? '코어는 180 g! 벽 옆 상자를 직접 움직여 길을 열어요.' : '빠진 배터리 코어를 다시 끼울 거예요. 먼저 빈 저울을 0으로 맞추고 코어의 무게를 재요.');
   renderClues(); update();
-  return () => { active = false; closeWeightDialog(); cancelAnimationFrame(frame); cancelAnimationFrame(buttonFrame); cancelAnimationFrame(slideFrame); clearTimeout(stageTimer); clearTimeout(stopTimer); events.abort(); scene?.dispose(); companion.dispose(); };
+  return () => { active = false; closeWeightDialog(); cancelAnimationFrame(frame); cancelAnimationFrame(buttonFrame); cancelAnimationFrame(slideFrame); clearTimeout(stageTimer); clearTimeout(stopTimer); events.abort(); scene?.dispose(); companion.dispose(); hint.dispose(); };
 }
