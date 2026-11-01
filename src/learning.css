@@ -70,7 +70,7 @@
   .learning-records .learning-talk { margin: 12px 0 0; padding: 10px 14px; border-radius: 12px; background: #eaf5e8; }
   .learning-quiz .question-zone { margin-top: 12px; }
 }
-@media (min-width: 900px) and (orientation: landscape) and (max-height: 820px) {
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 900px) {
   .learning-card { padding: 14px 20px 16px; }
   .learning-heading img { width: 40px; height: 48px; }
   .learning-heading h2 { font-size: 24px; }
@@ -90,7 +90,7 @@
   .learning-talk { margin: 8px 0; font-size: 17px; }
   .learning-actions .button { min-height: 48px; font-size: 19px; }
 }
-@media (min-width: 900px) and (orientation: landscape) and (max-height: 700px) {
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 760px) {
   .learning-quiz .learning-balance { zoom: .82; }
   .learning-feedback .feedback-label { display: inline; margin: 0 6px 0 0; }
   .learning-option { min-height: 50px; }

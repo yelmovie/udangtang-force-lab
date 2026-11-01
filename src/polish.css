@@ -513,8 +513,8 @@ button.button:not(:disabled):active {
 .modal-card:has(> #world-title) > .world-review .question-prompt { margin: 4px 0 6px; }
 .modal-card:has(> #world-title) > .world-review .button { margin-top: 0; min-height: 46px; }
 @media (min-width: 1600px) and (min-height: 900px) { .modal-card:has(> #world-title) > h2 { font-size: 34px; } .modal-card:has(> #world-title) > .discovery-recap .discovery-key { font-size: 22px; } }
-/* 세로 700px 이하: 글자 한 단계 줄이고 더 촘촘히. */
-@media (max-height: 700px) {
+/* 세로 760px 이하(갤럭시탭 가로 712px 포함): 글자 한 단계 줄이고 더 촘촘히. */
+@media (max-height: 760px) {
   .modal-layer > .modal-card:has(> #world-title) { padding: 10px 24px 16px; max-height: calc(100dvh - 20px); }
   .modal-card:has(> #world-title) > .modal-emblem { width: 46px; height: 46px; font-size: 24px; margin: 2px auto 0; }
   .modal-card:has(> #world-title) > h2 { font-size: 28px; }
