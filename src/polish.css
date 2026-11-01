@@ -506,6 +506,12 @@ button.button:not(:disabled):active {
 .modal-card:has(> #world-title) > .world-meter { margin: 12px auto 6px; }
 .modal-card:has(> #world-title) > .small-note { margin: 0; font-size: 16px; }
 .modal-card:has(> #world-title) > #world-continue { justify-self: center; margin-top: 12px; min-height: 56px; min-width: 260px; font-size: 20px; }
+/* 개념 영상 버튼과 '마을로 가기 전 문제' 칸을 한 줄에 나란히(영상이 없는 단계는 문제 칸이 한 줄을 다 쓴다). */
+.modal-card:has(> #world-title) > .world-concept:not(:empty) { grid-column: 1; margin-top: 10px; }
+.modal-card:has(> #world-title) > .world-concept:not(:empty) + .world-review { grid-column: 2; }
+.modal-card:has(> #world-title) > .world-review { margin: 10px 0 0; padding: 8px 12px; }
+.modal-card:has(> #world-title) > .world-review .question-prompt { margin: 4px 0 6px; }
+.modal-card:has(> #world-title) > .world-review .button { margin-top: 0; min-height: 46px; }
 @media (min-width: 1600px) and (min-height: 900px) { .modal-card:has(> #world-title) > h2 { font-size: 34px; } .modal-card:has(> #world-title) > .discovery-recap .discovery-key { font-size: 22px; } }
 /* 세로 700px 이하: 글자 한 단계 줄이고 더 촘촘히. */
 @media (max-height: 700px) {
@@ -521,7 +527,8 @@ button.button:not(:disabled):active {
 }
 /* 좁은 화면(태블릿 세로 등)은 다시 1열. */
 @media (max-width: 720px) {
-  .modal-card:has(> #world-title) > .toolcard-reveal, .modal-card:has(> #world-title) > .toolcard-reveal + .discovery-recap { grid-column: 1 / -1; }
+  .modal-card:has(> #world-title) > .toolcard-reveal, .modal-card:has(> #world-title) > .toolcard-reveal + .discovery-recap,
+  .modal-card:has(> #world-title) > .world-concept:not(:empty), .modal-card:has(> #world-title) > .world-concept:not(:empty) + .world-review { grid-column: 1 / -1; }
 }
 
 /* Reduced motion: adventure.css already stops every animation/transition globally; these only document the intent. */

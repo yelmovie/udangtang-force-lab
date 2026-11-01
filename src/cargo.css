@@ -141,6 +141,7 @@
 .cargo-popup-orders{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
 .cargo-popup-orders span{padding:6px 14px;border-radius:14px;border:2px dashed #cdbb98;background:#fffdf7;color:#7b6a4c;font-size:20px;font-weight:800;white-space:nowrap}
 .cargo-popup-orders span[data-state="done"]{border:2px solid #4c9a5a;background:#e6f4e7;color:#1c5a43}
+@media(max-height:760px){.cargo-popup .cargo-trace{margin:0;font-size:20px}.cargo-popup .cargo-direction{margin:2px 0;font-size:20px}.cargo-popup .cargo-discovery{margin:8px 0 0;padding:10px 14px}.cargo-popup .cargo-discovery .question-prompt{margin:6px 0 8px;font-size:22px}.cargo-popup .cargo-discovery button{min-height:50px;font-size:20px}.cargo-popup .cargo-finding{margin:6px 0 0;font-size:20px}.cargo-popup-next{margin:8px 0 0;padding:4px 12px;font-size:20px}.cargo-popup-orders span{padding:4px 12px}}
 /* Real part count inside the crate: one big part, three medium, five small — each row laid out so none hide behind the box front. */
 .cargo-contents[data-count="1"] img{width:46%;left:27%;bottom:34%;transform:rotate(-8deg)}
 .cargo-contents[data-count="3"] img{width:34%;left:calc(6% + var(--part)*22%);bottom:calc(32% + (var(--part) - 1)*(var(--part) - 1)*-6%);transform:rotate(calc(var(--part)*10deg - 10deg))}

@@ -22,4 +22,20 @@
   .stage-popup-label { font-size:22px; }
   .stage-popup-actions .button { min-height:60px; font-size:24px; }
 }
+/* 노트북·낮은 태블릿 화면: 본문 스크롤이 생기지 않도록 여백·글자를 한 단계 줄인다. */
+@media (max-height:760px) {
+  .stage-popup-card { padding:16px 20px 14px; border-radius:26px; }
+  .stage-popup-label { font-size:16px; }
+  .stage-popup h2 { font-size:26px; }
+  .stage-popup-card, .stage-popup-body, .stage-popup-lead { font-size:21px; }
+  .stage-popup-body { margin-top:6px; }
+  .stage-popup-close { top:10px; right:10px; width:46px; height:46px; font-size:24px; }
+  .stage-popup-actions { margin-top:8px; }
+  .stage-popup-actions .button { min-height:50px; font-size:20px; }
+}
+@media (max-height:600px) {
+  .stage-popup, .stage-popup-card { max-height:calc(100dvh - 16px); }
+  .stage-popup-card { padding-top:12px; padding-bottom:12px; }
+  .stage-popup h2 { font-size:24px; }
+}
 @media (prefers-reduced-motion: reduce) { .stage-popup-card { animation:none; } }

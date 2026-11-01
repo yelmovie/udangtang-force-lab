@@ -57,3 +57,45 @@
 .learning-balance .lb-names { position:absolute; left:0; right:0; bottom:0; display:flex; justify-content:space-between; gap:8px; }
 .learning-balance .lb-names > span { width:42%; text-align:center; font-size:16px; font-weight:800; color:#21463f; line-height:1.2; word-break:keep-all; }
 .learning-balance .lb-names small { display:block; font-size:13px; color:#557368; }
+/* 좁은·세로 화면은 예전처럼 한 줄로 쌓고, '함께 말해봐요'는 피드백 뒤에 둔다. */
+.learning-body { display: flex; flex-direction: column; }
+.learning-records, .learning-quiz { display: contents; }
+.learning-talk { order: 1; }
+.learning-actions { order: 2; }
+/* 가로 화면: 왼쪽 내 기록, 오른쪽 문제·답. 기본 크기에선 한 화면에 들어가고, 확대해서 넘칠 때만 카드가 스크롤된다. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .learning-card { width: min(1240px, calc(100vw - 28px)); max-width: none; }
+  .learning-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+  .learning-records, .learning-quiz { display: block; }
+  .learning-records .learning-talk { margin: 12px 0 0; padding: 10px 14px; border-radius: 12px; background: #eaf5e8; }
+  .learning-quiz .question-zone { margin-top: 12px; }
+}
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 820px) {
+  .learning-card { padding: 14px 20px 16px; }
+  .learning-heading img { width: 40px; height: 48px; }
+  .learning-heading h2 { font-size: 24px; }
+  .learning-first-thought { margin: 8px 0; padding: 7px 12px; font-size: 16px; }
+  .learning-record-label { margin: 8px 0 -4px; }
+  .learning-card .learning-evidence-grid { margin: 10px 0 0; }
+  .learning-evidence { padding: 10px 12px; }
+  .learning-evidence strong { font-size: 18px; }
+  .learning-evidence p { margin: 4px 0; font-size: 16px; }
+  .learning-balance { height: 150px; }
+  .learning-quiz .question-zone { margin: 8px 0 0; padding: 10px 14px; }
+  .learning-card .learning-question { margin: 6px 0 8px; font-size: 21px; }
+  .learning-card .learning-question-pair { margin-bottom: 6px; }
+  .learning-card .answer-label { margin: 4px 0 8px; }
+  .learning-option { min-height: 56px; padding: 8px 10px; font-size: 18px; }
+  .learning-feedback { margin: 10px 0; padding: 8px 14px; min-height: 0; font-size: 18px; line-height: 1.4; }
+  .learning-talk { margin: 8px 0; font-size: 17px; }
+  .learning-actions .button { min-height: 48px; font-size: 19px; }
+}
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 700px) {
+  .learning-quiz .learning-balance { zoom: .82; }
+  .learning-feedback .feedback-label { display: inline; margin: 0 6px 0 0; }
+  .learning-option { min-height: 50px; }
+  .learning-layer { padding: 8px; }
+  .learning-card { max-height: calc(var(--app-height, 100dvh) - 16px); }
+  .learning-card .answer-label { margin: 2px 0 6px; }
+  .learning-feedback { margin: 6px 0; }
+}
