@@ -198,3 +198,7 @@
 @media (max-height: 540px) {
   .village-labels button.village-board-label { font-size: 14px; }
 }
+
+.village-bottom .village-pan{width:52px;min-width:52px;height:52px;padding:8px;margin-right:0;justify-content:center}.village-pan:focus-visible{outline:4px solid #f6d36e;outline-offset:3px}
+
+.village-camera-tools{display:flex;gap:8px;flex:none;pointer-events:auto}
