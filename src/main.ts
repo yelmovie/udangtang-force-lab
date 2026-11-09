@@ -19,6 +19,8 @@ import { mountRescue } from './screens/rescue';
 import { mountVillage } from './screens/village';
 import { villageRewards } from './villageStory';
 import { playMusic, playSound, stopMusic, stopSounds, setVolume, type MusicName } from './sound';
+import { installNpcNarration } from './npc-narration.js';
+installNpcNarration({selector:'.corgi-hint-body',src:import.meta.env.BASE_URL+'assets/audio/npc-welcome.mp3',text:'안녕! 나는 콩이야. 물건을 밀고 당기면서 힘이 하는 일을 함께 알아보자. 한 번에 한 가지씩 바꾸며 살펴보면 새로운 발견을 할 수 있어!',enabled:()=>save.soundOn,volume:()=>save.soundVolume??.3,hold:()=>{stopSounds();stopMusic();return syncMusic;}});
 import { infoContent, type InfoSection } from './info';
 import { prepareOffline } from './offline';
 import type { AppContext } from './appTypes';

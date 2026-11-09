@@ -16,6 +16,7 @@ export function setVolume(value: number) {
 }
 export function stopSounds() { players.forEach(audio => { audio.pause(); audio.currentTime = 0; }); }
 export function playSound(name: SoundName) {
+  if (volume === 0 || document.hidden) return;
   stopSounds();
   let audio = players.get(name);
   if (!audio) { audio = new Audio(`${import.meta.env.BASE_URL}assets/audio/${files[name]}`); players.set(name, audio); }

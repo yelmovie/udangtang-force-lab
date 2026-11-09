@@ -20,7 +20,7 @@ export function offlinePlugin() {
     async closeBundle() {
       if (!built) return;
       const paths = (await filesIn(outputDirectory))
-        .filter(path => /\.(?:html|css|js|json|webmanifest|webp|png|ogg|svg|woff2?|glb)$/i.test(path) && !path.endsWith(`${sep}sw.js`)).sort();
+        .filter(path => (path.endsWith(`${sep}npc-welcome.mp3`) || /\.(?:html|css|js|json|webmanifest|webp|png|ogg|svg|woff2?|glb)$/i.test(path)) && !path.endsWith(`${sep}sw.js`)).sort();
       const hash = createHash('sha256');
       const urls = [];
       for (const path of paths) {
@@ -32,6 +32,7 @@ export function offlinePlugin() {
       // First-screen set only: everything else is cached the first time a screen asks for it.
       const core = urls.filter(name => /^(?:index\.html|manifest\.webmanifest|favicon\.svg|icons\/.*|assets\/index-[^/]+\.(?:js|css)|assets\/fonts\/.*\.woff2|assets\/ui\/title\.webp|assets\/backgrounds\/lab\.webp|assets\/characters\/.*\.webp)$/.test(name));
       const runtimePattern = '/\\.(?:html|css|js|json|webmanifest|webp|png|ogg|svg|woff2?|glb)$/i';
+      core.push('assets/audio/npc-welcome.mp3');
       const code = `// Generated from this production build. Do not edit by hand.
 const ROOT = new URL('./', self.location.href);
 const PREFIX = 'udangtang-force-lab:' + ROOT.href + ':';
@@ -55,6 +56,10 @@ self.addEventListener('activate', event => {
 });
 self.addEventListener('fetch', event => {
   const request = event.request;
+  if (request.method === 'GET' && request.url === new URL('assets/audio/npc-welcome.mp3', ROOT).href) {
+    event.respondWith(caches.open(CACHE).then(cache => cache.match(request.url)).then(hit => hit || fetch(request)));
+    return;
+  }
   if (request.method !== 'GET' || request.headers.has('range')) return;
   const url = new URL(request.url);
   if (url.origin !== ROOT.origin) return;
