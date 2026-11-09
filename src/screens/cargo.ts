@@ -182,7 +182,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         tapGo.disabled = !canPush() && !needsForce();
         autoGo.hidden = !autoPlaying && (level === 1 ? ready() : deliveredAll());
         autoGo.disabled = !autoPlaying && (busy || waiting || !!drag);
-        autoGo.textContent = autoPlaying ? '■ 자동 멈추기' : '▶ 자동으로 보기';
+        autoGo.textContent = autoPlaying ? '직접 해보기' : '▶ 자동으로 보기';
         autoGo.setAttribute('aria-pressed', String(autoPlaying));
         handle.setAttribute('aria-label', level === 1
             ? `남자아이를 잡고 오른쪽 표시까지 ${action === 'push' ? '밀기' : '당기기'}. Enter로도 실험`
