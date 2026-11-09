@@ -2,6 +2,8 @@
 // 스포일러 금지: 버튼은 각 미션이 핵심 발견을 확인한 뒤에만 syncConceptButton(..., true)로 보인다.
 // 영상에는 글자가 없고, 자막은 장면 시간에 맞춰 DOM으로 얹는다.
 import './conceptClip.css';
+import './concept-focus.css';
+import {bindConceptFocus} from './concept-focus.js';
 
 export type ConceptStage = 'cargo' | 'balance' | 'scale' | 'workshop' | 'rescue';
 type Clip = { title: string; cues: { at: number; text: string }[] };
@@ -57,6 +59,9 @@ export function syncConceptButton(host: Element, stage: ConceptStage, show: bool
 export function openConceptClip(stage: ConceptStage): void {
   if (document.querySelector('.concept-layer')) return;
   const clip = clips[stage];
+  const terms: Record<ConceptStage, string[]> = { cargo:['똑같은 힘','같은 힘','같은 시간','가벼운 상자'], balance:['받침점','거리','무게','수평'], scale:['영점','0','80 g'], workshop:['빗면','힘','받침점'], rescue:['힘의 증거','같은 작은 힘','가파른 길','완만한 길'] };
+  const labels: Record<ConceptStage, string[]> = { cargo:['똑같은 힘','같은 시간','움직임 비교'], balance:['같은 거리','무게 비교','수평'], scale:['영점 맞추기','무게 측정','영점의 역할'], workshop:['들어 올리기','빗면','지레의 받침점'], rescue:['힘의 증거','가파른 길','완만한 길'] };
+  let releaseFocus = () => {};
   const app = document.querySelector<HTMLElement>('#app');
   const appWasInert = app?.inert ?? false;
   if (app) app.inert = true;
@@ -144,6 +149,7 @@ export function openConceptClip(stage: ConceptStage): void {
   const close = () => {
     if (closed) return;
     closed = true;
+    releaseFocus();
     window.clearTimeout(timer);
     document.removeEventListener('keydown', onKey, true);
     video.pause(); video.removeAttribute('src'); video.load();
@@ -168,5 +174,6 @@ export function openConceptClip(stage: ConceptStage): void {
   closeButton.addEventListener('click', close);
   layer.addEventListener('modal-dismiss', close);
   layer.addEventListener('click', event => { if (event.target === layer) close(); });
+  releaseFocus = bindConceptFocus(layer.querySelector<HTMLElement>('.concept-card')!, video, {steps:clip.cues.map((cue,i)=>({at:cue.at,term:labels[stage][i]})),terms:terms[stage],caption,anchor:layer.querySelector<HTMLElement>('.concept-video-wrap')!});
   closeButton.focus();
 }
