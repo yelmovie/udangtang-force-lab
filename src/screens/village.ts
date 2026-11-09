@@ -293,7 +293,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   const events = new AbortController();
   const base = `${import.meta.env.BASE_URL}assets/village/`;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  root.innerHTML = `<section class="village-screen"><div class="village-frame"><canvas class="village-canvas" tabindex="0" aria-label="힘 마을. 방향키나 WASD로 걷고, 땅이나 건물 이름을 누르면 길을 따라 이동해요. 열린 문에 닿으면 자동 입장해요. Enter로 안내원과 대화하거나 가까운 문에 들어갈 수도 있어요."></canvas><svg class="village-lights" aria-hidden="true" focusable="false"></svg><div class="village-labels"></div></div><header class="village-hud"><div class="village-objective"><span>우리의 힘 마을</span><strong id="village-goal"></strong></div><div class="village-tally"><span class="village-count" id="village-count"></span></div></header><div class="village-reveal" role="status" hidden></div><div class="village-bottom"><div class="village-pad" role="group" aria-label="이동 방향판"><button data-direction="up" aria-label="위로 걷기">↑</button><button data-direction="left" aria-label="왼쪽으로 걷기">←</button><button data-direction="down" aria-label="아래로 걷기">↓</button><button data-direction="right" aria-label="오른쪽으로 걷기">→</button></div><button class="village-pan" id="village-pan" aria-pressed="false"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 17V8.5a2 2 0 0 1 4 0V15m0-8a2 2 0 0 1 4 0v8m0-6.5a2 2 0 0 1 4 0V16m0-4a2 2 0 0 1 4 0v8.5C26 26 22.5 29 18 29h-1.5c-3.4 0-5.4-1.5-7.3-4.4L5.6 19c-1-1.6 1.2-3.4 2.6-2l1.8 2" fill="#fff5d7" stroke="#5a3d17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>손으로 둘러보기</span></button><p class="village-hint" id="village-hint" role="status">길을 누르거나 방향판으로 걸어가 봐!</p><div class="village-actions"><button id="village-results" hidden>내 발견 모아 보기</button><button id="village-action" disabled>건물 이름을 눌러요</button></div></div><div class="village-loading"><strong>마을로 가는 길을 준비해요…</strong><progress max="100" value="0" aria-label="마을 그림 준비"></progress><span id="village-loading-detail">마을 지도를 읽는 중이에요</span><button id="village-retry" hidden>다시 불러오기</button></div><dialog class="village-dialog" aria-labelledby="village-dialog-title"><img class="village-portrait" alt=""><div class="village-dialog-heading"><div><span id="village-dialog-role">마을의 안내원</span><h2 id="village-dialog-title"></h2></div><button id="village-dialog-close" aria-label="대화 닫기">×</button></div><p id="village-dialog-line"></p><div class="village-dialog-bottom"><span id="village-dialog-page"></span><button id="village-dialog-next">이야기 더 듣기 →</button></div></dialog><dialog class="village-board" aria-labelledby="village-board-title"><div class="village-board-heading"><h2 id="village-board-title">의뢰 게시판</h2><button id="village-board-close" aria-label="게시판 닫기">×</button></div><p class="village-board-lead"></p><ul class="village-board-cards"></ul></dialog></section>`;
+  root.innerHTML = `<section class="village-screen"><div class="village-frame"><canvas class="village-canvas" tabindex="0" aria-label="힘 마을. 방향키나 WASD로 걷고, 땅이나 건물 이름을 누르면 길을 따라 이동해요. 열린 문에 닿으면 자동 입장해요. Enter로 안내원과 대화하거나 가까운 문에 들어갈 수도 있어요."></canvas><svg class="village-lights" aria-hidden="true" focusable="false"></svg><div class="village-labels"></div></div><header class="village-hud"><div class="village-objective"><span>우리의 힘 마을</span><strong id="village-goal"></strong></div><div class="village-tally"><span class="village-count" id="village-count"></span></div></header><div class="village-reveal" role="status" hidden></div><div class="village-bottom"><div class="village-pad" role="group" aria-label="이동 방향판"><button data-direction="up" aria-label="위로 걷기">↑</button><button data-direction="left" aria-label="왼쪽으로 걷기">←</button><button data-direction="down" aria-label="아래로 걷기">↓</button><button data-direction="right" aria-label="오른쪽으로 걷기">→</button></div><div class="village-camera-tools" role="group" aria-label="지도 보기"><button class="village-pan" id="village-pan" aria-pressed="false" aria-label="지도 끌어 보기" title="지도 끌어 보기"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 17V8.5a2 2 0 0 1 4 0V15m0-8a2 2 0 0 1 4 0v8m0-6.5a2 2 0 0 1 4 0V16m0-4a2 2 0 0 1 4 0v8.5C26 26 22.5 29 18 29h-1.5c-3.4 0-5.4-1.5-7.3-4.4L5.6 19c-1-1.6 1.2-3.4 2.6-2l1.8 2" fill="#fff5d7" stroke="#5a3d17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="village-pan" id="village-fit" aria-label="지도 전체 보기" title="지도 전체 보기" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M8 8h8v8H8z"/></svg></button></div><p class="village-hint" id="village-hint" role="status">길을 누르거나 방향판으로 걸어가 봐!</p><div class="village-actions"><button id="village-results" hidden>내 발견 모아 보기</button><button id="village-action" disabled>건물 이름을 눌러요</button></div></div><div class="village-loading"><strong>마을로 가는 길을 준비해요…</strong><progress max="100" value="0" aria-label="마을 그림 준비"></progress><span id="village-loading-detail">마을 지도를 읽는 중이에요</span><button id="village-retry" hidden>다시 불러오기</button></div><dialog class="village-dialog" aria-labelledby="village-dialog-title"><img class="village-portrait" alt=""><div class="village-dialog-heading"><div><span id="village-dialog-role">마을의 안내원</span><h2 id="village-dialog-title"></h2></div><button id="village-dialog-close" aria-label="대화 닫기">×</button></div><p id="village-dialog-line"></p><div class="village-dialog-bottom"><span id="village-dialog-page"></span><button id="village-dialog-next">이야기 더 듣기 →</button></div></dialog><dialog class="village-board" aria-labelledby="village-board-title"><div class="village-board-heading"><h2 id="village-board-title">의뢰 게시판</h2><button id="village-board-close" aria-label="게시판 닫기">×</button></div><p class="village-board-lead"></p><ul class="village-board-cards"></ul></dialog></section>`;
   const shell = root.querySelector<HTMLElement>('.village-screen')!, frame = root.querySelector<HTMLElement>('.village-frame')!;
   const canvas = root.querySelector<HTMLCanvasElement>('.village-canvas')!;
   const ctx = canvas.getContext('2d')!;
@@ -494,7 +494,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if(revealStage && revealTime<2.4 && !reduced.matches){const p=rewardPoint(revealStage);ctx.save();ctx.globalAlpha=Math.max(0,1-revealTime/2.4);ctx.strokeStyle='#fff4b4';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(p.x,p.y-22,20+revealTime*48,12+revealTime*23,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
   }
   // The map fills the screen (cover, up to 2x the fit size) and the camera follows the student over the overflow.
-  let frameWidth=1,frameHeight=1;
+  let frameWidth=1,frameHeight=1,overview=false;
   function follow() {
     const sw=shell.clientWidth,sh=shell.clientHeight,mw=map?.width??16,mh=map?.height??9;
     const clamp=(view:number,size:number,at:number)=>size<=view?(view-size)/2:Math.min(0,Math.max(view-size,at));
@@ -508,7 +508,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   }
   function resize() {
     const mw=map?.width??16,mh=map?.height??9,sw=Math.max(1,shell.clientWidth),sh=Math.max(1,shell.clientHeight);
-    const fit=Math.min(sw/mw,sh/mh),scale=Math.min(Math.max(sw/mw,sh/mh),fit*2);
+    const fit=Math.min(sw/mw,sh/mh),scale=overview?Math.min(sw/mw,Math.max(1,sh-170)/mh):Math.min(Math.max(sw/mw,sh/mh),fit*2);
     frameWidth=mw*scale;frameHeight=mh*scale;
     frame.style.width=`${frameWidth}px`;frame.style.height=`${frameHeight}px`;
     const density=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(frameWidth*density);canvas.height=Math.round(frameHeight*density);draw();
@@ -542,8 +542,9 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     panView = on ? { ...camera } : null; panDrag = null;
     shell.classList.toggle('is-panning', on);
     panButton.setAttribute('aria-pressed', String(on));
-    panButton.querySelector('span')!.textContent = on ? '둘러보기 끝' : '손으로 둘러보기';
-    if (on) { hintBeforePan = hint.textContent ?? ''; hint.textContent = '화면을 손으로 밀어서 마을을 둘러봐요. 다 보면 ‘둘러보기 끝’을 눌러요.'; }
+    panButton.setAttribute('aria-label', on ? '지도 끌기 끝' : '지도 끌어 보기');
+    if(on&&overview){overview=false;root.querySelector('#village-fit')!.setAttribute('aria-pressed','false');resize();}
+    if (on) { hintBeforePan = hint.textContent ?? ''; hint.textContent = ''; }
     else hint.textContent = hintBeforePan;
     follow();
   }
@@ -794,6 +795,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       loading.querySelector('strong')!.textContent='마을 그림을 불러오지 못했어요';detail.textContent='인터넷 연결을 확인하고 다시 불러와 주세요. 탐구 기록은 그대로예요.';progress.hidden=true;retry.hidden=false;retry.focus();
     }
   }
+  root.querySelector('#village-fit')!.addEventListener('click',()=>{if(!map||paused())return;setPan(false);overview=!overview;root.querySelector('#village-fit')!.setAttribute('aria-pressed',String(overview));resize();follow();},{signal:events.signal});
   panButton.addEventListener('click',()=>{if(map&&!paused())setPan(!panView);},{signal:events.signal});
   canvas.addEventListener('pointermove',event=>{
     if(!panDrag||panDrag.id!==event.pointerId||!panView)return;
