@@ -92,7 +92,7 @@ test('workshop record names the design that needed the least force compared with
   save.workshop.trials.push({ tool: 'lever', setting: 0 });
   assert.equal(record(save, 'workshop'), "직접 들 때보다 힘이 가장 적게 든 설계: 지레 '화물 가까이'");
   save.workshop.trials.push({ tool: 'ramp', setting: 0 }, { tool: 'ramp', setting: 1 });
-  assert.equal(record(save, 'workshop'), "직접 들 때보다 힘이 가장 적게 든 설계: 빗면 '길고 완만하게'");
+  assert.equal(record(save, 'workshop'), "직접 들 때보다 힘이 가장 적게 든 설계: 빗면 '길고 완만한 빗면'");
 });
 
 test('core record states the same-force comparison', () => {

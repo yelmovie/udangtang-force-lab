@@ -1,10 +1,12 @@
 /* Popup + button polish (dokdo-design). Loaded after the base sheets; stage sheets (village, workshop, rescue, cargo, balance, scale, toolBag) load later, so stage-specific overrides live there. */
-@font-face { font-family: 'Jua'; font-style: normal; font-weight: 400; font-display: swap; src: url('/assets/fonts/jua-korean-400.woff2') format('woff2'); unicode-range: U+AC00-D7A3, U+1100-11FF, U+3130-318F, U+A960-A97F, U+D7B0-D7FF, U+3000-303F, U+FF00-FFEF; }
-@font-face { font-family: 'Jua'; font-style: normal; font-weight: 400; font-display: swap; src: url('/assets/fonts/jua-latin-400.woff2') format('woff2'); unicode-range: U+0000-00FF, U+2000-206F, U+2190-21FF, U+2300-25FF, U+2600-26FF, U+2700-27BF; }
+@font-face { font-family: 'NanumSquareNeo'; font-style: normal; font-weight: 400; font-display: swap; src: url('/assets/fonts/NanumSquareNeo-Regular.woff') format('woff'); }
+@font-face { font-family: 'NanumSquareNeo'; font-style: normal; font-weight: 700; font-display: swap; src: url('/assets/fonts/NanumSquareNeo-Bold.woff') format('woff'); }
+@font-face { font-family: 'NanumSquareNeo'; font-style: normal; font-weight: 800; font-display: swap; src: url('/assets/fonts/NanumSquareNeo-ExtraBold.woff') format('woff'); }
+@font-face { font-family: 'NanumSquareNeo'; font-style: normal; font-weight: 900; font-display: swap; src: url('/assets/fonts/NanumSquareNeo-Heavy.woff') format('woff'); }
 :root {
-  --font-display: 'Jua', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-  --font-body: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-  /* Jua ships one weight: never fake-bold it. Fallback faces with a real bold still get it. */
+  --font-display: 'NanumSquareNeo', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-body: 'NanumSquareNeo', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  /* Use the official static faces: the variable WOFF fails Chromium font validation. */
   font-synthesis-weight: none;
 }
 h1, h2, h3, .button, .brand, .topbar-title strong, .eyebrow, .control-label, .mission-tag strong,

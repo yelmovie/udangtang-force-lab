@@ -170,7 +170,7 @@
 }
 @keyframes village-bubble-pop { from { opacity: 0; transform: translate(-50%, -50%) scale(.3); } }
 .village-sign-plate { fill: #ffe9a6; stroke: #8a5a1c; stroke-width: 4; }
-.village-sign-text { fill: #5a3510; font: 400 22px/1 'Jua', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; text-anchor: middle; }
+.village-sign-text { fill: #5a3510; font: 400 22px/1 'NanumSquareNeo', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; text-anchor: middle; }
 .village-board { width: min(820px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 18px 20px 20px; overflow: auto; color: #283d30; background: #f6e7c4; border: 4px solid #6b4a26; border-radius: 10px; box-shadow: 0 8px 0 #3b2c1a; }
 .village-board::backdrop { background: #163c33a8; }
 .village-board-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }

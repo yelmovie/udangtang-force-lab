@@ -108,11 +108,11 @@ test('the request recap describes only the designs the student actually tried', 
   const play = steps => steps.reduce((record, [cargo, tool, setting]) => model.applyWorkshopL2Attempt(record, cargo, model.judgeWorkshopL2(cargo, tool, setting).success, { tool, setting }), undefined);
   // Kept the long ramp from level 1 and pressed run three times: no change, no comparison.
   const kept = play([[0, 'ramp', 1], [1, 'ramp', 1], [2, 'ramp', 1]]);
-  assert.equal(model.workshopL2Recap(kept), "화물 3개를 모두 '빗면 · 길고 완만하게' 설계로 올렸어요.");
+  assert.equal(model.workshopL2Recap(kept), "화물 3개를 모두 '빗면 · 길고 완만한 빗면' 설계로 올렸어요.");
   assert.doesNotMatch(model.workshopL2Recap(kept), /더 길게|바꿔|무거운 화물일수록/);
   // Lever for the first two, a stall on the heavy cargo, then the long ramp: name exactly that.
   const changed = play([[0, 'lever', 0], [1, 'lever', 0], [2, 'lever', 0], [2, 'lever', 0], [2, 'ramp', 1]]);
-  assert.equal(model.workshopL2Recap(changed), "가벼운 화물은 '지레 · 화물 가까이'로 올렸어요. 보통 화물은 '지레 · 화물 가까이'로 올렸어요. 무거운 화물은 '지레 · 화물 가까이'로는 멈췄고 '빗면 · 길고 완만하게'로 올렸어요.");
+  assert.equal(model.workshopL2Recap(changed), "가벼운 화물은 '지레 · 화물 가까이'로 올렸어요. 보통 화물은 '지레 · 화물 가까이'로 올렸어요. 무거운 화물은 '지레 · 화물 가까이'로는 멈췄고 '빗면 · 길고 완만한 빗면'로 올렸어요.");
   assert.deepEqual(changed.tries.filter(t => t.cargo === 2).length, 2, 'a retried design is kept once');
   // Saves from before tries were recorded give no recap, so the screen falls back to a neutral line.
   assert.equal(model.workshopL2Recap({ cleared: [0, 1, 2], attempts: 3 }), '');
@@ -125,4 +125,9 @@ test('level 1 finish rule is unchanged: level 2 never gates canFinishWorkshopExp
   Object.assign(save.workshop, { direct: true, trials: model.retainWorkshopRuns([{ tool: 'lever', setting: 0 }, { tool: 'lever', setting: 1 }, { tool: 'ramp', setting: 0 }, { tool: 'ramp', setting: 1 }]) });
   assert.equal(model.canFinishWorkshopExploration(save.workshop), true);
   assert.equal(model.workshopL2Complete(save.levels?.workshop), false);
+});
+
+test('ramp labels form grammatical location phrases in learning summaries', () => {
+  assert.equal(`${model.getWorkshopDesign('ramp', 1).label}에서`, '길고 완만한 빗면에서');
+  assert.equal(`${model.getWorkshopDesign('ramp', 0).label}에서`, '짧고 가파른 빗면에서');
 });

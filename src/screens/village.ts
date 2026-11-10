@@ -696,7 +696,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   function closeDialogue() { if(!dialog.open)return;dialog.close();talk=null;clearInput();canvas.focus();last=performance.now();draw(); }
   function explainLockedBuilding(building: Building) {
     if (options.adminUnlocked || stageIsOpen(context.save, building.id)) return false;
-    const mission = story.next ? villageRewards[story.next].name : '먼저 열린 실험실';
+    const mission = story.next ? villageRewards[story.next].name : '열린 실험실';
     const message = `먼저 ${mission} 미션을 끝내고 와 줘! 실험과 의뢰를 마치고 복구하면 다음 건물에 들어갈 수 있어.`;
     hint.textContent = message;
     openTalk({ name: villageRewards[building.id].name, role: '아직 들어갈 수 없어요', lines: [message], portrait: () => 'npc/point.webp', tint: '', done: '미션을 끝내고 올게!' });

@@ -81,6 +81,13 @@ async function test(name, run) {
 
 document.querySelector('#run-tests').addEventListener('click', async event => {
   event.target.disabled = true; results.textContent = ''; panel.style.pointerEvents = 'none';
+  await test('official font: NanumSquareNeo loads at all four shipped weights', async () => {
+    for (const weight of [400, 700, 800, 900]) {
+      const faces = await document.fonts.load(`${weight} 16px NanumSquareNeo`, '힘과 우리 생활');
+      assert(faces.length > 0 && faces.every(face => face.status === 'loaded'), `font weight ${weight} loaded`);
+      assert(document.fonts.check(`${weight} 16px NanumSquareNeo`, '힘과 우리 생활'), `font weight ${weight} ready`);
+    }
+  });
   for (const kind of ['webgl', 'asset']) await test(`${kind}: failure → retry → map, saved progress unchanged`, async () => {
     failMode = kind;
     const save = freshSave(); save.workshop.direct = true;
@@ -179,6 +186,7 @@ document.querySelector('#run-tests').addEventListener('click', async event => {
     click('.stage-popup-continue');await until(()=>!root.querySelector('dialog'),'question dismissed');
     click('#cargo-record-open');click('[data-finding="heavy"]');
     assert(!root.querySelector('#request-letter-title') && finished===0,'incorrect answer cannot open the request');
+    await until(() => root.querySelector('[data-finding="light"]:not(:disabled)'), 'wrong-answer review pause ended');
     click('[data-finding="light"]');
     assert(!root.querySelector('#request-letter-title'),'correct finding does not auto-open a letter');
     click('#cargo-open-orders');await until(()=>root.querySelector('#request-letter-title'),'letter after explicit request button');
@@ -322,7 +330,17 @@ document.querySelector('#run-tests').addEventListener('click', async event => {
   });
   await test('balance: inline prediction and result popup can reopen without input lock', async () => {
     mount(mountBalance); click('[data-object="A"]'); click('[data-pan="left"]');
-    click('[data-object="B"]'); click('[data-pan="right"]');
+    click('[data-object="B"]');
+    // I8 regression: .has-tap-hint must never put either pan into normal flow.
+    const pans = ['left', 'right'].map(side => root.querySelector(`[data-pan="${side}"]`));
+    const [leftRect, rightRect] = pans.map(pan => pan.getBoundingClientRect());
+    assert(pans.every(pan => getComputedStyle(pan).position === 'absolute'), 'hinted pans stay absolute');
+    assert(leftRect.right < rightRect.left, 'left and right pan hit areas do not overlap');
+    for (const [i, rect] of [leftRect, rightRect].entries()) {
+      assert(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)?.closest('[data-pan]') === pans[i], 'pan center hits the visible pan');
+    }
+    click('[data-pan="right"]');
+    assert(context.save.balance.left === 'A' && context.save.balance.right === 'B', 'both selected objects are placed');
     assert(root.querySelector('[data-predict="right"]'),'prediction is on the stage before release');
     click('[data-predict="right"]');
     assert(!root.querySelector('#balance-test').disabled,'prediction enables the pin');
