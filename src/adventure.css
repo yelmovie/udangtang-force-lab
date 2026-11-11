@@ -51,7 +51,7 @@ button:active:not(:disabled) { transform: translateY(2px); }
 .core-handle { position:absolute; z-index:3; bottom:37px; left:20%; width:60%; min-height:56px; border:3px solid #fff2cb; border-radius:16px; color:#194f4d; background:linear-gradient(#ffdf8e,#efba58); font-weight:900; font-size:18px; box-shadow:0 5px 0 #876223; touch-action:none; }
 .core-handle span { margin-left:12px; display:inline-block; animation: swipe-hint 1.8s ease-in-out infinite; }
 .mini-scale { padding:12px; border-radius:18px; background:#164a50; color:#bffbdd; margin:16px 0; display:grid; text-align:center; gap:5px; }
-.mini-scale strong { font-size:38px; font-family:ui-monospace,monospace; }
+.mini-scale strong { font-size:38px; font-family:var(--font-body); }
 .mini-scale strong span { font-size:20px; }
 .route-options { display:grid; gap:10px; }
 .route-options button { min-height:65px; border:2px solid #adccbd; border-radius:15px; background:#fffdf3; color:#285d58; font-weight:800; font-size:16px; text-align:left; padding:8px 12px; }
