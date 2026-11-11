@@ -34,6 +34,7 @@ import { earnedToolCards, toolCardInfo, toolCards } from './toolCards';
 import { bagIcon, openToolBag, toolCardRevealMarkup, toolCardRowMarkup } from './toolBag';
 import './studentUx.css';
 import './tabletUx.css';
+import './glass-ui.css';
 import { icons } from './icons';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
