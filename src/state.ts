@@ -35,7 +35,9 @@ export function retainLevels(value: unknown): LevelRecords {
 }
 export type RescueState = { zeroed: boolean; loaded: boolean; measured: boolean; gate: boolean; route: 'short' | 'long'; force: number; runs: RescueRun[]; delivered: boolean };
 
+import {normalizeMapVillains} from './map-villains.js';
 export interface SaveData {
+  mapVillains: number[];
   version: 1;
   currentPage: PageId;
   completed: StageId[];
@@ -71,6 +73,7 @@ const pageIds: PageId[] = ['title', 'map', ...stageIds, 'complete'];
 export function freshSave(): SaveData {
   return {
     version: 1,
+    mapVillains: normalizeMapVillains(null),
     currentPage: 'title',
     completed: [],
     evidence: {},
@@ -110,6 +113,7 @@ export function readSave(): SaveData | null {
     for (const id of completed) if (typeof item.evidence?.[id] === 'string') evidence[id] = item.evidence[id];
     const restored: SaveData = {
       ...fallback,
+      mapVillains: normalizeMapVillains(item.mapVillains),
       currentPage: pageIds.includes(item.currentPage as PageId) ? item.currentPage as PageId : 'map',
       completed,
       evidence,

@@ -1,3 +1,5 @@
+import { bindDirectionPad } from '../map-controls.js';
+import {mountMapVillains} from '../map-villains.js';
 import type { AppContext } from '../appTypes';
 import { icons } from '../icons';
 import type { StageId } from '../data';
@@ -291,6 +293,7 @@ export function villageLightRoutes(map: VillageMap, navigation: ReturnType<typeo
 export function mountVillage(root: HTMLElement, context: AppContext, options: { adminUnlocked: boolean; returnedFrom?: StageId; newlyCompleted?: StageId }): () => void {
   const story = getVillageStory(context.save.completed);
   const events = new AbortController();
+  let villains: ReturnType<typeof mountMapVillains> | undefined;
   const base = `${import.meta.env.BASE_URL}assets/village/`;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   root.innerHTML = `<section class="village-screen"><div class="village-frame"><canvas class="village-canvas" tabindex="0" aria-label="힘 마을. 방향키나 WASD로 걷고, 땅이나 건물 이름을 누르면 길을 따라 이동해요. 열린 문에 닿으면 자동 입장해요. Enter로 안내원과 대화하거나 가까운 문에 들어갈 수도 있어요."></canvas><svg class="village-lights" aria-hidden="true" focusable="false"></svg><div class="village-labels"></div></div><header class="village-hud"><div class="village-objective"><span>우리의 힘 마을</span><strong id="village-goal"></strong></div><div class="village-tally"><span class="village-count" id="village-count"></span></div></header><div class="village-reveal" role="status" hidden></div><div class="village-bottom"><div class="village-pad" role="group" aria-label="이동 방향판"><button data-direction="up" aria-label="위로 걷기">↑</button><button data-direction="left" aria-label="왼쪽으로 걷기">←</button><button data-direction="down" aria-label="아래로 걷기">↓</button><button data-direction="right" aria-label="오른쪽으로 걷기">→</button></div><div class="village-camera-tools" role="group" aria-label="지도 보기"><button class="village-pan" id="village-pan" aria-pressed="false" aria-label="지도 끌어 보기" title="지도 끌어 보기"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 17V8.5a2 2 0 0 1 4 0V15m0-8a2 2 0 0 1 4 0v8m0-6.5a2 2 0 0 1 4 0V16m0-4a2 2 0 0 1 4 0v8.5C26 26 22.5 29 18 29h-1.5c-3.4 0-5.4-1.5-7.3-4.4L5.6 19c-1-1.6 1.2-3.4 2.6-2l1.8 2" fill="#fff5d7" stroke="#5a3d17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="village-pan" id="village-fit" aria-label="지도 전체 보기" title="지도 전체 보기" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M8 8h8v8H8z"/></svg></button></div><p class="village-hint" id="village-hint" role="status">길을 누르거나 방향판으로 걸어가 봐!</p><div class="village-actions"><button id="village-results" hidden>내 발견 모아 보기</button><button id="village-action" disabled>건물 이름을 눌러요</button></div></div><div class="village-loading"><strong>마을로 가는 길을 준비해요…</strong><progress max="100" value="0" aria-label="마을 그림 준비"></progress><span id="village-loading-detail">마을 지도를 읽는 중이에요</span><button id="village-retry" hidden>다시 불러오기</button></div><dialog class="village-dialog" aria-labelledby="village-dialog-title"><img class="village-portrait" alt=""><div class="village-dialog-heading"><div><span id="village-dialog-role">마을의 안내원</span><h2 id="village-dialog-title"></h2></div><button id="village-dialog-close" aria-label="대화 닫기">×</button></div><p id="village-dialog-line"></p><div class="village-dialog-bottom"><span id="village-dialog-page"></span><button id="village-dialog-next">이야기 더 듣기 →</button></div></dialog><dialog class="village-board" aria-labelledby="village-board-title"><div class="village-board-heading"><h2 id="village-board-title">의뢰 게시판</h2><button id="village-board-close" aria-label="게시판 닫기">×</button></div><p class="village-board-lead"></p><ul class="village-board-cards"></ul></dialog></section>`;
@@ -568,6 +571,8 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   }
   function setupLabels() {
     labels.replaceChildren();
+    villains?.destroy();
+    villains=mountMapVillains(frame,{progress:options.adminUnlocked?[...context.save.mapVillains]:context.save.mapVillains,points:map!.buildings.filter(b=>context.save.completed.includes(b.id)).map(b=>({id:stageIds.indexOf(b.id),name:villageRewards[b.id].name,x:(b.entry.x+65)/map!.width*100,y:(b.entry.y-45)/map!.height*100})),onHit:()=>{if(!options.adminUnlocked)context.commit();},blocked:()=>paused(),sound:()=>context.sound(620),tool:'힘 빛 파동',color:'#a26995'});
     for(const building of map!.buildings){const button=document.createElement('button');button.className='village-building-label';button.dataset.stage=building.id;button.style.left=`${(building.x+building.width/2)/map!.width*100}%`;button.style.top=`max(${(building.y+building.height*0.42)/map!.height*100}%, var(--label-floor, 0px))`;const name=document.createElement('span');name.textContent=`${story.changes.includes(building.id)?'✓ ':''}${villageRewards[building.id].name}`;button.append(name,starRow(building.id));button.classList.toggle('is-current',story.next===building.id);button.classList.toggle('is-complete',story.changes.includes(building.id));button.classList.toggle('is-locked',!options.adminUnlocked&&!stageIsOpen(context.save,building.id));button.setAttribute('aria-label',`${villageRewards[building.id].name} 문 앞으로 걷기, ${starText(building.id)}`);button.addEventListener('click',()=>goTo(building.entry,villageRewards[building.id].name),{signal:events.signal});labels.append(button);}
     for(const npc of map!.npcs){const button=document.createElement('button');button.className='village-npc-label';button.style.left=`${npc.x/map!.width*100}%`;button.style.top=`${(npc.y-100)/map!.height*100}%`;button.textContent='도토리 박사';button.setAttribute('aria-label',`${npc.name}에게 걸어가기`);button.addEventListener('click',()=>goTo({x:npc.x-72,y:npc.y+6},npc.name),{signal:events.signal});labels.append(button);const bubble=document.createElement('button');bubble.className='village-npc-bubble';bubble.hidden=true;bubble.style.left=`${(npc.x-30)/map!.width*100}%`;bubble.style.top=`${(npc.y-112)/map!.height*100}%`;bubble.setAttribute('aria-label',`${npc.name}의 이야기 더 듣기`);bubble.addEventListener('click',()=>interact(),{signal:events.signal});labels.append(bubble);}
     const open=cards.filter(card=>card.status==='open').length;
@@ -825,16 +830,11 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   window.addEventListener('keyup',event=>{if(input.release(event.key,event.code)){event.preventDefault();syncPadFeedback();}},{signal:events.signal});
   window.addEventListener('blur',clearInput,{signal:events.signal});
   document.addEventListener('visibilitychange',()=>{clearInput();last=performance.now();},{signal:events.signal});
-  padButtons.forEach(button=>{
-    button.addEventListener('pointerdown',event=>{if(!map||paused()||(event.pointerType==='mouse'&&event.button!==0))return;event.preventDefault();setPan(false);canvas.focus();path=[];destination=null;button.setPointerCapture(event.pointerId);pads.set(event.pointerId,button.dataset.direction as Direction);syncPadFeedback();},{signal:events.signal});
-    button.addEventListener('pointermove',event=>{
-      if(!pads.has(event.pointerId)||paused())return;
-      const hovered=document.elementFromPoint(event.clientX,event.clientY)?.closest<HTMLElement>('[data-direction]');
-      if(hovered&&pad.contains(hovered)){pads.set(event.pointerId,hovered.dataset.direction as Direction);syncPadFeedback();}
-    },{signal:events.signal});
-    const release=(event:PointerEvent)=>{pads.delete(event.pointerId);syncPadFeedback();};
-    button.addEventListener('pointerup',release,{signal:events.signal});button.addEventListener('pointercancel',release,{signal:events.signal});button.addEventListener('lostpointercapture',release,{signal:events.signal});
-    button.addEventListener('click',event=>{if(event.detail!==0||!map||paused())return;const v=vectors[button.dataset.direction as Direction];goTo({x:actor.x+v.x*48,y:actor.y+v.y*48});},{signal:events.signal});
+  bindDirectionPad(pad, '[data-direction]', b=>b.dataset.direction as Direction, {
+    signal:events.signal, blocked:()=>!map||paused(),
+    press:direction=>{setPan(false);canvas.focus({preventScroll:true});path=[];destination=null;pads.set(-1,direction);const v=vectors[direction];move(v.x*6,v.y*6);syncPadFeedback();},
+    release:()=>{pads.delete(-1);syncPadFeedback();},
+    tap:direction=>{const v=vectors[direction];goTo({x:actor.x+v.x*32,y:actor.y+v.y*32});}
   });
   action.addEventListener('click',primary,{signal:events.signal});results.addEventListener('click',()=>context.navigate('complete'),{signal:events.signal});
   nextLine.addEventListener('click',()=>{if(talk&&line+1<talk.lines.length){line++;showLine();}else closeDialogue();},{signal:events.signal});
@@ -845,7 +845,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   retry.addEventListener('click',()=>void loadWorld(),{signal:events.signal});
   reduced.addEventListener('change',()=>{if(reduced.matches)lights.querySelectorAll('.village-spark').forEach(spark=>spark.remove());draw();},{signal:events.signal});
   void loadWorld();
-  return()=>{alive=false;generation++;cancelAnimationFrame(raf);fetches.abort();cancelImages.forEach(cancel=>cancel());clearInput();events.abort();observer.disconnect();if(dialog.open)dialog.close();if(board.open)board.close();portrait.removeAttribute('src');tinted.clear();images.clear();metadata.clear();};
+  return()=>{villains?.destroy();alive=false;generation++;cancelAnimationFrame(raf);fetches.abort();cancelImages.forEach(cancel=>cancel());clearInput();events.abort();observer.disconnect();if(dialog.open)dialog.close();if(board.open)board.close();portrait.removeAttribute('src');tinted.clear();images.clear();metadata.clear();};
 }
 
 

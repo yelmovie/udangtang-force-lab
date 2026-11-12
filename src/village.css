@@ -202,3 +202,29 @@
 .village-bottom .village-pan{width:52px;min-width:52px;height:52px;padding:8px;margin-right:0;justify-content:center}.village-pan:focus-visible{outline:4px solid #f6d36e;outline-offset:3px}
 
 .village-camera-tools{display:flex;gap:8px;flex:none;pointer-events:auto}
+
+/* Friendly post-learning map villains, independent of mission rewards. */
+.map-villains{position:absolute;inset:0;pointer-events:none;z-index:1900;--villain-scale:1}
+.map-villains .map-villain{position:absolute;transform:translate(-50%,-50%) scale(var(--villain-scale));transform-origin:center;pointer-events:auto;touch-action:manipulation;width:94px;height:96px;min-width:64px;min-height:64px;padding:0;border:0;background:none;box-shadow:none;cursor:pointer;overflow:visible;color:#fff;font:700 12px/1.3 sans-serif}
+.map-villain:focus-visible{outline:4px solid #fff47d;outline-offset:5px;border-radius:22px}
+.map-villain-body{position:absolute;left:9px;top:15px;width:76px;height:49px;border-radius:48% 52% 38% 43%;background:var(--villain-color);box-shadow:inset 0 -7px 0 #30295455,0 5px 0 #18262444;filter:drop-shadow(0 0 4px #fff9)}
+.map-villain-body:before,.map-villain-body:after{content:'';position:absolute;background:var(--villain-color);border-radius:50%;width:35px;height:35px;top:-14px;left:10px}
+.map-villain-body:after{left:34px;top:-8px;width:32px;height:32px}
+.map-villain-body i{position:absolute;z-index:1;top:13px;left:22px;width:10px;height:15px;border-radius:50%;background:#fff;box-shadow:inset -3px -3px 0 #253047}
+.map-villain-body i+i{left:47px}.map-villain-body em{position:absolute;left:33px;top:32px;width:14px;height:7px;border-bottom:3px solid #fff;border-radius:50%}
+.map-villain-caption{position:absolute;bottom:0;left:50%;transform:translateX(-50%);white-space:nowrap;background:#243941ed;border:1px solid #fff8;border-radius:12px;padding:4px 7px;box-shadow:0 2px 3px #0005}
+.map-villain-pulse{position:absolute;inset:-8px;display:grid;place-items:center;font-size:78px;color:#fff28d;opacity:0;pointer-events:none;text-shadow:0 0 10px #fff}
+.map-villain.is-hit .map-villain-body{animation:map-villain-hit .42s ease-out}.map-villain.is-cleared .map-villain-body{animation:map-villain-clear .46s ease-in forwards}
+.map-villain.is-hit .map-villain-pulse,.map-villain.is-cleared .map-villain-pulse{animation:map-villain-pulse .46s ease-out}
+.map-villain.is-cleared .map-villain-caption{opacity:0}.map-villain-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+@keyframes map-villain-hit{20%{translate:-8px 0;rotate:-9deg;filter:brightness(1.6)}50%{translate:7px 0;rotate:8deg}80%{translate:-3px 0}}
+@keyframes map-villain-clear{40%{scale:1.15;filter:brightness(1.6)}100%{translate:0 -30px;scale:.1;opacity:0}}
+@keyframes map-villain-pulse{0%{scale:.3;opacity:1}100%{scale:1.3;opacity:0}}
+@media(prefers-reduced-motion:reduce){.map-villain.is-hit .map-villain-body,.map-villain.is-cleared .map-villain-body,.map-villain.is-hit .map-villain-pulse,.map-villain.is-cleared .map-villain-pulse{animation:none}.map-villain.is-hit .map-villain-body{filter:brightness(1.5)}.map-villain.is-cleared .map-villain-body{opacity:0}}
+
+/* Map controls: clear local feedback without moving the layout. */
+[data-map-pad] { min-width:44px; min-height:44px; touch-action:none; user-select:none; -webkit-user-select:none; }
+[data-map-pad] > * { pointer-events:none; }
+[data-map-pad][data-map-held] { filter:brightness(1.15); outline:3px solid #f4bc45; outline-offset:1px; box-shadow:inset 0 0 0 2px #fff8da; }
+[data-map-pad]:focus-visible { outline:3px solid #165fba; outline-offset:3px; }
+[data-map-pad]:disabled { opacity:.5; }
