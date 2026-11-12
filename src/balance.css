@@ -22,13 +22,15 @@
   border:0; box-shadow:0 8px 7px #3b2c1d5c;
 }
 .instrument-screen.balance-screen .balance-pan {
+  /* Tap hints must not replace the absolute positioning of the two pans. */
+  position:absolute;
   width:clamp(108px,15vw,168px); height:143px; top:0;
   border:0; background:transparent url('/assets/game/balance-pan.webp') center bottom 4px/100% 49px no-repeat;
   padding:0; display:block; color:#2f4f46; text-shadow:none;
   filter:drop-shadow(0 7px 5px #34221250);
 }
-.instrument-screen.balance-screen .balance-pan.left { left:0; }
-.instrument-screen.balance-screen .balance-pan.right { right:0; }
+.instrument-screen.balance-screen .balance-pan.left { left:0; right:auto; }
+.instrument-screen.balance-screen .balance-pan.right { right:0; left:auto; }
 .instrument-screen.balance-screen .balance-pan::after { display:none; }
 .instrument-screen.balance-screen .balance-side {
   position:absolute; bottom:10px; left:50%; transform:translateX(-50%);

@@ -22,7 +22,7 @@ export async function autoWait(ready: () => boolean, alive: () => boolean): Prom
 export function syncAutoButton(button: HTMLButtonElement, screen: HTMLElement, playing: boolean, available: boolean, blocked: boolean) {
   button.hidden = !playing && !available;
   button.disabled = !playing && blocked;
-  button.textContent = playing ? '■ 자동 멈추기' : '▶ 자동으로 보기';
+  button.textContent = playing ? '직접 해보기' : '▶ 자동으로 보기';
   button.setAttribute('aria-pressed', String(playing));
   screen.classList.toggle('is-autoplaying', playing);
 }

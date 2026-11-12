@@ -24,7 +24,7 @@ export function getWorkshopDesign(tool: WorkshopTool, setting: number): Workshop
   const long = setting >= 1;
   const length = long ? 4.4 : 2.5;
   const lift = 1.4;
-  return { label: long ? '길고 완만하게' : '짧고 가파르게', force: 100 * lift / length, distance: length, lift, pivot: 0, length };
+  return { label: long ? '길고 완만한 빗면' : '짧고 가파른 빗면', force: 100 * lift / length, distance: length, lift, pivot: 0, length };
 }
 
 export function retainWorkshopRuns(value: unknown): WorkshopRun[] {
