@@ -565,7 +565,7 @@ function renderTitle(root: HTMLElement) {
     </div>
     <div class="title-buttons">
       <button class="button button-primary" id="new-start">${readSave() ? '새로 시작' : '시작하기'}</button>
-      <button class="button button-secondary" id="continue" ${hasSave ? '' : 'disabled'}>이어하기</button>
+      <button class="button button-secondary" id="continue" ${hasSave ? '' : 'disabled'}>이어 하기</button>
     </div>
     <div class="character" data-pose="title-squirrel" role="img" aria-label="기록판을 든 다람쥐 연구 기록관"></div>
   </section>`;
@@ -674,7 +674,7 @@ function openSettings() {
       // One clip per mission; a clip opens only after its mission, so it never spoils the discovery.
       content = `<p class="settings-lead">미션을 마치면 그 미션의 개념 영상이 열려요. 보고 싶은 영상을 골라요.</p><div class="concept-gallery">${stages.map(stage => {
         const open = adminUnlocked || save.completed.includes(stage.id);
-        return `<button type="button" class="concept-gallery-item" data-concept-open="${stage.id}"${open ? '' : ' disabled'}><img src="${conceptPoster(stage.id)}" alt=""><span><small>MISSION 0${stage.mission} · ${stage.concept}</small><strong>${conceptClipTitle(stage.id)}</strong><em>${open ? '▶ 영상 보기' : `미션 ${stage.mission}을 마치면 열려요`}</em></span></button>`;
+        return `<button type="button" class="concept-gallery-item" data-concept-open="${stage.id}"${open ? '' : ' disabled'}><img src="${conceptPoster(stage.id)}" alt=""><span><small>MISSION 0${stage.mission} · ${stage.concept}</small><strong>${conceptClipTitle(stage.id)}</strong><em>${open ? '▶ 영상 보기' : `미션 ${stage.mission}${[2,4,5].includes(stage.mission)?'를':'을'} 마치면 열려요`}</em></span></button>`;
       }).join('')}</div>`;
     } else if (section === 'reset') {
       content = '<p class="settings-lead">이 브라우저의 모든 실험 기록과 복구 진행을 지울까요? 지운 기록은 되돌릴 수 없어요. 소리 설정은 유지해요.</p><button class="button button-secondary settings-danger" data-settings="confirm-reset">기록을 지우고 처음으로</button>';

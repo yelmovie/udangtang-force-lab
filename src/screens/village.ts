@@ -767,14 +767,37 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     loading.querySelector('strong')!.textContent='마을로 가는 길을 준비해요…';
     const progress=loading.querySelector('progress')!,detail=root.querySelector('#village-loading-detail')!;progress.hidden=false;progress.value=0;detail.textContent='마을 지도를 읽는 중이에요';
     try {
-      const responses=await Promise.all([fetch(base+'world-map.json',{signal:fetches.signal}),fetch(base+'manifest.json',{signal:fetches.signal})]);
-      if(responses.some(response=>!response.ok))throw new Error('map');
-      const candidate=validateMap(await responses[0].json());const manifest=await responses[1].json() as {outputs:AssetMeta[]};
+      const readMapData = async (file: string): Promise<unknown> => {
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try {
+            const response = await fetch(base + file, {
+              signal: AbortSignal.any([fetches.signal, AbortSignal.timeout(25000)]),
+            });
+            if (!response.ok) throw new Error(file);
+            return await response.json();
+          } catch (error) {
+            if (attempt || !alive || token !== generation || fetches.signal.aborted) throw error;
+          }
+        }
+      };
+      const [rawMap, rawManifest] = await Promise.all([
+        readMapData('world-map.json'),
+        readMapData('manifest.json'),
+      ]);
+      const candidate = validateMap(rawMap);
+      const manifest = rawManifest as { outputs: AssetMeta[] };
       if(!alive||token!==generation)return;if(!ctx)throw new Error('canvas');
       if(!Array.isArray(manifest.outputs))throw new Error('manifest');metadata=new Map(manifest.outputs.map(item=>[item.file,item]));
       const files=[...new Set(['terrain.webp',...candidate.buildings.map(b=>b.asset),...candidate.npcs.map(n=>n.asset),...['guide','wave','think','point','baker','inspector','clerk','crafter'].map(pose=>`npc/${pose}.webp`),...['student','corgi'].flatMap(person=>directions.flatMap(direction=>[1,2,3,4].map(i=>`${person}/${direction}-${i}.webp`))),...[1,4,5,9,10,11,12].map(i=>`props/prop-${String(i).padStart(2,'0')}.webp`),'props/request-board.webp'])];
       let count=0;
-      const loaded=await Promise.all(files.map(async file=>{const image=await loadImage(file);if(alive&&token===generation){count++;progress.value=Math.round(count/files.length*95);detail.textContent='마을 그림을 준비하는 중이에요';}return [file,image] as const;}));
+      // Start each timeout only when its request has a slot; retry a transient failure once.
+      const queue=[...files],loaded:(readonly [string,HTMLImageElement])[]=[];
+      await Promise.all(Array.from({length:4},async()=>{while(queue.length){
+        const file=queue.shift()!;let image:HTMLImageElement;
+        try{image=await loadImage(file);}catch(error){if(!alive||token!==generation||fetches.signal.aborted)throw error;image=await loadImage(file);}
+        if(!alive||token!==generation||fetches.signal.aborted)throw new Error('cancelled');
+        count++;progress.value=Math.round(count/files.length*95);detail.textContent='마을 그림을 준비하는 중이에요';loaded.push([file,image]);
+      }}));
       if(!alive||token!==generation)return;
       detail.textContent='안전하게 걸을 수 있는 길을 찾는 중이에요';
       const nav=createVillageNavigation(candidate);const returned=candidate.buildings.find(b=>b.id===options.returnedFrom);
