@@ -326,7 +326,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   }
   function reviewRequest() {
     if(busy||waiting||drag||level!==1||!scaleExplorationReady(state)||!spring.hidden) return;
-    popup?.close(); showRequestLetter(root,'scale',openRequest);
+    popup?.close(); showRequestLetter(root,'scale',openRequest, () => context.save);
   }
   function advanceFakeRound() {
     if(!waiting) return;

@@ -330,7 +330,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         return; force = Number(b.dataset.force) as ForceLevel; context.sound(380 + force * 60); update(); }, { signal: events.signal }));
     ordersOpen.addEventListener('click', () => {
         if (busy || waiting || drag || !ready() || !finding || level !== 1) return;
-        closePopup(); showRequestLetter(root, 'cargo', enterOrders);
+        closePopup(); showRequestLetter(root, 'cargo', enterOrders, () => context.save);
     }, { signal: events.signal });
     recordOpen.addEventListener('click', () => { if (!busy && !waiting && !drag) recordPopup(); }, { signal: events.signal });
     root.querySelector('#cargo-finding-go')!.addEventListener('click', () => { if (!busy && !waiting && !drag) recordPopup(); }, { signal: events.signal });

@@ -7,7 +7,7 @@ const tracks = new Map<MusicName, HTMLAudioElement>();
 let volume = 0.3;
 let wanted: MusicName | null = null;
 // Music sits under the effects so feedback sounds stay easy to hear.
-const musicVolume = () => volume * 0.7;
+const musicVolume = () => volume * 0.7 * (musicDucks.size ? .32 : 1);
 export function setVolume(value: number) {
   volume = Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0.3;
   players.forEach(audio => { audio.volume = volume; });
@@ -33,7 +33,19 @@ export function playMusic(name: MusicName) {
   if (audio.paused && !audio.ended && !document.hidden) void audio.play().catch(() => { /* Autoplay waits for the first tap. */ });
 }
 export function stopMusic() { wanted = null; tracks.forEach(audio => { audio.pause(); audio.currentTime = 0; }); }
-document.addEventListener('visibilitychange', () => {
+if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => {
   if (document.hidden) { stopSounds(); tracks.forEach(audio => audio.pause()); }
   else if (wanted) playMusic(wanted);
 });
+
+// Reduce music under a line of dialogue without restarting the track.
+const musicDucks = new Set<symbol>();
+export function duckMusic() {
+  const token = Symbol();
+  musicDucks.add(token);
+  tracks.forEach(audio => { audio.volume = musicVolume(); });
+  return () => {
+    musicDucks.delete(token);
+    tracks.forEach(audio => { audio.volume = musicVolume(); });
+  };
+}

@@ -35,3 +35,18 @@
 .corgi-hint-steps li.done { background: #dcf1d8; color: #176248; }
 .corgi-hint-missing, .corgi-hint-finish { margin: 6px 0 0; }
 .corgi-hint-finish { color: #8a4b12; font-weight: 800; }
+
+.corgi-greeting-button {
+  min-height: 44px;
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  color: inherit;
+}
+
+body:has(.kong-dialogue[open]) .corgi-hint-bubble,
+body:has(.kong-dialogue[open]) .corgi-hint-solo { opacity: 0; }

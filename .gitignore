@@ -22,3 +22,7 @@ tools/remotion-concepts/node_modules/
 .tmp/
 output/
 graphify-out/
+
+# Small production story movies include the character narration.
+!public/assets/story/intro.mp4
+!public/assets/story/ending.mp4

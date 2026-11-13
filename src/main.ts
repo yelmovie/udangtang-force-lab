@@ -19,8 +19,8 @@ import { mountRescue } from './screens/rescue';
 import { mountVillage } from './screens/village';
 import { villageRewards } from './villageStory';
 import { playMusic, playSound, stopMusic, stopSounds, setVolume, type MusicName } from './sound';
-import { installNpcNarration } from './npc-narration.js';
-installNpcNarration({selector:'.corgi-hint-body',src:import.meta.env.BASE_URL+'assets/audio/npc-welcome.mp3',text:'안녕! 나는 콩이야. 물건을 밀고 당기면서 힘이 하는 일을 함께 알아보자. 한 번에 한 가지씩 바꾸며 살펴보면 새로운 발견을 할 수 있어!',enabled:()=>save.soundOn,volume:()=>save.soundVolume??.3,hold:()=>{stopSounds();stopMusic();return syncMusic;}});
+import { installKongDialogue } from './kongDialogue';
+installKongDialogue(() => save);
 import { infoContent, type InfoSection } from './info';
 import { prepareOffline } from './offline';
 import type { AppContext } from './appTypes';
@@ -237,7 +237,7 @@ function escapeHtml(value: string): string {
 const prologueLines = [
   { who: '도토리 박사', text: '우당탕 마을에 전기가 모두 나갔어! 무슨 일이 생긴 걸까?' },
   { who: '도토리 박사', text: '원인을 찾았어! 마을의 배터리 ‘코어’가 중앙 장치에서 분리돼 있어. 다시 끼워야 전기가 돌아와.' },
-  { who: '코기 콩이', text: '그런데 코어가 너무 무거워! 네 건물에서 밀고 당기기, 무게 비교, 도구 쓰는 법을 익혀서 다시 장착할 방법을 찾자!' },
+  { who: '코기 콩이', text: '코어가 너무 무거워! 힘을 쓰는 방법을 배워서 다시 끼우자!' },
 ];
 type StoryVideo = { src: string; cues: number[]; duration: number; poster?: string };
 type StoryOptions = { lines: { who: string; text: string }[]; finishLabel: string; onDone?: () => void; skippable?: boolean; scenes?: string[]; video?: StoryVideo; music?: MusicName };
@@ -297,6 +297,8 @@ function openStoryModal(options: StoryOptions) {
       <div class="story-actions"><button class="button button-secondary" data-story="skip">건너뛰기</button><button class="button button-primary" data-story="done" hidden>${options.finishLabel}</button></div>
     </div>`;
     const el = modal.querySelector<HTMLVideoElement>('video')!;
+    el.muted = !anySound();
+    el.volume = Math.min(1, Math.max(0, (save.soundVolume ?? .3) * 2.4));
     const who = modal.querySelector<HTMLElement>('#story-title')!;
     const caption = modal.querySelector<HTMLElement>('#story-caption')!;
     const dotNodes = Array.from(modal.querySelectorAll<HTMLElement>('.story-dots i'));
@@ -379,7 +381,7 @@ function openStoryModal(options: StoryOptions) {
   });
   document.addEventListener('keydown', onEscape, true);
   document.body.append(modal);
-  storyMusic = options.music ?? (options.video ? 'quiet' : null); syncMusic();
+  storyMusic = options.video ? 'quiet' : options.music ?? null; syncMusic();
   if (options.video) drawVideo(options.video); else draw();
 }
 function openEndingCeremony() {

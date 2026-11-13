@@ -1,0 +1,135 @@
+dialog.npc-dialogue {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  color: #3e3224;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+dialog.npc-dialogue::backdrop { background: #17251b91; }
+.npc-dialogue-stage {
+  position: absolute;
+  inset: auto 0 max(20px, env(safe-area-inset-bottom));
+  width: min(92%, 960px);
+  margin: auto;
+}
+.npc-dialogue-character {
+  width: min(45vh, 45vw, 420px);
+  margin: 0 0 -8px 4%;
+  pointer-events: none;
+  filter: drop-shadow(0 5px 4px #281d2955);
+}
+.npc-dialogue-frame {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--npc-portrait) 0% 0 / 200% 100% no-repeat;
+}
+.npc-dialogue[data-speaking="true"] .npc-dialogue-frame { animation: npc-dialogue-mouth 410ms steps(1) infinite; }
+@keyframes npc-dialogue-mouth { 0%, 74% { background-position-x: 0%; } 28% { background-position-x: 100%; } }
+.npc-dialogue-panel {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 22px 24px 12px;
+  border: 2px solid #bf9652;
+  border-radius: 12px;
+  background: linear-gradient(#fff6df, #f1e0b8);
+  box-shadow: 0 10px 32px #18251e50, inset 0 0 0 2px #fff9e850;
+}
+.npc-dialogue-name {
+  position: absolute;
+  top: -27px;
+  left: 23px;
+  margin: 0;
+  padding: 5px 15px;
+  color: #fff4d4;
+  background: #704b29;
+  border-radius: 7px;
+  font-size: clamp(17px, 2.3vw, 23px);
+  line-height: 1.2;
+}
+.npc-dialogue-panel [data-dialogue-text] {
+  position: relative;
+  margin: 0;
+  margin-right: 36px;
+  max-height: min(30vh, 7.4em);
+  overflow: auto;
+  font-size: clamp(18px, 2.15vw, 25px);
+  line-height: 1.48;
+  font-weight: 700;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.npc-dialogue-panel [data-dialogue-text] > :first-child { position: absolute; inset: 0; }
+.npc-dialogue-reserve { visibility: hidden; }
+.npc-dialogue-panel .npc-dialogue-close {
+  position: absolute;
+  top: 0;
+  right: 3px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  color: #705231;
+  font-size: 29px;
+}
+.npc-dialogue-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2px 10px; }
+.npc-dialogue-meta { display: flex; flex-wrap: wrap; align-items: center; column-gap: 10px; color: #705c40; font-size: 14px; }
+.npc-dialogue-panel .npc-dialogue-replay {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #704522;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: underline;
+}
+.npc-dialogue-panel .npc-dialogue-next {
+  margin-left: auto;
+  min-height: 44px;
+  padding: 6px 12px;
+  color: #754126;
+  background: #fff5dd;
+  border: 1px solid #bf9652;
+  border-radius: 7px;
+  box-shadow: 0 3px 0 #c4a373;
+  font-size: clamp(15px, 1.9vw, 19px);
+  font-weight: 900;
+}
+.npc-dialogue-next::after { content: ' ▼'; color: #b65b29; font-size: .75em; }
+.npc-dialogue[data-typing="true"] .npc-dialogue-next::after { content: ' …'; }
+.npc-dialogue-readable { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 700px) {
+  .npc-dialogue-stage { width: 94%; }
+  .npc-dialogue-character { width: min(74vw, 46dvh, 360px); margin-left: 0; }
+  .npc-dialogue-panel { padding-inline: 15px; }
+  .npc-dialogue-name { left: 15px; }
+}
+@media (max-height: 600px) {
+  .npc-dialogue-stage { bottom: max(9px, env(safe-area-inset-bottom)); }
+  .npc-dialogue-character { width: min(43dvh, 62vw, 340px); }
+  .npc-dialogue-panel { padding-top: 15px; padding-bottom: 6px; gap: 3px; }
+  .npc-dialogue-panel [data-dialogue-text] { font-size: clamp(16px, 2.6dvh, 20px); }
+}
+@media (prefers-reduced-motion: reduce) { .npc-dialogue[data-speaking="true"] .npc-dialogue-frame { animation: none; } }
+
+.village-screen:has(.village-conversation[open]) .village-npc-bubble { visibility: hidden; }
+
+/* These left-side portraits face or point into the open part of the scene. */
+.npc-dialogue-frame:is([data-portrait="baker"],[data-portrait="inspector"],[data-portrait="crafter"]) { scale: -1 1; }

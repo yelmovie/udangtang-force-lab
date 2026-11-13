@@ -389,7 +389,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     if (button.dataset.pan) { if (selectedObject) place(selectedObject,button.dataset.pan as 'left'|'right'); else { feedback=`아래 ${level === 1 ? '물체' : '상자'}를 고른 다음 왼쪽 또는 오른쪽 자리를 눌러요.`; update(); } }
     if (button.dataset.predict) { state.prediction=button.dataset.predict as BalanceRun['prediction']; visibleOutcome=null; shownRun=null; feedback=`${names[state.prediction]}을 예상했어요. 가운데 잠금핀 고리를 뽑아 확인해요.`; context.commit(); update(); }
     if (button.dataset.pick) pick(button.dataset.pick);
-    if ((button.id==='balance-request-open' || button.id==='balance-popup-request') && !busy && level === 1 && canFinish()) { closePopup(); showRequestLetter(root, 'balance', enterMystery); }
+    if ((button.id==='balance-request-open' || button.id==='balance-popup-request') && !busy && level === 1 && canFinish()) { closePopup(); showRequestLetter(root, 'balance', enterMystery, () => context.save); }
     if (button.id==='balance-record') openPopup();
     if (button.id==='balance-free-play') { exploreFreely(); return; }
     if (button.id==='balance-next-round' || button.id==='balance-popup-next') nextRound();

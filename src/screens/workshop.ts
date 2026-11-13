@@ -509,7 +509,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   window.addEventListener('resize',()=>{ endDesign(true); if (keyHeld || heldPointer !== null) end(true); },{signal});
   const resizeObserver=new ResizeObserver(()=>{if(active)requestAnimationFrame(positionHandle);}); resizeObserver.observe(world);
   notebookBoard.addEventListener('click', event => {
-    if ((event.target as Element).closest('#workshop-open-request')) { if(level===1&&workshopExplorationReady(state)&&heldPointer===null&&!keyHeld&&designPointer===null&&!waiting&&!sliding) { recordDialog?.close(); showRequestLetter(root,'workshop',enterRequest); } return; }
+    if ((event.target as Element).closest('#workshop-open-request')) { if(level===1&&workshopExplorationReady(state)&&heldPointer===null&&!keyHeld&&designPointer===null&&!waiting&&!sliding) { recordDialog?.close(); showRequestLetter(root,'workshop',enterRequest, () => context.save); } return; }
     const nextTool = (event.target as Element).closest<HTMLButtonElement>('[data-next-tool]')?.dataset.nextTool as WorkshopTool | undefined;
     if (nextTool) { recordDialog?.close(); configure(nextTool); return; }
     if (level === 2) return;
