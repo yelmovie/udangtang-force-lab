@@ -1,5 +1,4 @@
 import { bindDirectionPad } from '../map-controls.js';
-import {mountMapVillains} from '../map-villains.js';
 import type { AppContext } from '../appTypes';
 import { icons } from '../icons';
 import type { StageId } from '../data';
@@ -8,8 +7,6 @@ import { getVillageStory, villageRewards } from '../villageStory';
 import '../village.css';
 import { mountDialogueText } from '../npcDialogue';
 import { mountDialogueVoice, setDialoguePortrait } from '../npcDialogueVoice';
-import { challenges } from '../challenges';
-import { stageStars, type StageStars } from '../stars';
 import { newlySolved, requestBoard, requestThanks, solvedRequests, villageRequests, type RequestStage } from '../requestBoard';
 
 type Point = { x: number; y: number };
@@ -23,8 +20,6 @@ const directions: Direction[] = ['down', 'left', 'right', 'up'];
 const stageIds: StageId[] = ['cargo', 'balance', 'scale', 'workshop', 'rescue'];
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
 const walkingSpeed = 220;
-/** Star slots seen at the last village visit; only lives for this page load, so stars stay computed from the save. */
-let seenStars: Record<StageId, boolean[]> | undefined;
 /** Requests solved at the last village visit, so a client walks out only once per new solve. */
 let seenRequests: RequestStage[] | undefined;
 
@@ -295,10 +290,9 @@ export function villageLightRoutes(map: VillageMap, navigation: ReturnType<typeo
 export function mountVillage(root: HTMLElement, context: AppContext, options: { adminUnlocked: boolean; returnedFrom?: StageId; newlyCompleted?: StageId }): () => void {
   const story = getVillageStory(context.save.completed);
   const events = new AbortController();
-  let villains: ReturnType<typeof mountMapVillains> | undefined;
   const base = `${import.meta.env.BASE_URL}assets/village/`;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  root.innerHTML = `<section class="village-screen"><div class="village-frame"><canvas class="village-canvas" tabindex="0" aria-label="힘 마을. 방향키나 WASD로 걷고, 땅이나 건물 이름을 누르면 길을 따라 이동해요. 열린 문에 닿으면 자동 입장해요. Enter로 안내원과 대화하거나 가까운 문에 들어갈 수도 있어요."></canvas><svg class="village-lights" aria-hidden="true" focusable="false"></svg><div class="village-labels"></div></div><header class="village-hud"><div class="village-objective"><span>우리의 힘 마을</span><strong id="village-goal"></strong></div><div class="village-tally"><span class="village-count" id="village-count"></span></div></header><div class="village-reveal" role="status" hidden></div><div class="village-bottom"><div class="village-pad" role="group" aria-label="이동 방향판"><button data-direction="up" aria-label="위로 걷기">↑</button><button data-direction="left" aria-label="왼쪽으로 걷기">←</button><button data-direction="down" aria-label="아래로 걷기">↓</button><button data-direction="right" aria-label="오른쪽으로 걷기">→</button></div><div class="village-camera-tools" role="group" aria-label="지도 보기"><button class="village-pan" id="village-pan" aria-pressed="false" aria-label="지도 끌어 보기" title="지도 끌어 보기"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 17V8.5a2 2 0 0 1 4 0V15m0-8a2 2 0 0 1 4 0v8m0-6.5a2 2 0 0 1 4 0V16m0-4a2 2 0 0 1 4 0v8.5C26 26 22.5 29 18 29h-1.5c-3.4 0-5.4-1.5-7.3-4.4L5.6 19c-1-1.6 1.2-3.4 2.6-2l1.8 2" fill="#fff5d7" stroke="#5a3d17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="village-pan" id="village-fit" aria-label="지도 전체 보기" title="지도 전체 보기" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M8 8h8v8H8z"/></svg></button></div><p class="village-hint" id="village-hint" role="status">길을 누르거나 방향판으로 걸어가 봐!</p><div class="village-actions"><button id="village-results" hidden>내 발견 모아 보기</button><button id="village-action" disabled>건물 이름을 눌러요</button></div></div><div class="village-loading"><strong>마을로 가는 길을 준비해요…</strong><progress max="100" value="0" aria-label="마을 그림 준비"></progress><span id="village-loading-detail">마을 지도를 읽는 중이에요</span><button id="village-retry" hidden>다시 불러오기</button></div><dialog class="village-conversation npc-dialogue" aria-labelledby="village-dialog-title"><div class="npc-dialogue-stage"><div class="npc-dialogue-character"><span class="npc-dialogue-frame" aria-hidden="true"></span></div><div class="npc-dialogue-panel"><h2 class="npc-dialogue-name" id="village-dialog-title"></h2><button class="npc-dialogue-close" id="village-dialog-close" aria-label="대화 닫기">×</button><p id="village-dialog-line" data-dialogue-text></p><div class="npc-dialogue-bottom"><div class="npc-dialogue-meta"><span id="village-dialog-role">마을의 안내원</span><button class="npc-dialogue-replay" type="button" data-dialogue-voice hidden>다시 듣기</button></div><button class="npc-dialogue-next" id="village-dialog-next">이야기 더 듣기</button></div></div></div></dialog><dialog class="village-board" aria-labelledby="village-board-title"><div class="village-board-heading"><h2 id="village-board-title">의뢰 게시판</h2><button id="village-board-close" aria-label="게시판 닫기">×</button></div><p class="village-board-lead"></p><ul class="village-board-cards"></ul></dialog></section>`;
+  root.innerHTML = `<section class="village-screen"><div class="village-frame"><canvas class="village-canvas" tabindex="0" aria-label="힘 마을. 방향키나 WASD로 걷고, 땅이나 건물 이름을 누르면 길을 따라 이동해요. 장소 이름이나 다음 장소 버튼을 눌러 출발해요. Enter로 가까운 주민과 이야기하거나 문에 들어갈 수도 있어요."></canvas><svg class="village-lights" aria-hidden="true" focusable="false"></svg><div class="village-labels"></div></div><div class="village-reveal" role="status" hidden></div><div class="village-bottom"><div class="village-pad" role="group" aria-label="이동 방향판"><button data-direction="up" aria-label="위로 걷기">↑</button><button data-direction="left" aria-label="왼쪽으로 걷기">←</button><button data-direction="down" aria-label="아래로 걷기">↓</button><button data-direction="right" aria-label="오른쪽으로 걷기">→</button></div><p class="village-hint" id="village-hint" role="status">길을 누르거나 방향판으로 걸어가 봐!</p><div class="village-actions"><div class="village-camera-tools" role="group" aria-label="지도 보기"><button class="village-pan" id="village-pan" aria-pressed="false" aria-label="지도 끌어 보기" title="지도 끌어 보기"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 17V8.5a2 2 0 0 1 4 0V15m0-8a2 2 0 0 1 4 0v8m0-6.5a2 2 0 0 1 4 0V16m0-4a2 2 0 0 1 4 0v8.5C26 26 22.5 29 18 29h-1.5c-3.4 0-5.4-1.5-7.3-4.4L5.6 19c-1-1.6 1.2-3.4 2.6-2l1.8 2" fill="#fff5d7" stroke="#5a3d17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="village-pan" id="village-fit" aria-label="지도 전체 보기" title="지도 전체 보기" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M8 8h8v8H8z"/></svg></button></div><button id="village-results" hidden>내 발견 모아 보기</button><button id="village-action" disabled>건물 이름을 눌러요</button></div></div><div class="village-loading"><strong>마을로 가는 길을 준비해요…</strong><progress max="100" value="0" aria-label="마을 그림 준비"></progress><span id="village-loading-detail">마을 지도를 읽는 중이에요</span><button id="village-retry" hidden>다시 불러오기</button></div><dialog class="village-conversation npc-dialogue" aria-labelledby="village-dialog-title"><div class="npc-dialogue-stage"><div class="npc-dialogue-character"><span class="npc-dialogue-frame" aria-hidden="true"></span></div><div class="npc-dialogue-panel"><h2 class="npc-dialogue-name" id="village-dialog-title"></h2><button class="npc-dialogue-close" id="village-dialog-close" aria-label="대화 닫기">×</button><p id="village-dialog-line" data-dialogue-text></p><div class="npc-dialogue-bottom"><div class="npc-dialogue-meta"><span id="village-dialog-role">마을의 안내원</span><button class="npc-dialogue-replay" type="button" data-dialogue-voice hidden>다시 듣기</button></div><button class="npc-dialogue-next" id="village-dialog-next">이야기 더 듣기</button></div></div></div></dialog><dialog class="village-board" aria-labelledby="village-board-title"><div class="village-board-heading"><h2 id="village-board-title">의뢰 게시판</h2><button id="village-board-close" aria-label="게시판 닫기">×</button></div><p class="village-board-lead"></p><ul class="village-board-cards"></ul></dialog></section>`;
   const shell = root.querySelector<HTMLElement>('.village-screen')!, frame = root.querySelector<HTMLElement>('.village-frame')!;
   const canvas = root.querySelector<HTMLCanvasElement>('.village-canvas')!;
   const ctx = canvas.getContext('2d')!;
@@ -317,18 +311,12 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   const portrait = root.querySelector<HTMLElement>('.npc-dialogue-frame')!;
   const nextLine = root.querySelector<HTMLButtonElement>('#village-dialog-next')!;
   const board = root.querySelector<HTMLDialogElement>('.village-board')!;
-  root.querySelector('#village-goal')!.textContent = story.next ? `다음 발견 · ${villageRewards[story.next].name}` : `마을 복구 완료 · 도전 과제 ${challenges(context.save).filter(item => item.done).length}/5`;
-  root.querySelector('#village-count')!.textContent = `${story.count} / 5 복구`;
-  const stars = Object.fromEntries(stageIds.map(id => [id, stageStars(context.save, id)])) as Record<StageId, StageStars>;
-  // A star earned since the last visit pops once on its building label.
-  const freshStars = Object.fromEntries(stageIds.map(id => [id, stars[id].slots.map((slot, i) => !!seenStars && slot.done && !seenStars[id][i])])) as Record<StageId, boolean[]>;
-  seenStars = Object.fromEntries(stageIds.map(id => [id, stars[id].slots.map(slot => slot.done)])) as Record<StageId, boolean[]>;
   // Level 2 requests: the board shows all four; a solved one brings its client back to the building.
   const cards = requestBoard(context.save), solved = solvedRequests(context.save);
+  const boardAvailable=cards.some(card=>card.status!=='locked');
   const arriving = reduced.matches ? [] : newlySolved(seenRequests, solved);
   seenRequests = solved;
-  // Clients walk out after the light reveal and the star pop, never on top of them.
-  const freshStar = Object.values(freshStars).some(row => row.some(Boolean));
+  // Give the light reveal room before clients walk out.
   const results = root.querySelector<HTMLButtonElement>('#village-results')!; results.hidden = !story.complete; results.classList.toggle('is-next', story.complete);
   let alive = true, generation = 0, raf = 0, last = 0, walkingTime = 0, dogTime = 0, revealTime = 0, lastDraw = 0;
   let wasMoving = false, wasDogMoving = false;
@@ -344,7 +332,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   let revealStage = options.newlyCompleted && story.changes.includes(options.newlyCompleted) ? options.newlyCompleted : undefined;
   // Reveal timeline (seconds): windows light up, then light runs along the road to the core.
   const flowStart = .7, flowTime = 1.3, revealEnd = flowStart + flowTime + .5;
-  const arrivalStart = revealStage ? revealEnd + .3 : freshStar ? 1.3 : .5, arrivalTime = .9;
+  const arrivalStart = revealStage ? revealEnd + .3 : .5, arrivalTime = .9;
   let arrivalShown = !arriving.length;
   const tinted = new Map<RequestStage, HTMLCanvasElement>();
   let images = new Map<string,HTMLImageElement>(), metadata = new Map<string,AssetMeta>();
@@ -355,8 +343,8 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   const panButton = root.querySelector<HTMLButtonElement>('#village-pan')!;
   // Hand mode: the student drags the map to look around. The camera stays where it was dragged
   // until hand mode is switched off or the student starts walking again.
-  let camera = { x: 0, y: 0 }, panView: { x: number; y: number } | null = null, panDrag: { id: number; x: number; y: number; from: { x: number; y: number } } | null = null, hintBeforePan = '';
-  let entrance: ReturnType<typeof createVillageEntrances> | null = null, entering = false;
+  let camera = { x: 0, y: 0 }, panView: { x: number; y: number } | null = null, panDrag: { id: number; x: number; y: number; from: { x: number; y: number }; moved: boolean } | null = null, hintBeforePan = '';
+  let guided: Building | undefined, entering = false;
   const vectors: Record<Direction,Point> = { up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0} };
   function paused() { return document.hidden || dialog.open || board.open || !!root.closest('[inert]') || !!document.querySelector('.modal-layer'); }
   function syncPadFeedback() {
@@ -382,10 +370,30 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     const studentFamilyHeight = Math.max(...directions.flatMap(direction => [1, 2, 3, 4].map(i => visibleHeight(`student/${direction}-${i}.webp`))));
     return mapCharacterHeight * visibleHeight('student/down-1.webp') / studentFamilyHeight;
   }
-  function sprite(file: string, p: Point, height: number, familyHeight?: number) {
+  // Cache the transparent outline per pose and rounded display scale, never on the map itself.
+  const outlinedSprites = new Map<string,HTMLCanvasElement>();
+  let outlineRatio = 0;
+  function outlinedSprite(file: string, image: HTMLImageElement, width: number, height: number) {
+    const ratio=Math.max(.25,Math.round(ctx.getTransform().a/Math.min(devicePixelRatio||1,1.5)*8)/8);
+    if(ratio!==outlineRatio){outlinedSprites.clear();outlineRatio=ratio;}
+    const key=`${file}:${width}:${height}`;let art=outlinedSprites.get(key);
+    if(!art){
+      const w=Math.max(1,Math.round(width*ratio)),h=Math.max(1,Math.round(height*ratio));
+      art=document.createElement('canvas');art.width=w+8;art.height=h+8;
+      const ink=art.getContext('2d')!;ink.imageSmoothingEnabled=false;
+      for(const [x,y] of [[-2,0],[2,0],[0,-2],[0,2],[-1,-1],[1,1],[1,-1],[-1,1]])ink.drawImage(image,4+x,4+y,w,h);
+      ink.globalCompositeOperation='source-in';ink.fillStyle='#fff4d2';ink.fillRect(0,0,art.width,art.height);ink.globalCompositeOperation='source-over';
+      ink.shadowColor='#23392a66';ink.shadowOffsetY=2;ink.shadowBlur=2;ink.drawImage(image,4,4,w,h);
+      outlinedSprites.set(key,art);
+    }
+    return {art,pad:4/ratio};
+  }
+  function sprite(file: string, p: Point, height: number, familyHeight?: number, outline=false) {
     const image = images.get(file); if(!image)return;
     const scale = height/(familyHeight||visibleHeight(file)), anchor=pivot(file,image);
-    ctx.drawImage(image,Math.round(p.x-anchor.x*scale),Math.round(p.y-anchor.y*scale),Math.round(image.naturalWidth*scale),Math.round(image.naturalHeight*scale));
+    const x=Math.round(p.x-anchor.x*scale),y=Math.round(p.y-anchor.y*scale),w=Math.round(image.naturalWidth*scale),h=Math.round(image.naturalHeight*scale);
+    if(outline){const {art,pad}=outlinedSprite(file,image,w,h);ctx.drawImage(art,x-pad,y-pad,w+2*pad,h+2*pad);}
+    else ctx.drawImage(image,x,y,w,h);
   }
   function rewardPoint(id: StageId): Point { return id==='rescue'?{x:838,y:243}:id==='balance'?{x:1183,y:282}:id==='cargo'?{x:455,y:374}:id==='scale'?{x:574,y:735}:{x:1344,y:732}; }
   // Light glows live in the SVG overlay (setupLights); the canvas keeps only the reward props.
@@ -478,6 +486,22 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     fogCtx.setTransform(fogScale,0,0,fogScale,0,0);fogCtx.globalCompositeOperation='destination-out';clearAround(fogCtx,actor,125);fogCtx.globalCompositeOperation='source-over';
     ctx.imageSmoothingEnabled=true;ctx.drawImage(fogCanvas,0,0,map.width,map.height);ctx.imageSmoothingEnabled=false;
   }
+  const sleepingFacades = new Map<string, HTMLCanvasElement>();
+  function drawFacade(building: Building) {
+    const art=images.get(building.asset)!;
+    if(story.complete && !revealStage){ctx.drawImage(art,building.x,building.y,building.width,building.height);return;}
+    let sleeping=sleepingFacades.get(building.asset);
+    if(!sleeping){
+      sleeping=document.createElement('canvas');sleeping.width=art.naturalWidth;sleeping.height=art.naturalHeight;
+      const brush=sleeping.getContext('2d')!;
+      brush.filter='grayscale(.55) saturate(.54) brightness(.83)';brush.drawImage(art,0,0);
+      sleepingFacades.set(building.asset,sleeping);
+    }
+    const amount=!story.changes.includes(building.id)?0:building.id===revealStage?revealProgress():1;
+    const rect=[building.x,building.y,building.width,building.height] as const;
+    if(amount<1)ctx.drawImage(sleeping,...rect);
+    if(amount>0){ctx.save();ctx.globalAlpha=amount;ctx.drawImage(art,...rect);ctx.restore();}
+  }
   function draw(moving = false, dogMoving = false) {
     if(!alive||!map||!images.has('terrain.webp'))return;
     follow();
@@ -485,7 +509,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     ctx.clearRect(0,0,map.width,map.height);ctx.drawImage(images.get('terrain.webp')!,0,0,map.width,map.height);
     if(destination){ctx.strokeStyle='#fff5b1';ctx.lineWidth=4;ctx.setLineDash([5,5]);ctx.beginPath();ctx.ellipse(destination.x,destination.y,15,8,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
     for(const building of map.buildings){if(story.next===building.id){ctx.fillStyle='#ffe68799';ctx.beginPath();ctx.ellipse(building.entry.x,building.entry.y+8,26,11,0,0,Math.PI*2);ctx.fill();}}
-    const layers:{y:number;draw:()=>void}[]=map.buildings.map(building=>({y:building.y+(metadata.get(building.asset)?.pivot?.y??images.get(building.asset)!.naturalHeight)/images.get(building.asset)!.naturalHeight*building.height,draw:()=>ctx.drawImage(images.get(building.asset)!,building.x,building.y,building.width,building.height)}));
+    const layers:{y:number;draw:()=>void}[]=map.buildings.map(building=>({y:building.y+(metadata.get(building.asset)?.pivot?.y??images.get(building.asset)!.naturalHeight)/images.get(building.asset)!.naturalHeight*building.height,draw:()=>drawFacade(building)}));
     for(const id of story.changes){const p=rewardPoint(id),building=map.buildings.find(b=>b.id===id);const depth=id==='balance'?p.y:Math.max(p.y,(building?.y??0)+(building?.height??0)+1);layers.push({y:depth,draw:()=>drawRewards(id,id===revealStage&&!reduced.matches?Math.min(1,revealTime/1.1):1)});}
     for(const npc of map.npcs)if(!dialog.open||portrait.dataset.portrait!=='guide')layers.push({y:npc.y,draw:()=>{ctx.save();ctx.translate(npc.x*2,0);ctx.scale(-1,1);sprite(npc.asset,npc,npcHeight());ctx.restore();}});
     layers.push({y:requestBoardSpot.y,draw:drawBoard});
@@ -493,31 +517,40 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     const studentHeight=Math.max(...directions.flatMap(direction=>[1,2,3,4].map(i=>visibleHeight(`student/${direction}-${i}.webp`))));
     const corgiHeight=Math.max(...directions.flatMap(direction=>[1,2,3,4].map(i=>visibleHeight(`corgi/${direction}-${i}.webp`))));
     const studentFrame=moving&&!reduced.matches?Math.floor(walkingTime*8)%4+1:1, dogFrame=dogMoving&&!reduced.matches?Math.floor(dogTime*8)%4+1:1;
-    layers.push({y:dog.y,draw:()=>sprite(`corgi/${dog.direction}-${dogFrame}.webp`,dog,43,corgiHeight)});
-    layers.push({y:actor.y,draw:()=>{ctx.fillStyle='#1d362c55';ctx.beginPath();ctx.ellipse(actor.x,actor.y,17,7,0,0,Math.PI*2);ctx.fill();sprite(`student/${actor.direction}-${studentFrame}.webp`,actor,mapCharacterHeight,studentHeight);}});
+    layers.push({y:dog.y,draw:()=>sprite(`corgi/${dog.direction}-${dogFrame}.webp`,dog,43,corgiHeight,true)});
+    layers.push({y:actor.y,draw:()=>{ctx.fillStyle='#1d362c55';ctx.beginPath();ctx.ellipse(actor.x,actor.y,17,7,0,0,Math.PI*2);ctx.fill();sprite(`student/${actor.direction}-${studentFrame}.webp`,actor,mapCharacterHeight,studentHeight,true);}});
     layers.sort((a,b)=>a.y-b.y).forEach(layer=>layer.draw());
     drawVillageLight();
     if(revealStage && revealTime<2.4 && !reduced.matches){const p=rewardPoint(revealStage);ctx.save();ctx.globalAlpha=Math.max(0,1-revealTime/2.4);ctx.strokeStyle='#fff4b4';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(p.x,p.y-22,20+revealTime*48,12+revealTime*23,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
   }
   // The map fills the screen (cover, up to 2x the fit size) and the camera follows the student over the overflow.
-  let frameWidth=1,frameHeight=1,overview=false;
-  function follow() {
+  let frameWidth=1,frameHeight=1,overview=false,zoom=1,camAt=0,viewW=1,viewH=1;
+  let savedView: {zoom:number; point:Point|null}|null=null;
+  const touches=new Map<number,Point>();
+  let pinch:{gap:number;scale:number;point:Point}|null=null;
+  const scaleFor=()=>{const mw=map?.width??16,mh=map?.height??9,sw=Math.max(1,shell.clientWidth),sh=Math.max(1,shell.clientHeight),fit=Math.min(sw/mw,sh/mh);return Math.min(Math.max(sw/mw,sh/mh),fit*2);};
+  function syncFit(){const button=root.querySelector('#village-fit')!;button.setAttribute('aria-pressed',String(overview));button.setAttribute('aria-label',overview?'이전 지도 보기':'지도 전체 보기');}
+  function follow(snap=false) {
     const sw=shell.clientWidth,sh=shell.clientHeight,mw=map?.width??16,mh=map?.height??9;
     const clamp=(view:number,size:number,at:number)=>size<=view?(view-size)/2:Math.min(0,Math.max(view-size,at));
     const axis=(view:number,size:number,at:number)=>clamp(view,size,view/2-at);
     const x=panView?clamp(sw,frameWidth,panView.x):axis(sw,frameWidth,actor.x/mw*frameWidth);
     const y=panView?clamp(sh,frameHeight,panView.y):axis(sh,frameHeight,actor.y/mh*frameHeight);
-    camera={x,y};
-    frame.style.transform=`translate(${x}px,${y}px)`;
+    const now=performance.now(),blend=snap||!camAt||panView||overview||reduced.matches?1:1-Math.exp(-Math.min(40,now-camAt)/73);
+    camAt=now;camera={x:camera.x+(x-camera.x)*blend,y:camera.y+(y-camera.y)*blend};
+    if(distance(camera,{x,y})<.45)camera={x,y};
+    frame.style.transform=`translate(${camera.x}px,${camera.y}px)`;
     // Short screens: building labels keep clear of the top bar badges (village.css --label-floor uses this).
-    labels.style.setProperty('--cam-y',`${y}px`);
+    labels.style.setProperty('--cam-y',`${camera.y}px`);
   }
   function resize() {
     const mw=map?.width??16,mh=map?.height??9,sw=Math.max(1,shell.clientWidth),sh=Math.max(1,shell.clientHeight);
-    const fit=Math.min(sw/mw,sh/mh),scale=overview?Math.min(sw/mw,Math.max(1,sh-170)/mh):Math.min(Math.max(sw/mw,sh/mh),fit*2);
+    const scale=overview?Math.min(sw/mw,Math.max(1,sh-170)/mh):scaleFor()*zoom;
+    if(panView&&!overview){const fx=(viewW/2-camera.x)/frameWidth,fy=(viewH/2-camera.y)/frameHeight;panView={x:sw/2-fx*mw*scale,y:sh/2-fy*mh*scale};}
+    viewW=sw;viewH=sh;
     frameWidth=mw*scale;frameHeight=mh*scale;
     frame.style.width=`${frameWidth}px`;frame.style.height=`${frameHeight}px`;
-    const density=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(frameWidth*density);canvas.height=Math.round(frameHeight*density);draw();
+    const density=Math.min(devicePixelRatio||1,1.5);canvas.width=Math.round(frameWidth*density);canvas.height=Math.round(frameHeight*density);follow(true);draw();
   }
   const observer=new ResizeObserver(resize);observer.observe(shell);resize();
   function updateNearby() {
@@ -525,59 +558,57 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     nearestBuilding=map.buildings.filter(building=>distance(actor,building.entry)<=building.entry.radius+11).sort((a,b)=>distance(actor,a.entry)-distance(actor,b.entry))[0];
     nearestNpc=map.npcs.filter(npc=>distance(actor,npc)<=120).sort((a,b)=>distance(actor,a)-distance(actor,b))[0];
     nearestClient=nearestNpc?undefined:visibleClients().filter(stage=>distance(actor,requesterSpots[stage])<=48).sort((a,b)=>distance(actor,requesterSpots[a])-distance(actor,requesterSpots[b]))[0];
-    nearBoard=!nearestNpc&&!nearestClient&&distance(actor,requestBoardSpot)<=80;
-    const spot=!!nearestNpc||!!nearestClient||nearBoard;
-    // Away from the next lab's door, the main button walks there instead of back into a finished one.
-    const guide=!spot&&!!story.next&&nearestBuilding?.id!==story.next;
-    action.disabled=!nearestBuilding&&!spot&&!guide;
-    const next=nearestNpc?`${nearestNpc.name}와 이야기` : nearestClient?`${withParticle(villageRequests[nearestClient].client,'과','와')} 이야기` : nearBoard?'의뢰 게시판 보기' : guide?`다음: ${withDirectionParticle(villageRewards[story.next!].name)} 가기` : nearestBuilding?`${villageRewards[nearestBuilding.id].name} ${options.adminUnlocked||stageIsOpen(context.save,nearestBuilding.id)?'들어가기':'살펴보기'}`:'건물 이름을 눌러요';
-    if(action.textContent!==next)action.textContent=next;
-    // Walking past the doctor shows his greeting as a bubble; the button still opens the full talk.
-    const bubble=labels.querySelector<HTMLElement>('.village-npc-bubble');
-    if(bubble){const show=!!nearestNpc&&!dialog.open;if(show&&bubble.hidden){bubble.textContent=story.lines[0];}bubble.hidden=!show;}
+    nearBoard=boardAvailable&&!nearestNpc&&!nearestClient&&distance(actor,requestBoardSpot)<=80;
+    action.hidden=!story.next;
+    action.disabled=!!guided||!story.next;
+    if(guided) action.setAttribute('aria-busy','true');
+    else action.removeAttribute('aria-busy');
+    const guide=!!story.next&&!guided;
+    const next=guided?'길을 따라 가는 중…':story.next?`${withDirectionParticle(villageRewards[story.next].name)} 가기`:'';
+    if(action.firstChild?.textContent!==next)action.replaceChildren(document.createTextNode(next));
+    if(guide&&!action.querySelector('svg'))action.insertAdjacentHTML('beforeend','<svg class="map-direction-cue" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>');
+    if(!guide)action.querySelector('svg')?.remove();
+    action.classList.toggle('map-next-cue',guide);
+    for(const bubble of labels.querySelectorAll<HTMLButtonElement>('[data-near-npc]'))bubble.hidden=!!guided||dialog.open||board.open||nearestNpc?.name!==bubble.dataset.nearNpc;
+    for(const bubble of labels.querySelectorAll<HTMLButtonElement>('.village-client-bubble[data-client]'))bubble.hidden=!!guided||nearestClient!==bubble.dataset.client;
+    const boardLabel=labels.querySelector<HTMLButtonElement>('.village-board-label');if(boardLabel)boardLabel.hidden=!!guided||!nearBoard;
   }
   function restHint() {
-    if(nearestNpc)return `${nearestNpc.name} 곁이야. 오른쪽 아래 버튼을 누르면 이야기를 들을 수 있어!`;
-    if(nearestClient)return `${villageRequests[nearestClient].client} 곁이야. 오른쪽 아래 버튼을 누르면 인사를 들을 수 있어!`;
-    if(nearBoard)return '의뢰 게시판이야. 의뢰는 마을 사람들이 도와 달라고 하는 부탁이야. 오른쪽 아래 버튼을 눌러 봐!';
+    if(nearestNpc)return `${nearestNpc.name} 곁이야. 말풍선을 누르면 이야기를 들을 수 있어!`;
+    if(nearestClient)return `${villageRequests[nearestClient].client} 곁이야. 말풍선을 누르면 인사를 들을 수 있어!`;
+    if(nearBoard)return '의뢰 게시판이야. 게시판을 눌러 마을 사람들의 부탁을 확인해 봐!';
     if(!story.next)return '마을에 불이 모두 켜졌어! 「내 발견 모아 보기」를 눌러 봐.';
     return `다음 목적지는 ${villageRewards[story.next].name}! 불이 켜진 이름표를 누르면 걸어가요.`;
   }
+  function stopRoute() { path=[]; destination=null; guided=undefined; }
   function setPan(on: boolean) {
     if (on === !!panView) return;
     panView = on ? { ...camera } : null; panDrag = null;
     shell.classList.toggle('is-panning', on);
     panButton.setAttribute('aria-pressed', String(on));
     panButton.setAttribute('aria-label', on ? '지도 끌기 끝' : '지도 끌어 보기');
-    if(on&&overview){overview=false;root.querySelector('#village-fit')!.setAttribute('aria-pressed','false');resize();}
-    if (on) { hintBeforePan = hint.textContent ?? ''; hint.textContent = ''; }
+    if(on&&overview){overview=false;savedView=null;syncFit();resize();}
+    if (on) { stopRoute();updateNearby();hintBeforePan = hint.textContent ?? ''; hint.textContent = ''; }
     else hint.textContent = hintBeforePan;
     follow();
   }
-  function goTo(target: Point, name?: string) {
-    if(!navigation||paused())return;
+  function resumeFollow() {
+    touches.clear();pinch=null;panDrag=null;
     setPan(false);
-    const building = map?.buildings.find(building => distance(target, building.entry) < 1);
+    if(overview||zoom!==1){overview=false;zoom=1;savedView=null;syncFit();resize();}
+  }
+  function goTo(target: Point, name?: string, building?: Building) {
+    if(!navigation||paused())return;
+    stopRoute();resumeFollow();
     if (building && explainLockedBuilding(building)) return;
     const next=navigation.route(actor,target);
-    if(!next){hint.textContent='그곳까지 갈 길이 없어. 흙길이나 다리를 눌러 봐!';destination=null;path=[];draw();return;}
-    clearInput();path=next;destination=next.at(-1)??null;hint.textContent=name?`${name} 앞까지 길을 따라 걸어갈게.`:'길을 따라 가는 중… 방향판을 누르면 직접 걸을 수 있어.';canvas.focus();draw();
-  }
-  /** Small star row under a building name: earned or empty. */
-  function starRow(id: StageId) {
-    const row=document.createElement('span');row.className='village-label-stars';row.setAttribute('aria-hidden','true');
-    stars[id].slots.forEach((slot,i)=>{const star=document.createElement('span');star.className='village-star';star.classList.toggle('is-done',slot.done);star.classList.toggle('is-new',freshStars[id][i]);star.textContent=slot.done?'★':'☆';row.append(star);});
-    return row;
-  }
-  function starText(id: StageId) {
-    return `별 ${stars[id].earned}개`;
+    if(!next){hint.textContent='그곳까지 갈 길이 없어. 흙길이나 다리를 눌러 봐!';updateNearby();draw();return;}
+    clearInput();guided=building;path=next;destination=next.at(-1)??null;updateNearby();hint.textContent=name?`${name} 앞까지 길을 따라 걸어갈게.`:'길을 따라 가는 중… 방향판을 누르면 직접 걸을 수 있어.';canvas.focus();draw();
   }
   function setupLabels() {
     labels.replaceChildren();
-    villains?.destroy();
-    villains=mountMapVillains(frame,{progress:options.adminUnlocked?[...context.save.mapVillains]:context.save.mapVillains,points:map!.buildings.filter(b=>context.save.completed.includes(b.id)).map(b=>({id:stageIds.indexOf(b.id),name:villageRewards[b.id].name,x:(b.entry.x+65)/map!.width*100,y:(b.entry.y-45)/map!.height*100})),onHit:()=>{if(!options.adminUnlocked)context.commit();},blocked:()=>paused(),sound:()=>context.sound(620),tool:'힘 빛 파동',color:'#a26995'});
-    for(const building of map!.buildings){const button=document.createElement('button');button.className='village-building-label';button.dataset.stage=building.id;button.style.left=`${(building.x+building.width/2)/map!.width*100}%`;button.style.top=`max(${(building.y+building.height*0.42)/map!.height*100}%, var(--label-floor, 0px))`;const name=document.createElement('span');name.textContent=`${story.changes.includes(building.id)?'✓ ':''}${villageRewards[building.id].name}`;button.append(name,starRow(building.id));button.classList.toggle('is-current',story.next===building.id);button.classList.toggle('is-complete',story.changes.includes(building.id));button.classList.toggle('is-locked',!options.adminUnlocked&&!stageIsOpen(context.save,building.id));button.setAttribute('aria-label',`${villageRewards[building.id].name} 문 앞으로 걷기, ${starText(building.id)}`);button.addEventListener('click',()=>goTo(building.entry,villageRewards[building.id].name),{signal:events.signal});labels.append(button);}
-    for(const npc of map!.npcs){const button=document.createElement('button');button.className='village-npc-label';button.style.left=`${npc.x/map!.width*100}%`;button.style.top=`${(npc.y-100)/map!.height*100}%`;button.textContent='도토리 박사';button.setAttribute('aria-label',`${npc.name}에게 걸어가기`);button.addEventListener('click',()=>goTo({x:npc.x-72,y:npc.y+6},npc.name),{signal:events.signal});labels.append(button);const bubble=document.createElement('button');bubble.className='village-npc-bubble';bubble.hidden=true;bubble.style.left=`${(npc.x-30)/map!.width*100}%`;bubble.style.top=`${(npc.y-112)/map!.height*100}%`;bubble.setAttribute('aria-label',`${npc.name}의 이야기 더 듣기`);bubble.addEventListener('click',()=>interact(),{signal:events.signal});labels.append(bubble);}
+    for(const building of map!.buildings){const button=document.createElement('button');button.className='village-building-label';button.dataset.stage=building.id;button.style.left=`${(building.x+building.width/2)/map!.width*100}%`;button.style.top=`max(${(building.y+building.height*0.42)/map!.height*100}%, var(--label-floor, 0px))`;const name=document.createElement('span');const open=options.adminUnlocked||stageIsOpen(context.save,building.id);name.textContent=villageRewards[building.id].name;button.innerHTML=`<svg class="map-lock-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="${open?'M8 11V7a4 4 0 0 1 7.5-2':'M8 11V7a4 4 0 0 1 8 0v4'}"/></svg>`;button.append(name);button.classList.toggle('is-current',story.next===building.id);button.classList.toggle('is-complete',story.changes.includes(building.id));button.classList.toggle('is-locked',!options.adminUnlocked&&!stageIsOpen(context.save,building.id));button.setAttribute('aria-label',`${villageRewards[building.id].name} 문 앞으로 걷기 · ${open?'열림':'잠김'}`);button.addEventListener('click',()=>goTo(building.entry,villageRewards[building.id].name,building),{signal:events.signal});labels.append(button);}
+    for(const npc of map!.npcs){const bubble=document.createElement('button');bubble.className='village-client-bubble';bubble.dataset.nearNpc=npc.name;bubble.hidden=true;bubble.style.left=`${(npc.x-30)/map!.width*100}%`;bubble.style.top=`${(npc.y-82)/map!.height*100}%`;bubble.innerHTML=icons.speech;bubble.setAttribute('aria-label',`${npc.name}와 이야기`);bubble.addEventListener('click',interact,{signal:events.signal});labels.append(bubble);}
     const open=cards.filter(card=>card.status==='open').length;
     const boardLabel=document.createElement('button');boardLabel.className='village-board-label';boardLabel.style.left=`${requestBoardSpot.x/map!.width*100}%`;boardLabel.style.top=`${(requestBoardSpot.y+6)/map!.height*100}%`;
     boardLabel.textContent='의뢰 게시판';if(open){const count=document.createElement('span');count.className='village-board-count';count.textContent=String(open);boardLabel.append(count);}
@@ -585,8 +616,8 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     for(const stage of solved){const {bubble}=requesterSpots[stage],button=document.createElement('button');button.className='village-client-bubble';button.dataset.client=stage;button.style.left=`${bubble.x/map!.width*100}%`;button.style.top=`${bubble.y/map!.height*100}%`;button.innerHTML=icons.speech;button.setAttribute('aria-label',`${villageRequests[stage].client}의 인사 듣기`);button.classList.toggle('is-waiting',!arrivalShown&&arriving.includes(stage));button.addEventListener('click',()=>openClient(stage),{signal:events.signal});labels.append(button);}
   }
   function openBoard() {
-    if(!map||paused())return;
-    clearInput();path=[];destination=null;
+    if(!map||paused()||!boardAvailable)return;
+    clearInput();stopRoute();updateNearby();
     board.querySelector('.village-board-lead')!.textContent='마을 사람들의 부탁이에요. 실험 1단계를 마치면 그 건물에서 의뢰를 받을 수 있어요.';
     const list=board.querySelector('.village-board-cards')!;list.replaceChildren();
     for(const card of cards){
@@ -603,7 +634,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       const status=document.createElement('span');status.className='village-board-status';status.textContent=card.statusText;
       text.append(from,quote,status);
       const go=document.createElement('button');go.textContent=`${withDirectionParticle(villageRewards[card.stage].name)} 가기`;
-      go.addEventListener('click',()=>{const building=map?.buildings.find(b=>b.id===card.stage);board.close();last=performance.now();if(building)goTo(building.entry,villageRewards[card.stage].name);});
+      go.addEventListener('click',()=>{const building=map?.buildings.find(b=>b.id===card.stage);board.close();last=performance.now();if(building)goTo(building.entry,villageRewards[card.stage].name,building);});
       item.append(face,text,go);list.append(item);
     }
     board.showModal();board.querySelector<HTMLButtonElement>('.village-board-card button')?.focus();draw();
@@ -683,14 +714,13 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     }
   }
   function primary() {
-    if(!map||paused())return;updateNearby();
-    const goal=!nearestNpc&&!nearestClient&&!nearBoard&&story.next&&nearestBuilding?.id!==story.next?map.buildings.find(b=>b.id===story.next):undefined;
-    if(goal){goTo(goal.entry,villageRewards[goal.id].name);return;}
-    interact();
+    if(!map||paused()||guided)return;
+    const goal=map.buildings.find(b=>b.id===story.next);
+    if(goal)goTo(goal.entry,villageRewards[goal.id].name,goal);
   }
   function openTalk(next: Talk) {
     if (!map || paused()) return;
-    path = []; destination = null; clearInput();
+    stopRoute();clearInput();updateNearby();
     root.querySelector('#village-dialog-title')!.textContent = next.name;
     root.querySelector('#village-dialog-role')!.textContent = next.role;
     setDialoguePortrait(portrait, next.portrait);
@@ -716,7 +746,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if (entering || !alive || paused()) return false;
     if (explainLockedBuilding(building)) return false;
     entering = true;
-    clearInput(); path = []; destination = null;
+    clearInput();stopRoute();
     context.navigate(building.id);
     return true;
   }
@@ -744,15 +774,15 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   function tick(now: number) {
     if(!alive||!map)return;
     const dt=Math.min(.035,Math.max(0,(now-last)/1000));last=now;
-    if(paused()){clearInput();path=[];destination=null;walkingTime=0;dogTime=0;raf=requestAnimationFrame(tick);return;}
+    if(paused()){clearInput();stopRoute();updateNearby();walkingTime=0;dogTime=0;raf=requestAnimationFrame(tick);return;}
     const old={x:actor.x,y:actor.y}, oldFacing=actor.direction;
     const direction = input.vector(pads.values());
     let arrived=false;
-    if(direction.x||direction.y){path=[];destination=null;move(direction.x*walkingSpeed*dt,direction.y*walkingSpeed*dt);}
+    if(direction.x||direction.y){stopRoute();move(direction.x*walkingSpeed*dt,direction.y*walkingSpeed*dt);}
     else if(path.length){const target=path[0],d=distance(actor,target);if(d<3)path.shift();else move((target.x-actor.x)/d*Math.min(d,walkingSpeed*dt),(target.y-actor.y)/d*Math.min(d,walkingSpeed*dt));if(!path.length){destination=null;arrived=true;}}
     const moved=distance(old,actor)>.05;if(moved){walkingTime+=dt;if(!trail.length||distance(actor,trail.at(-1)!)>9)trail.push({x:actor.x,y:actor.y});}else walkingTime=0;
-    const entered = entrance?.(actor);
-    if (entered && enterBuilding(entered)) return;
+    if(guided&&distance(actor,guided.entry)<=Math.min(16,guided.entry.radius)&&enterBuilding(guided))return;
+    if(arrived)guided=undefined;
     let dogMoved=false;
     if(trail.length>5){const target=trail[0],d=distance(dog,target);if(d<4)trail.shift();else{const amount=Math.min(d,(walkingSpeed+40)*dt),next={x:dog.x+(target.x-dog.x)/d*amount,y:dog.y+(target.y-dog.y)/d*amount};if(navigation!.stand(next)){dog.direction=Math.abs(target.x-dog.x)>Math.abs(target.y-dog.y)?target.x<dog.x?'left':'right':target.y<dog.y?'up':'down';dog.x=next.x;dog.y=next.y;dogMoved=true;}else trail.shift();}}
     dogTime=dogMoved?dogTime+dt:0;revealTime+=dt;
@@ -761,8 +791,8 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       labels.querySelectorAll('.village-client-bubble.is-waiting').forEach(bubble=>{bubble.classList.remove('is-waiting');bubble.classList.add('is-arrived');});
       hint.textContent=`${withParticle(villageRequests[arriving[0]].client,'이','가')} 가게 앞에 돌아왔어! 말풍선을 누르면 인사를 들을 수 있어.`;
     }
-    updateNearby();
-    if(arrived&&!entered)hint.textContent=restHint();
+    updateNearby();follow();
+    if(arrived)hint.textContent=restHint();
     // The banner shrinks to its title so labels stay readable, then leaves the next step to the hint.
     if(!reveal.hidden&&revealTime>3.6)reveal.classList.add('is-compact');
     if(!reveal.hidden&&revealTime>8){reveal.hidden=true;if(revealStage&&hint.textContent===villageRewards[revealStage].changeDescription)hint.textContent=restHint();}
@@ -771,7 +801,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     raf=requestAnimationFrame(tick);
   }
   async function loadWorld() {
-    const token=++generation;cancelAnimationFrame(raf);fetches.abort();fetches=new AbortController();cancelImages.forEach(cancel=>cancel());clearInput();map=null;path=[];images.clear();labels.replaceChildren();lights.replaceChildren();loading.hidden=false;retry.hidden=true;action.disabled=true;reveal.hidden=true;
+    const token=++generation;cancelAnimationFrame(raf);fetches.abort();fetches=new AbortController();cancelImages.forEach(cancel=>cancel());clearInput();map=null;path=[];images.clear();sleepingFacades.clear();labels.replaceChildren();lights.replaceChildren();loading.hidden=false;retry.hidden=true;action.disabled=true;reveal.hidden=true;
     loading.querySelector('strong')!.textContent='마을로 가는 길을 준비해요…';
     const progress=loading.querySelector('progress')!,detail=root.querySelector('#village-loading-detail')!;progress.hidden=false;progress.value=0;detail.textContent='마을 지도를 읽는 중이에요';
     try {
@@ -814,10 +844,10 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       const dogSpawn = [{x:spawn.x+27,y:spawn.y+28},{x:spawn.x-27,y:spawn.y+28},{x:spawn.x,y:spawn.y+40}]
         .find(point => nav.stand(point) && nav.segment(spawn,point)) ?? spawn;
       map=candidate;navigation=nav;images=new Map(loaded);actor={...spawn,direction:'down'};dog={...dogSpawn,direction:'down'};trail=[{...spawn}];
-      entrance=createVillageEntrances(candidate,spawn);entering=false;
+      entering=false;stopRoute();
       walkingTime=dogTime=revealTime=0;destination=null;setupLabels();setupLights();loading.hidden=true;resize();updateNearby();
       if(revealStage){
-        reveal.innerHTML=`<strong>✦ ${villageRewards[revealStage].changeTitle}</strong><span>도토리 박사: ${villageRewards[revealStage].afterLines[0]}</span>`;
+        reveal.innerHTML=`<strong>${villageRewards[revealStage].changeTitle}</strong><span>도토리 박사: ${villageRewards[revealStage].afterLines[0]}</span>`;
         // The banner sits above the bottom bar; if the next lab's label is low, lean away from it.
         const goal=candidate.buildings.find(b=>b.id===story.next);
         const low=goal&&(goal.y+goal.height*.42)/candidate.height>.45;
@@ -831,39 +861,74 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       loading.querySelector('strong')!.textContent='마을 그림을 불러오지 못했어요';detail.textContent='인터넷 연결을 확인하고 다시 불러와 주세요. 탐구 기록은 그대로예요.';progress.hidden=true;retry.hidden=false;retry.focus();
     }
   }
-  root.querySelector('#village-fit')!.addEventListener('click',()=>{if(!map||paused())return;setPan(false);overview=!overview;root.querySelector('#village-fit')!.setAttribute('aria-pressed',String(overview));resize();follow();},{signal:events.signal});
-  panButton.addEventListener('click',()=>{if(map&&!paused())setPan(!panView);},{signal:events.signal});
-  canvas.addEventListener('pointermove',event=>{
-    if(!panDrag||panDrag.id!==event.pointerId||!panView)return;
-    panView={x:panDrag.from.x+event.clientX-panDrag.x,y:panDrag.from.y+event.clientY-panDrag.y};follow();
-    // Keep the stored view inside the map, so the next drag starts from what is on screen.
-    panView={...camera};
-  },{signal:events.signal});
-  const endPan=(event:PointerEvent)=>{if(panDrag?.id===event.pointerId){panDrag=null;shell.classList.remove('is-pan-dragging');}};
-  canvas.addEventListener('pointerup',endPan,{signal:events.signal});canvas.addEventListener('pointercancel',endPan,{signal:events.signal});canvas.addEventListener('lostpointercapture',endPan,{signal:events.signal});
+  root.querySelector('#village-fit')!.addEventListener('click',()=>{if(!map||paused())return;stopRoute();updateNearby();
+    if(!overview){
+      savedView={zoom,point:panView?{x:(shell.clientWidth/2-camera.x)/frameWidth,y:(shell.clientHeight/2-camera.y)/frameHeight}:null};
+      setPan(false);overview=true;resize();
+    }else{
+      overview=false;zoom=savedView?.zoom??1;resize();
+      if(savedView?.point){setPan(true);panView={x:shell.clientWidth/2-savedView.point.x*frameWidth,y:shell.clientHeight/2-savedView.point.y*frameHeight};follow(true);}
+      savedView=null;
+    }
+    syncFit();},{signal:events.signal});
+  panButton.addEventListener('click',()=>{if(map&&!paused()){if(panView)resumeFollow();else setPan(true);}},{signal:events.signal});
+  const local=(event:PointerEvent|WheelEvent)=>{const box=shell.getBoundingClientRect();return {x:event.clientX-box.left,y:event.clientY-box.top};};
+  const midpoint=()=>{const [a,b]=[...touches.values()];return {x:(a.x+b.x)/2,y:(a.y+b.y)/2,gap:distance(a,b)};};
+  function zoomAt(mult:number,mid:Point,point:Point){
+    if(!map)return;overview=false;savedView=null;syncFit();setPan(true);zoom=Math.max(1,Math.min(2,mult));resize();
+    panView={x:mid.x-point.x*frameWidth,y:mid.y-point.y*frameHeight};follow(true);
+  }
+  canvas.addEventListener('wheel',event=>{if(!map||paused())return;event.preventDefault();stopRoute();const p=local(event);
+    zoomAt(frameWidth/map.width/scaleFor()*Math.exp(-event.deltaY*.0015),p,{x:(p.x-camera.x)/frameWidth,y:(p.y-camera.y)/frameHeight});
+  },{signal:events.signal,passive:false});
   canvas.addEventListener('pointerdown',event=>{
     if(!map||paused()||(event.pointerType==='mouse'&&event.button!==0))return;
-    // In hand mode a touch drags the view instead of walking.
-    if(panView){event.preventDefault();if(panDrag)return;panDrag={id:event.pointerId,x:event.clientX,y:event.clientY,from:{...panView}};if(event.pointerType==='mouse')canvas.setPointerCapture(event.pointerId);shell.classList.add('is-pan-dragging');return;}
-    event.preventDefault();const bounds=canvas.getBoundingClientRect(),p={x:(event.clientX-bounds.left)/bounds.width*map.width,y:(event.clientY-bounds.top)/bounds.height*map.height};
-    if(Math.abs(p.x-requestBoardSpot.x)<50&&p.y>requestBoardSpot.y-98&&p.y<requestBoardSpot.y+10){openBoard();return;}
-    const client=visibleClients().find(stage=>{const c=requesterSpots[stage];return Math.abs(p.x-c.x)<30&&p.y>c.y-npcHeight()-5&&p.y<c.y+8;});if(client){openClient(client);return;}
+    if(event.pointerType==='touch'){
+      touches.set(event.pointerId,local(event));canvas.setPointerCapture?.(event.pointerId);
+      if(touches.size===2){stopRoute();clearInput();panDrag=null;const m=midpoint();pinch={gap:m.gap,scale:frameWidth/map.width/scaleFor(),point:{x:(m.x-camera.x)/frameWidth,y:(m.y-camera.y)/frameHeight}};return;}
+    }
+    if(panDrag||pinch||overview)return;
+    // Take over from the route at the finger-down point. Only a release without dragging counts as a tap.
+    stopRoute();clearInput();updateNearby();draw();event.preventDefault();
+    panDrag={id:event.pointerId,x:event.clientX,y:event.clientY,from:{...camera},moved:false};
+    if(event.pointerType==='mouse')canvas.setPointerCapture(event.pointerId);
+  },{signal:events.signal});
+  canvas.addEventListener('pointermove',event=>{
+    if(paused())return;
+    if(touches.has(event.pointerId))touches.set(event.pointerId,local(event));
+    if(pinch&&touches.size>=2){const m=midpoint();zoomAt(pinch.scale*m.gap/Math.max(8,pinch.gap),m,pinch.point);return;}
+    const drag=panDrag;if(!drag||drag.id!==event.pointerId)return;
+    const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
+    if(!drag.moved&&Math.hypot(dx,dy)<8)return;
+    if(!drag.moved){if(!panView)setPan(true);panDrag=drag;drag.moved=true;shell.classList.add('is-pan-dragging');}
+    panView={x:drag.from.x+dx,y:drag.from.y+dy};follow();
+    panView={...camera};
+  },{signal:events.signal});
+  const endPan=(event:PointerEvent)=>{touches.delete(event.pointerId);if(touches.size<2)pinch=null;if(panDrag?.id===event.pointerId){panDrag=null;shell.classList.remove('is-pan-dragging');}};
+  canvas.addEventListener('pointercancel',endPan,{signal:events.signal});canvas.addEventListener('lostpointercapture',endPan,{signal:events.signal});
+  canvas.addEventListener('pointerup',event=>{
+    if(panDrag?.id!==event.pointerId){endPan(event);return;}
+    const tap=!panDrag.moved&&!panView;endPan(event);
+    if(!map||paused()||!tap)return;
+    const bounds=canvas.getBoundingClientRect(),p={x:(event.clientX-bounds.left)/bounds.width*map.width,y:(event.clientY-bounds.top)/bounds.height*map.height};
+    if(nearBoard&&Math.abs(p.x-requestBoardSpot.x)<50&&p.y>requestBoardSpot.y-98&&p.y<requestBoardSpot.y+10){openBoard();return;}
+    const client=visibleClients().find(stage=>{const c=requesterSpots[stage];return distance(actor,c)<=48&&Math.abs(p.x-c.x)<30&&p.y>c.y-npcHeight()-5&&p.y<c.y+8;});if(client){openClient(client);return;}
     const npc=map.npcs.find(n=>distance(n,p)<55);if(npc){goTo({x:npc.x-72,y:npc.y+6},npc.name);return;}
-    const building=map.buildings.find(b=>p.x>b.x&&p.x<b.x+b.width&&p.y>b.y&&p.y<b.y+b.height);if(building){goTo(building.entry,villageRewards[building.id].name);return;}
+    const building=map.buildings.find(b=>p.x>b.x&&p.x<b.x+b.width&&p.y>b.y&&p.y<b.y+b.height);if(building){goTo(building.entry,villageRewards[building.id].name,building);return;}
     goTo(p);
   },{signal:events.signal});
   window.addEventListener('keydown',event=>{
     if(!map||paused())return;const target=event.target as Element;
     if(event.ctrlKey||event.altKey||event.metaKey||target.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="dialog"]'))return;
-    if(input.press(event.key,event.code)){event.preventDefault();setPan(false);path=[];destination=null;canvas.focus({preventScroll:true});syncPadFeedback();}
+    if(input.press(event.key,event.code)){event.preventDefault();resumeFollow();stopRoute();updateNearby();canvas.focus({preventScroll:true});syncPadFeedback();}
     else if((event.key==='Enter'||event.key===' ')&&!event.repeat&&!target.closest('button,a')){event.preventDefault();interact();}
   },{signal:events.signal});
   window.addEventListener('keyup',event=>{if(input.release(event.key,event.code)){event.preventDefault();syncPadFeedback();}},{signal:events.signal});
-  window.addEventListener('blur',clearInput,{signal:events.signal});
+  window.addEventListener('blur',()=>{clearInput();touches.clear();pinch=null;panDrag=null;},{signal:events.signal});
   document.addEventListener('visibilitychange',()=>{clearInput();last=performance.now();},{signal:events.signal});
   bindDirectionPad(pad, '[data-direction]', b=>b.dataset.direction as Direction, {
     signal:events.signal, blocked:()=>!map||paused(),
-    press:direction=>{setPan(false);canvas.focus({preventScroll:true});path=[];destination=null;pads.set(-1,direction);const v=vectors[direction];move(v.x*6,v.y*6);syncPadFeedback();},
+    press:direction=>{resumeFollow();canvas.focus({preventScroll:true});stopRoute();updateNearby();pads.set(-1,direction);const v=vectors[direction];move(v.x*6,v.y*6);syncPadFeedback();},
     release:()=>{pads.delete(-1);syncPadFeedback();},
     tap:direction=>{const v=vectors[direction];goTo({x:actor.x+v.x*32,y:actor.y+v.y*32});}
   });
@@ -875,7 +940,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   retry.addEventListener('click',()=>void loadWorld(),{signal:events.signal});
   reduced.addEventListener('change',()=>{if(reduced.matches)lights.querySelectorAll('.village-spark').forEach(spark=>spark.remove());draw();},{signal:events.signal});
   void loadWorld();
-  return()=>{voice.destroy();dialogueText.destroy();villains?.destroy();alive=false;generation++;cancelAnimationFrame(raf);fetches.abort();cancelImages.forEach(cancel=>cancel());clearInput();events.abort();observer.disconnect();if(dialog.open)dialog.close();if(board.open)board.close();portrait.removeAttribute('style');tinted.clear();images.clear();metadata.clear();};
+  return()=>{voice.destroy();dialogueText.destroy();alive=false;generation++;cancelAnimationFrame(raf);fetches.abort();cancelImages.forEach(cancel=>cancel());clearInput();events.abort();observer.disconnect();if(dialog.open)dialog.close();if(board.open)board.close();portrait.removeAttribute('style');tinted.clear();images.clear();metadata.clear();};
 }
 
 
