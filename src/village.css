@@ -262,3 +262,32 @@
   #app .village-screen .village-camera-tools .village-pan svg { width: 25px; height: 25px; }
 
 }
+
+.village-encounter-hud {
+  position: absolute;
+  top: 72px;
+  right: 18px;
+  z-index: 2;
+  width: min(260px, 42%);
+  padding: 10px 12px;
+  background: #fff3d9;
+  border: 2px solid #825232;
+  border-radius: 12px;
+  box-shadow: 0 4px 0 #543d2b;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  align-items: center;
+}
+.village-encounter-hud[hidden] { display: none; }
+.village-encounter-hud strong { font-size: 16px; }
+.village-encounter-hud p { grid-column: 1 / -1; margin: 0; font-size: 15px; line-height: 1.3; word-break: keep-all; }
+.village-encounter-pips { display: inline-flex; gap: 4px; }
+.village-encounter-pips i { width: 13px; height: 8px; border-radius: 3px; background: #b84c30; border: 1px solid #733922; }
+.village-encounter-pips i.is-spent { background: #ead9ba; border-color: #947e66; }
+#app #village-attack { grid-column: 1 / -1; min-height: 48px; color: #fff9ea; background: #a74528; border-color: #632e1f; }
+#app #village-attack:not([aria-disabled="true"]):hover { background: #883620; }
+#app #village-attack[aria-disabled="true"] { background: #783824; }
+@media (max-height: 480px) {
+  .village-encounter-hud { top: 60px; right: 8px; padding: 6px 8px; }
+}
