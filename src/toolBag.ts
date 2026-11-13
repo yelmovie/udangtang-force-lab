@@ -34,7 +34,7 @@ export function bagIcon(): string {
   return `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 7V5.5a3.5 3.5 0 0 1 7 0V7"/><rect x="4" y="7" width="16" height="13" rx="3"/><path d="M4 12h16M10 12v2h4v-2"/></svg>`;
 }
 
-type BagOptions = { app: HTMLElement; save: SaveData; open?: StageId; sound?: () => void; preview?: boolean };
+type BagOptions = { app: HTMLElement; save: SaveData; open?: StageId; sound?: () => void; preview?: boolean; onClose?: () => void };
 
 /** Tool bag dialog: five slots, earned cards face up, locked ones say where to get them. */
 export function openToolBag(options: BagOptions): () => void {
@@ -52,7 +52,8 @@ export function openToolBag(options: BagOptions): () => void {
     closed = true;
     app.inert = appWasInert;
     overlay.remove();
-    if (opener?.isConnected) opener.focus();
+    if (options.onClose) options.onClose();
+    else if (opener?.isConnected) opener.focus();
   };
   const heading = (id: string, title: string) => `<div class="toolbag-heading"><h2 id="${id}">${title}</h2><button type="button" class="settings-close" data-bag="close" aria-label="도구 가방 닫기">×</button></div>`;
   const slot = (card: ToolCard) => card.earned

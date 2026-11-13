@@ -515,7 +515,7 @@ function header(title: string, subtitle: string) {
     <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" width="34" height="34"><path d="M18 5h12M21 6v13L11 35a5 5 0 0 0 4 8h18a5 5 0 0 0 4-8L27 19V6" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 32h18l4 6-3 5H14l-3-5z" fill="#73bba2"/><circle cx="20" cy="35" r="2" fill="#f6b45e"/><circle cx="28" cy="38" r="2" fill="#f6b45e"/></svg></span><span>우당탕<br><strong>힘 실험실</strong></span></div>
     <div class="topbar-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기 · 학생 기록과 분리' : '초등 3학년 과학 · 힘과 우리 생활'}</span><strong>${title}</strong><span>${subtitle}</span></div>
     <div class="top-actions">
-      ${(count => `<button class="icon-button" data-top="bag" aria-label="도구 가방 열기, 카드 ${count}장" aria-haspopup="dialog" title="도구 가방">${bagIcon()}${count ? `<span class="toolbag-count" aria-hidden="true">${count}</span>` : ''}</button>`)(earnedToolCards(adminSave ?? save).length)}
+      ${viewPage === 'map' ? '' : (count => `<button class="icon-button" data-top="bag" aria-label="도구 가방 열기, 카드 ${count}장" aria-haspopup="dialog" title="도구 가방">${bagIcon()}${count ? `<span class="toolbag-count" aria-hidden="true">${count}</span>` : ''}</button>`)(earnedToolCards(adminSave ?? save).length)}
       <button class="icon-button" data-top="sound" aria-label="소리 ${anySound() ? '끄기' : '켜기'}" aria-pressed="${anySound()}">${soundIcon()}</button>
       <button class="icon-button" data-top="settings" aria-label="설정 열기" aria-haspopup="dialog" title="설정">${settingsIcon()}</button>
     </div>
@@ -648,7 +648,7 @@ function renderComplete(root: HTMLElement) {
   replay();
 }
 
-function openSettings() {
+function openSettings(focusAction?: 'bag') {
   const overlay = document.createElement('div');
   overlay.className = 'modal-layer settings-layer';
   const appWasInert = app.inert;
@@ -659,8 +659,10 @@ function openSettings() {
   const show = (section: Section | 'concepts') => {
     let content: string;
     if (section === 'menu') {
+      const cardCount = earnedToolCards(adminSave ?? save).length;
       content = `<div class="settings-links">
         <button data-settings="home"><span>${icons.home}</span> 메인 화면</button>
+        <button data-settings="bag" aria-haspopup="dialog"><span>${bagIcon()}</span> 도구 가방 <small>${cardCount}장</small></button>
         <button data-settings="help"><span>?</span> 학생 가이드</button><button data-settings="save"><span>${icons.check}</span> 지금 저장</button></div><details class="teacher-tools"><summary>선생님 도구 · 정보</summary><div class="settings-links"><button data-settings="teacher"><span>${icons.book}</span> 교사 가이드</button>
         <button data-settings="curriculum"><span>${icons.target}</span> 교육과정</button><button data-settings="info"><span>${icons.info}</span> 정보와 출처</button>
         <button data-settings="admin"><span>${icons.gear}</span> 전체 단계 해금 <small>${adminUnlocked ? '사용 중' : ''}</small></button>
@@ -685,7 +687,9 @@ function openSettings() {
       <div class="settings-heading"><h2 id="settings-title">${section === 'concepts' ? '개념 영상 다시 보기' : headings[section]}</h2><button class="settings-close" data-settings="close" aria-label="설정 닫기">×</button></div>
       ${content}${section === 'menu' ? '' : '<button class="button button-secondary settings-back" data-settings="back">설정으로 돌아가기</button>'}
     </div>`;
-    overlay.querySelector<HTMLButtonElement>('[data-settings="close"]')?.focus();
+    const target = section === 'menu' && focusAction ? focusAction : 'close';
+    overlay.querySelector<HTMLButtonElement>(`[data-settings="${target}"]`)?.focus();
+    focusAction = undefined;
   };
   overlay.addEventListener('click', event => {
     if (event.target === overlay) { close(); return; }
@@ -698,6 +702,11 @@ function openSettings() {
     const action = button.dataset.settings;
     if (action === 'close') close();
     else if (action === 'back') show('menu');
+    else if (action === 'bag') {
+      close();
+      tone(470);
+      openToolBag({ app, save: adminSave ?? save, sound: () => tone(470), preview: adminUnlocked, onClose: () => openSettings('bag') });
+    }
     else if (action === 'concepts') show('concepts');
     else if (['help', 'teacher', 'curriculum', 'info', 'admin', 'reset'].includes(action ?? '')) show(action as Section);
     else if (action === 'sound') {
@@ -776,7 +785,7 @@ function bindHeader() {
     if (on) tone(620); else stopSounds();
     syncMusic();
   });
-  app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.addEventListener('click', openSettings);
+  app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.addEventListener('click', () => openSettings());
   app.querySelector<HTMLButtonElement>('[data-top="bag"]')?.addEventListener('click', () => { tone(470); openToolBag({ app, save: adminSave ?? save, sound: () => tone(470), preview: adminUnlocked }); });
   app.querySelector<HTMLButtonElement>('[data-top="back"]')?.addEventListener('click', goBack);
   app.querySelector<HTMLButtonElement>('[data-top="home"]')?.addEventListener('click', () => { if (viewPage !== 'map') navigate('map'); });
