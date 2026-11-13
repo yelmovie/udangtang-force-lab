@@ -1,8 +1,8 @@
 /* Popup + button polish (dokdo-design). Loaded after the base sheets; stage sheets (village, workshop, rescue, cargo, balance, scale, toolBag) load later, so stage-specific overrides live there. */
-@font-face { font-family: 'NanumSquareNeo'; font-style: normal; font-weight: 400; font-display: swap; src: url('/assets/fonts/NanumSquareNeo-Regular.woff') format('woff'); }
-@font-face { font-family: 'NanumSquareNeo'; font-style: normal; font-weight: 700; font-display: swap; src: url('/assets/fonts/NanumSquareNeo-Bold.woff') format('woff'); }
-@font-face { font-family: 'NanumSquareNeo'; font-style: normal; font-weight: 800; font-display: swap; src: url('/assets/fonts/NanumSquareNeo-ExtraBold.woff') format('woff'); }
-@font-face { font-family: 'NanumSquareNeo'; font-style: normal; font-weight: 900; font-display: swap; src: url('/assets/fonts/NanumSquareNeo-Heavy.woff') format('woff'); }
+@font-face { font-family: 'NanumSquareNeo'; font-style: normal; font-weight: 400; font-display: swap; src: url('/assets/fonts/NanumSquareNeo-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'NanumSquareNeo'; font-style: normal; font-weight: 700; font-display: swap; src: url('/assets/fonts/NanumSquareNeo-Bold.woff2') format('woff2'); }
+@font-face { font-family: 'NanumSquareNeo'; font-style: normal; font-weight: 800; font-display: swap; src: url('/assets/fonts/NanumSquareNeo-ExtraBold.woff2') format('woff2'); }
+@font-face { font-family: 'NanumSquareNeo'; font-style: normal; font-weight: 900; font-display: swap; src: url('/assets/fonts/NanumSquareNeo-Heavy.woff2') format('woff2'); }
 :root {
   --font-display: 'NanumSquareNeo', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   --font-body: 'NanumSquareNeo', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
