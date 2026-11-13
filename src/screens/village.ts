@@ -517,6 +517,33 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if(amount<1)ctx.drawImage(sleeping,...rect);
     if(amount>0){ctx.save();ctx.globalAlpha=amount;ctx.drawImage(art,...rect);ctx.restore();}
   }
+  let lastEncounterLayout = -Infinity;
+  function layoutEncounterHud(now: number) {
+    if (encounterHud.hidden || now - lastEncounterLayout < 100) return;
+    lastEncounterLayout = now;
+    const bounds = shell.getBoundingClientRect(), w = shell.clientWidth, h = shell.clientHeight;
+    const pw = encounterHud.offsetWidth, ph = encounterHud.offsetHeight;
+    if (!w || !h || !pw || !ph) return;
+    const sx = bounds.width/w, sy = bounds.height/h;
+    const boxes = [...root.ownerDocument.querySelectorAll('button, a[href], .village-reveal, .village-hint')]
+      .filter(el => !encounterHud.contains(el) && !el.closest('[hidden]') && getComputedStyle(el).visibility !== 'hidden')
+      .map(el => el.getBoundingClientRect()).filter(r => r.width && r.height && r.right > bounds.left && r.left < bounds.right && r.bottom > bounds.top && r.top < bounds.bottom)
+      .map(r => ({ l:(r.left-bounds.left)/sx-8, t:(r.top-bounds.top)/sy-8, r:(r.right-bounds.left)/sx+8, b:(r.bottom-bounds.top)/sy+8 }));
+    if (map) for (const p of [actor,dog,...map.npcs]) {
+      const x = camera.x + p.x/map.width*frameWidth, y = camera.y + p.y/map.height*frameHeight;
+      boxes.push({l:x-45,r:x+45,t:y-88,b:y+12});
+    }
+    const ideal = {x:Math.max(8,w-pw-18),y:Math.min(72,Math.max(8,h-ph-8))};
+    const score = (x:number,y:number) => boxes.reduce((s,r) => s + Math.max(0,Math.min(x+pw,r.r)-Math.max(x,r.l))*Math.max(0,Math.min(y+ph,r.b)-Math.max(y,r.t)),0)*1000+Math.hypot(x-ideal.x,y-ideal.y);
+    const best = {...ideal}; let cost = score(best.x,best.y);
+    for (let y=8; y<=h-ph-8; y+=18) for (let i=0;i<=14;i++) {
+      const x=8+Math.max(0,w-pw-16)*i/14, current=score(x,y);
+      if(current<cost){cost=current;best.x=x;best.y=y;}
+    }
+    encounterHud.style.left=`${Math.round(best.x)}px`;
+    encounterHud.style.top=`${Math.round(best.y)}px`;
+    encounterHud.style.right='auto';
+  }
   const hitCount = (enemy: Encounter) => context.save.mapVillains[enemy.index] ?? 0;
   const canSeeEnemy = (enemy: Encounter) => hitCount(enemy) < 3 || encounterClock - enemy.hitAt < (reduced.matches ? 300 : 620);
   function updateEncounters(now: number) {
@@ -539,6 +566,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if(clearUntil>now&&!paused()&&options.newlyCompleted){
       encounterHud.hidden=false;attack.hidden=true;encounterPips.hidden=true;
       encounterText.textContent='바퀴 잠금 악당 · “'+encounterLines[options.newlyCompleted][0]+'”';
+      layoutEncounterHud(now);
       return;
     }
     attack.hidden=false;encounterPips.hidden=false;
@@ -563,6 +591,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     attack.setAttribute('aria-disabled', String(locked));
     const label = hits === 3 ? '물리쳤어요!' : `공격 · ${3-hits}번 남음`;
     if (attack.textContent !== label) attack.textContent = label;
+    layoutEncounterHud(now);
   }
   function updateContact(now: number) {
     const collision = (p: Point) => encounters.find(e => hitCount(e) < 3 && distance(e, p) <= contactRange);
