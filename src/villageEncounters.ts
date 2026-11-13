@@ -4,12 +4,42 @@ export const encounterAtlas = 'encounters/wheel-lock-atlas.webp';
 export const attackRange = 95;
 export const contactRange = 25;
 
-export const encounterLines: Record<StageId, readonly [string, string]> = {
-  cargo: ['바퀴 한 번 잠그면 못 가지!', '바퀴를 꽉 잡았다!'],
-  balance: ['이쪽 추를 조금만 밀어 볼까?', '한쪽 다리를 기울여야지!'],
-  scale: ['저울 받침을 덜컹대게 해 볼까?', '저울이 자꾸 들썩이지?'],
-  workshop: ['빗면 아래 받침을 숨겨야지!', '받침이 어디 갔을까?'],
-  rescue: ['코어 운반은 여기서 끝!', '운반대 앞을 가로막아야지!'],
+export const encounterLines: Record<StageId, readonly [string, string, string, string, string]> = {
+  "cargo": [
+    "짐을 밀고 당겨 옮겼어? 바퀴를 꽉 잠가 놨는데!",
+    "다음엔 바퀴에 내 자물쇠 이름표도 달겠어!",
+    "앗, 바퀴 집게가 풀렸어!",
+    "내 자물쇠가 데굴데굴!",
+    "쳇, 배송소 바퀴는 놓아줄게!"
+  ],
+  "balance": [
+    "양쪽을 맞춰 다리를 수평으로 만들었어? 내 추를 밀어 놨는데!",
+    "다음엔 내 가방을 한쪽 끝에 올려야지!",
+    "앗, 내가 민 추가 움직여!",
+    "양쪽 높이가 다시 맞았어!",
+    "흥, 균형 다리는 그냥 지나가!"
+  ],
+  "scale": [
+    "전자저울로 무게를 쟀어? 받침을 흔들어 놓았는데!",
+    "내 장난 무게는 숫자로 안 나오겠지?",
+    "앗, 저울 받침이 제자리로!",
+    "내가 가린 숫자가 보이잖아!",
+    "쳇, 저울은 돌려줄게!"
+  ],
+  "workshop": [
+    "지레랑 빗면으로 짐을 옮겼어? 받침을 쏙 숨겼는데!",
+    "나도 빗면 타고 근사하게 퇴장할래!",
+    "앗, 숨긴 받침이 굴러 나와!",
+    "운반 공방 장치가 다시 움직여!",
+    "흥, 지레와 빗면은 두고 갈게!"
+  ],
+  "rescue": [
+    "코어를 끝까지 옮겼어? 운반대 앞을 가로막았는데!",
+    "그 불빛, 내 비밀 기지에도 하나 달아 줘!",
+    "앗, 운반대 바퀴가 돌아!",
+    "코어 불빛이 다시 켜졌잖아!",
+    "쳇, 중앙 코어는 돌려줄게. 악당 퇴장!"
+  ]
 };
 
 type Point = { x: number; y: number };

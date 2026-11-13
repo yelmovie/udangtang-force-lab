@@ -1,3 +1,4 @@
+import { openMapFinale } from '../map-finale.js';
 import { bindDirectionPad } from '../map-controls.js';
 import type { AppContext } from '../appTypes';
 import { icons } from '../icons';
@@ -333,6 +334,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   let encounters: Encounter[] = [];
   let nearbyEnemy: Encounter | undefined;
   let attackTarget: Encounter | undefined;
+  let finaleAt=0,clearReady:number|null=null,clearUntil=0,clearShown=false;
   let lastHitAt = -Infinity, studentHurt = -Infinity, dogHurt = -Infinity, studentAttackFacing: 1 | -1 = 1;
   let studentHurtFacing: 1 | -1 = 1, dogHurtFacing: 1 | -1 = 1;
   let encounterClock = 0, studentTouching = false, dogTouching = false;
@@ -530,7 +532,16 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
         nearbyEnemy = enemy; closest = d;
       }
     }
-    const fading = attackTarget && hitCount(attackTarget) === 3 && now - lastHitAt < 850;
+    const fading = attackTarget && hitCount(attackTarget) === 3 && now - lastHitAt < 2400;
+    if(finaleAt&&now>=finaleAt&&!paused()){finaleAt=0;openMapFinale(encounterHud,'/assets/story/ending.mp4');}
+    if(paused())clearReady=null;else clearReady??=now;
+    if(options.newlyCompleted&&!options.adminUnlocked&&!clearShown&&clearReady!==null&&now-clearReady>=1250){clearShown=true;clearUntil=now+4200;}
+    if(clearUntil>now&&!paused()&&options.newlyCompleted){
+      encounterHud.hidden=false;attack.hidden=true;encounterPips.hidden=true;
+      encounterText.textContent='바퀴 잠금 악당 · “'+encounterLines[options.newlyCompleted][0]+'”';
+      return;
+    }
+    attack.hidden=false;encounterPips.hidden=false;
     const hudEnemy = nearbyEnemy ?? (fading ? attackTarget : undefined);
     const hidden = !hudEnemy || !!panView || overview || paused();
     const moveFocus = hidden && !encounterHud.hidden && document.activeElement === attack && !paused();
@@ -581,7 +592,8 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     const hits = hitCount(enemy) + 1;
     context.save.mapVillains[enemy.index] = hits;
     if (!options.adminUnlocked) context.commit();
-    encounterText.textContent = ['','앗, 집게가 풀렸어!','스프링이 덜컥!','나사까지 다 풀렸잖아!'][hits];
+    encounterText.textContent = encounterLines[enemy.id][hits+1];
+    if(hits===3&&!options.adminUnlocked&&stageIds.every((_,i)=>context.save.mapVillains[i]===3))finaleAt=now+2500;
     context.sound([0, 460, 365, 760][hits]);
     updateEncounters(now);
     draw();
