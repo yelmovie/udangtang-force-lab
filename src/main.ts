@@ -22,7 +22,7 @@ import { villageRewards } from './villageStory';
 import { playMusic, playSound, stopMusic, stopSounds, setVolume, type MusicName } from './sound';
 import { installKongDialogue } from './kongDialogue';
 installKongDialogue(() => save);
-import { infoContent, type InfoSection } from './info';
+import { infoContent } from './info';
 import { prepareOffline } from './offline';
 import type { AppContext } from './appTypes';
 import { abilityStatements, challenges } from './challenges';
@@ -679,23 +679,42 @@ function openSettings(focusAction?: 'bag') {
   const appWasInert = app.inert;
   app.inert = true;
   const close = () => { app.inert = appWasInert; overlay.remove(); app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.focus(); };
-  type Section = 'menu' | 'admin' | 'reset' | InfoSection;
-  const headings: Record<Section, string> = { menu: '설정', help: '학생 탐구 가이드', teacher: '교사 가이드', curriculum: '교육과정', info: '정보와 출처', admin: '전체 단계 해금', reset: '탐구 기록 초기화' };
-  const show = (section: Section | 'concepts') => {
+  type Section = 'menu' | 'admin' | 'reset' | 'concepts';
+  const headings: Record<Section, string> = { menu: '설정', admin: '전체 단계 해금', reset: '탐구 기록 초기화', concepts: '개념 영상 다시 보기' };
+  const show = (section: Section) => {
     let content: string;
     if (section === 'menu') {
       const cardCount = earnedToolCards(adminSave ?? save).length;
-      content = `<div class="settings-links">
-        <button data-settings="home"><span>${icons.home}</span> 메인 화면</button>
-        <button data-settings="bag" aria-haspopup="dialog"><span>${bagIcon()}</span> 도구 가방 <small>${cardCount}장</small></button>
-        <button data-settings="help"><span>?</span> 학생 가이드</button><button data-settings="save"><span>${icons.check}</span> 지금 저장</button></div><details class="teacher-tools"><summary>선생님 도구 · 정보</summary><div class="settings-links"><button data-settings="teacher"><span>${icons.book}</span> 교사 가이드</button>
-        <button data-settings="curriculum"><span>${icons.target}</span> 교육과정</button><button data-settings="info"><span>${icons.info}</span> 정보와 출처</button>
-        <button data-settings="admin"><span>${icons.gear}</span> 전체 단계 해금 <small>${adminUnlocked ? '사용 중' : ''}</small></button>
-        <button data-settings="prologue"><span>${icons.play}</span> 프롤로그 다시 보기</button>
-        ${canPlayMapFinale(save) || adminUnlocked ? `<button data-settings="ending"><span>${icons.sparkle}</span> 점등식 다시 보기</button>` : ''}
-        <button data-settings="concepts"><span>${icons.film}</span> 개념 영상 다시 보기</button>
-        <button class="settings-danger" data-settings="reset"><span>${icons.reset}</span> 기록 초기화</button></div></details>
-        <div class="settings-audio"><div class="settings-audio-switches"><button class="button button-secondary" data-settings="music" aria-pressed="${save.musicOn === true}">${switchLabel('배경음', save.musicOn === true)}</button><button class="button button-secondary" data-settings="sound" aria-pressed="${save.soundOn}">${switchLabel('효과음', save.soundOn)}</button></div><label for="sound-volume">소리 크기 <output id="volume-value">${Math.round((save.soundVolume ?? 0.3) * 100)}%</output></label><input id="sound-volume" type="range" min="0" max="100" step="5" value="${Math.round((save.soundVolume ?? 0.3) * 100)}" aria-label="소리 크기"></div>`;
+      const canWatch = canPlayMapFinale(save) || adminUnlocked;
+      const canRead = save.completed.length === stages.length || adminUnlocked;
+      const volume = Math.round((save.soundVolume ?? .3) * 100);
+      const soundSwitch = (action: 'sound' | 'music', name: string, on: boolean) =>
+        `<button type="button" role="switch" class="button button-secondary setting-row" data-settings="${action}" aria-label="${name}" aria-checked="${on}">${switchLabel(name, on)}</button>`;
+      const summary = (title: string, body: string) => `<details class="science-settings-detail"><summary>${title}</summary>${body}</details>`;
+      content = `<div class="science-settings-body">
+        <div class="science-settings-audio" aria-label="소리 설정">
+          ${soundSwitch('music','배경 음악',save.musicOn === true)}${soundSwitch('sound','효과음',save.soundOn)}
+        <label class="setting-row settings-wide" for="sound-volume">전체 소리 크기 <input id="sound-volume" type="range" min="0" max="100" step="5" value="${volume}"><output id="volume-value" for="sound-volume">${volume}%</output></label></div>
+        <div class="settings-links science-settings-actions" aria-label="바로 가기">
+          <button type="button" data-settings="bag" aria-haspopup="dialog"><span>${bagIcon()}</span> 도구 가방 <small>${cardCount}장</small></button>
+          <button type="button" data-settings="prologue"><span>${icons.play}</span> 이 탐험을 하는 이유 다시 보기</button>
+          <button type="button" data-settings="ending"${canWatch ? '' : ' disabled aria-describedby="finale-locked"'}><span>${icons.sparkle}</span> 점등식 다시 보기</button>
+          <button type="button" data-settings="record"${canRead ? '' : ' disabled aria-describedby="record-locked"'}><span>${icons.book}</span> 나의 탐구 결과 보기</button>
+          <button type="button" data-settings="concepts"><span>${icons.film}</span> 개념 영상 다시 보기</button>
+        </div>
+        ${canWatch ? '' : '<p class="settings-lock" id="finale-locked">지도에서 다섯 악당을 모두 물리치면 점등식이 열려요.</p>'}
+        ${canRead ? '' : '<p class="settings-lock" id="record-locked">다섯 미션을 마치면 탐구 결과를 볼 수 있어요.</p>'}
+        ${summary('앱 정보 · 배움과 보상',infoContent.about)}
+        ${summary('학생용 가이드',infoContent.help)}
+        ${summary('교사용 가이드',infoContent.teacher+`<details class="science-settings-detail"> <summary>성취기준</summary>${infoContent.curriculum}</details><div class="settings-reading"><h3>교사용 도구</h3><div class="settings-links"><button type="button" data-settings="admin"><span>${icons.gear}</span> 전체 단계 해금 <small>${adminUnlocked ? '사용 중' : '꺼짐'}</small></button></div><p>수업에서 바로 살펴볼 수 있어요. 미리보기 진행은 학생 기록에 남지 않아요.</p></div>`)}
+        ${summary('이미지·소리·저작권 고지',infoContent.info)}
+      </div>
+      <footer class="science-settings-footer settings-links">
+        <button type="button" data-settings="home"><span>${icons.home}</span> 메인 화면</button>
+        <button type="button" data-settings="save"><span>${icons.check}</span> 지금 저장</button>
+        <button type="button" class="settings-danger" data-settings="reset"><span>${icons.reset}</span> 탐구 기록 초기화</button>
+        <button type="button" class="button button-primary" data-settings="close">닫기</button>
+      </footer>`;
     } else if (section === 'admin') {
       content = `<p class="settings-lead">${adminUnlocked ? '실험 5개가 모두 열려 있어요.' : '실험 5개와 결과 화면을 미리 볼 수 있어요.'} 미리보기 조작은 학생 기록에 반영되지 않아요.</p><button class="button button-primary full" data-settings="toggle-admin">${adminUnlocked ? '전체 단계 해금 종료' : '전체 단계 해금'}</button><p class="settings-lead">해금은 이 탭에서만 유지되고 새로고침하면 종료돼요.</p>`;
       if (adminUnlocked) content += `<div class="settings-links" aria-label="미리 볼 실험">${stages.map(stage=>`<button data-preview-stage="${stage.id}">${stage.mission}. ${stage.title}</button>`).join('')}<button data-preview-stage="complete">결과 화면</button></div>`;
@@ -707,9 +726,9 @@ function openSettings(focusAction?: 'bag') {
       }).join('')}</div>`;
     } else if (section === 'reset') {
       content = '<p class="settings-lead">이 브라우저의 모든 실험 기록과 복구 진행을 지울까요? 지운 기록은 되돌릴 수 없어요. 소리 설정은 유지해요.</p><button class="button button-secondary settings-danger" data-settings="confirm-reset">기록을 지우고 처음으로</button>';
-    } else content = infoContent[section];
-    overlay.innerHTML = `<div class="modal-card settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-      <div class="settings-heading"><h2 id="settings-title">${section === 'concepts' ? '개념 영상 다시 보기' : headings[section]}</h2><button class="settings-close" data-settings="close" aria-label="설정 닫기">×</button></div>
+    } else return;
+    overlay.innerHTML = `<div class="modal-card settings-card"${section === 'menu' ? ' data-science-settings' : ''} role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="settings-heading"><h2 id="settings-title">${headings[section]}</h2><button type="button" class="settings-close" data-settings="close" aria-label="설정 닫기">×</button></div>
       ${content}${section === 'menu' ? '' : '<button class="button button-secondary settings-back" data-settings="back">설정으로 돌아가기</button>'}
     </div>`;
     const target = section === 'menu' && focusAction ? focusAction : 'close';
@@ -733,11 +752,11 @@ function openSettings(focusAction?: 'bag') {
       openToolBag({ app, save: adminSave ?? save, sound: () => tone(470), preview: adminUnlocked, onClose: () => openSettings('bag') });
     }
     else if (action === 'concepts') show('concepts');
-    else if (['help', 'teacher', 'curriculum', 'info', 'admin', 'reset'].includes(action ?? '')) show(action as Section);
+    else if (action === 'admin' || action === 'reset') show(action);
     else if (action === 'sound') {
       save.soundOn = !save.soundOn;
       persist();
-      button.setAttribute('aria-pressed', String(save.soundOn));
+      button.setAttribute('aria-checked', String(save.soundOn));
       button.textContent = switchLabel('효과음', save.soundOn);
       updateSoundButton();
       if (save.soundOn) tone(520); else stopSounds();
@@ -745,8 +764,8 @@ function openSettings(focusAction?: 'bag') {
     else if (action === 'music') {
       save.musicOn = !save.musicOn;
       persist();
-      button.setAttribute('aria-pressed', String(save.musicOn));
-      button.textContent = switchLabel('배경음', save.musicOn);
+      button.setAttribute('aria-checked', String(save.musicOn));
+      button.textContent = switchLabel('배경 음악', save.musicOn);
       updateSoundButton();
       syncMusic();
     }
@@ -757,6 +776,7 @@ function openSettings(focusAction?: 'bag') {
       persist(); viewPage = 'title'; render();
     }
     else if (action === 'ending') { close(); openEndingCeremony(); }
+    else if (action === 'record') { close(); navigate('complete'); }
     else if (action === 'prologue') { close(); openStoryModal({ lines: prologueLines, finishLabel: '닫기', video: introVideo }); }
     else if (action === 'toggle-admin') {
       const enable = !adminUnlocked;
@@ -797,7 +817,7 @@ function updateSoundButton() {
 }
 /** Settings switch text: what is on now, then what a press does. */
 function switchLabel(name: string, on: boolean): string {
-  return `${name} ${on ? '켜짐 · 끄기' : '꺼짐 · 켜기'}`;
+  return `${name} ${on ? '켜짐' : '꺼짐'}`;
 }
 
 function bindHeader() {

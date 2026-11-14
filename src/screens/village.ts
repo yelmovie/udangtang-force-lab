@@ -550,6 +550,11 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   }
   const hitCount = (enemy: Encounter) => context.save.mapVillains[enemy.index] ?? 0;
   const canSeeEnemy = (enemy: Encounter) => hitCount(enemy) < 3 || encounterClock - enemy.hitAt < (reduced.matches ? 300 : 620);
+  function clearOfVillageResidents(point: Point) {
+    const neighbors: Point[] = [...(map?.npcs ?? []), ...visibleClients().map(stage=>requesterSpots[stage])];
+    // Feet can differ vertically while the visible character silhouettes still overlap.
+    return neighbors.every(n=>Math.hypot((n.x-point.x)/48,(n.y-point.y)/60)>=1);
+  }
   function updateEnemyPatrol(now: number, dt: number) {
     if (reduced.matches || !navigation) return;
     for (const enemy of encounters) {
@@ -560,7 +565,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       const goal={x:enemy.home.x+p.x*xRadius,y:enemy.home.y+p.y*xRadius*.25};
       const blend=1-Math.exp(-dt*7);
       const next={x:enemy.x+(goal.x-enemy.x)*blend,y:enemy.y+(goal.y-enemy.y)*blend};
-      if (navigation.stand(next) && navigation.segment(enemy,next)) {enemy.x=next.x;enemy.y=next.y;}
+      if (navigation.stand(next) && navigation.segment(enemy,next) && clearOfVillageResidents(next)) {enemy.x=next.x;enemy.y=next.y;}
       if (large) enemy.facing=p.direction<0?-1:1;
     }
   }
@@ -1029,7 +1034,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
         .find(point => nav.stand(point) && nav.segment(spawn,point)) ?? spawn;
       map=candidate;navigation=nav;images=new Map(loaded);actor={...spawn,direction:'down'};dog={...dogSpawn,direction:'down'};trail=[{...spawn}];
       const used: Point[] = [];
-      const offsets = [[-42,48],[42,48],[-54,24],[54,24],[-30,65],[30,65],[0,65]];
+      const offsets = [[-42,48],[42,48],[-54,24],[54,24],[-30,65],[30,65],[0,65],[-77,50],[77,50]];
       encounterClock=performance.now();
       encounters=candidate.buildings.flatMap(building=>{
         if(!context.save.completed.includes(building.id))return [];
@@ -1038,7 +1043,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
         const home={x:building.entry.x,y:building.entry.y+36};
         const exit=nav.stand(home)?home:nav.nearest(home,100);
         const spots=offsets.map(([dx,dy])=>nav.nearest({x:building.entry.x+dx,y:building.entry.y+dy},24))
-          .filter((p): p is Point => !!p && distance(p,building.entry)>34 && distance(p,home)<100 &&
+          .filter((p): p is Point => !!p && distance(p,building.entry)>34 && distance(p,home)<100 && clearOfVillageResidents(p) &&
             used.every(q=>distance(p,q)>100));
         const point=spots.find(p=>exit && nav.segment(exit,p)) ?? spots.find(p=>nav.route(spawn,p));
         if(!point)return [];
@@ -1158,6 +1163,3 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   void loadWorld();
   return()=>{voice.destroy();dialogueText.destroy();alive=false;generation++;cancelAnimationFrame(raf);fetches.abort();cancelImages.forEach(cancel=>cancel());clearInput();events.abort();observer.disconnect();if(dialog.open)dialog.close();if(board.open)board.close();portrait.removeAttribute('style');tinted.clear();images.clear();metadata.clear();};
 }
-
-
-
