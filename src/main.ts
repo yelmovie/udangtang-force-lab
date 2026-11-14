@@ -28,7 +28,6 @@ import { abilityStatements, challenges } from './challenges';
 import { openLearningReview } from './learningReview';
 import { conceptClipTitle, conceptPoster, openConceptClip, syncConceptButton } from './conceptClip';
 import { learningTask, learningRecordComplete, learningSummary } from './learningModel';
-import { stageStars, type StageStars } from './stars';
 import { inquiryPlans, predictionRecap, predictionVerdict, type PredictionRecap } from './inquiryPlan';
 import { earnedToolCards, toolCardInfo, toolCards } from './toolCards';
 import { bagIcon, openToolBag, toolCardRevealMarkup, toolCardRowMarkup } from './toolBag';
@@ -164,11 +163,11 @@ function finishWithEvidence(stageId: StageId, summary: string) {
   modal.innerHTML = `<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="world-title">
       <div class="modal-emblem">${icons.sparkle}</div>
       <p class="eyebrow">${adminUnlocked ? '관리자 미리보기 · 실험 결과' : '새로운 발견 · 실험실 복구!'}</p>
-      <h2 id="world-title">${stage.evidence}</h2>${starRow(stageStars(activeSave, stageId), true)}
+      <h2 id="world-title">${stage.evidence}</h2>
       ${newCard ? toolCardRevealMarkup(newCard) : ''}
       <div class="discovery-recap"><img src="/assets/game/corgi-success.webp" alt=""><div><strong class="discovery-key">${escapeHtml(toolCardInfo[stageId].idea)}</strong>${guessMarkup(predictionRecap(activeSave, stageId))}</div></div>
       <div class="world-concept"></div>
-      ${reviewTask ? `<section class="world-review question-zone question-zone-compact"><span class="question-label">마을로 가기 전 문제</span><p class="question-prompt">내 실험 기록을 보고 문제를 풀어요</p><button class="button button-primary" id="world-review">문제 풀기</button></section>` : ''}<details class="discovery-detail"><summary>도전 과제 (선택)</summary><p>${challenge.done ? `★ ${challenge.label}` : challenge.hint}</p><p class="discovery-record">${escapeHtml(summary)}</p></details>
+      ${reviewTask ? `<section class="world-review question-zone question-zone-compact"><span class="question-label">마을로 가기 전 문제</span><p class="question-prompt">내 실험 기록을 보고 문제를 풀어요</p><button class="button button-primary" id="world-review">문제 풀기</button></section>` : ''}<details class="discovery-detail"><summary>도전 과제 (선택)</summary><p>${challenge.done ? `${challenge.label} 완료` : challenge.hint}</p><p class="discovery-record">${escapeHtml(summary)}</p></details>
       ${adminUnlocked ? '<p class="small-note">미리보기 결과는 학생 진행 기록에 반영되지 않습니다.</p>' : `<div class="world-meter"><span style="width:${save.completed.length * 20}%"></span></div><p class="small-note">전체 실험실 복구 ${save.completed.length * 20}% · 미션 ${save.completed.length}/5 완료</p>`}
       <button class="button button-primary" id="world-continue">${stageId === 'rescue' ? '마을 점등식 보러 가기 ✦' : '달라진 마을 보러 가기'}</button><p class="world-lock-note" id="world-lock-note" role="status"></p>
     </div>`;
@@ -225,14 +224,9 @@ function predictionMarkup(recap: PredictionRecap, className = 'discovery-predict
   const verdict = predictionVerdict(recap);
   return `<div class="${className} prediction-recap" data-matched="${recap.matched ?? 'none'}"><p><span class="prediction-tag">처음 생각</span>${escapeHtml(recap.predicted ?? '기록된 예상이 없어')}</p><p><span class="prediction-tag is-result">실제 결과</span>${escapeHtml(recap.result)}</p>${verdict ? `<strong class="prediction-verdict">${verdict}</strong>` : ''}</div>`;
 }
-/** Three star slots per mission: completed, level 2 request, challenge. */
-function starRow(stars: StageStars, celebrate = false): string {
-  return `<ul class="star-row${celebrate ? ' is-celebrating' : ''}" aria-label="별 ${stars.earned}개">${stars.slots.map((slot, i) => `<li class="${slot.done ? 'is-done' : ''}" style="--i:${i}"><span aria-hidden="true">${slot.done ? '★' : '☆'}</span>${escapeHtml(slot.label)}</li>`).join('')}</ul>`;
-}
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!);
 }
-
 
 const prologueLines = [
   { who: '도토리 박사', text: '우당탕 마을에 전기가 모두 나갔어! 무슨 일이 생긴 걸까?' },
@@ -415,7 +409,7 @@ function openReviewGate(stageId: StageId) {
       <p class="eyebrow">MISSION 0${stage.mission} · 실험 완료!</p>
       <h2 id="world-title">마지막으로 문제를 풀어요</h2>
       <section class="world-review question-zone question-zone-compact"><span class="question-label">마을로 가기 전 문제</span><p class="question-prompt">내 실험 기록을 보고 문제를 풀어요</p><button class="button button-primary" id="gate-review">문제 풀기</button></section>
-      <p class="world-lock-note">문제를 다 풀면 별과 도구 카드를 받고, 달라진 마을을 볼 수 있어요.</p>
+      <p class="world-lock-note">문제를 다 풀면 도구 카드를 받고, 달라진 마을을 볼 수 있어요.</p>
       <button class="button button-secondary" id="gate-back">실험 더 해 보기</button>
     </div>`;
   document.body.append(modal);
@@ -507,6 +501,8 @@ function goBack() {
 }
 
 function header(title: string, subtitle: string) {
+  const count = earnedToolCards(adminSave ?? save).length;
+  const toolBag = `<button class="icon-button" data-top="bag" aria-label="도구 가방 열기, 카드 ${count}장" aria-haspopup="dialog" title="도구 가방">${bagIcon()}${count ? `<span class="toolbag-count" aria-hidden="true">${count}</span>` : ''}</button>`;
   return `<header class="topbar">
     <div class="top-nav">
       <button class="icon-button" data-top="back" aria-label="이전 페이지로" title="이전"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 5l-7 7 7 7"/></svg></button>
@@ -515,7 +511,7 @@ function header(title: string, subtitle: string) {
     <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" width="34" height="34"><path d="M18 5h12M21 6v13L11 35a5 5 0 0 0 4 8h18a5 5 0 0 0 4-8L27 19V6" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 32h18l4 6-3 5H14l-3-5z" fill="#73bba2"/><circle cx="20" cy="35" r="2" fill="#f6b45e"/><circle cx="28" cy="38" r="2" fill="#f6b45e"/></svg></span><span>우당탕<br><strong>힘 실험실</strong></span></div>
     <div class="topbar-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기 · 학생 기록과 분리' : '초등 3학년 과학 · 힘과 우리 생활'}</span><strong>${title}</strong><span>${subtitle}</span></div>
     <div class="top-actions">
-      ${viewPage === 'map' ? '' : (count => `<button class="icon-button" data-top="bag" aria-label="도구 가방 열기, 카드 ${count}장" aria-haspopup="dialog" title="도구 가방">${bagIcon()}${count ? `<span class="toolbag-count" aria-hidden="true">${count}</span>` : ''}</button>`)(earnedToolCards(adminSave ?? save).length)}
+      ${viewPage === 'map' ? '' : toolBag}
       <button class="icon-button" data-top="sound" aria-label="소리 ${anySound() ? '끄기' : '켜기'}" aria-pressed="${anySound()}">${soundIcon()}</button>
       <button class="icon-button" data-top="settings" aria-label="설정 열기" aria-haspopup="dialog" title="설정">${settingsIcon()}</button>
     </div>
@@ -577,7 +573,7 @@ function renderTitle(root: HTMLElement) {
   else window.addEventListener('load', () => window.setTimeout(reveal, 250), { once: true });
   bindHeader();
   root.querySelector<HTMLButtonElement>('#new-start')?.addEventListener('click', async () => {
-    if (hasSave && !await confirmBox('기존 탐구 기록을 지우고 새로 시작할까요?', '별, 도구 카드, 실험 기록이 이 기기에서 모두 지워져요. 소리 설정은 그대로예요.', '기록 지우고 시작')) return;
+    if (hasSave && !await confirmBox('기존 탐구 기록을 지우고 새로 시작할까요?', '도구 카드와 실험 기록이 이 기기에서 모두 지워져요. 소리 설정은 그대로예요.', '기록 지우고 시작')) return;
     adminUnlocked = false;
     adminSave = null;
     save = { ...freshSave(), soundOn: save.soundOn, musicOn: save.musicOn, soundVolume: save.soundVolume };
@@ -601,7 +597,7 @@ function renderTitle(root: HTMLElement) {
 }
 
 async function restartFromBeginning() {
-  if(!await confirmBox('처음부터 다시 해볼까요?', '별, 도구 카드, 실험 기록을 지우고 처음부터 시작해요. 소리 설정은 그대로예요.', '처음부터 다시 시작')) return;
+  if(!await confirmBox('처음부터 다시 해볼까요?', '도구 카드와 실험 기록을 지우고 처음부터 시작해요. 소리 설정은 그대로예요.', '처음부터 다시 시작')) return;
   const previous=context.save;
   save={...freshSave(),soundOn:previous.soundOn,musicOn:previous.musicOn,soundVolume:previous.soundVolume};
   adminUnlocked=false; adminSave=null; context.save=save; missionCardShown.clear(); villageReturn=undefined; villageCelebration=undefined;
@@ -618,10 +614,10 @@ function renderComplete(root: HTMLElement) {
     <div class="report-grid">${stages.map(stage => {
       const task = learningTask(save, stage.id), record = save.learning?.[stage.id];
       const checked = task && record && learningRecordComplete(task, record);
-      return `<article class="report-card"><span>MISSION 0${stage.mission} · ${stage.concept}</span><h2>${stage.evidence}</h2>${starRow(stageStars(save, stage.id))}<p class="report-card-insight">${escapeHtml(villageRewards[stage.id].afterLines[1])}</p>${predictionMarkup(predictionRecap(save, stage.id), 'report-first')}${save.completed.includes(stage.id) ? `<button type="button" class="report-concept" data-concept="${stage.id}">▶ 개념 영상 보기</button>` : ''}<details class="report-detail"><summary>내 실험과 답변 살펴보기</summary><p>${escapeHtml(save.evidence[stage.id] ?? '아직 기록이 없습니다.')}</p>${checked ? `<p>${escapeHtml(learningSummary(task, record))}</p>` : ''}</details></article>`;
+      return `<article class="report-card"><span>MISSION 0${stage.mission} · ${stage.concept}</span><h2>${stage.evidence}</h2><p class="report-card-insight">${escapeHtml(villageRewards[stage.id].afterLines[1])}</p>${predictionMarkup(predictionRecap(save, stage.id), 'report-first')}${save.completed.includes(stage.id) ? `<button type="button" class="report-concept" data-concept="${stage.id}">▶ 개념 영상 보기</button>` : ''}<details class="report-detail"><summary>내 실험과 답변 살펴보기</summary><p>${escapeHtml(save.evidence[stage.id] ?? '아직 기록이 없습니다.')}</p>${checked ? `<p>${escapeHtml(learningSummary(task, record))}</p>` : ''}</details></article>`;
     }).join('')}</div>
     </details><details class="complete-details"><summary>스스로 돌아보기 · 더 탐구하기 (선택)</summary><div class="ability-card"><h2>나는 이제 할 수 있어요!</h2><p>할 수 있게 된 것을 눌러 골라 봐. 연구 기록에 함께 저장돼.</p><div class="ability-list">${abilityStatements.map((text, i) => `<button class="ability-item" data-ability="${i}" aria-pressed="${(save.abilities ?? []).includes(i)}"><span>${(save.abilities ?? []).includes(i) ? '✓' : ''}</span>${text}</button>`).join('')}</div></div>
-    <div class="challenge-card"><h2>도전 과제 <small id="challenge-count"></small></h2><p>실험실로 돌아가서 더 시험해 보면 배지가 켜져.</p><div class="challenge-list">${challenges(save).map(item => `<div class="challenge-item ${item.done ? 'done' : ''}"><span>${item.done ? '★' : '☆'}</span><div><strong>${item.label}</strong><small>${item.hint}</small></div></div>`).join('')}</div></div>
+    <div class="challenge-card"><h2>도전 과제 <small id="challenge-count"></small></h2><p>실험실로 돌아가서 더 시험해 봐. 해 본 과제는 완료로 표시돼.</p><div class="challenge-list">${challenges(save).map(item => `<div class="challenge-item ${item.done ? 'done' : ''}"><span aria-hidden="true">${item.done ? '✓' : '○'}</span><div><strong>${item.label}</strong><small>${item.done ? '완료' : item.hint}</small></div></div>`).join('')}</div></div>
     </details>${toolCardRowMarkup(save)}<div class="transfer-card"><h2>내가 찾은 생활 속 도구</h2><p>${save.lifeObservation ? escapeHtml(save.lifeObservation.object) + ' · ' + escapeHtml(save.lifeObservation.use) : '주변에서 지레나 빗면을 찾아 어떻게 쓰이는지 살펴봐요.'}</p><p>이 기록을 보며 친구에게 도구의 쓰임을 설명해요.</p></div>
     <div class="complete-footer"><p>${adminUnlocked ? '관리자 미리보기 결과는 학생의 기록에 반영되지 않아요.' : ''}</p><button class="button button-secondary" id="back-map">작전 지도로</button></div>
   </section>`;
@@ -840,7 +836,7 @@ function watchFinish(screen: HTMLElement, stageId: StageId) {
     const dialog = document.createElement('dialog');
     finishDialog = dialog;
     dialog.className = 'stage-popup stage-finish';
-    dialog.innerHTML = `<div class="stage-popup-card"><span class="stage-popup-label">MISSION 0${stages.find(item => item.id === stageId)!.mission} 완료</span><span class="stage-stamp" aria-hidden="true">★ 완료</span><h2>다 했어요! 멋져요 ★</h2><button class="stage-popup-close" aria-label="닫기">×</button><div class="stage-popup-body"><p>${finishLines[stageId]}</p></div><div class="stage-popup-actions"><button class="stage-finish-later">조금 더 실험할래요</button><button class="button button-primary stage-finish-go">${button.textContent}</button></div></div>`;
+    dialog.innerHTML = `<div class="stage-popup-card"><span class="stage-popup-label">MISSION 0${stages.find(item => item.id === stageId)!.mission} 완료</span><span class="stage-stamp" aria-hidden="true">✓ 완료</span><h2>다 했어요! 멋져요</h2><button class="stage-popup-close" aria-label="닫기">×</button><div class="stage-popup-body"><p>${finishLines[stageId]}</p></div><div class="stage-popup-actions"><button class="stage-finish-later">조금 더 실험할래요</button><button class="button button-primary stage-finish-go">${button.textContent}</button></div></div>`;
     dialog.querySelector('.stage-popup-close')!.addEventListener('click', () => dialog.close());
     dialog.querySelector('.stage-finish-later')!.addEventListener('click', () => dialog.close());
     dialog.querySelector('.stage-finish-go')!.addEventListener('click', () => { dialog.close(); button.click(); });

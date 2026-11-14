@@ -50,7 +50,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     root.innerHTML = `<section class="experiment-screen cargo-expedition">
     <div class="experiment-heading"><div><p class="eyebrow">01 · 물자 배송소</p><h1>멈춘 화물을 움직여라!</h1><p>같은 힘·시간으로 밀면, 무거운 상자도 같은 곳에 도착할까?</p></div><div class="cargo-tools"><button class="cargo-record-open" id="cargo-record-open">기록 보기 <span id="cargo-record-count">0</span></button><button class="button button-primary cargo-bakery-open" id="cargo-open-orders" hidden>${requestOpenLabel} →</button></div>${missionProgressMarkup('cargo', ['밀기 1·3·5개', '당기기 1·3·5개', '더 멀리 간 상자', '빵집 주문 3장'])}</div>
     <div class="cargo-adventure"><div class="cargo-scene" aria-label="화물 실험 무대">
-      <div class="cargo-scene-caption"><span class="instrument-phase cargo-step" id="cargo-step" tabindex="-1"></span><button class="button button-secondary cargo-auto-go" id="cargo-auto-go" aria-pressed="false">▶ 자동으로 보기</button><button class="button button-primary cargo-tap-go" id="cargo-tap-go">눌러서 밀기 →</button></div>
+      <div class="cargo-scene-caption"><span class="instrument-phase cargo-step" id="cargo-step" tabindex="-1"></span><button class="button button-primary cargo-tap-go" id="cargo-tap-go" aria-describedby="cargo-step">눌러서 밀기 →</button><button class="button button-secondary cargo-auto-go" id="cargo-auto-go" aria-pressed="false">▶ 자동으로 보기</button></div>
       <div class="cargo-finding-cta" hidden><p>실험 끝! 1·3·5개 상자를 모두 밀고 당겨 봤어요.</p><button class="button button-primary" id="cargo-finding-go">비교하고 의뢰 받기 →</button></div>
       <div class="cargo-rail"><span class="rail-start">출발</span><span class="rail-end">어디까지 갈까?</span><i class="rail-ticks"></i><div class="cargo-target-zone" hidden><span>빵집 문 앞</span></div><div class="cargo-ghosts" aria-hidden="true"></div><div class="cargo-gesture-guide" aria-hidden="true"><span class="cargo-gesture-arrow">→</span><span class="cargo-gesture-target">같은 힘</span></div><div class="cargo-object" data-mood="idle" aria-label="부품을 담는 상자"><span class="cargo-pull-strap" aria-hidden="true"></span><span class="cargo-force-arrow" aria-hidden="true"><b>같은 힘</b></span><button class="cargo-worker-grip"><img class="cargo-worker cargo-worker-push" src="${imagePath('student-cargo-push')}" alt="" draggable="false"><img class="cargo-worker cargo-worker-pull" src="${imagePath('student-cargo-pull')}" alt="" draggable="false"><span class="cargo-grab-cue">${fingerIcon}</span></button><img class="cargo-box-art" src="${imagePath('crate-empty')}" alt="나무 운반 상자" draggable="false"><div class="cargo-contents"></div><span class="cargo-load-tag"></span></div></div>
       <div class="cargo-distance" role="status"></div>
@@ -123,13 +123,13 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             if (deliveredAll()) return '배달 완료! 운반 레일 복구하기를 눌러요';
             if (waiting) return misses ? '흔적을 보고 힘을 다시 골라요' : '배달 성공! 다음 주문이 와요';
             const label = `주문 ${orders().length + 1} · 부품 ${currentOrder().parts}개`;
-            return force ? `${label} · 아이를 옮기거나 눌러서 밀기` : `${label} · 아래에서 힘을 고른 뒤 움직여 보세요`;
+            return force ? `${label} · ‘눌러서 밀기’를 눌러요. 끌어서 밀어도 돼요.` : `${label} · 힘을 고르고 ‘눌러서 밀기’를 눌러요`;
         }
         if (finding && deliveredAll()) return '배달 완료! 부품과 방향을 바꿔 더 실험해 봐요';
         if (finding) return `위의 ‘${requestOpenLabel}’를 눌러요`;
         if (ready()) return '실험은 끝! 가운데 비교하고 의뢰 받기를 눌러요';
         if (needsSetup) return !pushCompared() ? '뒤에서 밀기로 1·3·5개 상자를 모두 비교해요' : '앞에서 당기기로 1·3·5개 상자를 모두 비교해요';
-        return '아이를 오른쪽 표시까지 옮기거나 눌러서 움직여요';
+        return `‘${tapLabel()}’를 눌러요. 아이를 오른쪽 표시까지 끌어도 돼요.`;
     }
     function renderGhosts() {
         // Level 1: where every other load stopped, so 1·3·5 can be compared side by side on the rail.

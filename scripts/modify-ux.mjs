@@ -28,7 +28,7 @@ edit('src/main.ts', [
       },
     });
   } else finishWithEvidence(stageId, summary);`],
-  ['<p class="discovery-challenge">${challenge.done ? `★ 추가 탐구 성공 · ${challenge.label}` : `☆ 다시 도전할 수 있어 · ${challenge.hint}`}</p>', '<details class="discovery-detail"><summary>더 탐구하기 (선택)</summary><p>${challenge.done ? `★ ${challenge.label}` : challenge.hint}</p>${learningTask(activeSave, stageId) ? \'<button class="button button-secondary" id="optional-review">내 기록으로 문제 풀기</button>\' : \'\'}</details>'],
+  ['<p class="discovery-challenge">${challenge.done ? `★ 추가 탐구 성공 · ${challenge.label}` : `☆ 다시 도전할 수 있어 · ${challenge.hint}`}</p>', '<details class="discovery-detail"><summary>더 탐구하기 (선택)</summary><p>${challenge.done ? `${challenge.label} 완료` : challenge.hint}</p>${learningTask(activeSave, stageId) ? \'<button class="button button-secondary" id="optional-review">내 기록으로 문제 풀기</button>\' : \'\'}</details>'],
   [`  modal.addEventListener('keydown', event => {
     if (event.key === 'Tab') { event.preventDefault(); next.focus(); }
   });`, `  modal.querySelector('#optional-review')?.addEventListener('click', () => {

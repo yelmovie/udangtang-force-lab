@@ -10,7 +10,7 @@
   font-synthesis-weight: none;
 }
 h1, h2, h3, .button, .brand, .topbar-title strong, .eyebrow, .control-label, .mission-tag strong,
-.modal-card h2, .settings-links button, .settings-heading h2, .village-screen button, .village-objective strong, .village-dialog-heading h2,
+.modal-card h2, .settings-links button, .settings-heading h2, .village-screen button, .village-dialog-heading h2,
 .segmented button, .predict-options button, .workshop-drawer > button, .workshop-choice button, .rescue-controls button, .rescue-step-button, .route-options button, .core-handle, .toast, .progress-card strong, .complete-count strong {
   font-family: var(--font-display); font-weight: 400; letter-spacing: 0;
 }
@@ -272,19 +272,12 @@ button.button:not(:disabled):active {
 }
 #app .screen .village-screen { background: transparent; }
 #app .screen .village-frame { position: absolute; left: 0; top: 0; max-width: none; max-height: none; will-change: transform; box-shadow: 0 0 0 4px #10261f88, 0 24px 60px rgba(6, 30, 30, .6); border-radius: 6px; }
-/* Village HUD: only the star badge (hugging the home button) and the next-step button stay. */
-#app .village-screen .village-hud { top: 8px; left: 140px; right: 176px; }
-#app .village-screen .village-objective, #app .village-screen .village-count, #app .village-screen .village-hint { display: none; }
-@media (min-width: 1600px) { #app .village-screen .village-hud { left: 152px; } }
-@media (min-width: 1600px) and (min-height: 900px) and (orientation: landscape) { #app .village-screen .village-hud { right: 200px; } }
-@media (max-width: 760px), (orientation: portrait) { #app .village-screen .village-hud { top: 64px; right: 10px; } }
+/* Village HUD: keep the next-step button visible. */
+#app .village-screen .village-hint { display: none; }
 
 /* ===== Village signs on roofs: translucent; the base button look (radius, edge, states) is in village.css ===== */
 .village-labels button { font-size: 15px; background: #fff4d7e6; border-color: #715737cc; color: #3b2c1e; }
-.village-labels button.is-current { animation: sign-pulse 3s ease-in-out infinite; }
 .village-labels button.is-locked { border-color: #7c806eaa; }
-/* scale (not box-shadow) so the pulse stays on the compositor; the halo ring itself is static in village.css. */
-@keyframes sign-pulse { 0%, 100% { scale: 1; } 50% { scale: 1.07; } }
 /* tablet landscape (1024–1366 wide) */
 @media (min-width: 761px) and (max-width: 1366px) and (orientation: landscape) { .village-labels button { font-size: 16px; } }
 /* interactive board */
@@ -466,18 +459,6 @@ button.button:not(:disabled):active {
 .report-card .report-first.prediction-recap { display:grid; }
 .report-card .prediction-recap p { font-size:15px; line-height:1.4; word-break:keep-all; }
 
-/* 미션별 별 3칸: 완료 · 의뢰 · 도전 과제 */
-.star-row { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin:8px 0 4px; padding:0; list-style:none; }
-.star-row li { display:flex; align-items:center; gap:4px; padding:3px 10px; border-radius:999px; background:#f1ede1; color:#7b7464; font-size:14px; font-weight:700; }
-.star-row li span { font-size:18px; line-height:1; }
-.star-row li.is-done { background:#fff1c4; color:#7a5310; }
-.star-row li.is-done span { color:#e3a21a; }
-.report-card .star-row { justify-content:flex-start; }
-.star-row.is-celebrating li.is-done span { animation:star-pop .5s cubic-bezier(.2,.8,.3,1.4) both; animation-delay:calc(var(--i) * .15s + .2s); }
-@keyframes star-pop { from { transform:scale(0) rotate(-40deg); } to { transform:none; } }
-.ending-stars { margin:6px 0 0; font-size:22px; font-weight:900; color:#ffd766; text-shadow:0 2px 0 #6b4510; }
-#app .village-star { font-size: 14px; }
-
 /* ===== 미션 완료 모달(#world-title): 세로 스크롤 없이 한 화면에. 넓게(760px) 펴고 도구 카드·코기 요약을 2열로 둬서 높이를 줄인다. ===== */
 .modal-layer > .modal-card:has(> #world-title) {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-content: start; column-gap: 12px; row-gap: 0;
@@ -488,9 +469,6 @@ button.button:not(:disabled):active {
 .modal-card:has(> #world-title) > .modal-emblem { width: 56px; height: 56px; margin: 4px auto 2px; font-size: 30px; border-width: 3px; box-shadow: 0 4px 0 #a86a2a, 0 8px 14px rgba(121, 69, 34, .22); }
 .modal-card:has(> #world-title) > .eyebrow { margin: 0; font-size: 16px; }
 .modal-card:has(> #world-title) > h2 { margin: 2px 0 0; font-size: 30px; line-height: 1.25; }
-.modal-card:has(> #world-title) > .star-row { margin: 6px 0 0; gap: 8px; }
-.modal-card:has(> #world-title) > .star-row li { font-size: 16px; padding: 4px 12px; }
-.modal-card:has(> #world-title) > .star-row li span { font-size: 20px; }
 /* 도구 카드 상자와 코기 요약이 같은 줄에 나란히; 새 카드가 없으면 요약이 한 줄을 다 쓴다. */
 .modal-card:has(> #world-title) > .toolcard-reveal { grid-column: 1; margin: 10px 0 0; max-width: none; padding: 8px 12px; gap: 12px; }
 .modal-card:has(> #world-title) > .toolcard-reveal + .discovery-recap { grid-column: 2; }
@@ -520,7 +498,6 @@ button.button:not(:disabled):active {
   .modal-layer > .modal-card:has(> #world-title) { padding: 10px 24px 16px; max-height: calc(100dvh - 20px); }
   .modal-card:has(> #world-title) > .modal-emblem { width: 46px; height: 46px; font-size: 24px; margin: 2px auto 0; }
   .modal-card:has(> #world-title) > h2 { font-size: 28px; }
-  .modal-card:has(> #world-title) > .star-row { margin-top: 4px; }
   .modal-card:has(> #world-title) > .toolcard-reveal, .modal-card:has(> #world-title) > .discovery-recap { margin-top: 8px; padding: 6px 10px; }
   .modal-card:has(> #world-title) > .discovery-recap .discovery-key { font-size: 18px; }
   .modal-card:has(> #world-title) > .discovery-recap img { width: 54px; height: 54px; }
@@ -536,7 +513,7 @@ button.button:not(:disabled):active {
 /* Reduced motion: adventure.css already stops every animation/transition globally; these only document the intent. */
 @media (prefers-reduced-motion: reduce) {
   .modal-layer, .modal-card, .village-dialog, .toast, .title-screen .illustrated-title, .title-screen .title-buttons .button-primary,
-  .village-labels button.is-current, .star-row.is-celebrating li.is-done span, .village-screen .village-portrait, .village-screen .village-board-mark,
+  .village-labels button.is-current, .village-screen .village-portrait, .village-screen .village-board-mark,
   #app .village-labels button.village-npc-bubble, .stage-finish .stage-popup-card { animation: none; }
   .stage-finish .stage-stamp, .stage-finish .stage-stamp.is-stamped { transition: none; transform: scale(1) rotate(-8deg); opacity: 1; }
 }

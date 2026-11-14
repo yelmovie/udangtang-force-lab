@@ -51,7 +51,7 @@
   #app :is(.balance-goal > span, #balance-record-label, #balance-count, .balance-pan .balance-side, .balance-pan-name, .balance-lock-callout, #balance-result, .object-options .object-card strong),
   #app :is(#cargo-record-open, .cargo-rail .rail-start, .cargo-rail .rail-end),
   #app :is(.core-eyebrow, #rescue-phase, #rescue-readout, .rescue-notebook > summary),
-  #app :is(.village-labels .village-star, .village-board-count) { font-size: 18px; }
+  #app .village-board-count { font-size: 18px; }
   #app .village-board-count { min-width: 28px; height: 28px; }
   /* The core top bar is 85px tall here; start the stage head below it instead of under it. */
   #app .experiment-screen.core-studio { padding-top: 92px; }

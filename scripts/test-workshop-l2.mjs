@@ -93,7 +93,7 @@ test('the clue gets one step more specific every two misses', () => {
   assert.match(model.workshopL2Hint(3, 'lever'), /앞 화물을 올렸던 설계/);
   assert.doesNotMatch(model.workshopL2Hint(3, 'lever'), /화물 가까이|길고 완만/, 'the last clue still never names the answer setting');
   assert.match(model.workshopL2Hint(0, 'direct'), /지레나 빗면/);
-  assert.match(model.workshopL2Hint(1, 'lever', 0), /빗면으로 바꿔/, 'when the best fulcrum still misses, the clue points at the other tool');
+  assert.match(model.workshopL2Hint(1, 'lever', 0), /힘 막대.*비교/, 'a missed trial points to evidence for another test');
   assert.doesNotMatch(model.workshopL2Hint(1, 'lever', 0), /길고 완만/);
   assert.match(model.workshopL2Hint(1, 'lever', 1), /빨간 칸/, 'other fulcrum positions keep the ordinary clue');
 });

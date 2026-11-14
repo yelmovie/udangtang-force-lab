@@ -57,7 +57,7 @@ export interface SaveData {
   abilities?: number[];
   learning?: LearningRecords;
   /** The experiment is finished but its required questions are not solved yet. The stage is
-   * completed (stars, tool card, next mission) only after they are, so a reload never skips them. */
+   * completed (tool card, next mission) only after they are, so a reload never skips them. */
   pendingStage?: { id: StageId; summary: string };
   inquiryPlans?: InquiryPlans;
   lifeObservation?: LifeObservation;

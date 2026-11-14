@@ -21,7 +21,6 @@ function moduleUrl(filename) {
   return url;
 }
 const state = await import(moduleUrl('src/state.ts'));
-const stars = await import(moduleUrl('src/stars.ts'));
 
 let stored = new Map();
 globalThis.localStorage = { getItem: k => stored.get(k) ?? null, setItem: (k, v) => stored.set(k, String(v)), removeItem: k => stored.delete(k) };
@@ -35,7 +34,6 @@ test('finished experiment with open questions is not a completion, and survives 
   assert.deepEqual(restored.pendingStage, { id: 'cargo', summary: '요약' });
   assert.equal(restored.currentPage, 'cargo', 'reload resumes on the stage, where the questions reopen');
   assert.equal(state.stageIsOpen(restored, 'balance'), false, 'next mission stays locked');
-  assert.equal(stars.stageStars(restored, 'cargo').slots[0].done, false, 'no mission star yet');
 });
 
 test('solving completes once, clears the pending mark, and a repeat completion adds nothing', () => {

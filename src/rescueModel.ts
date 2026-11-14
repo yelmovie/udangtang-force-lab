@@ -52,14 +52,14 @@ export function comparisonHint(runs: RescueRun[], force: number): string {
 }
 /** After the first discovery: an optional nudge to check the same difference at another force. */
 export function secondComparisonHint(runs: RescueRun[]): string {
-  return fairComparisonForces(runs).length === 1 ? '다른 힘에서도 같은 차이가 날까요? 비교해 보면 별을 하나 더 받아요.' : '';
+  return fairComparisonForces(runs).length === 1 ? '다른 힘에서도 같은 차이가 날까요? 힘만 바꿔서 두 길을 다시 비교해 봐요.' : '';
 }
 export function comparisonSummary(runs: RescueRun[]): string {
   const found = firstFairComparison(runs);
   return found ? `${forceNames[found.force - 1]}으로 똑같이 밀었을 때 ${routeNames[found.stopped.route]}에서는 코어가 올라가지 못하고, ${routeNames[found.arrived.route]}에서는 끝까지 도착했어요.` : '';
 }
 // Keep the first run of each route and force, plus recent trials, without growing the save forever.
-// A result depends only on route and force, so those first runs hold every comparison (and the first discovery) the stars read.
+// A result depends only on route and force, so those first runs hold every comparison and the first discovery.
 export function retainRescueRuns(runs: RescueRun[]): RescueRun[] {
   const valid = runs.filter(validRun);
   if (valid.length <= 20) return valid;

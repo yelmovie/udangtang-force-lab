@@ -3,7 +3,7 @@ import { triedEveryForce } from './rescueModel';
 
 export type Challenge = { id: string; label: string; hint: string; done: boolean };
 
-/** Optional badges reward comparing or extending evidence, never speed or tap count. */
+/** Optional challenges invite learners to compare or extend their evidence. */
 export function challenges(save: SaveData): Challenge[] {
   const cargoTrend = (['push', 'pull'] as const).some(action => [1,3,5].every(parts => save.cargo.runs.some(run => run.parts === parts && run.action === action)));
   const swappedBalance = save.balance.runs.some(a => a.actual !== 'level' && save.balance.runs.some(b => b.left === a.right && b.right === a.left && b.actual !== a.actual));

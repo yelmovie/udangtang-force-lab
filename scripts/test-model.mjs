@@ -180,7 +180,7 @@ test('prediction recap compares the first thought with the student own records',
   assert.equal(rescue.matched, true);
   assert.match(rescue.result, /^작은 힘으로/, 'uses the force where the fair comparison happened, not the latest run');
 });
-test('optional badges require distinct comparison evidence rather than repeated actions', () => {
+test('optional challenges require distinct comparison evidence rather than repeated actions', () => {
   const save = state.freshSave();
   const earned = id => challenge.challenges(save).find(item => item.id === id).done;
   save.cargo.runs = [1, 1, 5].map(parts => ({parts, action:'push', gesture:100, distance:Math.round(72/(1+parts*.2))}));
@@ -204,7 +204,7 @@ test('optional badges require distinct comparison evidence rather than repeated 
   save.rescue.runs = structuredClone(comparison);
   assert.equal(earned('rescue'), false);
   save.rescue.runs.push({route:'short',force:2,success:false},{route:'long',force:2,success:true});
-  assert.equal(earned('rescue'), false, 'two forces are the second star; the badge also needs big force');
+  assert.equal(earned('rescue'), false, 'the optional challenge also needs the strongest force');
   save.rescue.runs.push({route:'short',force:3,success:true},{route:'short',force:3,success:true});
   assert.equal(earned('rescue'), false, 'repeating one route is not trying both');
   save.rescue.runs.push({route:'long',force:3,success:true});
