@@ -3,3 +3,29 @@
 .is-autoplaying :is(.stage-auto-go, dialog, dialog *, .auto-keep, .auto-keep *) { pointer-events: auto; }
 .stage-auto-go { flex: none; min-height: 48px; padding: 6px 16px; font-size: 17px; white-space: nowrap; }
 .stage-auto-go[hidden] { display: none !important; }
+
+/* A quiet cue for playable demos and the next request action. Keep the label and touch target still. */
+:is(.stage-auto-go, .cargo-auto-go)[aria-pressed="false"]:not(:disabled, [hidden])::before,
+:is(#cargo-finding-go, #cargo-open-orders, #balance-request-open, #balance-popup-request, #scale-request-open, [data-scale-request], #workshop-open-request):not(:disabled, [hidden])::before,
+.request-letter[open][data-typing="false"] #request-letter-accept:not(:disabled)::before {
+  content: "";
+  display: inline-block;
+  flex: none;
+  width: .9em;
+  height: .9em;
+  margin-inline-end: .35em;
+  vertical-align: -.09em;
+  background: currentColor;
+  clip-path: polygon(0 38%, 55% 38%, 55% 8%, 100% 50%, 55% 92%, 55% 62%, 0 62%);
+  pointer-events: none;
+  animation: var(--action-cue-motion, action-cue-pulse 1.25s ease-in-out 3);
+}
+
+@keyframes action-cue-pulse {
+  0%, 100% { opacity: 1; transform: translateX(0); }
+  50% { opacity: .45; transform: translateX(-.18em); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --action-cue-motion: none; }
+}
