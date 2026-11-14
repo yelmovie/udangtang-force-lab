@@ -23,9 +23,17 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   let progress = 0, heldPointer: number | null = null, keyHeld = false, frame = 0, startX = 0, startY = 0, completedGesture = false;
   let designPointer: number | null = null, designStartX = 0, designAnchorX = 0;
   let designInitialSetting: LeverSetting = state.fulcrumPosition;
-  // "자동으로 보기" runs the level 1 tries (direct, two fulcrums, two ramps); the force question and the
+  // "자동으로 보기" runs the level 1 tries (direct, three fulcrums, two ramps); the force question and the
   // level 2 design choice stay with the student.
   let autoPlaying = false;
+  const demoSteps = () => ({
+    direct: state.direct,
+    lever: [0, 1, 2].every(setting => state.trials.some(run => run.tool === 'lever' && run.setting === setting)),
+    ramp: [0, 1].every(setting => state.trials.some(run => run.tool === 'ramp' && run.setting === setting)),
+  });
+  const demoReady = () => Object.values(demoSteps()).every(Boolean);
+  const benchSteps = () => autoPlaying ? demoSteps() : workshopActivitySteps(state);
+  const benchReady = () => autoPlaying ? demoReady() : workshopExplorationReady(state);
   // Level 2 (force budget) opens after the three level 1 findings. Its record is
   // save.levels.workshop; misses and traces are session play for the current cargo.
   const levelRecord = () => context.save.levels?.workshop;
@@ -186,7 +194,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     dialog.showModal();
     dialog.querySelector<HTMLButtonElement>('#workshop-record-close')!.focus();
   }
-  const queueRecord = (lead: string) => { if (workshopExplorationReady(state)) recordPending = lead; };
+  const queueRecord = (lead: string) => { if (benchReady()) recordPending = lead; };
   function setFeedback(message: string) {
     feedback = message;
     root.querySelector<HTMLElement>('#workshop-feedback')!.textContent = message;
@@ -207,7 +215,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     nextCargoButton.disabled = busy;
     recordButton.disabled = busy;
     // Level 1 order: ① → ② → ③. Finished tools get a check, the next one glows with "다음".
-    const done = workshopActivitySteps(state);
+    const done = benchSteps();
     const nextTool = level === 2 ? null : !done.direct ? 'direct' : !done.lever ? 'lever' : !done.ramp ? 'ramp' : null;
     root.querySelectorAll<HTMLButtonElement>('.workshop-drawer > [data-tool]').forEach(button => {
       const id = button.dataset.tool as 'direct' | 'lever' | 'ramp';
@@ -244,7 +252,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     actorWrap.querySelector('.effort-word')!.textContent = effort === 'hard' ? '끙! 힘들어' : effort === 'mid' ? '으쌰!' : '가뿐해!';
     actorWrap.setAttribute('aria-label', `${actorWrap.getAttribute('aria-label')} · ${effort === 'hard' ? '힘이 많이 들어요' : effort === 'mid' ? '힘이 조금 들어요' : '힘이 적게 들어요'}`);
     root.querySelector<HTMLElement>('#workshop-instruction span')!.textContent = instruction();
-    const steps = workshopActivitySteps(state);
+    const steps = benchSteps();
     const notebook=root.querySelector<HTMLElement>('.workshop-notebook')!;
     const quiz=root.querySelector<HTMLElement>('.workshop-quiz-prompt')!;
     const note=root.querySelector<HTMLElement>('.workshop-model-note')!;
@@ -264,14 +272,14 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     const distanceScale = Math.max(Number.EPSILON, ...entries.map(run => run.distance));
     const distanceLabel = tool === 'lever' ? '손잡이가 움직인 길' : '화물이 움직인 길';
     const finding = tool === 'lever' ? state.leverFinding : state.rampFinding;
-    const choosing = tool !== 'direct' && workshopExplorationReady(state) && !finding;
+    const choosing = tool !== 'direct' && benchReady() && !finding;
     // While experimenting the board is only force bars; the question waits for two records.
     quiz.hidden = !choosing; note.hidden = !finding || tool === 'direct';
     root.querySelector<HTMLElement>('#workshop-quiz-label')!.textContent = '생각해 볼 문제';
     root.querySelector<HTMLElement>('#workshop-observation-help')!.textContent = '어느 쪽이 힘이 덜 들었나요?';
     root.querySelector<HTMLElement>('#workshop-answer-help')!.textContent = '초록색 힘 막대가 더 짧은 쪽을 골라요';
     notebook.classList.toggle('quiz-ready',choosing); notebook.classList.toggle('quiz-done',tool!=='direct'&&finding);
-    recordButton.dataset.attention = String(choosing || (workshopExplorationReady(state) && !workshopL2Complete(levelRecord())));
+    recordButton.dataset.attention = String(choosing || (benchReady() && !workshopL2Complete(levelRecord())));
     const isLatest = (runTool: WorkshopTool | 'direct', setting = 0) => lastRun?.tool === runTool && lastRun.setting === setting;
     const latestMark = (runTool: WorkshopTool | 'direct', setting = 0) => isLatest(runTool, setting) ? '<em class="workshop-latest">방금</em>' : '';
     const bar = (force: number, baseline = state.direct) => `<div class="workshop-force${baseline ? ' has-baseline' : ''}" aria-hidden="true" style="--baseline:${100 / forceScale * 100}%"><i style="width:${force / forceScale * 100}%"></i></div>`;
@@ -283,10 +291,10 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     root.querySelector<HTMLElement>('#workshop-choice')!.innerHTML = finding && tool !== 'direct' ? `<p class="finding-earned">✓ 작은 힘, 더 먼 길!</p><p class="workshop-finding">${tool === 'lever' ? '받침점이 화물에 가까울수록 힘은 작게 들고, 손잡이는 더 멀리 움직여요.' : '빗면이 길고 완만할수록 힘은 작게 들고, 화물은 더 먼 길을 가요.'}</p>` : '';
     const otherTool = tool === 'lever' ? 'ramp' : 'lever';
     if (finding && tool !== 'direct' && !steps[otherTool]) root.querySelector<HTMLElement>('#workshop-choice')!.insertAdjacentHTML('beforeend', `<button class="button button-primary workshop-next-tool" data-next-tool="${otherTool}" ${busy ? 'disabled' : ''}>${otherTool === 'ramp' ? '③ 빗면 실험하러 가기 →' : '② 지레 실험하러 가기 →'}</button>`);
-    if (workshopExplorationReady(state)) root.querySelector<HTMLElement>('#workshop-choice')!.insertAdjacentHTML('beforeend', workshopL2Complete(levelRecord()) ? '<p class="finding-earned">✓ 공방 친구의 의뢰도 끝냈어요</p>' : `<div class="workshop-request-invite"><img src="/assets/game/corgi-observe.webp" alt="" draggable="false"><p><strong>공방 친구의 의뢰가 왔어요!</strong>콩이 힘으로 화물 3개를 올려 줄래요?</p><button id="workshop-open-request" class="button button-primary" ${busy ? 'disabled' : ''}>${requestOpenLabel} →</button></div>`);
+    if (benchReady()) root.querySelector<HTMLElement>('#workshop-choice')!.insertAdjacentHTML('beforeend', workshopL2Complete(levelRecord()) ? '<p class="finding-earned">✓ 공방 친구의 의뢰도 끝냈어요</p>' : `<div class="workshop-request-invite"><img src="/assets/game/corgi-observe.webp" alt="" draggable="false"><p><strong>공방 친구의 의뢰가 왔어요!</strong>콩이 힘으로 화물 3개를 올려 줄래요?</p><button id="workshop-open-request" class="button button-primary" ${busy ? 'disabled' : ''}>${requestOpenLabel} →</button></div>`);
     }
     finish.disabled = busy || !workshopExplorationReady(state) || !workshopL2Complete(levelRecord());
-    syncAutoButton(autoGo, root.querySelector<HTMLElement>('.workshop-redesign')!, autoPlaying, level === 1 && !!scene && !workshopExplorationReady(state), busy);
+    syncAutoButton(autoGo, root.querySelector<HTMLElement>('.workshop-redesign')!, autoPlaying, level === 1 && !!scene && !demoReady() && !workshopL2Complete(levelRecord()), busy);
     const leverRuns=state.trials.filter(r=>r.tool==='lever'), rampRuns=state.trials.filter(r=>r.tool==='ramp');
     setMissionProgress(root,[steps.direct,steps.lever,steps.ramp,workshopL2Complete(levelRecord())],
       !steps.direct?'먼저 직접 들어요'
@@ -379,21 +387,21 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   function instruction() {
     if (level === 2 && !workshopCargos[cargoIndex()].longRampFits && tool === 'ramp' && state.rampLength === 1) return '긴 빗면을 펼칠 자리가 없어요';
     if (level === 2) return tool === 'direct' ? '지레나 빗면을 골라요' : tool === 'lever' ? '받침대를 옮기고, 손잡이를 아래로 눌러요' : '길이를 고르고, 손잡이를 오른쪽으로 밀어요';
-    const steps = workshopActivitySteps(state);
+    const steps = benchSteps();
     if (tool === 'direct') return state.direct ? '② 지레를 눌러 이어서 해요' : '손잡이를 위로 끝까지 끌어요';
     const tried = state.trials.some(run => run.tool === tool && run.setting === currentSetting());
     const finding = tool === 'lever' ? state.leverFinding : state.rampFinding;
-    if (workshopExplorationReady(state) && !finding) return '기록 보기를 눌러 질문에 답해요';
+    if (benchReady() && !finding) return '기록 보기를 눌러 질문에 답해요';
     const allDone = workshopL2Complete(levelRecord()) ? '모두 했어요!' : '기록 보기에서 의뢰를 받아요';
     if (tool === 'lever') return steps.lever && tried ? (steps.ramp ? allDone : '③ 빗면을 눌러 이어서 해요') : tried ? '받침대를 다른 곳으로 옮겨요' : '손잡이를 아래로 끝까지 눌러요';
     return steps.ramp && tried ? (steps.lever ? allDone : '② 지레로 돌아가 비교해요') : tried ? '아래에서 빗면 길이를 바꿔요' : '손잡이를 오른쪽 끝까지 밀어요';
   }
   function nextHint() {
-    const steps = workshopActivitySteps(state);
+    const steps = benchSteps();
     if (tool === 'lever' && !hasWorkshopComparison(state.trials, 'lever')) return '받침대를 다른 곳으로 옮겨 한 번 더 들어 봐요.';
-    if (tool === 'lever' && !steps.lever) return '받침대를 화물 가까이 옮겨 힘이 줄어드는지 봐요.';
+    if (tool === 'lever' && !steps.lever) return autoPlaying ? '받침대 세 위치를 모두 시험해요. 아직 안 해 본 위치로 옮겨요.' : '받침대를 화물 가까이 옮겨 힘이 줄어드는지 봐요.';
     if (tool === 'ramp' && !steps.ramp) return '이번엔 길이를 바꿔 같은 높이까지 올려 봐요.';
-    if (!steps.lever) return '지레도 받침대 위치를 바꿔 비교해 봐요.';
+    if (!steps.lever) return autoPlaying ? '지레도 세 위치에서 모두 비교해 봐요.' : '지레도 받침대 위치를 바꿔 비교해 봐요.';
     if (!steps.ramp) return '빗면도 두 길이로 올려 봐요.';
     return '세 발견을 모두 했어요! 공방 친구의 의뢰를 받아요.';
   }
@@ -561,7 +569,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     const tried = (name: WorkshopTool, setting: number) => state.trials.some(run => run.tool === name && run.setting === setting);
     if (!state.direct) { configure('direct'); await autoTry(); }
     for (const setting of [0, 1, 2] as const) {
-      if (!autoAlive() || workshopActivitySteps(state).lever) break;
+      if (!autoAlive()) break;
       if (tried('lever', setting)) continue;
       if (tool !== 'lever') configure('lever');
       resetGesture(); changeFulcrum(setting); context.commit(); update();
