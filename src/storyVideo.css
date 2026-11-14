@@ -65,3 +65,16 @@
 .story-video-wrap { position:relative; }
 .story-video-loading { position:absolute; left:50%; bottom:16px; margin:0; padding:6px 16px; border-radius:999px; background:#173d40d9; color:#fff8e6; font-size:18px; font-weight:800; transform:translateX(-50%); pointer-events:none; }
 .story-video-loading[hidden] { display:none; }
+
+/* Video speech can be enabled here even if the rest of the game is quiet. */
+.story-video-card .story-actions .story-audio-toggle {
+  position:absolute; z-index:3; top:16px; left:16px; min-width:0;
+  padding:8px 14px; background:#0a2735e6; color:#fff9e5; border:2px solid #f4e4ba;
+}
+.story-video-card.is-ending .story-actions [data-story='skip'] {font-size:17px}
+@media (max-height:620px) {
+  .story-video-card.is-ending > #story-title {font-size:18px}
+  .story-video-card.is-ending > .story-caption.story-text {font-size:clamp(19px, 3.7vh, 25px);padding:9px 16px}
+  .story-video-card.is-ending .story-actions [data-story='skip'],
+  .story-video-card .story-actions .story-audio-toggle {top:10px;min-height:44px;font-size:15px}
+}

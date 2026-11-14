@@ -44,6 +44,7 @@ export const encounterLines: Record<StageId, readonly [string, string, string, s
 
 type Point = { x: number; y: number };
 export type Encounter = Point & {
+  home:Point;
   id: StageId;
   index: number;
   facing: 1 | -1;
