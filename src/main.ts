@@ -17,11 +17,12 @@ import { mountScale } from './screens/scale';
 import { mountWorkshop } from './screens/workshop';
 import { mountRescue } from './screens/rescue';
 import { mountVillage } from './screens/village';
+import { canPlayMapFinale, defeatedMapVillains } from './map-villains.js';
 import { villageRewards } from './villageStory';
 import { playMusic, playSound, stopMusic, stopSounds, setVolume, type MusicName } from './sound';
 import { installKongDialogue } from './kongDialogue';
 installKongDialogue(() => save);
-import { infoContent, type InfoSection } from './info';
+import { infoContent } from './info';
 import { prepareOffline } from './offline';
 import type { AppContext } from './appTypes';
 import { abilityStatements, challenges } from './challenges';
@@ -169,7 +170,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
       <div class="world-concept"></div>
       ${reviewTask ? `<section class="world-review question-zone question-zone-compact"><span class="question-label">마을로 가기 전 문제</span><p class="question-prompt">내 실험 기록을 보고 문제를 풀어요</p><button class="button button-primary" id="world-review">문제 풀기</button></section>` : ''}<details class="discovery-detail"><summary>도전 과제 (선택)</summary><p>${challenge.done ? `${challenge.label} 완료` : challenge.hint}</p><p class="discovery-record">${escapeHtml(summary)}</p></details>
       ${adminUnlocked ? '<p class="small-note">미리보기 결과는 학생 진행 기록에 반영되지 않습니다.</p>' : `<div class="world-meter"><span style="width:${save.completed.length * 20}%"></span></div><p class="small-note">전체 실험실 복구 ${save.completed.length * 20}% · 미션 ${save.completed.length}/5 완료</p>`}
-      <button class="button button-primary" id="world-continue">${stageId === 'rescue' ? '마을 점등식 보러 가기 ✦' : '달라진 마을 보러 가기'}</button><p class="world-lock-note" id="world-lock-note" role="status"></p>
+      <button class="button button-primary" id="world-continue">달라진 마을 보러 가기</button><p class="world-lock-note" id="world-lock-note" role="status"></p>
     </div>`;
   document.body.append(modal);
   confetti(modal.querySelector<HTMLElement>('.modal-card')!);
@@ -186,7 +187,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
     if (reviewButton) { reviewButton.textContent = solved ? '✓ 문제 다시 보기' : '문제 풀기'; reviewButton.className = `button ${solved ? 'button-secondary' : 'button-primary'}`; }
   };
   syncLock();
-  const close = () => { app.inert = appWasInert; modal.remove(); navigate('map'); if(stageId==='rescue'&&activeSave.completed.length===stages.length)openEndingCeremony(); };
+  const close = () => { app.inert = appWasInert; modal.remove(); navigate('map'); };
   reviewButton?.addEventListener('click', () => {
     modal.hidden = true;
     const restore = () => { closeLearningReview = null; modal.hidden = false; syncLock(); (next.disabled ? reviewButton : next).focus(); };
@@ -234,7 +235,7 @@ const prologueLines = [
   { who: '코기 콩이', text: '코어가 너무 무거워! 힘을 쓰는 방법을 배워서 다시 끼우자!' },
 ];
 type StoryVideo = { src: string; cues: number[]; duration: number; poster?: string };
-type StoryOptions = { lines: { who: string; text: string }[]; finishLabel: string; onDone?: () => void; skippable?: boolean; scenes?: string[]; video?: StoryVideo; music?: MusicName };
+type StoryOptions = { lines: { who: string; text: string }[]; finishLabel: string; onDone?: () => void; skippable?: boolean; scenes?: string[]; video?: StoryVideo; music?: MusicName; finale?: boolean };
 const introVideo: StoryVideo = { src: '/assets/story/intro.mp4', cues: [0, 6, 12], duration: 16, poster: '/assets/story/intro-01.webp' };
 const endingVideo: StoryVideo = { src: '/assets/story/ending.mp4', cues: [0, 4, 10], duration: 16, poster: '/assets/story/final-01.webp' };
 function storyCueIndex(cues: number[], time: number): number {
@@ -288,7 +289,7 @@ function openStoryModal(options: StoryOptions) {
       <p class="eyebrow" id="story-title"></p>
       <p class="story-text story-caption" id="story-caption" role="status" aria-live="polite"></p>
       <div class="story-dots" aria-hidden="true">${dots}</div>
-      <div class="story-actions"><button class="button button-secondary" data-story="skip">건너뛰기</button><button class="button button-primary" data-story="done" hidden>${options.finishLabel}</button></div>
+      <div class="story-actions">${options.finale ? '<button type="button" class="button button-secondary story-audio-toggle" data-story="audio" aria-pressed="false">영상 소리 켜기</button>' : ''}<button class="button button-secondary" data-story="skip">${options.finale ? '지도로 돌아가기' : '건너뛰기'}</button><button class="button button-primary" data-story="done" hidden>${options.finishLabel}</button></div>
     </div>`;
     const el = modal.querySelector<HTMLVideoElement>('video')!;
     el.muted = !anySound();
@@ -336,6 +337,20 @@ function openStoryModal(options: StoryOptions) {
     el.addEventListener('loadeddata', onReady, { once: true });
     const onPlay = () => { playBtn.hidden = true; onReady(); };
     const onPause = () => { if (!el.ended && !el.seeking) playBtn.hidden = false; };
+    const audioToggle = modal.querySelector<HTMLButtonElement>('[data-story="audio"]');
+    const syncAudio = () => {
+      const on = !el.muted && el.volume > 0;
+      audioToggle?.setAttribute('aria-pressed', String(on));
+      if (audioToggle) audioToggle.textContent = on ? '영상 소리 끄기' : '영상 소리 켜기';
+    };
+    audioToggle?.addEventListener('click', () => {
+      if (el.muted || !el.volume) { if (!el.volume) el.volume = .72; el.muted = false; }
+      else el.muted = true;
+      syncAudio();
+      if (!el.ended && el.paused) tryPlay();
+    });
+    el.addEventListener('volumechange', syncAudio);
+    syncAudio();
     el.addEventListener('loadedmetadata', onMeta);
     el.addEventListener('error', fallback);
     el.addEventListener('timeupdate', sync);
@@ -347,7 +362,7 @@ function openStoryModal(options: StoryOptions) {
       window.clearTimeout(timer);
       el.removeEventListener('loadedmetadata', onMeta); el.removeEventListener('error', fallback);
       el.removeEventListener('timeupdate', sync); el.removeEventListener('seeked', sync);
-      el.removeEventListener('play', onPlay); el.removeEventListener('pause', onPause); el.removeEventListener('ended', finishUi);
+      el.removeEventListener('play', onPlay); el.removeEventListener('pause', onPause); el.removeEventListener('ended', finishUi); el.removeEventListener('volumechange', syncAudio);
       el.pause(); el.removeAttribute('src'); el.load();
     };
     playBtn.addEventListener('click', () => { tone(470); tryPlay(); });
@@ -356,7 +371,7 @@ function openStoryModal(options: StoryOptions) {
   };
   modal.addEventListener('click', event => {
     const button = (event.target as Element).closest<HTMLButtonElement>('[data-story]');
-    if (!button || button.dataset.story === 'play') return;
+    if (!button || ['play','audio'].includes(button.dataset.story ?? '')) return;
     tone(470);
     if (button.dataset.story === 'skip' || button.dataset.story === 'done' || index === options.lines.length - 1) { close(); return; }
     index += 1; draw();
@@ -379,7 +394,14 @@ function openStoryModal(options: StoryOptions) {
   if (options.video) drawVideo(options.video); else draw();
 }
 function openEndingCeremony() {
+  if (!adminUnlocked && !canPlayMapFinale(save)) {
+    toast(`지도 악당 5마리를 모두 물리치면 점등식 영상이 열려요. 지금 ${defeatedMapVillains(save)} / 5`);
+    return;
+  }
+  if (document.querySelector('.story-layer')) return;
+  const fromMap = viewPage === 'map';
   openStoryModal({
+    finale: true,
     video: endingVideo,
     music: 'ending',
     scenes:[1,2,3].map(i=>`/assets/story/final-0${i}.webp`),
@@ -387,7 +409,10 @@ function openEndingCeremony() {
       {who:'코기 콩이',text:'딸깍! 떨어져 있던 배터리 코어를 중앙 장치에 다시 끼웠어!'},
       {who:'도토리 박사',text:'무게를 확인하고, 막힌 길을 열고, 도구를 비교했지. 네 건물에서 배운 방법으로 무거운 코어를 옮긴 거야.'},
       {who:'코기 콩이',text:'와, 코어가 다시 연결되니까 마을 전체에 전기가 돌아왔어! 우리가 힘을 모아 우당탕 마을을 다시 밝혔네!'},
-    ],finishLabel:'내가 살린 마을 둘러보기 ✦',onDone:()=>navigate('map'),
+    ],finishLabel:'지도로 돌아가기',onDone:()=>{
+      if (!adminUnlocked && save.mapFinalePending) { save.mapFinalePending = false; persist(); }
+      if (!fromMap) navigate('map');
+    },
   });
 }
 const missionLearn: Record<StageId, string> = {
@@ -591,7 +616,7 @@ function renderTitle(root: HTMLElement) {
     adminSave = null;
     save = loaded;
     context.save = save;
-    const resume = save.currentPage === 'title' || (save.currentPage === 'complete' && save.completed.length < stages.length) ? 'map' : save.currentPage;
+    const resume = save.mapFinalePending || save.currentPage === 'title' || (save.currentPage === 'complete' && save.completed.length < stages.length) ? 'map' : save.currentPage;
     navigate(resume);
   });
 }
@@ -609,7 +634,7 @@ function renderComplete(root: HTMLElement) {
   const save = adminSave ?? context.save;
   const completed = save.completed.length;
   root.innerHTML = `<section class="complete-screen">
-    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1><p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 장착했어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><div class="ending-actions"><button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button><button class="button button-primary" id="restart-ending">처음부터 다시 해보기 ↻</button></div></div></div>
+    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1><p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 장착했어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><div class="ending-actions"> ${adminUnlocked || canPlayMapFinale(save) ? '<button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button>' : `<p>지도에서 악당 5마리를 물리치면 점등식 영상이 열려요. 지금 ${defeatedMapVillains(save)} / 5</p>`}<button class="button button-primary" id="restart-ending">처음부터 다시 해보기 ↻</button></div></div></div>
     <details class="complete-details"><summary>내 실험과 발견 살펴보기 · ${completed} / 5</summary>
     <div class="report-grid">${stages.map(stage => {
       const task = learningTask(save, stage.id), record = save.learning?.[stage.id];
@@ -650,23 +675,42 @@ function openSettings(focusAction?: 'bag') {
   const appWasInert = app.inert;
   app.inert = true;
   const close = () => { app.inert = appWasInert; overlay.remove(); app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.focus(); };
-  type Section = 'menu' | 'admin' | 'reset' | InfoSection;
-  const headings: Record<Section, string> = { menu: '설정', help: '학생 탐구 가이드', teacher: '교사 가이드', curriculum: '교육과정', info: '정보와 출처', admin: '전체 단계 해금', reset: '탐구 기록 초기화' };
-  const show = (section: Section | 'concepts') => {
+  type Section = 'menu' | 'admin' | 'reset' | 'concepts';
+  const headings: Record<Section, string> = { menu: '설정', admin: '전체 단계 해금', reset: '탐구 기록 초기화', concepts: '개념 영상 다시 보기' };
+  const show = (section: Section) => {
     let content: string;
     if (section === 'menu') {
       const cardCount = earnedToolCards(adminSave ?? save).length;
-      content = `<div class="settings-links">
-        <button data-settings="home"><span>${icons.home}</span> 메인 화면</button>
-        <button data-settings="bag" aria-haspopup="dialog"><span>${bagIcon()}</span> 도구 가방 <small>${cardCount}장</small></button>
-        <button data-settings="help"><span>?</span> 학생 가이드</button><button data-settings="save"><span>${icons.check}</span> 지금 저장</button></div><details class="teacher-tools"><summary>선생님 도구 · 정보</summary><div class="settings-links"><button data-settings="teacher"><span>${icons.book}</span> 교사 가이드</button>
-        <button data-settings="curriculum"><span>${icons.target}</span> 교육과정</button><button data-settings="info"><span>${icons.info}</span> 정보와 출처</button>
-        <button data-settings="admin"><span>${icons.gear}</span> 전체 단계 해금 <small>${adminUnlocked ? '사용 중' : ''}</small></button>
-        <button data-settings="prologue"><span>${icons.play}</span> 프롤로그 다시 보기</button>
-        ${save.completed.length === stages.length || adminUnlocked ? `<button data-settings="ending"><span>${icons.sparkle}</span> 점등식 다시 보기</button>` : ''}
-        <button data-settings="concepts"><span>${icons.film}</span> 개념 영상 다시 보기</button>
-        <button class="settings-danger" data-settings="reset"><span>${icons.reset}</span> 기록 초기화</button></div></details>
-        <div class="settings-audio"><div class="settings-audio-switches"><button class="button button-secondary" data-settings="music" aria-pressed="${save.musicOn === true}">${switchLabel('배경음', save.musicOn === true)}</button><button class="button button-secondary" data-settings="sound" aria-pressed="${save.soundOn}">${switchLabel('효과음', save.soundOn)}</button></div><label for="sound-volume">소리 크기 <output id="volume-value">${Math.round((save.soundVolume ?? 0.3) * 100)}%</output></label><input id="sound-volume" type="range" min="0" max="100" step="5" value="${Math.round((save.soundVolume ?? 0.3) * 100)}" aria-label="소리 크기"></div>`;
+      const canWatch = canPlayMapFinale(save) || adminUnlocked;
+      const canRead = save.completed.length === stages.length || adminUnlocked;
+      const volume = Math.round((save.soundVolume ?? .3) * 100);
+      const soundSwitch = (action: 'sound' | 'music', name: string, on: boolean) =>
+        `<button type="button" role="switch" class="button button-secondary setting-row" data-settings="${action}" aria-label="${name}" aria-checked="${on}">${switchLabel(name, on)}</button>`;
+      const summary = (title: string, body: string) => `<details class="science-settings-detail"><summary>${title}</summary>${body}</details>`;
+      content = `<div class="science-settings-body">
+        <div class="science-settings-audio" aria-label="소리 설정">
+          ${soundSwitch('music','배경 음악',save.musicOn === true)}${soundSwitch('sound','효과음',save.soundOn)}
+        <label class="setting-row settings-wide" for="sound-volume">전체 소리 크기 <input id="sound-volume" type="range" min="0" max="100" step="5" value="${volume}"><output id="volume-value" for="sound-volume">${volume}%</output></label></div>
+        <div class="settings-links science-settings-actions" aria-label="바로 가기">
+          <button type="button" data-settings="bag" aria-haspopup="dialog"><span>${bagIcon()}</span> 도구 가방 <small>${cardCount}장</small></button>
+          <button type="button" data-settings="prologue"><span>${icons.play}</span> 이 탐험을 하는 이유 다시 보기</button>
+          <button type="button" data-settings="ending"${canWatch ? '' : ' disabled aria-describedby="finale-locked"'}><span>${icons.sparkle}</span> 점등식 다시 보기</button>
+          <button type="button" data-settings="record"${canRead ? '' : ' disabled aria-describedby="record-locked"'}><span>${icons.book}</span> 나의 탐구 결과 보기</button>
+          <button type="button" data-settings="concepts"><span>${icons.film}</span> 개념 영상 다시 보기</button>
+        </div>
+        ${canWatch ? '' : '<p class="settings-lock" id="finale-locked">지도에서 다섯 악당을 모두 물리치면 점등식이 열려요.</p>'}
+        ${canRead ? '' : '<p class="settings-lock" id="record-locked">다섯 미션을 마치면 탐구 결과를 볼 수 있어요.</p>'}
+        ${summary('앱 정보 · 배움과 보상',infoContent.about)}
+        ${summary('학생용 가이드',infoContent.help)}
+        ${summary('교사용 가이드',infoContent.teacher+`<details class="science-settings-detail"> <summary>성취기준</summary>${infoContent.curriculum}</details><div class="settings-reading"><h3>교사용 도구</h3><div class="settings-links"><button type="button" data-settings="admin"><span>${icons.gear}</span> 전체 단계 해금 <small>${adminUnlocked ? '사용 중' : '꺼짐'}</small></button></div><p>수업에서 바로 살펴볼 수 있어요. 미리보기 진행은 학생 기록에 남지 않아요.</p></div>`)}
+        ${summary('이미지·소리·저작권 고지',infoContent.info)}
+      </div>
+      <footer class="science-settings-footer settings-links">
+        <button type="button" data-settings="home"><span>${icons.home}</span> 메인 화면</button>
+        <button type="button" data-settings="save"><span>${icons.check}</span> 지금 저장</button>
+        <button type="button" class="settings-danger" data-settings="reset"><span>${icons.reset}</span> 탐구 기록 초기화</button>
+        <button type="button" class="button button-primary" data-settings="close">닫기</button>
+      </footer>`;
     } else if (section === 'admin') {
       content = `<p class="settings-lead">${adminUnlocked ? '실험 5개가 모두 열려 있어요.' : '실험 5개와 결과 화면을 미리 볼 수 있어요.'} 미리보기 조작은 학생 기록에 반영되지 않아요.</p><button class="button button-primary full" data-settings="toggle-admin">${adminUnlocked ? '전체 단계 해금 종료' : '전체 단계 해금'}</button><p class="settings-lead">해금은 이 탭에서만 유지되고 새로고침하면 종료돼요.</p>`;
       if (adminUnlocked) content += `<div class="settings-links" aria-label="미리 볼 실험">${stages.map(stage=>`<button data-preview-stage="${stage.id}">${stage.mission}. ${stage.title}</button>`).join('')}<button data-preview-stage="complete">결과 화면</button></div>`;
@@ -678,9 +722,9 @@ function openSettings(focusAction?: 'bag') {
       }).join('')}</div>`;
     } else if (section === 'reset') {
       content = '<p class="settings-lead">이 브라우저의 모든 실험 기록과 복구 진행을 지울까요? 지운 기록은 되돌릴 수 없어요. 소리 설정은 유지해요.</p><button class="button button-secondary settings-danger" data-settings="confirm-reset">기록을 지우고 처음으로</button>';
-    } else content = infoContent[section];
-    overlay.innerHTML = `<div class="modal-card settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-      <div class="settings-heading"><h2 id="settings-title">${section === 'concepts' ? '개념 영상 다시 보기' : headings[section]}</h2><button class="settings-close" data-settings="close" aria-label="설정 닫기">×</button></div>
+    } else return;
+    overlay.innerHTML = `<div class="modal-card settings-card"${section === 'menu' ? ' data-science-settings' : ''} role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="settings-heading"><h2 id="settings-title">${headings[section]}</h2><button type="button" class="settings-close" data-settings="close" aria-label="설정 닫기">×</button></div>
       ${content}${section === 'menu' ? '' : '<button class="button button-secondary settings-back" data-settings="back">설정으로 돌아가기</button>'}
     </div>`;
     const target = section === 'menu' && focusAction ? focusAction : 'close';
@@ -704,11 +748,11 @@ function openSettings(focusAction?: 'bag') {
       openToolBag({ app, save: adminSave ?? save, sound: () => tone(470), preview: adminUnlocked, onClose: () => openSettings('bag') });
     }
     else if (action === 'concepts') show('concepts');
-    else if (['help', 'teacher', 'curriculum', 'info', 'admin', 'reset'].includes(action ?? '')) show(action as Section);
+    else if (action === 'admin' || action === 'reset') show(action);
     else if (action === 'sound') {
       save.soundOn = !save.soundOn;
       persist();
-      button.setAttribute('aria-pressed', String(save.soundOn));
+      button.setAttribute('aria-checked', String(save.soundOn));
       button.textContent = switchLabel('효과음', save.soundOn);
       updateSoundButton();
       if (save.soundOn) tone(520); else stopSounds();
@@ -716,8 +760,8 @@ function openSettings(focusAction?: 'bag') {
     else if (action === 'music') {
       save.musicOn = !save.musicOn;
       persist();
-      button.setAttribute('aria-pressed', String(save.musicOn));
-      button.textContent = switchLabel('배경음', save.musicOn);
+      button.setAttribute('aria-checked', String(save.musicOn));
+      button.textContent = switchLabel('배경 음악', save.musicOn);
       updateSoundButton();
       syncMusic();
     }
@@ -727,7 +771,8 @@ function openSettings(focusAction?: 'bag') {
       save = { ...freshSave(), ...sound }; context.save = save; missionCardShown.clear();
       persist(); viewPage = 'title'; render();
     }
-    else if (action === 'ending') { close(); navigate('complete'); openEndingCeremony(); }
+    else if (action === 'ending') { close(); openEndingCeremony(); }
+    else if (action === 'record') { close(); navigate('complete'); }
     else if (action === 'prologue') { close(); openStoryModal({ lines: prologueLines, finishLabel: '닫기', video: introVideo }); }
     else if (action === 'toggle-admin') {
       const enable = !adminUnlocked;
@@ -768,7 +813,7 @@ function updateSoundButton() {
 }
 /** Settings switch text: what is on now, then what a press does. */
 function switchLabel(name: string, on: boolean): string {
-  return `${name} ${on ? '켜짐 · 끄기' : '꺼짐 · 켜기'}`;
+  return `${name} ${on ? '켜짐' : '꺼짐'}`;
 }
 
 function bindHeader() {
@@ -803,7 +848,7 @@ function render() {
   switch (viewPage) {
     case 'title': renderTitle(screen); break;
     case 'map': {
-      cleanup = mountVillage(screen, context, { adminUnlocked, returnedFrom: villageReturn, newlyCompleted: villageCelebration });
+      cleanup = mountVillage(screen, context, { adminUnlocked, returnedFrom: villageReturn, newlyCompleted: villageCelebration, onFinale: openEndingCeremony });
       villageCelebration = undefined;
       break;
     }

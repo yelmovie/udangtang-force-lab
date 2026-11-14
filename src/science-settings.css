@@ -1,0 +1,57 @@
+/* Shared layout derived from the Animal Record Recovery settings. */
+html [data-science-settings],html dialog:has([data-science-settings]),html [role=dialog]:has([data-science-settings]){
+ --settings-ink:#243a2c;--settings-paper:#fffdf3;--settings-line:#d3dfc8;--settings-pale:#f2f6e9;--settings-green:#2d694f;
+}
+html :is(dialog[data-science-settings],dialog:has([data-science-settings]),[role=dialog][data-science-settings],[role=dialog]:has([data-science-settings])) {
+  color:var(--settings-ink);background:var(--settings-paper);width:min(940px,calc(100vw - 28px));max-width:calc(100vw - 28px);max-height:94dvh;
+  box-sizing:border-box;border:1px solid var(--settings-line);border-radius:18px;padding:16px 20px 12px;overflow:hidden;
+}
+html :is(dialog[data-science-settings][open],dialog[open]:has([data-science-settings]),[role=dialog][data-science-settings],[role=dialog]:has([data-science-settings])){
+ display:flex;flex-direction:column;gap:10px;
+}
+html :is(dialog[open]:has([data-science-settings]),[role=dialog]:has([data-science-settings]))> :has(> [data-science-settings]){
+ display:flex;flex-direction:column;min-height:0;flex:1;
+}
+html [data-science-settings]:not(dialog):not([role=dialog]){display:flex;flex-direction:column;gap:10px;min-height:0;min-width:0;flex:1}
+html [data-science-settings] .science-settings-body,html .science-settings-body[data-science-settings]{
+ overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;min-height:0;min-width:0;flex:1;display:flex;flex-direction:column;gap:9px;
+ padding:1px 6px 6px 1px;margin:0;
+}
+html [data-science-settings] .science-settings-audio,html [data-science-settings] .science-settings-actions{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:0;min-width:0;align-items:center;
+}
+html [data-science-settings] .science-settings-audio>*,html [data-science-settings] .science-settings-actions>* {min-width:0;margin:0}
+html [data-science-settings] .science-settings-audio :is(.sound-row,.settings-row,.setting-row,.setting-toggle,.settings-sound-row,.toggle-row):is(label,div,button){
+ display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:49px;border:1px solid var(--settings-line);border-radius:11px;padding:7px 11px;background:#edf3e2;color:var(--settings-ink);
+}
+html [data-science-settings] .science-settings-audio input[type=range]{width:100%;min-width:0;accent-color:var(--settings-green)}
+html [data-science-settings] .science-settings-audio label:has(input[type=range]){font-weight:700}
+html [data-science-settings] .science-settings-audio :is(output,.settings-volume){font-variant-numeric:tabular-nums}
+html [data-science-settings] .science-settings-actions :is(button,a){min-height:47px;white-space:normal;word-break:keep-all}
+html [data-science-settings] .science-settings-actions> :is(p,small,.settings-wide,.science-settings-full,.wide){grid-column:1/-1}
+html [data-science-settings] .science-settings-body details{
+ margin:0;padding:0 13px;border:1px solid var(--settings-line);border-radius:10px;background:var(--settings-pale);color:var(--settings-ink);
+}
+html [data-science-settings] .science-settings-body details details{margin:8px 0;background:#fffdf5}
+html [data-science-settings] .science-settings-body summary{
+ display:flex;align-items:center;gap:10px;min-height:48px;padding:8px 0;box-sizing:border-box;list-style:none;font-size:clamp(17px,2vw,20px);font-weight:750;line-height:1.3;cursor:pointer;
+}
+html [data-science-settings] .science-settings-body summary::-webkit-details-marker{display:none}
+html [data-science-settings] .science-settings-body summary::before{content:'+';color:#466c45;width:16px;flex:none;font-weight:800}
+html [data-science-settings] .science-settings-body details[open]>summary::before{content:'−'}
+html [data-science-settings] .science-settings-body details[open]>summary{border-bottom:1px dashed #c7d4be}
+html [data-science-settings] .science-settings-body :is(p,li,dd,dt){word-break:keep-all;overflow-wrap:anywhere}
+html [data-science-settings] .science-settings-footer,html .science-settings-footer[data-science-settings],html :has(> [data-science-settings])>.science-settings-footer{
+ display:flex;flex:none;justify-content:space-between;align-items:center;gap:10px;padding-top:10px;margin:0;border-top:1px solid var(--settings-line);background:var(--settings-paper);
+}
+html .science-settings-footer button{min-height:44px;white-space:normal}
+html [data-science-settings] :focus-visible{outline:3px solid #477b58;outline-offset:2px}
+@media(max-width:600px){
+ html :is(dialog[data-science-settings],dialog:has([data-science-settings]),[role=dialog][data-science-settings],[role=dialog]:has([data-science-settings])){padding:10px 12px;gap:8px}
+ html [data-science-settings] :is(.science-settings-audio,.science-settings-actions){grid-template-columns:1fr}
+}
+
+html .science-settings-body>*{flex:none}
+html [data-science-settings] .science-settings-label{grid-column:1/-1;margin:0 0 4px}
+html [data-science-settings] .science-settings-body > .science-settings-guides{display:flex;flex-direction:column;gap:9px}
+html [data-science-settings] :is(h2,.settings-title,.settings-header){color:var(--settings-ink)}

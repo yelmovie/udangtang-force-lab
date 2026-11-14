@@ -35,9 +35,11 @@ export function retainLevels(value: unknown): LevelRecords {
 }
 export type RescueState = { zeroed: boolean; loaded: boolean; measured: boolean; gate: boolean; route: 'short' | 'long'; force: number; runs: RescueRun[]; delivered: boolean };
 
-import {normalizeMapVillains} from './map-villains.js';
+import {canPlayMapFinale,normalizeMapVillains} from './map-villains.js';
 export interface SaveData {
   mapVillains: number[];
+  /** The encounter is won, but the learner has not left the finale yet. */
+  mapFinalePending: boolean;
   version: 1;
   currentPage: PageId;
   completed: StageId[];
@@ -74,6 +76,7 @@ export function freshSave(): SaveData {
   return {
     version: 1,
     mapVillains: normalizeMapVillains(null),
+    mapFinalePending: false,
     currentPage: 'title',
     completed: [],
     evidence: {},
@@ -114,6 +117,7 @@ export function readSave(): SaveData | null {
     const restored: SaveData = {
       ...fallback,
       mapVillains: normalizeMapVillains(item.mapVillains),
+      mapFinalePending: item.mapFinalePending === true,
       currentPage: pageIds.includes(item.currentPage as PageId) ? item.currentPage as PageId : 'map',
       completed,
       evidence,
@@ -184,6 +188,9 @@ export function readSave(): SaveData | null {
       restored.completed = restored.completed.filter(id => id !== 'rescue');
       delete restored.evidence.rescue;
     }
+    // Never inherit a clear for an unearned area or resume an invalid finale.
+    restored.mapVillains = restored.mapVillains.map((hits,i)=>restored.completed.includes(stageIds[i]) ? hits : 0);
+    restored.mapFinalePending = restored.mapFinalePending && canPlayMapFinale(restored);
     if ((stageIds.includes(restored.currentPage as StageId) && !stageIsOpen(restored, restored.currentPage as StageId)) || (restored.currentPage === 'complete' && restored.completed.length !== stageIds.length)) restored.currentPage = 'map';
     return restored;
   } catch {

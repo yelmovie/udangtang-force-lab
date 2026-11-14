@@ -37,3 +37,9 @@
 .settings-layer .settings-lead { font-size: 20px; }
 .settings-layer .settings-danger { border-color: #c99d79; background: #fff1df; }
 @media (max-width: 600px) { .settings-layer .settings-links { grid-template-columns: 1fr; } }
+
+.settings-layer [data-science-settings] .science-settings-audio .settings-wide {grid-column:1/-1}
+.settings-layer [data-science-settings] .science-settings-audio label {white-space:nowrap}
+.settings-layer [data-science-settings] .science-settings-audio output {min-width:3em;text-align:right}
+.settings-layer [data-science-settings] .science-settings-footer button {justify-content:center;min-width:0;font-size:clamp(14px,2.2vw,18px);line-height:1.2}
+@media(max-width:620px){.settings-layer [data-science-settings] .science-settings-footer {display:grid;grid-template-columns:1fr 1fr}}
