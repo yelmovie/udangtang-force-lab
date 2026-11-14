@@ -125,3 +125,17 @@ test('bakery request needs both light and heavy crates in both push and pull mod
   assert.equal(cargo.cargoActionCompared(all.slice(0,3),'pull'),false);
   assert.equal(cargo.cargoExplorationReady([...all.slice(0,3),{parts:3,action:'pull'}]),false,'incomplete set cannot unlock the request');
 });
+
+test('the hands-on request needs three loads in one action plus the opposite action on a matching load', () => {
+  for (const action of ['push','pull']) {
+    const other = action === 'push' ? 'pull' : 'push';
+    const runs = [1,3,5].map(parts => ({parts,action}));
+    assert.equal(cargo.cargoManualEvidence(runs).ready,false);
+    assert.equal(cargo.cargoManualEvidence([...runs.slice(0,2),{parts:5,action:other}]).ready,false);
+    for (const parts of [1,3,5]) {
+      const mixed = [...runs,{parts,action:other}];
+      assert.deepEqual(cargo.cargoManualEvidence(mixed),{comparison:action,sameLoad:true,ready:true});
+      assert.equal(cargo.cargoExplorationReady(mixed),false,'a full demonstration still has all six runs');
+    }
+  }
+});

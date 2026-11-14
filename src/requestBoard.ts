@@ -1,5 +1,5 @@
 import type { SaveData } from './state';
-import { cargoExplorationReady, cargoForceNames, cargoOrders, ordersComplete } from './cargoModel';
+import { cargoManualEvidence, cargoForceNames, cargoOrders, ordersComplete } from './cargoModel';
 import { balanceExplorationReady, mysteryComplete, mysteryRoundCount } from './balanceModel';
 import { scaleExplorationReady, fakeRequestComplete, fakeRounds } from './scaleModel';
 import { workshopExplorationReady, workshopCargos, workshopL2Complete } from './workshopModel';
@@ -39,7 +39,7 @@ export function requestSolved(save: SaveData, stage: RequestStage): boolean {
 /** Level 1 done: all basic activities are recorded, or a previously completed mission is revisited. */
 function levelOneDone(save: SaveData, stage: RequestStage): boolean {
   if (save.completed.includes(stage)) return true;
-  if (stage === 'cargo') return Array.isArray(save.cargo?.orders) && cargoExplorationReady(save.cargo.runs);
+  if (stage === 'cargo') return Array.isArray(save.cargo?.orders) && cargoManualEvidence(save.cargo.runs).ready;
   if (stage === 'balance') {
     const runs = save.balance?.runs ?? [];
     return balanceExplorationReady(runs);

@@ -122,19 +122,20 @@ test('board judgements never change the save', () => {
 });
 
 
-test('an old early cargo request does not bypass an unfinished pull comparison', () => {
+test('a saved request does not replace the three-load comparison', () => {
   const save=state.freshSave();save.cargo.orders=[];
   save.cargo.runs=[{parts:1,action:'push',gesture:100,distance:66},{parts:5,action:'push',gesture:100,distance:22},{parts:5,action:'pull',gesture:100,distance:22}];
   assert.equal(board.requestStatus(save,'cargo'),'locked');
-  save.cargo.runs.push({parts:1,action:'pull',gesture:100,distance:66},{parts:3,action:'push',gesture:100,distance:33},{parts:3,action:'pull',gesture:100,distance:33});
+  save.cargo.runs.push({parts:3,action:'push',gesture:100,distance:44});
   assert.equal(board.requestStatus(save,'cargo'),'open');
 });
 
-test('existing cargo and bridge evidence requirements stay in place',()=>{
-  for(const [stage,count] of Object.entries({cargo:6,balance:3})) for(let missing=0;missing<count;missing++) {
-    const save=completeBase(state.freshSave());save.levels={balance:{cleared:[],attempts:0}};
-    save[stage].runs.splice(missing,1);
-    assert.equal(board.requestStatus(save,stage),'locked',stage+' missing '+missing);
+test('the bridge still requires all three pairs',()=>{
+  for(let missing=0;missing<3;missing++) {
+    const save=completeBase(state.freshSave());
+    save.levels={balance:{cleared:[],attempts:0}};
+    save.balance.runs.splice(missing,1);
+    assert.equal(board.requestStatus(save,'balance'),'locked');
   }
 });
 test('the scale opens with a zeroed pair; extra models stay optional',()=>{

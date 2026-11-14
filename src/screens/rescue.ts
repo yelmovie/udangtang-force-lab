@@ -259,17 +259,25 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
         controls.querySelector<HTMLButtonElement>('[data-rescue="load"]')?.click();
         controls.querySelector<HTMLButtonElement>('[data-rescue="zero"]')?.focus();
       }
-      if (button.dataset.weight === 'record' && state.loaded && state.zeroed && phase() === 0) {
-        closeWeightDialog();
-        state.measured = true; restProgress = 0;
-        tell('코어는 180 g! 이제 벽 옆 상자를 움직여 길을 열어요.');
-        companion.setMood('success'); context.sound(470); commit();
-        controls.querySelector<HTMLButtonElement>('[data-rescue="pull"]')?.focus();
-      }
+      if (button.dataset.weight === 'record') recordWeight();
     }, { signal });
     dialog.addEventListener('cancel', event => { event.preventDefault(); closeWeightDialog(); }, { signal });
     root.append(dialog); weightDialog = dialog; dialog.showModal();
     dialog.querySelector<HTMLButtonElement>(state.zeroed ? '[data-weight="record"]' : '[data-weight="unload"]')?.focus();
+  }
+  function recordWeight() {
+    if (phase() !== 0 || !state.loaded || !state.zeroed) return false;
+    closeWeightDialog();
+    state.measured = true; restProgress = 0;
+    tell(`코어는 ${coreWeight} g! 이제 벽 옆 상자를 움직여 길을 열어요.`);
+    companion.setMood('success'); context.sound(470); commit();
+    controls.querySelector<HTMLButtonElement>('[data-rescue="pull"]')?.focus();
+    return true;
+  }
+  function setManualLoad(loaded: boolean) {
+    state.loaded = loaded;
+    // The demo keeps its original measurement dialog and records there.
+    return !autoPlaying && recordWeight();
   }
   function commit() { context.commit(); update(); }
   function reset() { mounted3D = false; overview(); restProgress = 0; travel = 0; state.delivered = false; pose(0); }
@@ -278,7 +286,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     if (busy) return;
     const button = (event.target as Element).closest<HTMLButtonElement>('button'); if (!button) return;
     const action = button.dataset.rescue;
-    if (action === 'load') { state.loaded = !state.loaded; tell(state.loaded ? '코어를 올렸어요. 영점과 숫자를 확인해요.' : '코어를 내렸어요. 빈 저울이 0 g일까요?'); }
+    if (action === 'load') { if (setManualLoad(!state.loaded)) return; tell(state.loaded ? '코어를 올렸어요. 영점과 숫자를 확인해요.' : '코어를 내렸어요. 빈 저울이 0 g일까요?'); }
     if (action === 'zero') { if (state.loaded) tell('코어를 먼저 내려놓고 빈 저울의 영점을 맞춰요.'); else { state.zeroed = true; tell('빈 저울이 0 g이에요. 다시 코어를 올려요.'); } }
     if (action === 'reading') { openWeightDialog(); return; }
     if (action === 'push' || action === 'pull') { gateAction = action; restProgress = 0; tell(action === 'push' ? '벽 쪽으로 밀면 움직일 수 있을까요?' : '내 쪽으로 당겨 봐요.'); }
@@ -370,7 +378,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     held = null; busy = false;
     if (svg.hasPointerCapture(event.pointerId)) svg.releasePointerCapture(event.pointerId);
     if (phase() === 0) {
-      if (!cancelled) { state.loaded = current.x >= 245 && current.x <= 485 && current.y >= 162 && current.y <= 300; tell(state.loaded ? '저울 위에 놓았어요. 숫자를 확인하고 무게를 기록해요.' : '코어를 내려놓았어요. 빈 저울부터 살펴봐요.'); }
+      if (!cancelled) { if (setManualLoad(current.x >= 245 && current.x <= 485 && current.y >= 162 && current.y <= 300)) return; tell(state.loaded ? '저울 위에 놓았어요. 숫자를 확인하고 무게를 기록해요.' : '코어를 내려놓았어요. 빈 저울부터 살펴봐요.'); }
       companion.setMood('observe');
     } else finishTravel(cancelled);
     commit();
@@ -465,7 +473,11 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     if (!['Enter',' '].includes(event.key) || ![art,gate,handle,grip].includes(event.target as typeof art)) return;
     if (phase() === 2 && state.delivered) { event.preventDefault(); if (rescueReady(state)) finish.click(); return; }
     if (phase() === 2 && !use2D && !scene) return;
-    if (phase() === 0) { if (!event.repeat) { state.loaded = !state.loaded; tell(state.loaded ? '코어를 올렸어요.' : '코어를 내렸어요.'); commit(); } event.preventDefault(); return; }
+    if (phase() === 0) {
+      event.preventDefault();
+      if (!event.repeat && !busy && !autoPlaying && !setManualLoad(!state.loaded)) { tell(state.loaded ? '코어를 올렸어요.' : '코어를 내렸어요.'); commit(); }
+      return;
+    }
     event.preventDefault(); if (busy || stageLock || state.delivered || event.repeat) return;
     if (inspecting) overview();
     keyHeld = true; busy = true; restProgress = 0; travel = 0; companion.setMood('effort'); controls.inert = true; finish.disabled = true;

@@ -7,6 +7,10 @@
 .cargo-scene-caption>span{background:#fff8e9ed;padding:10px 16px;border-radius:12px}
 .cargo-finding-cta{position:absolute;left:50%;top:34%;z-index:8;display:grid;justify-items:center;gap:12px;width:max-content;max-width:min(520px,86%);padding:18px 28px 20px;border:3px solid #e5c792;border-radius:24px;background:#fff9e9f5;box-shadow:0 14px 32px #173f4238;text-align:center;transform:translate(-50%,-50%);animation:cargo-cta-in .28s ease-out both}
 .cargo-finding-cta[hidden],.cargo-scene-caption[hidden],.cargo-auto-go[hidden]{display:none}
+.cargo-scene-caption > [hidden],.cargo-order-notice[hidden],.cargo-order-notice button[hidden]{display:none}
+.cargo-order-notice{position:absolute;z-index:6;left:50%;top:92px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;width:max-content;max-width:92%;padding:6px 12px;border:2px solid #e5c792;border-radius:14px;background:#fff9e9f5;color:#244d47;font-weight:850}
+.cargo-order-notice p{margin:0;word-break:keep-all}
+.cargo-order-notice button{min-height:44px;flex:none}
 .cargo-tap-go{flex:none;min-height:52px;padding:0 22px;font-size:clamp(17px,1.4vw,22px);white-space:nowrap;pointer-events:auto}
 .cargo-tap-go:disabled{opacity:.45}
 /* The caption lets drags pass through to the stage, so each button in it opts back in to clicks. */

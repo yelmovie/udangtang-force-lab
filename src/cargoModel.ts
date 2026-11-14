@@ -31,6 +31,14 @@ export function cargoExplorationReady(runs: readonly { parts: number; action: st
   return cargoActionCompared(runs, 'push') && cargoActionCompared(runs, 'pull');
 }
 
+/** Hands-on: compare all three loads in one action and repeat one of them with the other action. */
+export function cargoManualEvidence(runs: readonly { parts: number; action: string }[]) {
+  const comparison = (['push', 'pull'] as const).find(action => cargoActionCompared(runs, action));
+  const sameLoad = [1, 3, 5].some(parts => runs.some(run => run.parts === parts && run.action === 'push')
+    && runs.some(run => run.parts === parts && run.action === 'pull'));
+  return { comparison, sameLoad, ready: comparison !== undefined && sameLoad };
+}
+
 export function cargoDistance(parts: number, force: ForceLevel = 2): number {
   const row = distanceTable[force];
   return row[parts as 1 | 3 | 5] ?? row[5];
