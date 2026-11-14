@@ -1,4 +1,4 @@
-import { learningTask, learningRecordComplete, learningSummary, type LearningRecord } from './learningModel';
+import { learningTask, learningRecordComplete, learningSummary, type LearningRecord, type LearningTask } from './learningModel';
 import type { SaveData } from './state';
 import { balanceObjects, type StageId } from './data';
 import { inquiryPlans, planLabel } from './inquiryPlan';
@@ -18,6 +18,38 @@ const balancePair = (pair: [string, string], tilt?: 'left' | 'right' | 'level') 
     ${tilt ? '' : '<b class="lb-ask" aria-hidden="true">?</b>'}
     <span class="lb-names"><span><small>왼쪽</small>${left}</span><span><small>오른쪽</small>${right}</span></span></div>`;
 };
+
+const evidenceMarkup = (task: LearningTask) => task.cards.map(card => `<article class="learning-evidence"><strong>${escape(card.title)}</strong>${card.pair ? balancePair(card.pair, card.tilt) : ''}<p>${escape(card.detail)}</p>${card.bars?.map((bar, i) => `<div class="learning-measure"><span>${escape(bar.label)}</span><div class="learning-bar ${i ? 'learning-bar-distance' : ''}" role="img" aria-label="${escape(bar.label)}, 비교 막대"><i style="width:${Math.max(4, Math.min(100, bar.value / bar.maximum * 100))}%"></i></div></div>`).join('') ?? ''}</article>`).join('');
+
+export function mountMissionReview(host: HTMLElement, task: LearningTask, record: LearningRecord, onAnswer: (correct: boolean) => void) {
+  const q = task.questions[0];
+  host.innerHTML = `<div class="mission-review-evidence"><p class="learning-record-label">내가 관찰한 기록</p><div class="learning-evidence-grid">${evidenceMarkup(task)}</div></div>
+    <section class="question-zone" aria-labelledby="mission-review-question"><span class="question-label">발견을 써 봐요</span><h3 class="question-prompt" id="mission-review-question">${escape(q.prompt)}</h3>
+    ${q.pair ? `<div class="learning-question-pair">${balancePair(q.pair)}</div>` : ''}<div class="question-choices">${q.choices.map(choice => `<button type="button" data-review-choice="${escape(choice.id)}" aria-pressed="false">${escape(choice.text)}</button>`).join('')}</div><p class="mission-review-feedback" role="status"></p></section>`;
+  const choices = [...host.querySelectorAll<HTMLButtonElement>('[data-review-choice]')];
+  const feedback = host.querySelector<HTMLElement>('.mission-review-feedback')!;
+  const draw = () => {
+    const answer = record.answers[0];
+    for (const choice of choices) {
+      const selected = answer?.chosen === choice.dataset.reviewChoice;
+      choice.setAttribute('aria-pressed', String(selected));
+      choice.classList.toggle('is-right', selected && record.completed);
+      choice.classList.toggle('is-wrong', selected && !record.completed);
+      choice.disabled = record.completed;
+    }
+    feedback.textContent = !answer ? '' : record.completed ? `✓ ${q.explanation}` : [q.why?.[answer.chosen], q.hint].filter(Boolean).join(' ');
+  };
+  for (const choice of choices) choice.addEventListener('click', () => {
+    const chosen = choice.dataset.reviewChoice!;
+    const old = record.answers[0];
+    if (record.completed || old?.chosen === chosen) return;
+    record.answers[0] = { first: old?.first ?? chosen, chosen, tries: Math.min(100, (old?.tries ?? 0) + 1) };
+    record.completed = learningRecordComplete(task, record);
+    draw();
+    onAnswer(record.completed);
+  });
+  draw();
+}
 
 /** A short observation-to-explanation check. Wrong first thoughts are kept, never penalized. */
 export function openLearningReview(options: {
@@ -48,12 +80,11 @@ export function openLearningReview(options: {
     const q = task.questions[step];
     const answer = record.answers[step];
     const correct = answer?.chosen === q.correct;
-    const cards = task.cards.map(card => `<article class="learning-evidence"><strong>${escape(card.title)}</strong>${card.pair ? balancePair(card.pair, card.tilt) : ''}<p>${escape(card.detail)}</p>${card.bars?.map((bar, i) => `<div class="learning-measure"><span>${escape(bar.label)}</span><div class="learning-bar ${i ? 'learning-bar-distance' : ''}" role="img" aria-label="${escape(bar.label)}, 비교 막대"><i style="width:${Math.max(4, Math.min(100, bar.value / bar.maximum * 100))}%"></i></div></div>`).join('') ?? ''}</article>`).join('');
     modal.innerHTML = `<section class="modal-card learning-card" role="dialog" aria-modal="true" aria-labelledby="learning-title">
       <div class="learning-heading"><img src="/assets/village/corgi/down-1.webp" alt=""><div><p class="eyebrow">문제 풀기 · ${step + 1} / ${task.questions.length}</p><h2 id="learning-title">${task.stage === 'balance' ? '그림을 보고 생각해 봐요' : '내가 발견한 것을 써볼까요?'}</h2></div><button class="learning-close" aria-label="결과로 돌아가기">×</button></div>
       <div class="learning-body"><div class="learning-records">
       ${predicted ? `<p class="learning-first-thought"><strong>콩이가 간직한 내 첫 생각:</strong> ${escape(predicted)} <span>· ${escape(inquiryPlans[options.stage].observation)}</span></p>` : ''}
-      <p class="learning-record-label">▤ 내 실험에서 관찰한 기록</p><div class="learning-evidence-grid">${cards}</div>
+      <p class="learning-record-label">▤ 내 실험에서 관찰한 기록</p><div class="learning-evidence-grid">${evidenceMarkup(task)}</div>
       ${correct && step === task.questions.length - 1 ? `<p class="learning-talk">함께 말해봐요 · ${escape(task.talk)}</p>` : ''}</div>
       <div class="learning-quiz"><section class="question-zone" aria-labelledby="learning-question"><span class="question-label">생각해 볼 문제 ${step + 1}</span><h3 id="learning-question" class="learning-question question-prompt">${escape(q.prompt)}</h3>
       ${q.pair ? `<div class="learning-question-pair">${balancePair(q.pair)}</div>` : ''}

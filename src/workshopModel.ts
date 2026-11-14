@@ -85,7 +85,7 @@ export function canFinishWorkshopExploration(state: WorkshopState): boolean {
 
 export function workshopActivitySteps(state: WorkshopState): {direct:boolean;lever:boolean;ramp:boolean} {
   const runs = retainWorkshopRuns(state.trials);
-  return {direct:state.direct, lever:[0,1,2].every(setting => runs.some(run => run.tool === 'lever' && run.setting === setting)), ramp:[0,1].every(setting => runs.some(run => run.tool === 'ramp' && run.setting === setting))};
+  return {direct:state.direct, lever:hasWorkshopComparison(runs, 'lever') && runs.some(run => run.tool === 'lever' && run.force < 100), ramp:[0,1].every(setting => runs.some(run => run.tool === 'ramp' && run.setting === setting))};
 }
 export function workshopExplorationReady(state: WorkshopState): boolean {
   const steps = workshopActivitySteps(state);
@@ -98,17 +98,15 @@ export type WorkshopL2Tool = WorkshopTool | 'direct';
 /** One distinct design tried on one request cargo, and whether it went up. Older saves have none. */
 export type WorkshopL2Try = { cargo: number; tool: WorkshopL2Tool; setting: number; success: boolean };
 export type WorkshopL2Record = { cleared: number[]; attempts: number; tries?: WorkshopL2Try[] };
-export type WorkshopL2Result = { force: number; success: boolean; needCells: number; budgetCells: number; overCells: number; stallAt: number };
+export type WorkshopL2Result = { force: number; success: boolean; needCells: number; budgetCells: number; overCells: number; stallAt: number; blocked: boolean };
 
 export const workshopForcePerCell = 10;
 export const workshopBudget = 60;
-/** Light 0.8 · normal 1 · heavy 1.85. The heavy cargo fits only the long ramp (58.9);
- * lever-near misses by one cell (61.7), so a student who kept one design through the first
- * two cargos has to change tools once. The short ramp (103.6) stays far over budget. */
+// The middle bay fits a short ramp, but its load is too heavy for that ramp and Kong's six cells.
 export const workshopCargos = [
-  { label: '가벼운 화물', weight: .8 },
-  { label: '보통 화물', weight: 1 },
-  { label: '무거운 화물', weight: 1.85 },
+  { label: '가벼운 화물', weight: .8, longRampFits: true, clue: '자리가 넓어요. 콩이 힘 6칸 안에서 쓸 도구를 골라요.' },
+  { label: '보통 화물', weight: 1.15, longRampFits: false, clue: '통로가 좁아 긴 빗면을 펼칠 수 없어요.' },
+  { label: '무거운 화물', weight: 1.85, longRampFits: true, clue: '자리는 넓어요. 더 무거운 화물을 6칸 안에서 올려요.' },
 ] as const;
 
 export function workshopL2Force(cargo: number, tool: WorkshopL2Tool, setting: number): number {
@@ -120,10 +118,11 @@ export function judgeWorkshopL2(cargo: number, tool: WorkshopL2Tool, setting: nu
   const force = workshopL2Force(cargo, tool, setting);
   const needCells = Math.ceil(force / workshopForcePerCell - 1e-9);
   const budgetCells = workshopBudget / workshopForcePerCell;
-  const success = tool !== 'direct' && force <= workshopBudget;
-  // Over budget the cargo only twitches: force is not a fuel that carries it part way.
-  const stallAt = success ? 1 : .05;
-  return { force, success, needCells, budgetCells, overCells: Math.max(0, needCells - budgetCells), stallAt };
+  const blocked = tool === 'ramp' && setting === 1 && workshopCargos[cargo]?.longRampFits === false;
+  const success = !blocked && tool !== 'direct' && force <= workshopBudget;
+  // A blocked ramp cannot be set down; insufficient force only makes the load twitch.
+  const stallAt = blocked ? 0 : success ? 1 : .05;
+  return { force, success, needCells, budgetCells, overCells: blocked ? 0 : Math.max(0, needCells - budgetCells), stallAt, blocked };
 }
 
 /** Cargo is delivered in order; the first not yet cleared is the current one. */

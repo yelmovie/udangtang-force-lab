@@ -16,7 +16,7 @@ export function scaleActivityMeasurements(runs: ScaleRun[]): ScaleRun[] {
   });
 }
 export function scaleExplorationReady(state: {zeroed: boolean; runs: ScaleRun[]}): boolean {
-  return state.zeroed && scaleActivityMeasurements(state.runs).length === scaleParts.length;
+  return canCompleteScale(state);
 }
 export function canCompleteScale(state: { zeroed: boolean; runs: ScaleRun[] }): boolean {
   return state.zeroed && scaleComparison(state.runs).length === 2;
@@ -38,6 +38,7 @@ export const fakeRounds: readonly FakeRound[] = [
 ];
 export const fakeLabels = ['가', '나', '다', '라', '마'] as const;
 export type FakePick = 'found' | 'real' | 'unmeasured';
+export type FakeMeasurement = { reading: number; zeroed: boolean };
 
 /** Same seed and round always hide the fake in the same slot; positions differ between rounds. */
 export function fakeSlot(round: number, seed: number): number {
@@ -52,10 +53,10 @@ export function fakeLayout(round: number, seed: number): number[] {
 export function fakeReading(round: number, seed: number, slot: number, zeroed: boolean): number {
   return fakeLayout(round, seed)[slot] + (zeroed ? 0 : emptyScaleReading);
 }
-/** Judgement uses scale measurements only: a part that was never weighed cannot be accused. */
-export function judgeFakePick(round: number, seed: number, picked: number, measured: readonly number[]): FakePick {
-  if (!measured.includes(picked)) return 'unmeasured';
-  return picked === fakeSlot(round, seed) ? 'found' : 'real';
+/** Compare the student's measurement with the published reference, using a zeroed scale. */
+export function judgeFakePick(round: number, measurement?: FakeMeasurement): FakePick {
+  if (!measurement?.zeroed) return 'unmeasured';
+  return measurement.reading === fakeRounds[round].real ? 'real' : 'found';
 }
 export function nextFakeRound(record?: LevelRecord): number {
   const index = fakeRounds.findIndex((_, i) => !record?.cleared.includes(i));
@@ -73,8 +74,8 @@ export function recordFakePick(record: LevelRecord, round: number, result: FakeP
 /** First miss says where to look; later misses say what to compare. Never a penalty. */
 export function fakeHint(misses: number, zeroed: boolean): string {
   const hint = misses < 2
-    ? '저울 화면의 숫자를 봐요. 부품을 하나씩 올려 모두 재 봐요.'
-    : '같은 숫자가 여러 번 나왔지요? 그 숫자와 다른 하나가 가짜예요.';
+    ? '저울 화면의 숫자를 진짜 부품의 기준 무게와 비교해요.'
+    : '진짜 부품은 기준과 같은 숫자가 나와요. 기준과 다른 숫자를 찾아봐요.';
   return zeroed ? hint : `${hint} 빈 저울을 0으로 맞추면 부품 무게만 보여요.`;
 }
 export function fakeDiscoveryText(round: number, picked: number, zeroed: boolean): string {

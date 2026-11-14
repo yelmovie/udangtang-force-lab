@@ -81,14 +81,17 @@ export function retainLifeObservation(value: unknown): LifeObservation | undefin
   return object || use ? { sorted: [], missed: [], object, use, shared: raw.shared === true } : undefined;
 }
 export function lifeSortDone(value: LifeObservation | undefined): boolean {
-  return !!value && lifeCards.every(card => value.sorted.includes(card.id));
+  return (['lever', 'ramp'] as const).every(tool => lifeCards.some(card => card.tool === tool && value?.sorted.includes(card.id)));
 }
 /** One drop: the right basket files the card; the other basket only notes it, and the card goes back to try again. */
 export function dropLifeCard(record: LifeObservation, cardId: string, basket: LifeTool): { result: 'correct' | 'retry'; record: LifeObservation } | undefined {
   const card = lifeCard(cardId);
   if (!card || record.sorted.includes(cardId)) return;
-  if (card.tool === basket) return { result: 'correct', record: lifeRecord([...record.sorted, cardId], record.missed) };
-  return { result: 'retry', record: lifeRecord(record.sorted, record.missed.includes(cardId) ? record.missed : [...record.missed, cardId]) };
+  const correct = card.tool === basket;
+  const next = correct ? lifeRecord([...record.sorted, cardId], record.missed)
+    : lifeRecord(record.sorted, record.missed.includes(cardId) ? record.missed : [...record.missed, cardId]);
+  if (record.intro) next.intro = record.intro;
+  return { result: correct ? 'correct' : 'retry', record: next };
 }
 
 const hasFinal = (word: string) => { const code = word.charCodeAt(word.length - 1) - 0xac00; return code >= 0 && code < 11172 && code % 28 !== 0; };
@@ -114,6 +117,9 @@ export function openLifeObservation(options: {
 }): void {
   let record = options.value ?? emptyLifeObservation();
   let selected = '';
+  let showMore = false;
+  const trayCards = () => lifeCards.filter(card => !record.sorted.includes(card.id) &&
+    (showMore || (!record.sorted.some(id => lifeCard(id)?.tool === card.tool) && ['bottle-opener', 'truck-ramp'].includes(card.id))));
   let feedback: { text: string; tone: '' | 'correct' | 'retry' } = { text: '', tone: '' };
   let drag: { pointer: number; card: HTMLButtonElement; x: number; y: number; ghost: HTMLElement | null; over: HTMLElement | null } | null = null;
   let suppressClickUntil = 0;
@@ -125,7 +131,7 @@ export function openLifeObservation(options: {
   options.app.inert = true;
   modal.innerHTML = `<section class="modal-card life-card" role="dialog" aria-modal="true" aria-labelledby="life-title" aria-describedby="life-guide">
     <div class="settings-heading"><h2 id="life-title">생활 속 도구를 찾아요</h2><span class="life-count" id="life-count"></span><button type="button" id="life-close" aria-label="공방으로 돌아가기">×</button></div>
-    <p class="life-guide" id="life-guide"><span class="life-guide-intro">공방에서 써 본 지레와 빗면이 우리 생활에도 있어요. </span>그림 카드를 알맞은 바구니로 끌어다 놓아요. <span class="life-guide-tap">카드를 누르고 바구니를 눌러도 돼요.</span></p>
+    <p class="life-guide" id="life-guide">지레와 빗면을 하나씩 찾아요. 카드를 알맞은 바구니에 끌어 놓거나, 카드와 바구니를 차례로 눌러요.</p>
     <div class="life-board">
       <div class="life-middle">
         <div class="life-tray" role="group" aria-label="생활 속 도구 그림 카드">${lifeCards.map(card => `<div class="life-slot"><button type="button" class="life-tool" data-card="${card.id}" aria-pressed="false">${image(card.id)}<span>${card.name}</span></button></div>`).join('')}</div>
@@ -137,7 +143,7 @@ export function openLifeObservation(options: {
             <label class="life-intro-row"><span>한마디 더</span><input id="life-intro-note" maxlength="40" placeholder="안 써도 돼요" autocomplete="off"></label>
             <p class="life-intro-sentence" id="life-intro-sentence" role="status"></p>
           </section>
-          <button type="button" class="button button-primary" id="life-done">관찰 기록으로 마치기</button></div>
+          <div class="life-actions"><button type="button" class="button button-secondary" id="life-more" aria-expanded="false">다른 카드도 보기 (선택)</button><button type="button" class="button button-primary" id="life-done">관찰 기록으로 마치기</button></div></div>
       </div>
       ${(['lever', 'ramp'] as const).map(tool => `<div class="life-basket is-${tool}" data-basket="${tool}">
         <button type="button" class="life-basket-head" data-basket="${tool}"><svg viewBox="0 0 64 40" aria-hidden="true" focusable="false">${toolIcons[tool]}</svg><strong>${lifeBaskets[tool].name}</strong><small>${lifeBaskets[tool].idea}</small></button>
@@ -156,10 +162,11 @@ export function openLifeObservation(options: {
 
   const render = () => {
     const done = lifeSortDone(record);
+    const shown = trayCards();
     for (const card of lifeCards) {
-      // A filed card keeps its slot (dashed outline) so the other cards do not jump around.
       const button = cardButton(card.id)!;
-      button.disabled = record.sorted.includes(card.id);
+      button.closest<HTMLElement>('.life-slot')!.hidden = !shown.includes(card);
+      button.disabled = !shown.includes(card);
       button.setAttribute('aria-pressed', String(selected === card.id));
     }
     for (const tool of ['lever', 'ramp'] as const) {
@@ -168,11 +175,16 @@ export function openLifeObservation(options: {
       if (list.children.length !== filed.length) list.innerHTML = filed.map(id => `<li data-filed="${id}">${image(id)}<span>${lifeCard(id)!.name}</span></li>`).join('');
       basketBox(tool).classList.toggle('is-ready', !!selected);
     }
-    field('life-count').textContent = `찾은 도구 ${record.sorted.length} / ${lifeCards.length}`;
+    const types = new Set(record.sorted.map(id => lifeCard(id)?.tool)).size;
+    field('life-count').textContent = showMore ? `찾은 카드 ${record.sorted.length} / ${lifeCards.length}` : `찾은 종류 ${types} / 2`;
     field('life-finish').hidden = !done;
+    const more = field<HTMLButtonElement>('life-more');
+    more.hidden = record.sorted.length === lifeCards.length;
+    more.textContent = showMore ? '선택 카드 접기' : '다른 카드도 보기 (선택)';
+    more.setAttribute('aria-expanded', String(showMore));
     if (done) {
       const cards = modal.querySelector<HTMLElement>('.life-intro-cards')!;
-      if (!cards.childElementCount) cards.innerHTML = record.sorted.map(id => `<button type="button" class="life-chip" data-intro-card="${id}" aria-pressed="false">${lifeCard(id)!.name}</button>`).join('');
+      if (cards.childElementCount !== record.sorted.length) cards.innerHTML = record.sorted.map(id => `<button type="button" class="life-chip" data-intro-card="${id}" aria-pressed="false">${lifeCard(id)!.name}</button>`).join('');
       modal.querySelectorAll<HTMLButtonElement>('[data-intro-card]').forEach(b => b.setAttribute('aria-pressed', String(record.intro?.card === b.dataset.introCard)));
       modal.querySelectorAll<HTMLButtonElement>('[data-intro-where]').forEach(b => b.setAttribute('aria-pressed', String(record.intro?.where === b.dataset.introWhere)));
       modal.querySelectorAll<HTMLButtonElement>('[data-intro-help]').forEach(b => {
@@ -183,7 +195,7 @@ export function openLifeObservation(options: {
       const sentence = introSentence(record.intro);
       field('life-intro-sentence').textContent = sentence ? `짝에게 이렇게 소개해 봐요: “${sentence}”` : '도구, 어디서, 무엇을 고르면 소개할 문장이 만들어져요.';
     }
-    modal.querySelector<HTMLElement>('.life-tray')!.hidden = done;
+    modal.querySelector<HTMLElement>('.life-tray')!.hidden = !shown.length;
     const status = field('life-feedback');
     const text = feedback.text || (done ? '' : '카드를 골라 지레 바구니나 빗면 바구니에 놓아요.');
     if (status.textContent !== text) status.textContent = text;
@@ -192,10 +204,8 @@ export function openLifeObservation(options: {
   /** Focus stays on something visible: the next card after a filed one, the same card after a retry. */
   const focusAfterDrop = (cardId: string, result: 'correct' | 'retry') => {
     if (result === 'retry') { cardButton(cardId)?.focus({ preventScroll: true }); return; }
-    if (lifeSortDone(record)) { field('life-done').focus({ preventScroll: true }); return; }
-    const at = lifeCards.findIndex(card => card.id === cardId);
-    const next = [...lifeCards.slice(at + 1), ...lifeCards.slice(0, at)].find(card => !record.sorted.includes(card.id));
-    if (next) cardButton(next.id)?.focus({ preventScroll: true });
+    const next = trayCards()[0];
+    (next ? cardButton(next.id) : field('life-done'))?.focus({ preventScroll: true });
   };
   const drop = (cardId: string, basket: LifeTool) => {
     const outcome = dropLifeCard(record, cardId, basket);
@@ -266,6 +276,7 @@ export function openLifeObservation(options: {
     const button = target.closest<HTMLButtonElement>('button');
     if (button?.id === 'life-close') { close(); return; }
     if (button?.id === 'life-done') { if (!lifeSortDone(record)) return; options.onSave(record); close(); options.onDone(); return; }
+    if (button?.id === 'life-more') { showMore = !showMore; selected = ''; render(); return; }
     if (button?.dataset.introCard || button?.dataset.introWhere || button?.dataset.introHelp) {
       const intro = record.intro ?? { card: '', where: '', help: '', note: '' };
       const card = button.dataset.introCard ?? intro.card;
@@ -283,7 +294,7 @@ export function openLifeObservation(options: {
     const basket = target.closest<HTMLElement>('.life-basket')?.dataset.basket;
     if (basket !== 'lever' && basket !== 'ramp') return;
     if (selected) { drop(selected, basket); return; }
-    if (lifeSortDone(record)) return;
+    if (!trayCards().length) return;
     feedback = { text: '먼저 그림 카드를 하나 골라요. 그다음 바구니를 눌러요.', tone: '' };
     render();
     flash(modal.querySelector('.life-tray'), 'is-nudge');
@@ -310,6 +321,6 @@ export function openLifeObservation(options: {
 
   render();
   document.body.append(modal);
-  const first = lifeCards.find(card => !record.sorted.includes(card.id));
+  const first = trayCards()[0];
   (first ? cardButton(first.id) : field('life-done'))?.focus({ preventScroll: true });
 }

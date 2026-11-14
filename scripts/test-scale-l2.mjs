@@ -86,12 +86,13 @@ test('before zeroing every part shows 15 g more, but the difference between part
   }
 });
 
-test('a pick is judged only from scale measurements', () => {
-  const seed = 11, fake = scale.fakeSlot(0, seed), real = (fake + 1) % 4;
-  assert.equal(scale.judgeFakePick(0, seed, fake, []), 'unmeasured', 'cannot accuse a part that was never weighed');
-  assert.equal(scale.judgeFakePick(0, seed, fake, [real]), 'unmeasured');
-  assert.equal(scale.judgeFakePick(0, seed, real, [real]), 'real');
-  assert.equal(scale.judgeFakePick(0, seed, fake, [real, fake]), 'found');
+test('a measured outlier can be picked immediately, with the scale zeroed', () => {
+  for (const [round, r] of scale.fakeRounds.entries()) {
+    assert.equal(scale.judgeFakePick(round), 'unmeasured');
+    assert.equal(scale.judgeFakePick(round, { reading: r.fake + 15, zeroed: false }), 'unmeasured');
+    assert.equal(scale.judgeFakePick(round, { reading: r.real, zeroed: true }), 'real');
+    assert.equal(scale.judgeFakePick(round, { reading: r.fake, zeroed: true }), 'found');
+  }
 });
 
 test('judged picks count attempts and clear rounds; unmeasured picks change nothing', () => {
@@ -122,7 +123,7 @@ test('progress: the next round is the first one not cleared; both rounds finish 
 test('hints climb from where to look to what to compare, without blame', () => {
   const first = scale.fakeHint(1, true), second = scale.fakeHint(2, true);
   assert.match(first, /저울 화면의 숫자/);
-  assert.match(second, /같은 숫자/);
+  assert.match(second, /기준과 다른 숫자/);
   assert.notEqual(first, second);
   assert.equal(scale.fakeHint(5, true), second);
   assert.match(scale.fakeHint(1, false), /0으로 맞추면/);

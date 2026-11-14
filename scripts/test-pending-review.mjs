@@ -21,10 +21,36 @@ function moduleUrl(filename) {
   return url;
 }
 const state = await import(moduleUrl('src/state.ts'));
+const learning = await import(moduleUrl('src/learningModel.ts'));
 
 let stored = new Map();
 globalThis.localStorage = { getItem: k => stored.get(k) ?? null, setItem: (k, v) => stored.set(k, String(v)), removeItem: k => stored.delete(k) };
 beforeEach(() => { stored = new Map(); });
+
+test('the merged result keeps the answered legacy question and its first choice', () => {
+  const save = state.freshSave();
+  save.cargo.runs = [{ parts: 1, action: 'push', gesture: 1, distance: 66 }, { parts: 5, action: 'push', gesture: 1, distance: 22 }];
+  const oldTask = learning.learningTask(save, 'cargo');
+  const answer = { first: 'weight', chosen: 'force-time', tries: 2 };
+  save.learning = { cargo: { signature: oldTask.signature, answers: [answer], completed: false } };
+  state.markExperimentDone(save, 'cargo', '요약');
+  const restored = state.readSave();
+  const task = learning.missionReviewTask(restored, 'cargo');
+  const record = learning.missionReviewRecord(restored, task);
+  assert.equal(task.questions.length, 1);
+  assert.deepEqual(record.answers, [answer]);
+  assert.equal(learning.learningRecordComplete(task, record), true);
+  assert.equal(restored.pendingStage.id, 'cargo');
+});
+
+test('request proof replaces the scale review only after both measured rounds', () => {
+  const save = state.freshSave();
+  save.scale = { zeroed: true, parts: [], runs: [{ parts: ['orange'], reading: 80, zeroed: true }, { parts: ['blue'], reading: 70, zeroed: true }] };
+  save.levels = { scale: { cleared: [0], attempts: 1 } };
+  assert.equal(learning.missionReviewTask(save, 'scale').questions.length, 1);
+  save.levels.scale.cleared.push(1);
+  assert.equal(learning.missionReviewTask(save, 'scale'), null);
+});
 
 test('finished experiment with open questions is not a completion, and survives a reload', () => {
   const save = state.freshSave();

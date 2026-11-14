@@ -4,6 +4,10 @@
 .workshop-redesign .experiment-heading > div > p:not(.eyebrow) { font-size:18px; }
 .workshop-studio { flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:14px; }
 .workshop-stage { min-height:0; display:flex; flex-direction:column; overflow:hidden; border:3px solid #9c754c; border-radius:24px; background:#fff5dd; box-shadow:0 7px 20px #4c382222; }
+.workshop-request-strip { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:49px; padding:4px 14px; background:#fff3cc; border-top:1px solid #d9b675; color:#503911; }
+.workshop-request-strip[hidden], .workshop-request-strip button[hidden] { display:none; }
+.workshop-request-strip p { margin:0; font-size:16px; font-weight:850; line-height:1.35; word-break:keep-all; }
+.workshop-request-strip .button { flex:none; min-height:44px; padding:5px 14px; }
 .workshop-drawer { display:flex; gap:8px; align-items:center; padding:8px 12px; background:#f8ead0; border-bottom:2px solid #b39162; }
 .workshop-drawer > button { min-height:48px; padding:8px 14px; border:2px solid #adbdab; border-radius:12px; color:#245955; background:#fffaf0; font-weight:850; font-size:17px; box-shadow:0 4px 0 #8fa58f; transition:transform .12s ease, box-shadow .12s ease, background .12s ease; }
 .workshop-drawer > button:not(:disabled):hover { background:#fff; }

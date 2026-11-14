@@ -1,7 +1,8 @@
 import { balanceObjects, scaleParts, type StageId } from './data';
-import { getWorkshopDesign } from './workshopModel';
+import { getWorkshopDesign, workshopExplorationReady, workshopL2Complete } from './workshopModel';
 import type { SaveData } from './state';
-import { scaleComparison } from './scaleModel';
+import { fakeRequestComplete, scaleComparison } from './scaleModel';
+import { lifeSortDone } from './lifeObservation';
 
 export type LearningAnswer = { first: string; chosen: string; tries: number };
 export type LearningRecord = { signature: string; answers: LearningAnswer[]; completed: boolean };
@@ -94,6 +95,33 @@ export function learningTask(save: SaveData, stage: StageId): LearningTask | nul
   return { stage, cards, questions, talk, signature: JSON.stringify({ stage, cards, questions: questions.map(q => [q.id, q.correct]) }) };
 }
 
+/** In the request, choosing a measured outlier and applying both tool types already demonstrate the learning. */
+export function missionReviewTask(save: SaveData, stage: StageId): LearningTask | null {
+  if (stage === 'scale' && fakeRequestComplete(save.levels?.scale) && scaleComparison(save.scale.runs).length === 2) return null;
+  if (stage === 'workshop' && workshopExplorationReady(save.workshop) && workshopL2Complete(save.levels?.workshop) && lifeSortDone(save.lifeObservation)) return null;
+  const task = learningTask(save, stage);
+  if (!task) return null;
+  const id = { cargo: 'fair', balance: 'swap', scale: 'zero', workshop: 'daily-tool', rescue: 'books' }[stage];
+  const previous = task.questions.find(q => q.id === id) ?? task.questions[0];
+  const question: LearningQuestion = stage === 'cargo' ? { ...previous,
+    prompt: '운동장에서도 상자의 무게만 바꿔 비교하려면, 두 번의 밀기에서 무엇을 같게 해야 할까요?' } : previous;
+  return { ...task, questions: [question], signature: JSON.stringify({ stage, cards: task.cards, questions: [[question.id, question.correct]] }) };
+}
+
+/** Resume the same question from a previous two-question result when the evidence still matches. */
+export function missionReviewRecord(save: SaveData, task: LearningTask): LearningRecord {
+  const previous = save.learning?.[task.stage];
+  if (previous?.signature === task.signature) {
+    previous.completed = learningRecordComplete(task, previous);
+    return previous;
+  }
+  const oldTask = learningTask(save, task.stage);
+  const index = oldTask?.questions.findIndex(q => q.id === task.questions[0].id) ?? -1;
+  const oldAnswer = previous && previous.signature === oldTask?.signature && index >= 0 ? previous.answers[index] : undefined;
+  const answer = oldAnswer && task.questions[0].choices.some(c => c.id === oldAnswer.chosen) ? oldAnswer : undefined;
+  return { signature: task.signature, answers: answer ? [{ ...answer }] : [], completed: answer?.chosen === task.questions[0].correct };
+}
+
 export function retainLearningRecords(value: unknown): LearningRecords {
   if (!value || typeof value !== 'object') return {};
   const result: LearningRecords = {};
@@ -101,7 +129,7 @@ export function retainLearningRecords(value: unknown): LearningRecords {
     const raw = (value as LearningRecords)[stage];
     if (!raw || typeof raw.signature !== 'string' || raw.signature.length > 6000 || !Array.isArray(raw.answers)) continue;
     const answers = raw.answers.slice(0, 2).filter(a => a && typeof a.first === 'string' && a.first.length <= 32 && typeof a.chosen === 'string' && a.chosen.length <= 32 && Number.isInteger(a.tries) && a.tries > 0 && a.tries <= 100).map(a => ({ first: a.first, chosen: a.chosen, tries: a.tries }));
-    result[stage] = { signature: raw.signature, answers, completed: raw.completed === true && answers.length === 2 };
+    result[stage] = { signature: raw.signature, answers, completed: raw.completed === true && answers.length > 0 };
   }
   return result;
 }
