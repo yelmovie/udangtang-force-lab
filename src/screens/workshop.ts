@@ -58,7 +58,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
       <div class="workshop-stage">
         <div class="workshop-drawer" role="group" aria-label="실험 도구"><button data-tool="direct">① 직접 들기</button><button data-tool="lever">② 지레</button><button data-tool="ramp">③ 빗면</button><span class="workshop-cargo-chip" id="workshop-cargo-chip" hidden></span><p class="workshop-instruction" id="workshop-instruction">${fingerIcon}<span></span></p><button class="button button-secondary stage-auto-go" id="workshop-auto-go" aria-pressed="false" hidden>▶ 자동으로 보기</button><button id="workshop-open-record" class="workshop-record-button" aria-haspopup="dialog">기록 보기</button><div class="workshop-view"><button class="camera-button" id="turn-left" aria-label="시점 왼쪽">${icons.rotateLeft}</button><button class="camera-button" id="turn-right" aria-label="시점 오른쪽">${icons.rotateRight}</button></div></div>
         <div class="workshop-world" data-tool="direct"><div class="workshop-budget" id="workshop-budget" role="img" hidden><div class="budget-head"><img src="/assets/game/corgi-effort.webp" alt="" draggable="false"><strong>콩이가 낼 수 있는 힘</strong><span class="budget-status"></span></div><div class="budget-cells">${'<i></i>'.repeat(budgetCellCount)}</div><div class="budget-scale"><span>콩이 힘 끝</span><span class="budget-more"></span></div></div><div id="workshop-canvas" class="workshop-canvas"><div class="scene-loading">작업대 준비 중…</div></div><button id="workshop-fulcrum" class="workshop-fulcrum-grip" aria-label="그림의 받침대. 잡고 좌우로 옮기기. 방향키로도 위치 변경" hidden><span class="fulcrum-grab-label">${fingerIcon} 받침대 옮기기</span></button><div class="workshop-actor" id="workshop-actor" role="img" aria-label="아이가 직접 화물을 들어 올려요"><img id="workshop-actor-main" src="/assets/game/workshop-direct-start.webp" alt="" draggable="false"><img id="workshop-actor-lift" src="/assets/game/workshop-direct-lift.webp" alt="" draggable="false"><div class="workshop-effort" aria-hidden="true"><span class="effort-face"><i></i><i></i></span><b class="effort-word"></b></div></div><button id="workshop-handle" class="workshop-handle" aria-label="손잡이를 움직여 실험하기"><i class="handle-force" aria-hidden="true"></i><i class="handle-budget" aria-hidden="true"></i><span class="handle-arrow">↑</span><span class="handle-label">상자를 잡고 위로</span></button><div class="workshop-height-ruler" aria-label="화물이 올라갈 높이 눈금자"><div class="height-ruler-track"><i class="height-current-marker"></i></div><span class="height-arrival" hidden>✓ 도착</span></div><div class="workshop-move-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="목표 지점까지 이동"><div class="workshop-travel"><i id="workshop-progress"></i></div><strong id="workshop-move-text">0%</strong></div></div>
-        <div class="workshop-request-strip" id="workshop-request-strip" hidden><p id="workshop-request-status" role="status"></p><button type="button" class="button button-primary" id="workshop-next-cargo" hidden>다음 화물 →</button></div><div class="workshop-design-dock" id="lever-adjustment" hidden><span class="design-dock-title">받침점 위치<small>골라서 바꿔요</small></span>${([0, 1, 2] as const).map(i => `<button type="button" class="design-stop" data-lever="${i}">${getWorkshopDesign('lever', i).label}</button>`).join('')}<button type="button" class="button button-primary workshop-tap-run" data-tap-run>눌러서 시험하기</button></div><div class="workshop-design-dock" id="design-adjustment"><span class="design-dock-title">빗면 길이<small>골라서 바꿔요</small></span><button type="button" class="design-stop" data-ramp="0">짧고 가파르게</button><input type="range" id="workshop-design" min="0" max="1" step="1" value="0" aria-label="빗면 길이 조절"><button type="button" class="design-stop" data-ramp="1">길고 완만하게</button><button type="button" class="button button-primary workshop-tap-run" data-tap-run>눌러서 시험하기</button><span class="design-dock-hint" aria-hidden="true">↓ 다른 길이로 바꿔 다시 밀어 봐요</span></div><div class="workshop-design-dock" id="direct-adjustment" hidden><span class="design-dock-title">직접 들기<small>끌거나 눌러요</small></span><button type="button" class="button button-primary workshop-tap-run" data-tap-run>눌러서 시험하기</button></div>
+        <div class="workshop-request-strip" id="workshop-request-strip" hidden><p id="workshop-request-status" role="status"></p><button type="button" class="button button-primary" id="workshop-switch-lever" hidden>지레로 바꾸기 →</button><button type="button" class="button button-primary" id="workshop-next-cargo" hidden>다음 화물 →</button></div><div class="workshop-design-dock" id="lever-adjustment" hidden><span class="design-dock-title">받침점 위치<small>골라서 바꿔요</small></span>${([0, 1, 2] as const).map(i => `<button type="button" class="design-stop" data-lever="${i}">${getWorkshopDesign('lever', i).label}</button>`).join('')}<button type="button" class="button button-primary workshop-tap-run" data-tap-run>눌러서 시험하기</button></div><div class="workshop-design-dock" id="design-adjustment"><span class="design-dock-title">빗면 길이<small>골라서 바꿔요</small></span><button type="button" class="design-stop" data-ramp="0">짧고 가파르게</button><input type="range" id="workshop-design" min="0" max="1" step="1" value="0" aria-label="빗면 길이 조절"><button type="button" class="design-stop" data-ramp="1">길고 완만하게</button><button type="button" class="button button-primary workshop-tap-run" data-tap-run>눌러서 시험하기</button><span class="design-dock-hint" aria-hidden="true">↓ 다른 길이로 바꿔 다시 밀어 봐요</span></div><div class="workshop-design-dock" id="direct-adjustment" hidden><span class="design-dock-title">직접 들기<small>끌거나 눌러요</small></span><button type="button" class="button button-primary workshop-tap-run" data-tap-run>눌러서 시험하기</button></div>
       </div>
       <div class="workshop-record-store" hidden><aside class="workshop-notebook"><div class="notebook-heading"><span>필요한 힘</span><strong id="workshop-evidence-count">0 / 2</strong></div><p class="workshop-force-legend" id="workshop-force-legend"><i class="legend-bar" aria-hidden="true"><b></b></i><span><strong>초록색 막대 = 힘 막대</strong>화물을 들 때 든 힘이에요. 길수록 힘이 많이 들고, 짧을수록 힘이 덜 들어요.<em class="legend-baseline">주황 점선 = 직접 들 때의 힘</em></span></p><div class="workshop-quiz-prompt" hidden><span class="question-label" id="workshop-quiz-label"></span><h2 id="workshop-observation-help"></h2><p id="workshop-answer-help" class="answer-label"></p></div><div class="workshop-records" id="workshop-records"></div><div id="workshop-choice" class="workshop-choice"></div><p class="workshop-model-note" hidden></p></aside></div>
     </div><div class="experiment-footer"><span id="workshop-feedback" class="feedback" role="status"></span><button id="workshop-finish" class="button button-primary" disabled>생활 속 도구 찾기 →</button></div>
@@ -80,6 +80,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   const requestStrip = root.querySelector<HTMLElement>('#workshop-request-strip')!;
   const requestStatus = root.querySelector<HTMLElement>('#workshop-request-status')!;
   const nextCargoButton = root.querySelector<HTMLButtonElement>('#workshop-next-cargo')!;
+  const switchLever = root.querySelector<HTMLButtonElement>('#workshop-switch-lever')!;
   let recordDialog: HTMLDialogElement | null = null;
   const hint = mountCorgiHint(root, {
     now: () => instruction(),
@@ -93,6 +94,12 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   const signal = events.signal;
   const currentSetting = () => tool === 'lever' ? state.fulcrumPosition : state.rampLength;
   const judge = () => judgeWorkshopL2(cargoIndex(), tool, currentSetting());
+  const narrowBay = () => level === 2 && !workshopCargos[cargoIndex()].longRampFits;
+  const rampBlocked = () => narrowBay() && tool === 'ramp' && state.rampLength === 1;
+  const requestClue = () => !narrowBay() ? workshopCargos[cargoIndex()].clue
+    : rampBlocked() ? '여기엔 긴 빗면을 놓을 자리가 없어요. 지레로 바꿔 봐요.'
+    : tool === 'lever' ? '받침대 위치를 고르고 시험해요. 실험에서 어느 위치가 힘이 덜 들었나요?'
+    : '통로가 좁아요. 빗면 대신 지레를 써 볼까요?';
   const designName = () => workshopL2DesignLabel(tool, currentSetting());
   const toolForce = () => level === 2 ? workshopL2Force(cargoIndex(), tool, currentSetting()) : tool === 'direct' ? 100 : getWorkshopDesign(tool, currentSetting()).force;
   /** Green cells up to the budget; red cells are how much force was missing. */
@@ -108,7 +115,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     if (level !== 2) return;
     const pushing = heldPointer !== null || keyHeld || progress > 0;
     const live = pushing && !completedGesture;
-    const result = live ? judge() : traces.at(-1)?.result ?? null;
+    const result = rampBlocked() || live ? judge() : traces.at(-1)?.result ?? null;
     const showOver = !!result && !live && !result.success && !result.blocked;
     const classes = cellClasses(result?.blocked ? null : result, showOver);
     bar.querySelectorAll<HTMLElement>('.budget-cells i').forEach((cell, index) => { cell.className = classes[index]; });
@@ -213,6 +220,10 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     requestStrip.hidden = level !== 2;
     nextCargoButton.hidden = !nextCargoReady;
     nextCargoButton.disabled = busy;
+    const blocked = rampBlocked() && !requestSettled;
+    switchLever.hidden = !narrowBay() || tool === 'lever' || requestSettled;
+    switchLever.disabled = !scene || controlsLocked;
+    world.toggleAttribute('data-ramp-blocked', blocked);
     recordButton.disabled = busy;
     // Level 1 order: ① → ② → ③. Finished tools get a check, the next one glows with "다음".
     const done = benchSteps();
@@ -224,7 +235,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
       button.dataset.next = String(id === nextTool && id !== tool);
     });
     slider.disabled = !scene || controlsLocked || tool!=='ramp';
-    handle.disabled = !scene || requestSettled;
+    handle.disabled = !scene || requestSettled || blocked;
     fulcrum.hidden=tool!=='lever'; fulcrum.disabled=!scene||controlsLocked;
     heightRuler.hidden=tool==='direct';
     fulcrum.setAttribute('aria-valuetext',getWorkshopDesign('lever',state.fulcrumPosition).label);
@@ -240,7 +251,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     root.querySelector<HTMLElement>('#lever-adjustment')!.hidden = tool !== 'lever';
     root.querySelector<HTMLElement>('#direct-adjustment')!.hidden = tool !== 'direct';
     root.querySelectorAll<HTMLButtonElement>('.design-stop[data-lever]').forEach(button => { button.disabled = !scene || controlsLocked; button.setAttribute('aria-pressed', String(Number(button.dataset.lever) === state.fulcrumPosition)); });
-    root.querySelectorAll<HTMLButtonElement>('[data-tap-run]').forEach(button => { button.disabled = !scene || controlsLocked; });
+    root.querySelectorAll<HTMLButtonElement>('[data-tap-run]').forEach(button => { button.disabled = !scene || controlsLocked || blocked; });
     if (tool === 'ramp') { slider.value = String(state.rampLength); slider.setAttribute('aria-valuetext', getWorkshopDesign('ramp', state.rampLength).label); }
     // After one push, the dock glows until the other length has been tried too.
     const rampTried = (setting: number) => state.trials.some(run => run.tool === 'ramp' && run.setting === setting);
@@ -331,7 +342,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     context.commit(); context.sound(520);
     level = 2; misses = 0; traces = []; cargo = savedCargo();
     configure(tool === 'direct' ? 'lever' : tool);
-    setFeedback(workshopCargos[cargoIndex()].clue);
+    setFeedback(requestClue());
   }
   /** Each result stays on the bench so the next design can be tried without closing a dialog. */
   function recordL2(result: WorkshopL2Result) {
@@ -342,12 +353,14 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     if (!result.success) {
       misses++;
       if (result.blocked) {
-        setFeedback('통로가 좁아 긴 빗면을 펼치지 못했어요. 짧은 빗면이나 지레를 골라 봐요.');
+        setFeedback(requestClue());
         context.sound(340); update(); return;
       }
-      const hint = !workshopCargos[cargo].longRampFits && tool === 'ramp'
-        ? '긴 빗면은 통로에 놓을 수 없어요. 지레로 올릴 방법을 찾아봐요.'
-        : workshopL2Hint(workshopL2HintLevel(misses), tool, currentSetting());
+      const hint = narrowBay() && tool === 'ramp'
+        ? '아래의 ‘지레로 바꾸기’를 눌러 다른 방법을 시험해 봐요.'
+        : narrowBay() && tool === 'lever'
+          ? '아래에서 받침대 위치를 바꿔 다시 시험해요.'
+          : workshopL2Hint(workshopL2HintLevel(misses), tool, currentSetting());
       setFeedback(`힘이 ${result.overCells}칸 모자라요. ${hint}`);
       slideBack(); return;
     }
@@ -359,10 +372,16 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   function nextCargo() {
     if (!nextCargoReady || !active || heldPointer !== null || keyHeld || designPointer !== null) return;
     nextCargoReady = false; traces = []; cargo = savedCargo(); resetGesture(); scene?.setCargoWeight(workshopCargos[cargoIndex()].weight);
-    setFeedback(workshopCargos[cargoIndex()].clue); update();
-    root.querySelector<HTMLButtonElement>(`[data-tool="${tool}"]`)?.focus({preventScroll:true});
+    setFeedback(requestClue()); update();
+    const nextControl = switchLever.hidden ? root.querySelector<HTMLButtonElement>(`[data-tool="${tool}"]`) : switchLever;
+    nextControl?.focus({preventScroll:true});
   }
   nextCargoButton.addEventListener('click', nextCargo, { signal });
+  switchLever.addEventListener('click', () => {
+    if (switchLever.hidden || switchLever.disabled) return;
+    configure('lever');
+    root.querySelector<HTMLButtonElement>(`[data-lever="${state.fulcrumPosition}"]`)?.focus({preventScroll:true});
+  }, { signal });
   function slideBack() {
     sliding = true; update();
     const from = progress, started = performance.now(), hold = 450, duration = reducedMotion() ? 0 : 650;
@@ -379,13 +398,13 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   function configure(next: WorkshopTool | 'direct') {
     resetGesture(); tool = next; toolChangedAt = performance.now(); scene?.configure(tool, currentSetting());
     scene?.setCargoWeight(level === 2 ? workshopCargos[cargoIndex()].weight : 1);
-    if (level === 2) { setFeedback(workshopCargos[cargoIndex()].clue); update(); return; }
+    if (level === 2) { setFeedback(requestClue()); update(); return; }
     setFeedback(tool === 'direct' ? '손잡이를 위로 움직여 화물을 들어 봐요.' : tool === 'lever' ? '받침대가 판자를 받치는 곳이 받침점이에요. 받침점 위치에 따라 힘이 어떻게 달라질까요?' : '빗면 길이에 따라 힘이 어떻게 달라질까요?');
     update();
   }
   /** One line telling the student the next physical action. */
   function instruction() {
-    if (level === 2 && !workshopCargos[cargoIndex()].longRampFits && tool === 'ramp' && state.rampLength === 1) return '긴 빗면을 펼칠 자리가 없어요';
+    if (rampBlocked()) return '통로가 좁아요 · 지레로 바꿔요';
     if (level === 2) return tool === 'direct' ? '지레나 빗면을 골라요' : tool === 'lever' ? '받침대를 옮기고, 손잡이를 아래로 눌러요' : '길이를 고르고, 손잡이를 오른쪽으로 밀어요';
     const steps = benchSteps();
     if (tool === 'direct') return state.direct ? '② 지레를 눌러 이어서 해요' : '손잡이를 위로 끝까지 끌어요';
@@ -499,7 +518,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     resetGesture();
     state.rampLength = Number(slider.value) as RampSetting;
     scene?.configure(tool, currentSetting());
-    setFeedback(`빗면: ${getWorkshopDesign('ramp',state.rampLength).label}`); context.commit(); update();
+    setFeedback(rampBlocked() ? requestClue() : `빗면: ${getWorkshopDesign('ramp',state.rampLength).label}`); context.commit(); update();
   }, { signal });
   function changeFulcrum(next:LeverSetting) {
     if(next===state.fulcrumPosition) return;
@@ -630,7 +649,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     scene = createWorkshopScene2D(canvas);
     world.classList.add('is-flat');
     scene.configure(tool, currentSetting()); scene.setCargoWeight(level === 2 ? workshopCargos[cargoIndex()].weight : 1);
-    setFeedback('평면 작업대로 이어서 해요. 손잡이를 끌거나 "눌러서 시험하기"를 눌러요.'); update();
+    setFeedback(narrowBay() ? requestClue() : '평면 작업대로 이어서 해요. 손잡이를 끌거나 "눌러서 시험하기"를 눌러요.'); update();
   }
   function loadScene() {
     world.classList.remove('is-flat');

@@ -8,6 +8,7 @@
 .workshop-request-strip[hidden], .workshop-request-strip button[hidden] { display:none; }
 .workshop-request-strip p { margin:0; font-size:16px; font-weight:850; line-height:1.35; word-break:keep-all; }
 .workshop-request-strip .button { flex:none; min-height:44px; padding:5px 14px; }
+.workshop-world[data-ramp-blocked] :is(.workshop-handle, .workshop-effort) { visibility:hidden; }
 .workshop-drawer { display:flex; gap:8px; align-items:center; padding:8px 12px; background:#f8ead0; border-bottom:2px solid #b39162; }
 .workshop-drawer > button { min-height:48px; padding:8px 14px; border:2px solid #adbdab; border-radius:12px; color:#245955; background:#fffaf0; font-weight:850; font-size:17px; box-shadow:0 4px 0 #8fa58f; transition:transform .12s ease, box-shadow .12s ease, background .12s ease; }
 .workshop-drawer > button:not(:disabled):hover { background:#fff; }
