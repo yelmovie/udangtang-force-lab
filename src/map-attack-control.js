@@ -15,10 +15,10 @@ html body button.map-attack-dock[data-map-attack-dock]:not([hidden]){
 }
 html body button.map-attack-dock[data-map-attack-dock][hidden]{display:none!important}
 html body button.map-attack-dock[data-map-attack-dock]>svg{display:block;width:30px;height:30px;pointer-events:none}
-html body button.map-attack-dock[data-map-attack-dock]:hover{background:#583c78!important}
-html body button.map-attack-dock[data-map-attack-dock]:active{background:#2e2043!important}
+html body button.map-attack-dock[data-map-attack-dock]:not([aria-disabled="true"]):hover{background:#583c78!important}
+html body button.map-attack-dock[data-map-attack-dock]:not([aria-disabled="true"]):active{background:#2e2043!important}
 html body button.map-attack-dock[data-map-attack-dock]:focus-visible{outline:3px solid #fff!important;outline-offset:3px}
-html body button.map-attack-dock[data-map-attack-dock][aria-disabled="true"]{opacity:.72}
+html body button.map-attack-dock[data-map-attack-dock][aria-disabled="true"]{background:#62576b!important;box-shadow:0 3px 0 #382e42!important;cursor:default}
 @media (max-width:440px){html body button.map-attack-dock[data-map-attack-dock]:not([hidden]){flex-basis:48px!important;width:48px!important;min-width:48px!important;height:48px!important;min-height:48px!important}}
 `;
 export function dockMapAttack(button,findHand){
@@ -27,7 +27,7 @@ export function dockMapAttack(button,findHand){
   const sheet=doc.createElement('style');sheet.dataset.mapAttackDockStyle='';sheet.textContent=styles;doc.head.append(sheet);
  }
  button.classList.add('map-attack-dock');button.dataset.mapAttackDock='';
- button.innerHTML=icon;button.title='공격 · 스페이스바';
+ button.innerHTML=icon;button.title='공격 · 가까이 가요';
  return ()=>{
   const hand=findHand();
   if(!hand?.isConnected||!hand.parentElement)return false;

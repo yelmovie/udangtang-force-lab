@@ -309,7 +309,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   const loading = root.querySelector<HTMLElement>('.village-loading')!;
   const retry = root.querySelector<HTMLButtonElement>('#village-retry')!;
   const action = root.querySelector<HTMLButtonElement>('#village-action')!;
-  shell.insertAdjacentHTML('beforeend', '<aside class="village-encounter-hud" aria-label="지도 악당" hidden><strong>바퀴잠금 봇</strong><span class="village-encounter-pips"><i></i><i></i><i></i></span><p role="status"></p><button id="village-attack" type="button" aria-keyshortcuts="Space X" hidden>공격</button></aside>');
+  shell.insertAdjacentHTML('beforeend', '<aside class="village-encounter-hud" aria-label="지도 악당" hidden><strong>바퀴잠금 봇</strong><span class="village-encounter-pips"><i></i><i></i><i></i></span><p role="status"></p><button id="village-attack" type="button" aria-keyshortcuts="Space X" aria-disabled="true" aria-label="공격 · 가까이 가요" hidden>공격</button></aside>');
   const encounterHud = shell.querySelector<HTMLElement>('.village-encounter-hud')!;
   const attack = encounterHud.querySelector<HTMLButtonElement>('#village-attack')!;
   const syncAttackDock=dockMapAttack(attack,()=>root.querySelector('#village-pan'));
@@ -585,7 +585,17 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     const fading = attackTarget && hitCount(attackTarget) === 3 && now - lastHitAt < 2400;
     if (finaleAt && now>=finaleAt && !paused()) { finaleAt=0; if (!options.adminUnlocked && canPlayMapFinale(context.save)) options.onFinale(); }
     const wasFocused = document.activeElement === attack;
-    attack.hidden = !(syncAttackDock() && nearbyEnemy && !panView && !overview && !paused());
+    const isPaused = paused();
+    attack.hidden = !(syncAttackDock() && !isPaused);
+    const target = !panView && !overview && !isPaused ? nearbyEnemy : undefined;
+    const locked = !target || now - lastHitAt < 290;
+    const label = target ? `공격 · ${3-hitCount(target)}번 남음`
+      : fading ? '공격 · 물리쳤어요!' : '공격 · 가까이 가요';
+    if (attack.getAttribute('aria-label') !== label) {
+      attack.setAttribute('aria-label', label);
+      attack.title = target ? `${label} · 스페이스바` : label;
+    }
+    if (attack.getAttribute('aria-disabled') !== String(locked)) attack.setAttribute('aria-disabled', String(locked));
     if(attack.hidden && wasFocused && !paused()) (focusBeforeAttack?.isConnected ? focusBeforeAttack : canvas).focus({preventScroll:true});
     if(paused())clearReady=null;else clearReady??=now;
     if(options.newlyCompleted&&!options.adminUnlocked&&!clearShown&&clearReady!==null&&now-clearReady>=1250){clearShown=true;clearUntil=now+4200;}
@@ -611,10 +621,6 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       encounterPips.setAttribute('aria-label', `남은 공격 ${3-hits}회`);
       Array.from(encounterPips.children).forEach((pip, index) => pip.classList.toggle('is-spent', index >= 3 - hits));
     }
-    const locked = !nearbyEnemy || now - lastHitAt < 290;
-    attack.setAttribute('aria-disabled', String(locked));
-    const label = hits === 3 ? '물리쳤어요!' : `공격 · ${3-hits}번 남음`;
-    if (attack.getAttribute('aria-label') !== label) attack.setAttribute('aria-label', label);
     layoutEncounterHud(now);
   }
   function updateContact(now: number) {
@@ -962,7 +968,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   function tick(now: number) {
     if(!alive||!map)return;
     const dt=Math.min(.035,Math.max(0,(now-last)/1000));last=now;
-    if(paused()){clearInput();stopRoute();updateNearby();if(encounters.length)updateEncounters(now);walkingTime=0;dogTime=0;raf=requestAnimationFrame(tick);return;}
+    if(paused()){clearInput();stopRoute();updateNearby();updateEncounters(now);walkingTime=0;dogTime=0;raf=requestAnimationFrame(tick);return;}
     const old={x:actor.x,y:actor.y}, oldFacing=actor.direction;
     const direction = input.vector(pads.values());
     let arrived=false;
@@ -974,7 +980,9 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     let dogMoved=false;
     if(trail.length>5){const target=trail[0],d=distance(dog,target);if(d<4)trail.shift();else{const amount=Math.min(d,(walkingSpeed+40)*dt),next={x:dog.x+(target.x-dog.x)/d*amount,y:dog.y+(target.y-dog.y)/d*amount};if(navigation!.stand(next)){dog.direction=Math.abs(target.x-dog.x)>Math.abs(target.y-dog.y)?target.x<dog.x?'left':'right':target.y<dog.y?'up':'down';dog.x=next.x;dog.y=next.y;dogMoved=true;}else trail.shift();}}
     dogTime=dogMoved?dogTime+dt:0;revealTime+=dt;
-    if (encounters.length || finaleAt) { updateEnemyPatrol(now,dt); updateEncounters(now); updateContact(now); }
+    if (encounters.length) updateEnemyPatrol(now,dt);
+    updateEncounters(now);
+    if (encounters.length) updateContact(now);
     if(!arrivalShown&&revealTime>=arrivalStart+arrivalTime){
       arrivalShown=true;
       labels.querySelectorAll('.village-client-bubble.is-waiting').forEach(bubble=>{bubble.classList.remove('is-waiting');bubble.classList.add('is-arrived');});
@@ -1133,7 +1141,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if(!map||paused()||event.defaultPrevented||event.isComposing)return;const target=event.target as Element;
     if(event.ctrlKey||event.altKey||event.metaKey||target.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="dialog"]'))return;
     const space=event.code==='Space'||event.key===' ';
-    if(space&&!attack.hidden&&(target===attack||!target.closest('button,a,summary,[role=button]'))){
+    if(space&&nearbyEnemy&&!panView&&!overview&&(target===attack||!target.closest('button,a,summary,[role=button]'))){
       event.preventDefault();if(!event.repeat)hitEnemy();return;
     }
     if (event.code === 'KeyX') { if (!event.repeat) hitEnemy(); return; }
@@ -1152,7 +1160,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   attack.addEventListener('pointerdown',()=>{
     focusBeforeAttack = document.activeElement instanceof HTMLElement && document.activeElement !== attack ? document.activeElement : null;
   },{signal:events.signal});
-  attack.addEventListener('click',hitEnemy,{signal:events.signal});
+  attack.addEventListener('click', () => { if (attack.getAttribute('aria-disabled') !== 'true') hitEnemy(); }, {signal:events.signal});
   action.addEventListener('click',primary,{signal:events.signal});results.addEventListener('click',()=>context.navigate('complete'),{signal:events.signal});
   root.querySelector('#village-board-close')!.addEventListener('click',closeBoard,{signal:events.signal});
   board.addEventListener('cancel',event=>{event.preventDefault();closeBoard();},{signal:events.signal});
