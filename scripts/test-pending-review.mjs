@@ -52,6 +52,17 @@ test('request proof replaces the scale review only after both measured rounds', 
   assert.equal(learning.missionReviewTask(save, 'scale'), null);
 });
 
+test('the restored workshop requires both original questions even with all tools sorted', () => {
+  const save = state.freshSave();
+  save.workshop.trials = [{ tool: 'ramp', setting: 0, force: 56, distance: 2.5 }, { tool: 'ramp', setting: 1, force: 32, distance: 4.4 }];
+  save.levels = { workshop: { cleared: [0, 1, 2], attempts: 3 } };
+  save.lifeObservation = { sorted: ['slide', 'bottle-opener', 'seesaw', 'wheelchair-ramp', 'mountain-road', 'claw-hammer', 'truck-ramp', 'scissors'] };
+  const task = learning.missionReviewTask(save, 'workshop');
+  assert.deepEqual(task.questions.map(q => q.id), ['design', 'daily-tool']);
+  assert.equal(task.signature, learning.learningTask(save, 'workshop').signature, 'old answers keep their original signature');
+  assert.equal(learning.learningRecordComplete(task, {signature: task.signature, answers: [{chosen:'best'}]}), false);
+});
+
 test('finished experiment with open questions is not a completion, and survives a reload', () => {
   const save = state.freshSave();
   assert.equal(state.markExperimentDone(save, 'cargo', '요약'), true);

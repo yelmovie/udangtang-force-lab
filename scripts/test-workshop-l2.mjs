@@ -30,22 +30,15 @@ test('direct lifting never fits the budget', () => {
   for (const [cargo] of model.workshopCargos.entries()) assert.equal(model.judgeWorkshopL2(cargo, 'direct', 0).success, false);
 });
 
-test('the first cargo allows exploration and the next two require different tools', () => {
+test('every cargo has a passing design, and heavier cargo leaves fewer', () => {
   assert.deepEqual(passing(0), ['lever:0', 'ramp:0', 'ramp:1']);
-  assert.deepEqual(passing(1), ['lever:0']);
+  assert.deepEqual(passing(1), ['lever:0', 'ramp:0', 'ramp:1']);
   assert.deepEqual(passing(2), ['ramp:1']);
 });
 
-test('space and force are reported separately and no design carries all three', () => {
+test('only the long ramp carries every cargo: a lever student must change tools once', () => {
   const always = designs.filter(([tool, setting]) => [0, 1, 2].every(cargo => model.judgeWorkshopL2(cargo, tool, setting).success));
-  assert.deepEqual(always, []);
-  const blocked = model.judgeWorkshopL2(1, 'ramp', 1);
-  assert.equal(blocked.blocked, true);
-  assert.equal(blocked.overCells, 0, 'space is the only problem for this design');
-  assert.equal(blocked.stallAt, 0);
-  const short = model.judgeWorkshopL2(1, 'ramp', 0);
-  assert.equal(short.blocked, false);
-  assert.equal(short.overCells, 1);
+  assert.deepEqual(always, [['ramp', 1]], 'the request opens on the lever, so the usual path meets one forced redesign');
   assert.equal(model.judgeWorkshopL2(2, 'ramp', 1).success, true);
   assert.equal(model.judgeWorkshopL2(2, 'lever', 0).success, false);
   assert.equal(model.judgeWorkshopL2(2, 'lever', 0).overCells, 1, 'the lever misses by one cell, not by a mile');
@@ -113,8 +106,8 @@ test('saved workshop level records survive a reload as plain cleared/attempts', 
 
 test('the request recap describes only the designs the student actually tried', () => {
   const play = steps => steps.reduce((record, [cargo, tool, setting]) => model.applyWorkshopL2Attempt(record, cargo, model.judgeWorkshopL2(cargo, tool, setting).success, { tool, setting }), undefined);
-  // A previously cleared design is historical evidence and isn't rejudged under today's rules.
-  const kept = state.retainLevels({ workshop: { cleared: [0, 1, 2], attempts: 3, tries: [0, 1, 2].map(cargo => ({ cargo, tool: 'ramp', setting: 1, success: true })) } }).workshop;
+  // Kept the long ramp from level 1 and pressed run three times: no change, no comparison.
+  const kept = play([[0, 'ramp', 1], [1, 'ramp', 1], [2, 'ramp', 1]]);
   assert.equal(model.workshopL2Recap(kept), "화물 3개를 모두 '빗면 · 길고 완만한 빗면' 설계로 올렸어요.");
   assert.doesNotMatch(model.workshopL2Recap(kept), /더 길게|바꿔|무거운 화물일수록/);
   // Lever for the first two, a stall on the heavy cargo, then the long ramp: name exactly that.

@@ -26,7 +26,7 @@ import { infoContent } from './info';
 import { prepareOffline } from './offline';
 import type { AppContext } from './appTypes';
 import { abilityStatements, challenges } from './challenges';
-import { mountMissionReview } from './learningReview';
+import { mountMissionReview, openLearningReview } from './learningReview';
 import { conceptClipTitle, conceptPoster, openConceptClip, syncConceptButton } from './conceptClip';
 import { learningTask, missionReviewTask, missionReviewRecord, learningRecordComplete, learningSummary } from './learningModel';
 import { inquiryPlans, predictionRecap, predictionVerdict, type PredictionRecap } from './inquiryPlan';
@@ -46,6 +46,7 @@ let adminSave: SaveData | null = null;
 let villageReturn: StageId | undefined;
 let villageCelebration: StageId | undefined;
 let closeMissionResult: (() => void) | null = null;
+let closeWorkshopReview: (() => void) | null = null;
 const pageHistory: PageId[] = [];
 
 function setHeight() {
@@ -103,6 +104,7 @@ function navigate(page: PageId) {
     toast('다섯 미션을 마치면 연구 기록을 볼 수 있어요.');
     return;
   }
+  closeWorkshopReview?.();
   closeMissionResult?.();
   if (page === 'map' && stages.some(stage => stage.id === viewPage)) villageReturn = viewPage as StageId;
   if (!backNavigation && page !== viewPage) { pageHistory.push(viewPage); if (pageHistory.length > 20) pageHistory.shift(); history.pushState({ page }, ''); }
@@ -124,10 +126,122 @@ function finish(stageId: StageId, summary: string) {
       onDone: () => {
         const observation = activeSave.lifeObservation!;
         const intro = introSentence(observation.intro);
-        finishWithEvidence(stageId, `${summary} 생활 속 도구 분류: ${observation.object.trim()} / ${observation.use.trim()}${intro ? ` 짝에게 소개할 말: ${intro}` : ''}`);
+        finishWorkshopWithEvidence(stageId, `${summary} 생활 속 도구 분류: ${observation.object.trim()} / ${observation.use.trim()}${intro ? ` 짝에게 소개할 말: ${intro}` : ''}`);
       },
     });
   } else finishWithEvidence(stageId, summary);
+}
+
+/** The workshop keeps its original questions before the discovery screen. */
+function questionsSolved(target: SaveData, stageId: StageId) {
+  const task = learningTask(target, stageId);
+  return !task || learningRecordComplete(task, target.learning?.[stageId]);
+}
+
+function finishWorkshopWithEvidence(stageId: StageId, summary: string) {
+  const activeSave = adminSave ?? save;
+  if (!adminUnlocked && !activeSave.completed.includes(stageId) && !questionsSolved(activeSave, stageId)) {
+    if (!markExperimentDone(save, stageId, summary)) toast('기록을 저장하지 못했어요. 브라우저 저장 설정을 확인해 주세요.');
+    openWorkshopReviewGate(stageId);
+    return;
+  }
+  const firstCompletion = !activeSave.completed.includes(stageId);
+  if (adminUnlocked && adminSave) {
+    // Preview the village restoration in memory without writing a student's save.
+    if (!adminSave.completed.includes(stageId)) adminSave.completed.push(stageId);
+    adminSave.evidence[stageId] = summary;
+  }
+  if (!adminUnlocked && !completeStage(save, stageId, summary)) toast('기록을 저장하지 못했어요. 브라우저 저장 설정을 확인해 주세요.');
+  if (firstCompletion && activeSave.completed.includes(stageId)) villageCelebration = stageId;
+  tone(710); window.setTimeout(() => tone(780), 200);
+  const stage = stages.find(item => item.id === stageId)!;
+  const challenge = challenges(activeSave).find(item => item.id === stageId)!;
+  // A tool card is shown only the first time a mission is completed; it is recomputed, never stored.
+  const newCard = firstCompletion && activeSave.completed.includes(stageId) ? toolCards(activeSave).find(card => card.stage === stageId) : undefined;
+  // The changed village opens only after the stage's questions are solved.
+  const reviewTask = learningTask(activeSave, stageId);
+  const reviewSolved = () => !reviewTask || learningRecordComplete(reviewTask, activeSave.learning?.[stageId] ?? { signature: '', answers: [], completed: false });
+  const modal = document.createElement('div');
+  modal.className = 'modal-layer';
+  modal.innerHTML = `<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="world-title">
+      <div class="modal-emblem">${icons.sparkle}</div>
+      <p class="eyebrow">${adminUnlocked ? '관리자 미리보기 · 실험 결과' : '새로운 발견 · 실험실 복구!'}</p>
+      <h2 id="world-title">${stage.evidence}</h2>
+      ${newCard ? toolCardRevealMarkup(newCard) : ''}
+      <div class="discovery-recap"><img src="/assets/game/corgi-success.webp" alt=""><div><strong class="discovery-key">${escapeHtml(toolCardInfo[stageId].idea)}</strong>${guessMarkup(predictionRecap(activeSave, stageId))}</div></div>
+      <div class="world-concept"></div>
+      ${reviewTask ? `<section class="world-review question-zone question-zone-compact"><span class="question-label">마을로 가기 전 문제</span><p class="question-prompt">내 실험 기록을 보고 문제를 풀어요</p><button class="button button-primary" id="world-review">문제 풀기</button></section>` : ''}<details class="discovery-detail"><summary>도전 과제 (선택)</summary><p>${challenge.done ? `${challenge.label} 완료` : challenge.hint}</p><p class="discovery-record">${escapeHtml(summary)}</p></details>
+      ${adminUnlocked ? '<p class="small-note">미리보기 결과는 학생 진행 기록에 반영되지 않습니다.</p>' : `<div class="world-meter"><span style="width:${save.completed.length * 20}%"></span></div><p class="small-note">전체 실험실 복구 ${save.completed.length * 20}% · 미션 ${save.completed.length}/5 완료</p>`}
+      <button class="button button-primary" id="world-continue">달라진 마을 보러 가기</button><p class="world-lock-note" id="world-lock-note" role="status"></p>
+    </div>`;
+  document.body.append(modal);
+  confetti(modal.querySelector<HTMLElement>('.modal-card')!);
+  const appWasInert = app.inert;
+  app.inert = true;
+  const next = modal.querySelector<HTMLButtonElement>('#world-continue')!;
+  const reviewButton = modal.querySelector<HTMLButtonElement>('#world-review');
+  syncConceptButton(modal.querySelector('.world-concept')!, stageId, true);
+  const syncLock = () => {
+    const solved = reviewSolved() || adminUnlocked;
+    next.disabled = !solved;
+    modal.querySelector<HTMLElement>('#world-lock-note')!.textContent = solved ? '' : '위의 문제를 풀면 달라진 마을을 볼 수 있어요.';
+    modal.querySelector('.world-review')?.classList.toggle('is-solved', solved);
+    if (reviewButton) { reviewButton.textContent = solved ? '✓ 문제 다시 보기' : '문제 풀기'; reviewButton.className = `button ${solved ? 'button-secondary' : 'button-primary'}`; }
+  };
+  syncLock();
+  const dismiss = () => { if (closeMissionResult !== dismiss) return; closeMissionResult = null; app.inert = appWasInert; modal.remove(); };
+  closeMissionResult = dismiss;
+  modal.addEventListener('modal-dismiss', dismiss);
+  const close = () => { dismiss(); navigate('map'); };
+  reviewButton?.addEventListener('click', () => {
+    modal.hidden = true;
+    const restore = () => { closeWorkshopReview = null; modal.hidden = false; syncLock(); (next.disabled ? reviewButton : next).focus(); };
+    closeWorkshopReview = openLearningReview({ app, save: activeSave, stage: stageId, commit: () => { if (!adminUnlocked) persist(); }, onClose: restore, onDone: restore });
+    if (!closeWorkshopReview) restore();
+  });
+  modal.addEventListener('keydown', event => {
+    if (event.key !== 'Tab') return;
+    const items = [...modal.querySelectorAll<HTMLElement>('button,summary')].filter(el => el.getClientRects().length);
+    if (event.shiftKey && document.activeElement === items[0]) { event.preventDefault(); items.at(-1)?.focus(); }
+    else if (!event.shiftKey && document.activeElement === items.at(-1)) { event.preventDefault(); items[0]?.focus(); }
+  });
+  next.addEventListener('click', close, { once: true });
+  (next.disabled && reviewButton ? reviewButton : next).focus();
+}
+
+function openWorkshopReviewGate(stageId: StageId) {
+  if (closeWorkshopReview || document.querySelector('#world-title')) return;
+  const stage = stages.find(item => item.id === stageId)!;
+  const modal = document.createElement('div');
+  modal.className = 'modal-layer';
+  modal.innerHTML = `<div class="modal-card review-gate" role="dialog" aria-modal="true" aria-labelledby="world-title">
+      <div class="modal-emblem">${icons.check}</div>
+      <p class="eyebrow">MISSION 0${stage.mission} · 실험 완료!</p>
+      <h2 id="world-title">마지막으로 문제를 풀어요</h2>
+      <section class="world-review question-zone question-zone-compact"><span class="question-label">마을로 가기 전 문제</span><p class="question-prompt">내 실험 기록을 보고 문제를 풀어요</p><button class="button button-primary" id="gate-review">문제 풀기</button></section>
+      <p class="world-lock-note">문제를 다 풀면 도구 카드를 받고, 달라진 마을을 볼 수 있어요.</p>
+      <button class="button button-secondary" id="gate-back">실험 더 해 보기</button>
+    </div>`;
+  document.body.append(modal);
+  const appWasInert = app.inert;
+  app.inert = true;
+  const review = modal.querySelector<HTMLButtonElement>('#gate-review')!;
+  const close = () => { if (closeMissionResult !== close) return; closeMissionResult = null; app.inert = appWasInert; modal.remove(); };
+  closeMissionResult = close;
+  review.addEventListener('click', () => {
+    modal.hidden = true;
+    const back = () => {
+      closeWorkshopReview = null;
+      const pending = save.pendingStage;
+      if (pending?.id === stageId && questionsSolved(save, stageId)) { close(); finishWorkshopWithEvidence(stageId, pending.summary); return; }
+      modal.hidden = false; review.focus();
+    };
+    closeWorkshopReview = openLearningReview({ app, save, stage: stageId, commit: () => persist(), onClose: back, onDone: back });
+    if (!closeWorkshopReview) back();
+  });
+  modal.querySelector('#gate-back')!.addEventListener('click', close);
+  modal.addEventListener('modal-dismiss', close);
+  review.focus();
 }
 
 function finishWithEvidence(stageId: StageId, summary: string) {
@@ -496,6 +610,7 @@ let backNavigation = false;
 window.addEventListener('popstate', event => {
   const page = (event.state as { page?: PageId } | null)?.page;
   if (!page || page === viewPage) return;
+  closeWorkshopReview?.();
   closeMissionResult?.();
   // Modals with global listeners or media listen for modal-dismiss and tear themselves down first.
   document.querySelectorAll('.modal-layer').forEach(node => { node.dispatchEvent(new Event('modal-dismiss')); node.remove(); }); app.inert = false;
@@ -849,7 +964,9 @@ function render() {
   }
   const entered = stages.find(item => item.id === viewPage);
   // Came back (or reloaded) with the questions still open: resume them before anything else.
-  if (entered && !adminUnlocked && save.pendingStage?.id === entered.id && !save.completed.includes(entered.id)) { missionCardShown.add(entered.id); finishWithEvidence(entered.id, save.pendingStage.summary); }
+  if (entered && !adminUnlocked && save.pendingStage?.id === entered.id && !save.completed.includes(entered.id)) { missionCardShown.add(entered.id);
+    if (entered.id === 'workshop') finishWorkshopWithEvidence('workshop', save.pendingStage.summary);
+    else finishWithEvidence(entered.id, save.pendingStage.summary); }
   else if (entered && !missionCardShown.has(entered.id)) { missionCardShown.add(entered.id); openMissionCard(entered.id); }
   if (entered) watchFinish(screen, entered.id);
 }

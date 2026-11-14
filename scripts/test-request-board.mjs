@@ -150,14 +150,7 @@ test('the scale opens with a zeroed pair; extra models stay optional',()=>{
   assert.equal(scale.scaleExplorationReady({...save.scale,runs:all.map(run=>({...run,zeroed:false}))}),false);
   assert.equal(scale.scaleExplorationReady({...save.scale,runs:[{parts:['orange','blue'],reading:150,zeroed:true}]}),false);
 });
-test('workshop requires direct lift, an easier lever comparison and both ramps',()=>{
-  const save=completeBase(state.freshSave());
-  const base=save.workshop;
-  const shortPath=base.trials.filter(t=>t.tool!=='lever'||t.setting!==2);
-  save.workshop={...base,trials:shortPath};
-  assert.equal(board.requestStatus(save,'workshop'),'open');
-  for (const trials of [shortPath.filter(t=>t.tool!=='lever'||t.setting!==1),base.trials.filter(t=>t.tool!=='lever'||t.setting!==0),shortPath.filter(t=>t.tool!=='ramp'||t.setting!==0)]) {
-    assert.equal(workshop.workshopExplorationReady({...base,trials}),false);
-  }
-  assert.equal(workshop.workshopExplorationReady({...base,direct:false}),false);
+test('workshop requires direct lift, all three fulcrums and both ramps',()=>{
+  const base=completeBase(state.freshSave()).workshop;
+  for(let mask=0;mask<64;mask++)assert.equal(workshop.workshopExplorationReady({...base,direct:!!(mask&32),trials:base.trials.filter((_,i)=>mask&(1<<i))}),mask===63);
 });

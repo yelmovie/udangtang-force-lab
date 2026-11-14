@@ -1,8 +1,7 @@
 import { balanceObjects, scaleParts, type StageId } from './data';
-import { getWorkshopDesign, workshopExplorationReady, workshopL2Complete } from './workshopModel';
+import { getWorkshopDesign } from './workshopModel';
 import type { SaveData } from './state';
 import { fakeRequestComplete, scaleComparison } from './scaleModel';
-import { lifeSortDone } from './lifeObservation';
 
 export type LearningAnswer = { first: string; chosen: string; tries: number };
 export type LearningRecord = { signature: string; answers: LearningAnswer[]; completed: boolean };
@@ -95,13 +94,12 @@ export function learningTask(save: SaveData, stage: StageId): LearningTask | nul
   return { stage, cards, questions, talk, signature: JSON.stringify({ stage, cards, questions: questions.map(q => [q.id, q.correct]) }) };
 }
 
-/** In the request, choosing a measured outlier and applying both tool types already demonstrate the learning. */
+/** A measured outlier covers the scale request. The workshop keeps its original two questions. */
 export function missionReviewTask(save: SaveData, stage: StageId): LearningTask | null {
   if (stage === 'scale' && fakeRequestComplete(save.levels?.scale) && scaleComparison(save.scale.runs).length === 2) return null;
-  if (stage === 'workshop' && workshopExplorationReady(save.workshop) && workshopL2Complete(save.levels?.workshop) && lifeSortDone(save.lifeObservation)) return null;
   const task = learningTask(save, stage);
-  if (!task) return null;
-  const id = { cargo: 'fair', balance: 'swap', scale: 'zero', workshop: 'daily-tool', rescue: 'books' }[stage];
+  if (!task || stage === 'workshop') return task;
+  const id = { cargo: 'fair', balance: 'swap', scale: 'zero', rescue: 'books' }[stage];
   const previous = task.questions.find(q => q.id === id) ?? task.questions[0];
   const question: LearningQuestion = stage === 'cargo' ? { ...previous,
     prompt: '운동장에서도 상자의 무게만 바꿔 비교하려면, 두 번의 밀기에서 무엇을 같게 해야 할까요?' } : previous;
