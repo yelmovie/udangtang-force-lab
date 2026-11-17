@@ -240,6 +240,13 @@
 | 콘솔 오류 | 없음(WebGL을 일부러 막은 시험의 오류 한 줄만) |
 | 영상 | `public/assets/story/*.mp4` 2개, `concepts/*.mp4` 5개 확인, `dist`에 7개 포함 |
 
+### 커밋·배포
+
+- 구현 커밋 `3cfa982` → `origin/main` 푸시(강제 푸시 없음). 기록 커밋은 그 뒤에 따로 올렸다.
+- 운영 배포 2026-11-17 13:14 · Cloudflare Version `ef47680d-19ae-4f91-a776-e2966d087e02`(100% 활성)
+- 운영 확인(https://udangtang-force-lab.yelsam.workers.dev): 응답 200, `index-Dx0WQBMa.js`가 `dist`와 같음, `run-stage/wall·decor-barrels·decor-bench·bot-walk.webp`, JS·CSS, `sw.js`, `story/intro.mp4`, `concepts/rescue.mp4` 9개 SHA-256 일치. Mac Chrome(1920×819)에서 검증용 저장으로 「중앙 코어」가 걷는 화면으로 열리고 키보드·버튼으로 끝까지 진행, `rescue` 필드와 `pendingStage` 기존 형식, 콘솔 오류 없음. 원래 있던 저장은 보관했다가 되돌리고 다시 열어 그대로인 것을 확인했다.
+- 관찰(낮음): 상자를 당긴 직후 코어가 레일을 타고 빗면으로 가는 동안 빗면 앞에서 E를 누르면 시험이 시작되지 않는다. 코어가 도착한 뒤에는 정상으로 시작된다. 기존 화면도 이동 중에는 입력을 받지 않는다(`busy`).
+
 ### 확인하지 못한 것
 
 - 실물 태블릿(iPad Safari, Android Chrome)의 터치·회전·백그라운드 복귀·오프라인
