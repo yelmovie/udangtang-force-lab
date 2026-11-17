@@ -309,28 +309,27 @@ button.button:not(:disabled):active {
 #app .village-labels button.village-npc-bubble:not(:disabled):active { transform: translate(-100%, -100%) translateY(2px); }
 @keyframes npc-bubble-in { from { opacity: 0; transform: translate(-100%, -100%) scale(.7); } }
 
-/* Request board cards as talk panels: the client stands big at the left, their words in a speech bubble; locked clients stay a "?" silhouette. */
-.village-screen .village-board { width: min(980px, calc(100vw - 32px)); }
-.village-screen .village-board-cards { gap: 18px 16px; }
-.village-screen .village-board-card { position: relative; grid-template: "face text" auto "face go" 1fr / 150px minmax(0, 1fr); gap: 10px 14px; padding: 14px 16px 14px 8px; overflow: visible; border-radius: 16px; }
-/* Portrait 1.5x and raised so the face sits beside the bubble tail; transparent side margins of the 627px cell overlap the gutter. */
-.village-screen .village-board-portrait { grid-area: face; width: 196px; height: 196px; align-self: start; margin: -14px -23px 0; object-fit: contain; object-position: top center; image-rendering: auto; filter: drop-shadow(0 6px 4px #0006); }
-.village-screen .village-board-text { position: relative; padding: 12px 14px; background: #fff; border: 2px solid #c9a86a; border-radius: 14px; gap: 6px; }
-.village-screen .village-board-text::before { content: ''; position: absolute; left: -11px; top: 46px; width: 16px; height: 16px; background: #fff; border-left: 2px solid #c9a86a; border-bottom: 2px solid #c9a86a; transform: rotate(45deg); }
-.village-screen .village-board-text strong { font-size: 20px; }
-.village-screen .village-board-text p { font-size: 18px; line-height: 1.5; }
-.village-screen .village-board-status { font-size: 16px; }
-.village-screen .village-board-card > button { align-self: end; font-size: 18px; min-height: 48px; }
+/* Request board as a scene card (3-second rule): it covers under half the screen and the village stays visible behind it.
+   Each card says who asks and where, its status and one go button. The client's own words are read in the letter at the building,
+   and a locked card's status already says how to open it, so the board repeats neither. Locked clients stay a "?" silhouette. */
+.village-screen .village-board { width: min(clamp(760px, 46vw, 900px), calc(100vw - 32px)); padding: 14px 16px 16px; }
+.village-screen .village-board-heading h2 { font-size: var(--text-title); }
+.village-screen .village-board-lead, .village-screen .village-board-text p { display: none; }
+.village-screen .village-board-cards { gap: 12px; margin-top: 10px; }
+.village-screen .village-board-card { position: relative; grid-template: "face text" auto "face go" 1fr / 88px minmax(0, 1fr); gap: 6px 12px; padding: 10px 12px 10px 6px; overflow: visible; border-radius: 16px; }
+.village-screen .village-board-portrait { grid-area: face; width: 108px; height: 108px; align-self: start; margin: -10px -10px 0; object-fit: contain; object-position: top center; image-rendering: auto; filter: drop-shadow(0 4px 3px #0006); }
+.village-screen .village-board-text { gap: 4px; }
+.village-screen .village-board-text strong { font-size: var(--text-button); line-height: 1.3; word-break: keep-all; }
+.village-screen .village-board-status { font-size: var(--text-caption); }
+.village-screen .village-board-card > button { align-self: end; font-size: var(--text-button); min-height: 48px; }
 .village-screen .village-board-card.is-locked .village-board-portrait.is-mystery { opacity: 1; filter: brightness(0) saturate(0) opacity(.5); }
 /* Big "?" centred on the silhouette's body. */
-.village-screen .village-board-mark { position: absolute; left: 8px; top: 0; width: 150px; height: 196px; display: grid; place-items: center; padding-top: 34px; font-family: var(--font-display); font-size: 96px; line-height: 1; color: #fff6d8; text-shadow: 0 4px 0 #5a4a2a, 0 0 16px #000c; animation: board-mark-bob 1.6s ease-in-out infinite alternate; pointer-events: none; z-index: 1; }
+.village-screen .village-board-mark { position: absolute; left: 6px; top: 0; width: 88px; height: 108px; display: grid; place-items: center; padding-top: 18px; font-family: var(--font-display); font-size: 56px; line-height: 1; color: #fff6d8; text-shadow: 0 3px 0 #5a4a2a, 0 0 12px #000c; animation: board-mark-bob 1.6s ease-in-out infinite alternate; pointer-events: none; z-index: 1; }
 @keyframes board-mark-bob { to { transform: translateY(-6px); } }
 @media (max-width: 760px) {
-  .village-screen .village-board-card { grid-template-columns: 90px minmax(0, 1fr); padding: 10px 10px 10px 6px; }
-  .village-screen .village-board-portrait { width: 118px; height: 118px; margin: -18px -14px 0; }
-  .village-screen .village-board-text::before { top: 22px; }
-  .village-screen .village-board-mark { left: 6px; top: -18px; width: 90px; height: 118px; padding-top: 20px; font-size: 58px; }
-  .village-screen .village-board-text strong { font-size: 17px; } .village-screen .village-board-text p { font-size: 16px; }
+  .village-screen .village-board-card { grid-template-columns: 68px minmax(0, 1fr); }
+  .village-screen .village-board-portrait { width: 84px; height: 84px; margin: -8px -8px 0; }
+  .village-screen .village-board-mark { width: 68px; height: 84px; padding-top: 12px; font-size: 44px; }
 }
 
 /* ===== Experiment screens: the scene takes the whole page. A 60px strip at the top holds the icons, record buttons and the next button;

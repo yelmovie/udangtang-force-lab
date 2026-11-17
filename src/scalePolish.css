@@ -131,7 +131,7 @@
 /* 옆 보드가 빠져 넓어진 무대에 맞춰 저울을 키운다. 높이 기준(50vh)이라 720~768 높이에서도 무대 안에 들어간다. */
 /* 무대 높이(의뢰 단계는 부품 줄이 높아 무대가 낮아진다)에 맞춰 저울을 키운다: 저울 몸통+쟁반이 무대 높이를 넘지 않는다. */
 .instrument-screen.scale-screen .scale-field { container-type:size; }
-#app .instrument-screen.scale-screen .scale-field > .scale-body, #app .instrument-screen.scale-screen .scale-field > .scale-basket { --device-width:clamp(260px, min(39vw, 50vh, calc((100cqh - 60px) * 1.28)), 560px); }
+#app .instrument-screen.scale-screen .scale-field > .scale-body, #app .instrument-screen.scale-screen .scale-field > .scale-basket { --device-width:clamp(260px, min(46vw, 62vh, calc((100cqh - 60px) * 1.28)), 560px); }
 @media (max-width:800px) {
   .instrument-screen.scale-screen .experiment-heading { flex-wrap:wrap; }
   .scale-screen .scale-toolbar { order:3; flex-basis:100%; justify-content:flex-start; flex-wrap:wrap; }
@@ -175,5 +175,5 @@
 .scale-request .scale-heft.is-on { border-color:#d99a2b; background:#fff1c4; }
 /* 3-second rule: the stage caption (#scale-phase) is the one instruction; the shelf label no longer gives a second, older one. */
 #app .scale-screen .scale-dock .dock-label { display:none; }
-/* 18px floor for what students read on this screen. The two round device buttons and the readout label stay sized to the scale drawing. */
+/* 18px floor for what students read on this screen. The round device buttons and readout get theirs in instruments.css (scale drawn bigger so they fit). */
 #app .scale-screen :is(.instrument-phase, .scale-comparison, .scale-record-open, .scale-difference, .scale-part strong, .known-weight) { font-size:var(--text-caption); }
