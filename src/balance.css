@@ -298,3 +298,4 @@
 #app .balance-screen .balance-dock .dock-label { display:none; }
 /* 18px floor for what students read on this screen (labels, goals, pan names, result line). */
 #app .balance-screen :is(.balance-goal, .balance-record-button, .balance-side, .balance-pan-name, .balance-lock-callout, .balance-result, .object-card strong) { font-size:var(--text-caption); }
+#app .balance-screen .balance-record-button b { font-size:var(--text-caption); }

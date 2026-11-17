@@ -29,3 +29,5 @@
 @media (prefers-reduced-motion: reduce) {
   :root { --action-cue-motion: none; }
 }
+/* 18px floor: some stages size their own auto button smaller. */
+#app .experiment-screen :is(.stage-auto-go, .cargo-auto-go) { font-size: var(--text-caption); }
