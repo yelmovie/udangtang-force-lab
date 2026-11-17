@@ -16,7 +16,7 @@ dialog.npc-dialogue {
   -webkit-backdrop-filter: none;
   box-shadow: none;
 }
-dialog.npc-dialogue::backdrop { background: #17251b91; }
+dialog.npc-dialogue::backdrop { background: var(--scrim); }
 .npc-dialogue-stage {
   position: absolute;
   inset: auto 0 max(20px, env(safe-area-inset-bottom));

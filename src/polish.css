@@ -80,8 +80,8 @@ button.button:not(:disabled):active {
 
 /* ===== Popups ===== */
 .modal-layer {
-  /* No backdrop blur: the dim is nearly opaque and re-blurring the page under every popup frame is costly on tablets. */
-  background: radial-gradient(ellipse at 50% 40%, #1d4b4be0, #0c2a2aee 75%);
+  /* No backdrop blur: re-blurring the page under every popup frame is costly on tablets. Light dim so the stage stays readable behind the card. */
+  background: var(--scrim);
   animation: dim-in .22s ease both;
 }
 .modal-card {
@@ -166,7 +166,7 @@ button.button:not(:disabled):active {
 
 /* Village NPC dialog: the speaker stands big at the left, outside the card, and the words sit in a speech bubble (same frame tokens as .modal-card) on the right. */
 .village-dialog { animation: modal-pop .28s var(--ease-pop) both; }
-.village-dialog::backdrop { background: radial-gradient(ellipse at 50% 40%, #1d4b4bd9, #0c2a2ae8 75%); }
+.village-dialog::backdrop { background: var(--scrim); }
 .village-dialog #village-dialog-line { padding: 14px 18px; border-radius: var(--radius-sm); background: #fff; border: 1px solid #ead9b8; }
 .village-dialog-bottom button { transition: transform .12s ease, box-shadow .12s ease; }
 .village-screen .village-dialog { position: relative; width: min(820px, calc(100vw - 32px)); margin-left: auto; margin-right: auto; padding: 0 0 0 250px; background: transparent; border: 0; outline: 0; box-shadow: none; animation: none; overflow: visible; }
