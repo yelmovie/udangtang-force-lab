@@ -91,6 +91,9 @@
 .cargo-choice-finger{position:absolute;right:-10px;bottom:-13px;width:29px;height:33px;z-index:2;pointer-events:none;animation:cargo-finger-tap 1.5s ease-in-out infinite;filter:drop-shadow(0 2px 2px #49361c40)}
 .cargo-choice-finger svg{width:100%;height:100%}
 .cargo-method .segmented button{font-size:var(--text-button);min-height:56px;padding:8px 12px}
+.cargo-method .segmented button{min-width:96px}
+/* A chosen side reads as a picked option (same as the picked load), so the orange tap button stays the one primary action. */
+.cargo-method .segmented button.selected{border-color:#087c79;background:#d2f1e5;color:#174b4c;box-shadow:inset 0 0 0 2px #087c79}
 .cargo-orders,.cargo-force{display:flex;align-items:center;gap:14px}.cargo-orders>strong,.cargo-force>strong{max-width:130px;font-size:16px}
 .cargo-order-cards{display:flex;gap:8px}
 .cargo-order-card{display:grid;justify-items:center;align-content:center;min-width:84px;min-height:60px;padding:4px 8px;border:2px dashed #cdbb98;border-radius:12px;background:#fffdf7;color:#7b6a4c;font-size:var(--text-caption);line-height:1.2}

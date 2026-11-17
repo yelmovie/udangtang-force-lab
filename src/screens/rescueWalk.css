@@ -21,7 +21,8 @@
 .walk-tag.short.is-selected { background:#5a4320f2; border-color:#f0c877; }
 .walk-tag.is-locked { opacity:.55; }
 .walk-host.is-looking :is(.walk-tag, .walk-scale-value, .walk-actions) { display:none; }
-.walk-tip { position:absolute; z-index:3; left:116px; top:10px; max-width:min(440px,46%); margin:0; padding:8px 14px; border:1px solid #91aaa54a; border-radius:12px; background:#12313ce0; color:#e7eee6; font-size:var(--text-caption); line-height:1.45; word-break:keep-all; pointer-events:none; }
+/* The one instruction line: top centre over the scene (3-second rule), clear of the hint corgi (left) and records (right). */
+.walk-tip { position:absolute; z-index:3; left:50%; top:10px; transform:translateX(-50%); width:max-content; max-width:min(640px,56%); margin:0; padding:8px 16px; border:1px solid #91aaa54a; border-radius:12px; background:#12313ce0; color:#e7eee6; font-size:var(--text-caption); line-height:1.4; text-align:center; word-break:keep-all; pointer-events:none; }
 .walk-host[data-phase='2'] .walk-tip { top:40px; }
 .walk-tip:empty { display:none; }
 .walk-pad { position:absolute; z-index:4; left:16px; bottom:14px; display:grid; grid-template-columns:repeat(3,58px); grid-template-rows:repeat(2,58px); gap:6px; }
@@ -57,7 +58,7 @@
 @media (max-width:1100px), (max-height:760px) {
   .walk-pad { grid-template-columns:repeat(3,54px); grid-template-rows:repeat(2,54px); }
   .walk-pad button { width:54px; height:54px; }
-  .walk-tip { max-width:42%; }
+  .walk-tip { max-width:52%; }
   .walk-force button { min-width:68px; }
 }
 @media (min-width:1600px) and (min-height:900px) {
@@ -71,7 +72,7 @@
   .walk-force { bottom:22px; font-size:19px; }
   .walk-force button { min-width:100px; min-height:66px; font-size:21px; }
   .walk-inspect { left:24px; bottom:200px; min-height:62px; font-size:20px; }
-  .walk-tip { font-size:21px; left:150px; }
+  .walk-tip { font-size:21px; }
   .walk-tag { font-size:19px; } .walk-tag span { font-size:18px; }
   .walk-scale-value { font-size:25px; min-width:96px; }
   .walk-conditions { font-size:18px; }
