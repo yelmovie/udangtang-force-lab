@@ -39,9 +39,9 @@
 #app .core-studio .mission-progress-steps .done { color:#99d5bd; }
 #app .core-studio .rescue-stage { min-height:0; border:1px solid #65818580; border-radius:16px; overflow:hidden; background:#15333b; box-shadow:0 16px 40px #020b1330; }
 #app .core-studio .rescue-stage-head { min-height:48px; padding:4px 20px; gap:16px; color:#e5ece3; background:#17353ecf; border-radius:0; border-bottom:1px solid #83a6a12b; }
-#app .core-studio .rescue-stage-head > strong { font-size:17px; font-weight:650; }
-#app .core-studio .rescue-stage-head > span { font-size:14px; color:#b3cbc7; }
-#app .core-studio .rescue-notebook > summary { color:#b7cbc6; font-size:14px; font-weight:500; }
+#app .core-studio .rescue-stage-head > strong { font-size:var(--text-caption); font-weight:650; }
+#app .core-studio .rescue-stage-head > span { font-size:var(--text-caption); color:#b3cbc7; }
+#app .core-studio .rescue-notebook > summary { color:#b7cbc6; font-size:var(--text-caption); font-weight:500; }
 #app .core-studio .rescue-notes-body { background:#183841; border:1px solid #567980; border-radius:12px; box-shadow:0 16px 32px #04151db3; color:#e7e7d9; }
 #app .core-studio .rescue-notes-body p { color:#c4d5d0; }
 #app .core-studio #rescue-clues button { background:#24454e; border:1px solid #597a7c; color:#e2ece3; border-radius:12px; box-shadow:0 4px 0 #0a1b21; }

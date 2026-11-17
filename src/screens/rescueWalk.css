@@ -21,7 +21,7 @@
 .walk-tag.short.is-selected { background:#5a4320f2; border-color:#f0c877; }
 .walk-tag.is-locked { opacity:.55; }
 .walk-host.is-looking :is(.walk-tag, .walk-scale-value, .walk-actions) { display:none; }
-.walk-tip { position:absolute; z-index:3; left:116px; top:10px; max-width:min(440px,46%); margin:0; padding:8px 14px; border:1px solid #91aaa54a; border-radius:12px; background:#12313ce0; color:#e7eee6; font-size:16px; line-height:1.45; word-break:keep-all; pointer-events:none; }
+.walk-tip { position:absolute; z-index:3; left:116px; top:10px; max-width:min(440px,46%); margin:0; padding:8px 14px; border:1px solid #91aaa54a; border-radius:12px; background:#12313ce0; color:#e7eee6; font-size:var(--text-caption); line-height:1.45; word-break:keep-all; pointer-events:none; }
 .walk-host[data-phase='2'] .walk-tip { top:40px; }
 .walk-tip:empty { display:none; }
 .walk-pad { position:absolute; z-index:4; left:16px; bottom:14px; display:grid; grid-template-columns:repeat(3,58px); grid-template-rows:repeat(2,58px); gap:6px; }
@@ -49,7 +49,7 @@
 .walk-inspect { position:absolute; z-index:4; left:16px; top:auto; bottom:150px; min-height:52px; padding:8px 14px; border:1px solid #63818580; border-radius:12px; background:#1b3942f2; color:#dfeade; font-size:16px; font-weight:700; box-shadow:0 4px 0 #0a1b21; }
 .walk-inspect[hidden] { display:none; }
 .walk-inspect[aria-pressed='true'] { background:#d3af72; color:#283a38; }
-.rescue-walk-toggle { flex:none; min-height:48px; padding:6px 14px; font-size:16px; white-space:nowrap; }
+.rescue-walk-toggle { flex:none; min-height:48px; padding:6px 14px; font-size:var(--text-caption); white-space:nowrap; }
 .rescue-walk-toggle[hidden] { display:none !important; }
 .rescue-walk-toggle.is-suggested { outline:3px solid #ffc247; outline-offset:2px; }
 #app .core-studio .rescue-playfield.is-walk > .core-records { z-index:3; top:12px; right:12px; width:196px; max-height:calc(100% - 110px); padding:12px; }
@@ -57,7 +57,7 @@
 @media (max-width:1100px), (max-height:760px) {
   .walk-pad { grid-template-columns:repeat(3,54px); grid-template-rows:repeat(2,54px); }
   .walk-pad button { width:54px; height:54px; }
-  .walk-tip { font-size:15px; max-width:42%; }
+  .walk-tip { max-width:42%; }
   .walk-force button { min-width:68px; }
 }
 @media (min-width:1600px) and (min-height:900px) {

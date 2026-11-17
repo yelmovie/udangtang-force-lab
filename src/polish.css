@@ -276,10 +276,10 @@ button.button:not(:disabled):active {
 #app .village-screen .village-hint { display: none; }
 
 /* ===== Village signs on roofs: translucent; the base button look (radius, edge, states) is in village.css ===== */
-.village-labels button { font-size: 15px; background: #fff4d7e6; border-color: #715737cc; color: #3b2c1e; }
+.village-labels button { font-size: var(--text-caption); background: #fff4d7e6; border-color: #715737cc; color: #3b2c1e; }
 .village-labels button.is-locked { border-color: #7c806eaa; }
 /* tablet landscape (1024–1366 wide) */
-@media (min-width: 761px) and (max-width: 1366px) and (orientation: landscape) { .village-labels button { font-size: 16px; } }
+@media (min-width: 761px) and (max-width: 1366px) and (orientation: landscape) { .village-labels button { font-size: var(--text-caption); } }
 /* interactive board */
 @media (min-width: 1500px) and (min-height: 850px) {
   .village-labels button { font-size: 22px; border-radius: 14px; }

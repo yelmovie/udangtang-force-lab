@@ -3,7 +3,7 @@
 .cargo-adventure{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}
 .cargo-scene{position:relative;min-height:300px;flex:1;border-radius:26px;overflow:hidden;background:url('/assets/backgrounds/cargo.webp') center/cover;box-shadow:inset 0 0 0 3px #dbb780}
 .cargo-scene::after{content:'';position:absolute;inset:35% 0 0;background:linear-gradient(transparent,#133c3630);pointer-events:none}
-.cargo-scene-caption{position:absolute;inset:16px 20px auto;display:flex;justify-content:space-between;gap:16px;z-index:5;font-size:16px;font-weight:800;color:#173f42}
+.cargo-scene-caption{position:absolute;inset:16px 20px auto;display:flex;justify-content:space-between;gap:16px;z-index:5;font-size:var(--text-caption);font-weight:800;color:#173f42}
 .cargo-scene-caption>span{background:#fff8e9ed;padding:10px 16px;border-radius:12px}
 .cargo-finding-cta{position:absolute;left:50%;top:34%;z-index:8;display:grid;justify-items:center;gap:12px;width:max-content;max-width:min(520px,86%);padding:18px 28px 20px;border:3px solid #e5c792;border-radius:24px;background:#fff9e9f5;box-shadow:0 14px 32px #173f4238;text-align:center;transform:translate(-50%,-50%);animation:cargo-cta-in .28s ease-out both}
 .cargo-finding-cta[hidden],.cargo-scene-caption[hidden],.cargo-auto-go[hidden]{display:none}
@@ -11,7 +11,7 @@
 .cargo-order-notice{position:absolute;z-index:6;left:50%;top:92px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;width:max-content;max-width:92%;padding:6px 12px;border:2px solid #e5c792;border-radius:14px;background:#fff9e9f5;color:#244d47;font-weight:850}
 .cargo-order-notice p{margin:0;word-break:keep-all}
 .cargo-order-notice button{min-height:44px;flex:none}
-.cargo-tap-go{flex:none;min-height:52px;padding:0 22px;font-size:clamp(17px,1.4vw,22px);white-space:nowrap;pointer-events:auto}
+.cargo-tap-go{flex:none;min-height:52px;padding:0 22px;font-size:var(--text-button);white-space:nowrap;pointer-events:auto}
 .cargo-tap-go:disabled{opacity:.45}
 /* The caption lets drags pass through to the stage, so each button in it opts back in to clicks. */
 .cargo-auto-go{pointer-events:auto}
@@ -21,7 +21,7 @@
 @media(prefers-reduced-motion:reduce){.cargo-finding-cta{animation:none}}
 .cargo-rail{--crate-size:clamp(112px,14vw,200px);position:absolute;inset:30% 5% 15%;border-bottom:14px solid #985d34;z-index:2}
 .rail-ticks{position:absolute;bottom:-9px;left:0;right:0;height:9px;background:repeating-linear-gradient(90deg,#ffdb89 0 2px,transparent 2px 5%)}
-.rail-start,.rail-end{position:absolute;bottom:-45px;padding:5px 12px;background:#fef4d9;font-size:16px;font-weight:900;border-radius:8px}
+.rail-start,.rail-end{position:absolute;bottom:-45px;padding:5px 12px;background:#fef4d9;font-size:var(--text-caption);font-weight:900;border-radius:8px}
 .rail-start{left:9%}.rail-end{right:3%}
 .cargo-object{--worker-width:clamp(130px,17vw,200px);position:absolute;left:17%;bottom:-8px;width:var(--crate-size);height:var(--crate-size);z-index:4;filter:drop-shadow(0 9px 3px #402e3340);transform-origin:center bottom}
 .cargo-worker-grip{position:absolute;bottom:-4px;right:calc(100% - 29px);width:var(--worker-width);aspect-ratio:800/670;padding:0;border:0;background:transparent;box-shadow:none;z-index:4;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;transform:none}
@@ -55,7 +55,7 @@
 .cargo-box-art{position:absolute;inset:8% 0 0;width:100%;height:90%;object-fit:contain;z-index:2;pointer-events:none}
 .cargo-contents{position:absolute;inset:0 5% 25%;z-index:3;pointer-events:none}
 .cargo-contents img{position:absolute;width:42%;left:calc(8% + var(--part)*9%);bottom:calc(30% + var(--part)*5%);transform:rotate(calc(var(--part)*8deg - 12deg));filter:drop-shadow(0 3px 2px #0d424655)}
-.cargo-load-tag{position:absolute;bottom:2%;left:4%;right:4%;z-index:5;padding:6px 4px;text-align:center;background:#fff8e8f0;color:#164c4c;border-radius:9px;font-weight:800;font-size:16px}
+.cargo-load-tag{position:absolute;bottom:2%;left:4%;right:4%;z-index:5;padding:6px 4px;text-align:center;background:#fff8e8f0;color:#164c4c;border-radius:9px;font-weight:800;font-size:var(--text-caption)}
 .cargo-object.drop-ready{filter:drop-shadow(0 0 15px #fef395)}
 .cargo-gesture-guide{position:absolute;left:var(--gesture-start);bottom:-42px;width:var(--gesture-travel);height:9px;border-radius:8px;background:#fff3d573;z-index:6;pointer-events:none}
 .cargo-gesture-guide::before{content:'';position:absolute;inset:0 auto 0 0;width:calc(var(--charge,0)*100%);border-radius:inherit;background:#ffce65}
@@ -78,27 +78,27 @@
 /* Force arrow from the child's hand: length and thickness follow the force step, never finger pressure. */
 .cargo-force-arrow{position:absolute;left:4%;bottom:50%;z-index:6;width:calc(var(--charge,0)*(28px + var(--force-step,2)*30px));height:calc(4px + var(--force-step,2)*4px);border-radius:4px 0 0 4px;background:#ff8a2a;box-shadow:0 0 0 2px #fff6dc;opacity:0;pointer-events:none;transition:opacity .15s}
 .cargo-force-arrow::after{content:'';position:absolute;left:100%;top:50%;transform:translateY(-50%);border-left:calc(10px + var(--force-step,2)*4px) solid #ff8a2a;border-top:calc(6px + var(--force-step,2)*3px) solid transparent;border-bottom:calc(6px + var(--force-step,2)*3px) solid transparent}
-.cargo-force-arrow b{position:absolute;bottom:calc(100% + 8px);left:0;white-space:nowrap;padding:2px 8px;border-radius:8px;background:#fff6dc;color:#7a3d06;font-size:16px;font-weight:900}
+.cargo-force-arrow b{position:absolute;bottom:calc(100% + 8px);left:0;white-space:nowrap;padding:2px 8px;border-radius:8px;background:#fff6dc;color:#7a3d06;font-size:var(--text-caption);font-weight:900}
 .cargo-dragging .cargo-force-arrow,.cargo-scene[data-busy="true"] .cargo-force-arrow{opacity:1}
 .cargo-scene[data-action="pull"] .cargo-force-arrow{left:calc(100% + 2px);bottom:56%}
 .cargo-dock{display:flex;align-items:center;gap:24px;background:#fdf6e5;border:2px solid #d9c39d;border-radius:18px;padding:12px 20px;color:#174b4c;box-shadow:0 4px 0 #c9a87b}
 .cargo-inventory,.cargo-method{display:flex;align-items:center;gap:14px}.cargo-inventory>strong,.cargo-method>strong{max-width:130px;font-size:16px}
 .cargo-load-options{display:flex;gap:10px}
-.cargo-load-options button{position:relative;min-width:68px;min-height:64px;padding:4px 8px;display:flex;flex-direction:column;align-items:center;border:2px solid #cdbb98;background:#fffdf7;border-radius:12px;font-weight:900;color:#174b4c;touch-action:none}
+.cargo-load-options button{position:relative;min-width:68px;min-height:64px;padding:4px 8px;display:flex;flex-direction:column;align-items:center;border:2px solid #cdbb98;background:#fffdf7;border-radius:12px;font-weight:900;font-size:var(--text-caption);color:#174b4c;touch-action:none}
 .cargo-load-options button img{height:33px;width:50px;object-fit:contain;pointer-events:none}
 .cargo-load-options button.selected{border-color:#087c79;background:#d2f1e5;box-shadow:inset 0 0 0 2px #087c79}
 .cargo-load-options button.cargo-next-choice{border-color:#be8c38;box-shadow:0 0 0 2px #ffe0a4}
 .cargo-choice-finger{position:absolute;right:-10px;bottom:-13px;width:29px;height:33px;z-index:2;pointer-events:none;animation:cargo-finger-tap 1.5s ease-in-out infinite;filter:drop-shadow(0 2px 2px #49361c40)}
 .cargo-choice-finger svg{width:100%;height:100%}
-.cargo-method .segmented button{font-size:16px;min-height:56px;padding:8px 12px}
+.cargo-method .segmented button{font-size:var(--text-button);min-height:56px;padding:8px 12px}
 .cargo-orders,.cargo-force{display:flex;align-items:center;gap:14px}.cargo-orders>strong,.cargo-force>strong{max-width:130px;font-size:16px}
 .cargo-order-cards{display:flex;gap:8px}
-.cargo-order-card{display:grid;justify-items:center;align-content:center;min-width:84px;min-height:60px;padding:4px 8px;border:2px dashed #cdbb98;border-radius:12px;background:#fffdf7;color:#7b6a4c;font-size:14px;line-height:1.2}
-.cargo-order-card b{font-size:16px}.cargo-order-card small{font-size:14px}.cargo-order-card em{font-style:normal;font-weight:900;font-size:14px}
+.cargo-order-card{display:grid;justify-items:center;align-content:center;min-width:84px;min-height:60px;padding:4px 8px;border:2px dashed #cdbb98;border-radius:12px;background:#fffdf7;color:#7b6a4c;font-size:var(--text-caption);line-height:1.2}
+.cargo-order-card b{font-size:var(--text-caption)}.cargo-order-card small{font-size:var(--text-caption)}.cargo-order-card em{font-style:normal;font-weight:900;font-size:var(--text-caption)}
 .cargo-order-card[data-state="now"]{border:3px solid #087c79;background:#d2f1e5;color:#174b4c;animation:cargo-order-pop .6s ease-out}
 .cargo-order-card[data-state="done"]{border:2px solid #4c9a5a;background:#e6f4e7;color:#1c5a43}
 @keyframes cargo-order-pop{0%{transform:scale(.9)}60%{transform:scale(1.05)}100%{transform:none}}
-.cargo-force .segmented button{display:flex;align-items:center;gap:8px;font-size:16px;min-height:56px;padding:8px 12px}
+.cargo-force .segmented button{display:flex;align-items:center;gap:8px;font-size:var(--text-button);min-height:56px;padding:8px 12px}
 .cargo-step-arrow{position:relative;display:inline-block;width:calc(8px + var(--step)*7px);height:calc(2px + var(--step)*2px);background:currentColor;border-radius:2px;margin-right:calc(4px + var(--step)*2px)}
 .cargo-step-arrow::after{content:'';position:absolute;left:100%;top:50%;transform:translateY(-50%);border-left:calc(4px + var(--step)*2px) solid currentColor;border-top:calc(3px + var(--step)*2px) solid transparent;border-bottom:calc(3px + var(--step)*2px) solid transparent}
 .cargo-direction{color:#3d5f4a;font-weight:700}
@@ -124,7 +124,7 @@
 .cargo-expedition .experiment-heading{gap:12px}
 .cargo-expedition .experiment-heading>div:first-child{flex:0 0 auto}.cargo-expedition .experiment-heading h1{white-space:nowrap}
 .cargo-tools{display:flex;align-items:center;gap:10px;margin-right:auto}
-.cargo-record-open{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:6px 14px;border:2px solid #1e6664;border-radius:12px;background:#fffaf0;color:#1e6664;font-size:16px;font-weight:800;white-space:nowrap;cursor:pointer;box-shadow:0 4px 0 #1e6664;transition:transform .12s ease,box-shadow .12s ease}
+.cargo-record-open{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:6px 14px;border:2px solid #1e6664;border-radius:12px;background:#fffaf0;color:#1e6664;font-size:var(--text-caption);font-weight:800;white-space:nowrap;cursor:pointer;box-shadow:0 4px 0 #1e6664;transition:transform .12s ease,box-shadow .12s ease}
 .cargo-record-open:not(:disabled):active{transform:translateY(3px);box-shadow:0 1px 0 #1e6664}
 .cargo-record-open span{min-width:26px;padding:2px 7px;border-radius:999px;background:#f5ce74;color:#264846;text-align:center}
 .cargo-record-open:disabled{opacity:.5;cursor:default;box-shadow:none}

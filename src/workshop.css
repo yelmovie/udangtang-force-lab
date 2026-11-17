@@ -435,3 +435,6 @@
   .workshop-record-popup .workshop-records { margin-top:6px; gap:6px; }
   .workshop-record-popup .workshop-notebook:not(.is-request) .workshop-run { padding:4px 10px; }
 }
+/* 18px floor for what students read on this screen. */
+#app .workshop-screen :is(.workshop-drawer > button, .workshop-handle .handle-label, .design-dock-title small) { font-size:var(--text-caption); }
+#app .workshop-screen .workshop-drawer > button[data-tool] { white-space:nowrap; }

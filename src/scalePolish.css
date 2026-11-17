@@ -173,3 +173,5 @@
 .instrument-screen.scale-screen .scale-callout::after { content:''; position:absolute; left:50%; bottom:-12px; width:18px; height:18px; background:#fff6d6; border-right:3px solid #e0a530; border-bottom:3px solid #e0a530; transform:translateX(-50%) rotate(45deg); }
 .instrument-screen.scale-screen .scale-callout[hidden] { display:none; }
 .scale-request .scale-heft.is-on { border-color:#d99a2b; background:#fff1c4; }
+/* 18px floor for what students read on this screen. The two round device buttons and the readout label stay sized to the scale drawing. */
+#app .scale-screen :is(.instrument-phase, .scale-comparison, .scale-record-open, .scale-difference, .scale-part strong, .known-weight) { font-size:var(--text-caption); }

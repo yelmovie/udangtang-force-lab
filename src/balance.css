@@ -294,3 +294,5 @@
 .balance-guess b, .balance-seen b { font-size:19px; color:#173f42; }
 .balance-popup .stage-popup-lead .balance-compare { display:flex; margin-bottom:8px; }
 .balance-screen .balance-next-round { min-height:52px; padding:0 24px; font-size:20px; }
+/* 18px floor for what students read on this screen (labels, goals, pan names, result line). */
+#app .balance-screen :is(.balance-goal, .balance-record-button, .balance-side, .balance-pan-name, .balance-lock-callout, .balance-result, .object-card strong) { font-size:var(--text-caption); }
