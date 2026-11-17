@@ -68,7 +68,7 @@ Claude Code는 루트의 `CLAUDE.md`가 이 파일을 `@AGENTS.md`로 불러온�
 설치·배포 명령은 설명만 적는다(요청 없이 실행하지 않는다).
 
 - 설치: `npm ci`는 lockfile 그대로 설치하지만 **기존 `node_modules`를 통째로 지우고 다시 만든다**. 다른 OS에서 넘어와 의존성을 다시 깔 때 쓴다. `npm install`은 lockfile을 바꿀 수 있다.
-- 배포: Cloudflare Workers 정적 에셋(`wrangler.jsonc`가 `./dist`를 올림). 절차·기록·되돌리기는 `docs/DEPLOY-LOG.md`(`npm test && npm run build && npx wrangler deploy`, 배포 뒤 기록 표에 한 줄 추가). 운영 주소 https://udangtang-force-lab.yelsam.workers.dev . 배포는 사용자 승인 없이 하지 않는다.
+- 배포: Cloudflare Workers 정적 에셋(`wrangler.jsonc`가 `./dist`를 올림). 절차·기록·되돌리기는 `docs/DEPLOY-LOG.md`(`npm test && npm run build && npx wrangler deploy`, 배포 뒤 기록 표에 한 줄 추가). 운영 주소 https://udangtang-force-lab.yelsam.workers.dev . 운영 배포는 자동 승인이다(2026-11-16 사용자 전역 지시). 검증을 통과하면 다시 묻지 않고 배포한다.
 - wrangler는 git이 아니라 로컬 `dist/`를 올린다. mp4 영상이 없는 컴퓨터에서 빌드·배포하면 영상이 빠진 채 운영본이 바뀐다.
 
 ### OS별로 다른 것

@@ -1,0 +1,79 @@
+/* Walking version of the core mission: the 3D workshop fills the playfield, with a direction pad (left) and action buttons (right). */
+.rescue-playfield.is-walk { background:#102a33; }
+.rescue-playfield.is-walk::after, .is-walk > .rescue-world, .is-walk > .rescue-companion, .is-walk > .rescue-corgi-tip, .is-walk > .rescue-progress-track, .is-walk > .rescue-world-note, .is-walk > .core-scene-host { display:none; }
+.rescue-stage.is-walk-stage > .rescue-bottom { display:none; }
+.rescue-playfield.is-walk > .rescue-hint-corgi { display:flex; left:12px; top:44px; bottom:auto; }
+.walk-host { position:absolute; inset:0; z-index:2; overflow:hidden; touch-action:none; user-select:none; -webkit-user-select:none; }
+.walk-host[hidden] { display:none; }
+.walk-host canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+.walk-loading { position:absolute; inset:0; z-index:6; display:grid; place-items:center; background:#13333b; color:#d5e3de; font-size:18px; }
+.walk-loading[hidden] { display:none; }
+.walk-conditions { position:absolute; z-index:3; top:12px; left:16px; display:none; align-items:center; gap:8px; color:#ebefe1; font-size:14px; font-weight:550; text-shadow:0 2px 8px #09212ae6; pointer-events:none; }
+.walk-host[data-phase='2'] .walk-conditions { display:flex; }
+.walk-conditions i { width:8px; height:8px; border-radius:50%; background:#8ef7db; }
+.walk-scale-value { position:absolute; z-index:2; transform:translate(-50%,-50%); display:grid; place-items:center; min-width:74px; padding:3px 8px; border:2px solid #163f48; border-radius:8px; background:#9ecfbc; color:#163f48; font-family:NanumSquareNeo,sans-serif; font-size:19px; font-weight:800; white-space:nowrap; pointer-events:none; box-shadow:0 2px 0 #0a1b2166; }
+.walk-tag { position:absolute; z-index:2; transform:translate(-50%,-100%); display:none; gap:6px; align-items:center; min-height:32px; padding:4px 10px; border:1px solid #76978c77; border-radius:8px; background:#16343ddd; color:#bdecdc; font-size:15px; font-weight:700; white-space:nowrap; pointer-events:none; }
+.walk-host[data-phase='2'] .walk-tag { display:flex; }
+.walk-host .walk-tag[hidden] { display:none; }
+.walk-tag span { font-size:14px; font-weight:500; color:#e1e8de; }
+.walk-tag.short { color:#e4b977; border-color:#bd9d6880; }
+.walk-tag.is-selected { background:#1f5a55f2; border-color:#8ef7db; }
+.walk-tag.short.is-selected { background:#5a4320f2; border-color:#f0c877; }
+.walk-tag.is-locked { opacity:.55; }
+.walk-host.is-looking :is(.walk-tag, .walk-scale-value, .walk-actions) { display:none; }
+.walk-tip { position:absolute; z-index:3; left:116px; top:10px; max-width:min(440px,46%); margin:0; padding:8px 14px; border:1px solid #91aaa54a; border-radius:12px; background:#12313ce0; color:#e7eee6; font-size:16px; line-height:1.45; word-break:keep-all; pointer-events:none; }
+.walk-host[data-phase='2'] .walk-tip { top:40px; }
+.walk-tip:empty { display:none; }
+.walk-pad { position:absolute; z-index:4; left:16px; bottom:14px; display:grid; grid-template-columns:repeat(3,58px); grid-template-rows:repeat(2,58px); gap:6px; }
+.walk-pad button { width:58px; height:58px; padding:0; border:1px solid #9fc1b8; border-radius:14px; background:#f3f1e0ee; color:#1d4a45; font-size:28px; font-weight:800; box-shadow:0 4px 0 #0a1b21; touch-action:none; }
+#app .core-studio .walk-pad button.is-held { background:#245b46; color:#fff9e5; transform:translateY(3px); box-shadow:0 1px 0 #0a1b21; }
+.walk-pad [data-direction='up'] { grid-column:2; }
+.walk-pad [data-direction='left'] { grid-row:2; grid-column:1; }
+.walk-pad [data-direction='down'] { grid-row:2; grid-column:2; }
+.walk-pad [data-direction='right'] { grid-row:2; grid-column:3; }
+.walk-actions { position:absolute; z-index:4; right:16px; bottom:14px; display:flex; align-items:flex-end; gap:10px; }
+.walk-context { display:flex; gap:10px; align-items:flex-end; }
+.walk-action, .walk-jump { min-width:92px; min-height:60px; padding:8px 16px; border:1px solid #9fc1b8; border-radius:16px; background:#1b3942f2; color:#e9f1e6; font-size:18px; font-weight:800; line-height:1.2; box-shadow:0 4px 0 #0a1b21; touch-action:none; }
+.walk-action.is-primary { min-width:120px; min-height:72px; border-color:#e5cda0; background:#dfc087; color:#283a38; box-shadow:0 4px 0 #8c6a2e; font-size:20px; }
+.walk-action small { display:block; font-size:13px; font-weight:600; opacity:.8; }
+.walk-action:not(:disabled):active, .walk-jump:active { transform:translateY(3px); box-shadow:0 1px 0 #0a1b21; }
+.walk-action:disabled { opacity:.5; box-shadow:none; }
+.walk-jump { border-radius:50%; width:72px; height:72px; min-width:72px; padding:0; background:#2a6a63f2; }
+:is(.walk-action, .walk-jump, .walk-pad button, .walk-force button, .walk-inspect):focus-visible { outline:3px solid #ffc247; outline-offset:3px; }
+.walk-force { position:absolute; z-index:4; left:50%; bottom:14px; transform:translateX(-50%); display:flex; align-items:center; gap:6px; padding:6px 8px; border:1px solid #91aaa54a; border-radius:14px; background:#12313ce6; color:#afc6c2; font-size:15px; }
+.walk-force[hidden] { display:none; }
+.walk-force span { padding:0 6px; white-space:nowrap; }
+.walk-force button { min-width:76px; min-height:52px; border:1px solid #63818580; border-radius:10px; background:#1b3942; color:#dfeade; font-size:16px; font-weight:700; }
+.walk-force button[aria-pressed='true'] { background:#d3af72; border-color:#f4dfae; color:#283a38; }
+.walk-force button:disabled { opacity:.5; }
+.walk-inspect { position:absolute; z-index:4; left:16px; top:auto; bottom:150px; min-height:52px; padding:8px 14px; border:1px solid #63818580; border-radius:12px; background:#1b3942f2; color:#dfeade; font-size:16px; font-weight:700; box-shadow:0 4px 0 #0a1b21; }
+.walk-inspect[hidden] { display:none; }
+.walk-inspect[aria-pressed='true'] { background:#d3af72; color:#283a38; }
+.rescue-walk-toggle { flex:none; min-height:48px; padding:6px 14px; font-size:16px; white-space:nowrap; }
+.rescue-walk-toggle[hidden] { display:none !important; }
+.rescue-walk-toggle.is-suggested { outline:3px solid #ffc247; outline-offset:2px; }
+#app .core-studio .rescue-playfield.is-walk > .core-records { z-index:3; top:12px; right:12px; width:196px; max-height:calc(100% - 110px); padding:12px; }
+#app .core-studio .rescue-playfield.is-walk > .core-records .core-record-help { display:none; }
+@media (max-width:1100px), (max-height:760px) {
+  .walk-pad { grid-template-columns:repeat(3,54px); grid-template-rows:repeat(2,54px); }
+  .walk-pad button { width:54px; height:54px; }
+  .walk-tip { font-size:15px; max-width:42%; }
+  .walk-force button { min-width:68px; }
+}
+@media (min-width:1600px) and (min-height:900px) {
+  .walk-pad { grid-template-columns:repeat(3,78px); grid-template-rows:repeat(2,78px); gap:8px; left:24px; bottom:22px; }
+  .walk-pad button { width:78px; height:78px; font-size:36px; }
+  .walk-actions { right:24px; bottom:22px; gap:14px; }
+  .walk-action, .walk-jump { min-height:78px; font-size:23px; }
+  .walk-action.is-primary { min-width:160px; min-height:92px; font-size:26px; }
+  .walk-action small { font-size:16px; }
+  .walk-jump { width:92px; height:92px; min-width:92px; }
+  .walk-force { bottom:22px; font-size:19px; }
+  .walk-force button { min-width:100px; min-height:66px; font-size:21px; }
+  .walk-inspect { left:24px; bottom:200px; min-height:62px; font-size:20px; }
+  .walk-tip { font-size:21px; left:150px; }
+  .walk-tag { font-size:19px; } .walk-tag span { font-size:18px; }
+  .walk-scale-value { font-size:25px; min-width:96px; }
+  .walk-conditions { font-size:18px; }
+  .rescue-walk-toggle { font-size:20px; min-height:56px; }
+}

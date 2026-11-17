@@ -9,8 +9,12 @@ import { showPredictionChip } from '../predictionChip';
 import { coreDragProgress } from '../coreSceneModel';
 import { autoPause, autoWait, syncAutoButton } from '../autoPlay';
 import type { CoreScene, CoreProjection } from '../three/coreScene';
+import type { WalkFrame, WalkStage } from '../three/walkStage';
+import { routeLocked, routeToSelect, walkActionLabels, walkActions, walkCheckpoint, walkCourse, walkHoldActions, walkView, walkWaiting, walkZone, type WalkAction, type WalkZone } from '../rescueWalkModel';
+import { MAP_VECTORS, bindDirectionPad, mapKeyDirection, type MapPadDirection } from '../map-controls.js';
 import './rescue.css';
 import './coreStudio.css';
+import './rescueWalk.css';
 
 export function mountRescue(root: HTMLElement, context: AppContext): () => void {
   const state = context.save.rescue, previous = context.save;
@@ -34,9 +38,17 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   // "자동으로 보기" weighs the core, pulls the crate and pushes the core up both ramps with the same small force;
   // putting the core back in (the finish button) stays with the student.
   let autoPlaying = false;
+  // Walking version of the hands-on path: the explorer walks to the scale, the crate and the ramps, and the same
+  // functions below record what happens. "자동으로 보기" always runs on the bench, so it leaves this mode first.
+  let walk: WalkStage | undefined, walkOn = !matchMedia('(prefers-reduced-motion: reduce)').matches, walkLoading = false, walkFrame: WalkFrame | undefined;
+  let walkPlace: WalkZone | null = null, walkRefused: WalkZone | null = null, walkLook = false, walkMisses = 0, walkHolding = false, walkKey = '', walkTimer = 0, walkPause = 0;
+  let padDirection: MapPadDirection | null = null;
+  const walkKeys = new Map<string, MapPadDirection>();
+  const walking = () => walkOn && !autoPlaying;
+  const say = (bench: string, onFoot: string) => walking() ? onFoot : bench;
   root.innerHTML = `<section class="experiment-screen rescue-screen rescue-redesign core-studio">
     <div class="experiment-heading"><div class="core-title"><span class="core-eyebrow">배터리 다시 끼우기 · 마지막 작전</span><h1>중앙 코어</h1></div>${missionProgressMarkup('rescue',['무게 확인','길 열기','같은 힘 비교','코어 도착'])}</div>
-    <div class="rescue-stage"><div class="rescue-stage-head"><strong id="rescue-phase"></strong><span id="rescue-readout"></span><button class="button button-secondary stage-auto-go" id="rescue-auto-go" aria-pressed="false" hidden>▶ 자동으로 보기</button><details class="rescue-notebook"><summary>내 발견 꺼내 쓰기 ▾</summary><div class="rescue-notes-body"><div id="rescue-clues"></div><p id="rescue-used-clue"></p><div id="rescue-checks" class="rescue-checks"></div><div id="rescue-runs" class="result-list"></div><p id="rescue-insight"></p></div></details></div>
+    <div class="rescue-stage"><div class="rescue-stage-head"><strong id="rescue-phase"></strong><span id="rescue-readout"></span><button class="button button-secondary stage-auto-go" id="rescue-auto-go" aria-pressed="false" hidden>▶ 자동으로 보기</button><button class="button button-secondary rescue-walk-toggle" id="rescue-walk-toggle" hidden>기존 방식으로 하기</button><details class="rescue-notebook"><summary>내 발견 꺼내 쓰기 ▾</summary><div class="rescue-notes-body"><div id="rescue-clues"></div><p id="rescue-used-clue"></p><div id="rescue-checks" class="rescue-checks"></div><div id="rescue-runs" class="result-list"></div><p id="rescue-insight"></p></div></details></div>
       <div class="rescue-playfield">
         <svg class="rescue-world" viewBox="0 90 720 350" aria-label="코어와 장애물을 직접 움직이는 운반 작업대">
           <defs><linearGradient id="rescue-platform" x2="0" y2="1"><stop stop-color="#cda776"/><stop offset="1" stop-color="#77593e"/></linearGradient></defs>
@@ -64,6 +76,17 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
           <div class="core-view-tools" aria-label="3D 시점"><button data-core-view="left" aria-label="시점 왼쪽으로 돌리기">${icons.rotateLeft}</button><button data-core-view="inspect" aria-pressed="false">코어 확대</button><button data-core-view="right" aria-label="시점 오른쪽으로 돌리기">${icons.rotateRight}</button></div>
           <p class="core-view-hint">시점을 돌려 두 빗면을 살펴보세요.</p>
         </div><aside id="core-records" class="core-records" hidden><span class="core-panel-kicker">운반할 코어</span><div class="core-mass"><strong>${coreWeight}<small>g</small></strong><span>영점 확인<br>측정 완료</span></div><h2>비교 기록</h2><p id="core-force-note"></p><div id="core-comparison"></div><p id="core-recent" class="core-record-recent" hidden></p><p class="core-record-help">같은 힘으로 두 길을 시험하고<br>도착 여부를 비교하세요.</p></aside>
+        <div id="walk-host" class="walk-host" hidden>
+          <div id="walk-loading" class="walk-loading" role="status">걸어 다닐 작업장을 준비하고 있어요…</div>
+          <div class="walk-conditions"><i aria-hidden="true"></i>같은 코어 · 같은 힘 · 같은 도착 높이</div>
+          <output id="walk-scale-value" class="walk-scale-value" aria-label="저울의 숫자"></output>
+          <span class="walk-tag short" id="walk-short-tag">A <span>짧고 가파른 빗면</span></span><span class="walk-tag long" id="walk-long-tag">B <span>길고 완만한 빗면</span></span>
+          <p id="walk-tip" class="walk-tip" role="status"></p>
+          <div id="walk-force" class="walk-force" role="group" aria-label="게임 속 미는 힘" hidden><span>미는 힘</span>${forceNames.map((name, index) => `<button type="button" data-walk-force="${index + 1}" aria-pressed="false">${name}</button>`).join('')}</div>
+          <button type="button" id="walk-inspect" class="walk-inspect" aria-pressed="false" hidden>코어 확대</button>
+          <div class="walk-pad" role="group" aria-label="이동 방향판"><button type="button" data-direction="up" aria-label="위로 걷기">↑</button><button type="button" data-direction="left" aria-label="왼쪽으로 걷기">←</button><button type="button" data-direction="down" aria-label="아래로 걷기">↓</button><button type="button" data-direction="right" aria-label="오른쪽으로 걷기">→</button></div>
+          <div class="walk-actions"><div id="walk-context" class="walk-context"></div><button type="button" id="walk-jump" class="walk-jump" aria-label="점프">점프</button></div>
+        </div>
         <div id="rescue-companion" class="rescue-companion" aria-hidden="true"></div><div class="rescue-corgi-tip" id="rescue-corgi-tip" role="status"></div><div id="rescue-stop-mark" class="rescue-stop-mark" aria-hidden="true" hidden>멈춤!</div><div class="rescue-progress-track" aria-hidden="true"><i id="rescue-progress"></i></div><div class="rescue-world-note">같은 코어 · 같은 도착 높이</div>
       </div>
       <div class="rescue-bottom"><div id="rescue-controls" class="rescue-controls"></div><button class="rescue-step-button" id="core-handle">상자 조금 움직이기 →</button><p id="rescue-gesture-help"></p></div>
@@ -87,6 +110,11 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   const loading = root.querySelector<HTMLElement>('#core-loading')!;
   const viewTools = root.querySelector<HTMLElement>('.core-view-tools')!;
   const stopMark = root.querySelector<HTMLElement>('#rescue-stop-mark')!;
+  const playfield = root.querySelector<HTMLElement>('.rescue-playfield')!;
+  const walkHost = root.querySelector<HTMLElement>('#walk-host')!;
+  const walkToggle = root.querySelector<HTMLButtonElement>('#rescue-walk-toggle')!;
+  const walkContext = root.querySelector<HTMLElement>('#walk-context')!;
+  const walkLookButton = root.querySelector<HTMLButtonElement>('#walk-inspect')!;
   const signal = events.signal;
   function phase() { return !state.measured ? 0 : !state.gate ? 1 : 2; }
   function point(event: PointerEvent) { const matrix = svg.getScreenCTM(); return matrix ? new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse()) : null; }
@@ -107,6 +135,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     root.querySelector('#gate-rope')!.setAttribute('d',`M${216+gateShift} 345L${handX+gateShift} ${handY}`);
     root.querySelector<HTMLElement>('#rescue-progress')!.style.width = `${Math.max(0, Math.min(1, t)) * 100}%`;
     scene?.configure(state.route, t, state.delivered);
+    walk?.sync(walkView(state, t));
   }
   function placeGrip(next: CoreProjection) {
     projection = next; grip.style.left = `${next.core.x}px`; grip.style.top = `${next.core.y}px`;
@@ -194,10 +223,10 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     const step = phase();
     if (step !== lastStep) { if (lastStep !== -1) lockStage(); lastStep = step; }
     root.querySelector('#rescue-ground')!.setAttribute('d',step===0?'M225 406H686':'M35 406H686');
-    const coreMode = step === 2 && !use2D;
+    const coreMode = step === 2 && !use2D && !walking();
     root.querySelector('.rescue-playfield')!.classList.toggle('is-core-3d', coreMode);
     sceneHost.hidden = !coreMode;
-    root.querySelector<HTMLElement>('#core-records')!.hidden = !coreMode;
+    root.querySelector<HTMLElement>('#core-records')!.hidden = !coreMode && !(walking() && step === 2);
     syncView();
     grip.querySelector('span')!.textContent = state.delivered ? '장착 준비' : '끌어서 운반';
     grip.setAttribute('aria-label', state.delivered && rescueReady(state) ? '코어 다시 장착하기' : '코어 움직이기. 빗면을 따라 끌거나 Enter를 누르고 있기');
@@ -234,8 +263,9 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     root.querySelector('#rescue-insight')!.textContent = hasFairComparison(state.runs) ? `발견! ${comparisonHint(state.runs, state.force)}` : comparisonHint(state.runs, state.force);
     root.querySelector('#rescue-used-clue')!.textContent = usedClue;
     for (const route of ['short','long']) root.querySelector(`#${route}-path`)!.classList.toggle('route-selected', state.route === route);
-    finish.disabled = busy || !rescueReady(state) || (coreMode && !scene); pose(state.delivered ? 1 : restProgress); tell(feedback);
+    finish.disabled = busy || !rescueReady(state) || (coreMode && !scene) || (walking() && !walk); pose(state.delivered ? 1 : restProgress); tell(feedback);
     syncAutoButton(autoGo, root.querySelector<HTMLElement>('.rescue-screen')!, autoPlaying, !state.delivered && !mounted3D, busy || stageLock || (coreMode && !scene));
+    syncWalk(step);
     if (step !== 0 || !state.loaded) closeWeightDialog();
   }
   function closeWeightDialog() {
@@ -269,7 +299,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     if (phase() !== 0 || !state.loaded || !state.zeroed) return false;
     closeWeightDialog();
     state.measured = true; restProgress = 0;
-    tell(`코어는 ${coreWeight} g! 이제 벽 옆 상자를 움직여 길을 열어요.`);
+    tell(`코어는 ${coreWeight} g! ${say('이제 벽 옆 상자를 움직여 길을 열어요.', '이제 오른쪽으로 가서 문을 막은 상자를 움직여요.')}`);
     companion.setMood('success'); context.sound(470); commit();
     controls.querySelector<HTMLButtonElement>('[data-rescue="pull"]')?.focus();
     return true;
@@ -281,7 +311,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   }
   function commit() { context.commit(); update(); }
   function reset() { mounted3D = false; overview(); restProgress = 0; travel = 0; state.delivered = false; pose(0); }
-  function selectRoute(route: RescueRun['route']) { if(route==='long'&&firstShort()) { tell('먼저 A 짧은 빗면을 작은 힘으로 끝까지 밀어 봐요. 그다음 같은 힘으로 다른 길과 비교해요.'); return; } state.route = route; reset(); tell(`${routeNames[route]}을 골랐어요. 코어를 길을 따라 끌어 봐요.`); companion.setMood('observe'); commit(); }
+  function selectRoute(route: RescueRun['route']) { if(route==='long'&&firstShort()) { tell('먼저 A 짧은 빗면을 작은 힘으로 끝까지 밀어 봐요. 그다음 같은 힘으로 다른 길과 비교해요.'); return; } state.route = route; reset(); tell(`${routeNames[route]}을 골랐어요. ${say('코어를 길을 따라 끌어 봐요.', '코어 뒤에서 밀기 버튼을 누르고 있어요.')}`); companion.setMood('observe'); commit(); }
   controls.addEventListener('click', event => {
     if (busy) return;
     const button = (event.target as Element).closest<HTMLButtonElement>('button'); if (!button) return;
@@ -324,6 +354,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     state.delivered = success && hasFairComparison(state.runs);
     restProgress = success ? 1 : stallTravel; // the same point the input stopped at: no jump at the verdict
     const found = !knew && hasFairComparison(state.runs), hint = comparisonHint(state.runs, state.force);
+    walkMisses = success || found ? 0 : walkMisses + 1; if (success) walk?.react('cheer');
     if (success) tell(found ? `코어 도착! ${hint} 이제 중앙 장치에 코어를 다시 끼워요!` : knew ? '코어 도착! 이제 중앙 장치에 코어를 다시 끼워요!' : `도착했어요! ${hint}`);
     else tell(found ? `이 힘으로는 올라가지 못했어요! ${hint} 이제 도착하는 길로 옮겨요.` : knew ? '이 힘으로는 올라가지 못했어요. 도착하는 길로 코어를 옮겨요.' : `이 힘으로는 올라가지 못했어요. 손가락을 더 세게 누를 필요는 없어요. ${hint}`);
     companion.setMood(success ? 'success' : 'observe'); context.sound(success ? 740 : 350);
@@ -335,19 +366,21 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   function slideBack(hold = 650) {
     const stopAt = restProgress, slide = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 500, started = performance.now();
     busy = true; cancelAnimationFrame(slideFrame);
+    if (walking() && phase() === 2) walk?.hold('push'); // the explorer walks the core back down instead of standing in its way
     const tick = (now: number) => {
       if (!active) return;
       const elapsed = now - started - hold;
       if (elapsed < 0) { slideFrame = requestAnimationFrame(tick); return; }
       if (elapsed < slide) { const k = elapsed / slide; pose(stopAt * (1 - k * k)); slideFrame = requestAnimationFrame(tick); return; }
-      busy = false; restProgress = 0; travel = 0; update();
+      busy = false; restProgress = 0; travel = 0; walk?.hold(null); update();
     };
     slideFrame = requestAnimationFrame(tick);
   }
   function showStopMark() {
     const field = root.querySelector<HTMLElement>('.rescue-playfield')!.getBoundingClientRect();
     let x: number, y: number;
-    if (scene && !use2D && projection) { const host = sceneHost.getBoundingClientRect(); x = host.left - field.left + projection.core.x; y = host.top - field.top + projection.core.y; }
+    if (walking() && walkFrame) { const host = walkHost.getBoundingClientRect(); x = host.left - field.left + walkFrame.core.x; y = host.top - field.top + walkFrame.core.y; }
+    else if (scene && !use2D && projection) { const host = sceneHost.getBoundingClientRect(); x = host.left - field.left + projection.core.x; y = host.top - field.top + projection.core.y; }
     else {
       const matrix = svg.getScreenCTM(); if (!matrix) return;
       const origin = corePosition(), p = new DOMPoint(origin.x + (628 - origin.x) * restProgress, origin.y - 166 * restProgress - 70).matrixTransform(matrix);
@@ -365,12 +398,12 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   function finishTravel(cancelled = false) {
     if (cancelled) { restProgress = 0; tell('조작이 멈춰 출발점으로 돌아왔어요. 다시 움직여 봐요.'); companion.setMood('observe'); }
     else if (phase() === 1) {
-      if (travel >= .95) { state.gate = true; restProgress = 0; tell('내 쪽으로 당겨 길이 열렸어요! 이제 코어를 빗면으로 옮겨요.'); companion.setMood('success'); context.sound(730); }
-      else { restProgress = 0; tell(travel < 0 ? '왼쪽은 벽이라 막혔어요. 내 쪽인 오른쪽으로 당겨 봐요.' : '오른쪽으로 조금 더 당겨 길을 열어요.'); companion.setMood('observe'); }
+      if (travel >= .95) { state.gate = true; restProgress = 0; walkMisses = 0; walk?.react('cheer'); tell('내 쪽으로 당겨 길이 열렸어요! 이제 코어를 빗면으로 옮겨요.'); companion.setMood('success'); context.sound(730); }
+      else { restProgress = 0; walkMisses++; tell(travel < 0 ? say('왼쪽은 벽이라 막혔어요. 내 쪽인 오른쪽으로 당겨 봐요.', '문틀 턱에 걸려 밀리지 않아요. 반대로 내 쪽으로 당겨 봐요.') : say('오른쪽으로 조금 더 당겨 길을 열어요.', '당기기 버튼을 조금 더 누르고 있어요.')); companion.setMood('observe'); }
     } else if (phase() === 2) {
       if (canLift(state.route,state.force) && travel >= .95) recordRun(true);
       else if (!canLift(state.route,state.force) && travel >= stallTravel) recordRun(false);
-      else { restProgress = 0; tell('아직 도착하지 않았어요. 코어를 빗면을 따라 조금 더 끌어 봐요.'); companion.setMood('observe'); }
+      else { restProgress = 0; tell(say('아직 도착하지 않았어요. 코어를 빗면을 따라 조금 더 끌어 봐요.', '아직 도착하지 않았어요. 밀기 버튼을 끝까지 누르고 있어요.')); companion.setMood('observe'); }
     }
   }
   function endPointer(event: Pick<PointerEvent, 'pointerId'>, cancelled: boolean) {
@@ -468,7 +501,15 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   handle.addEventListener('pointerup', () => stopButton(false, performance.now() - buttonStarted < 250), { signal });
   handle.addEventListener('pointercancel', () => stopButton(true), { signal });
   handle.addEventListener('lostpointercapture', () => stopButton(true), { signal });
-  function stopKey(cancelled: boolean) { if (!keyHeld) return; keyHeld = false; busy = false; cancelAnimationFrame(frame); finishTravel(cancelled); commit(); }
+  function stopKey(cancelled: boolean) { if (!keyHeld) return; keyHeld = false; busy = false; cancelAnimationFrame(frame); walkHolding = false; walk?.hold(null); finishTravel(cancelled); commit(); }
+  /** One held effort on the crate or the core: Enter on the bench, the hold buttons when walking. */
+  function beginHold() {
+    if (inspecting) overview();
+    keyHeld = true; busy = true; restProgress = 0; travel = 0; companion.setMood('effort'); controls.inert = true; finish.disabled = true;
+    const started = performance.now(), duration = phase() === 1 ? 1000 : state.route === 'long' ? 2500 : 1400;
+    const tick = (now: number) => { if (!active || !keyHeld) return; drawTravel(phase() === 1 && gateAction === 'push' ? -.07 : (now-started)/duration); const threshold = phase() === 1 || canLift(state.route,state.force) ? .95 : stallTravel; if (travel >= threshold || travel < 0) stopKey(false); else frame = requestAnimationFrame(tick); };
+    frame = requestAnimationFrame(tick);
+  }
   root.addEventListener('keydown', event => {
     if (!['Enter',' '].includes(event.key) || ![art,gate,handle,grip].includes(event.target as typeof art)) return;
     if (phase() === 2 && state.delivered) { event.preventDefault(); if (rescueReady(state)) finish.click(); return; }
@@ -479,13 +520,9 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
       return;
     }
     event.preventDefault(); if (busy || stageLock || state.delivered || event.repeat) return;
-    if (inspecting) overview();
-    keyHeld = true; busy = true; restProgress = 0; travel = 0; companion.setMood('effort'); controls.inert = true; finish.disabled = true;
-    const started = performance.now(), duration = phase() === 1 ? 1000 : state.route === 'long' ? 2500 : 1400;
-    const tick = (now: number) => { if (!active || !keyHeld) return; drawTravel(phase() === 1 && gateAction === 'push' ? -.07 : (now-started)/duration); const threshold = phase() === 1 || canLift(state.route,state.force) ? .95 : stallTravel; if (travel >= threshold || travel < 0) stopKey(false); else frame = requestAnimationFrame(tick); };
-    frame = requestAnimationFrame(tick);
+    beginHold();
   }, { signal });
-  root.addEventListener('keyup', event=>{ if (['Enter',' '].includes(event.key) && (keyHeld || [art,gate,handle,grip].includes(event.target as typeof art))) { event.preventDefault(); if (keyHeld) stopKey(false); } }, { signal });
+  root.addEventListener('keyup', event=>{ if (walkHolding) return; if (['Enter',' '].includes(event.key) && (keyHeld || [art,gate,handle,grip].includes(event.target as typeof art))) { event.preventDefault(); if (keyHeld) stopKey(false); } }, { signal });
   root.addEventListener('focusout', event=>{ if (keyHeld && [art,gate,handle,grip].includes(event.target as typeof art)) stopKey(true); }, { signal });
   const autoAlive = () => active && autoPlaying;
   /** Moves the crate or the core like holding Enter, then settles the try through finishTravel(). */
@@ -537,8 +574,9 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     if (!active) return;
     autoPlaying = false; update();
   }
-  autoGo.addEventListener('click', () => { if (autoPlaying) { autoPlaying = false; tell('자동 진행을 멈췄어요. 직접 이어서 해도 돼요.'); update(); } else void autoPlay(); }, { signal });
+  autoGo.addEventListener('click', () => { if (autoPlaying) { autoPlaying = false; tell('자동 진행을 멈췄어요. 직접 이어서 해도 돼요.'); update(); } else { if (walkOn) leaveWalk(); void autoPlay(); } }, { signal });
   function cancelInput() {
+    walkKeys.clear(); padDirection = null; walk?.move(0, 0);
     stopKey(true); stopButton(true);
     if (held !== null) endPointer({ pointerId: held }, true);
     if (corePointer !== null) stopCorePointer({ pointerId: corePointer }, true);
@@ -547,13 +585,14 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   window.addEventListener('resize', cancelInput, { signal });
   document.addEventListener('visibilitychange', () => { if (document.hidden) cancelInput(); }, { signal });
   finish.addEventListener('click', async () => {
-    if (busy || !rescueReady(state) || (!use2D && !scene)) return;
+    if (busy || !rescueReady(state) || (!use2D && !scene && !walk)) return;
     if (!mounted3D) {
       inspecting = false; syncView();
+      if (walkLook) { walkLook = false; walk?.inspect(false); }
       busy = true; controls.inert = true; finish.disabled = true; handle.disabled = true;
       viewTools.inert = true; sceneHost.classList.add('is-docking');
       tell('배터리 코어를 중앙 장치에 다시 끼워 마을의 전원을 연결하고 있어요…');
-      const mounted = scene ? await scene.dock() : true;
+      const mounted = walking() && walk ? await walk.dock() : scene ? await scene.dock() : true;
       if (!active || !mounted) return;
       busy = false; controls.inert = false; finish.disabled = false; mounted3D = true;
       sceneHost.classList.remove('is-docking'); syncView();
@@ -562,7 +601,153 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     }
     context.finish('rescue', `영점을 맞춰 코어 ${coreWeight} g을 확인하고 상자를 내 쪽으로 당겨 길을 열었어요. ${state.runs.length}번 운반을 시험했어요. ${comparisonSummary(state.runs)} ${routeNames[state.route]}에서 ${forceNames[state.force-1]}으로 운반하고 중앙 장치에 배터리 코어를 다시 장착해 마을의 전기를 되찾았어요.${usedClue ? ` ${usedClue}` : ''}`);
   }, { signal });
+  // ── Walking mode ──────────────────────────────────────────────────────────────────────────────
+  const walkBlocked = () => !walking() || !walk || document.hidden || !!document.querySelector('dialog[open], .modal-layer');
+  function walkSteer() {
+    let x = 0, z = 0;
+    for (const direction of [...walkKeys.values(), ...(padDirection ? [padDirection] : [])]) { x += MAP_VECTORS[direction].x; z += MAP_VECTORS[direction].y; }
+    walk?.move(x, z);
+  }
+  // After the core is back in the device the ramps can still be tried again; only the finished step is gone.
+  const walkChoices = (): WalkAction[] => walk && !walkLook ? walkActions(state, walkPlace).filter(action => !(mounted3D && action === 'dock')) : [];
+  function leaveWalk() {
+    walkOn = false; walkLook = false; walkHolding = false; walkPlace = null; walkRefused = null; walkKey = ''; walkFrame = undefined;
+    walkKeys.clear(); padDirection = null; walk?.dispose(); walk = undefined;
+  }
+  function prepareWalk() {
+    if (!active || walkLoading || walk || !walking()) return;
+    walkLoading = true;
+    const loadingNote = root.querySelector<HTMLElement>('#walk-loading')!; loadingNote.hidden = false;
+    const step = phase(), startAt = step === 0 ? walkCourse.spawn : walkCheckpoint(step === 1 ? walkCourse.sillX + 1 : -5, step === 2);
+    import('../three/walkStage').then(module => active && walkOn ? module.createWalkStage(walkHost, signal, startAt, {
+      frame: onWalkFrame,
+      bump: () => { tell('바퀴잠금 봇에 부딪혔어요! 코어와 기록은 그대로예요.'); context.sound(300); },
+      returned: () => tell('직전 지점으로 돌아왔어요. 다시 가 봐요.'),
+    }) : undefined).then(stage => {
+      walkLoading = false;
+      if (!stage) return;
+      if (!active || !walkOn) { stage.dispose(); return; }
+      walk = stage; loadingNote.hidden = true; update();
+    }).catch(() => {
+      walkLoading = false; if (!active) return;
+      // No WebGL or a failed download: the bench below does the same mission.
+      leaveWalk(); tell('걸어 다니는 작업장을 준비하지 못해 기존 방식으로 이어가요.'); update();
+    });
+  }
+  function renderWalkActions() {
+    if (walkHolding) return;
+    const actions = walkChoices(), locked = busy || stageLock, key = `${actions.join()}|${locked}`;
+    if (key === walkKey) return;
+    walkKey = key;
+    walkContext.innerHTML = actions.map((action, index) => { const hold = walkHoldActions.includes(action); return `<button type="button" class="walk-action${index ? '' : ' is-primary'}${hold ? ' is-hold' : ''}" data-walk-action="${action}"${locked ? ' disabled' : ''}>${walkActionLabels[action]}${hold ? '<small>누르고 있기</small>' : ''}</button>`; }).join('');
+  }
+  function syncWalk(step: number) {
+    const on = walking();
+    playfield.classList.toggle('is-walk', on); root.querySelector('.rescue-stage')!.classList.toggle('is-walk-stage', on); walkHost.hidden = !on;
+    walkToggle.hidden = autoPlaying || mounted3D; walkToggle.disabled = busy || stageLock;
+    walkToggle.textContent = walkOn ? '기존 방식으로 하기' : '걸어서 하기';
+    walkToggle.classList.toggle('is-suggested', on && walkMisses >= 3);
+    if (!on) return;
+    if (!walk) prepareWalk();
+    walkHost.dataset.phase = String(step); walkHost.classList.toggle('is-looking', walkLook);
+    root.querySelector<HTMLElement>('#walk-force')!.hidden = step !== 2 || state.delivered || walkLook;
+    for (const button of walkHost.querySelectorAll<HTMLButtonElement>('[data-walk-force]')) { button.setAttribute('aria-pressed', String(state.force === Number(button.dataset.walkForce))); button.disabled = busy || stageLock || firstShort(); }
+    root.querySelector('#walk-scale-value')!.textContent = `${(state.loaded && step < 2 ? coreWeight : 0) + (state.zeroed ? 0 : 20)} g`;
+    for (const route of ['short', 'long'] as const) { const tag = root.querySelector<HTMLElement>(`#walk-${route}-tag`)!; tag.classList.toggle('is-selected', step === 2 && state.route === route); tag.classList.toggle('is-locked', routeLocked(state, route)); }
+    walkLookButton.hidden = step !== 2 || mounted3D; walkLookButton.disabled = busy || stageLock;
+    walkLookButton.textContent = walkLook ? '전체 보기' : '코어 확대'; walkLookButton.setAttribute('aria-pressed', String(walkLook));
+    const clue = step === 1 ? '코기 단서: 밀어서 안 움직이면 반대로 당기면?' : root.querySelector('#rescue-corgi-tip')!.textContent ?? '';
+    root.querySelector('#walk-tip')!.textContent = walkLook ? '방향판의 왼쪽·오른쪽으로 코어를 돌려 모양을 살펴봐요.'
+      : walkMisses >= 3 ? `콩이: ${step === 1 ? '밀어서 안 움직이면 반대로 내 쪽으로 당겨 봐!' : nextHint()} 어려우면 위의 ‘기존 방식으로 하기’로 바꿔도 돼.`
+      : walkWaiting(state, walkPlace) || clue;
+    renderWalkActions();
+  }
+  function onWalkFrame(next: WalkFrame) {
+    walkFrame = next;
+    const place = walkZone(next.spot, state);
+    if (place !== walkPlace) { walkPlace = place; walkRefused = null; syncWalk(phase()); }
+    // Walking into a ramp entrance picks that ramp; the bench's own rule may still refuse the long one.
+    const route = routeToSelect(state, walkPlace);
+    if (route && !busy && !stageLock && !walkLook && walkRefused !== walkPlace) { if (routeLocked(state, route)) walkRefused = walkPlace; selectRoute(route); }
+    const value = root.querySelector<HTMLElement>('#walk-scale-value')!;
+    value.style.left = `${next.scale.x}px`; value.style.top = `${next.scale.y}px`;
+    // Ramp names stay whole inside the view, and leave when their ramp is far off screen.
+    const wide = walkHost.clientWidth; // the record board covers the right 220px
+    for (const route of ['short', 'long'] as const) { const tag = root.querySelector<HTMLElement>(`#walk-${route}-tag`)!, x = next[route].x; tag.hidden = x < -60 || x > wide + 60; tag.style.left = `${Math.max(96, Math.min(wide - 310, x))}px`; tag.style.top = `${next[route].y}px`; }
+  }
+  function walkTap(action: WalkAction) {
+    if (busy || stageLock || !walk) return;
+    const press = (name: string) => controls.querySelector<HTMLButtonElement>(`[data-rescue="${name}"]`)?.click();
+    if (action === 'zero') press('zero');
+    if (action === 'load' || action === 'unload') { press('load'); if (state.loaded && !state.zeroed && !state.measured) openWeightDialog(); }
+    if (action === 'reading') openWeightDialog();
+    if (action === 'push-crate') {
+      // The crate nudges against the stoppers and comes back: the same "blocked" result as on the bench.
+      gateAction = 'push'; busy = true; restProgress = 0; drawTravel(-.07); companion.setMood('effort'); update();
+      walkTimer = window.setTimeout(() => { if (!active) return; busy = false; finishTravel(); commit(); }, 320);
+    }
+    if (action === 'retry' && (walkPlace === 'short' || walkPlace === 'long')) selectRoute(walkPlace);
+    if (action === 'dock') finish.click();
+  }
+  function walkHoldStart(action: WalkAction) {
+    if (busy || stageLock || state.delivered || !walk || walkHolding) return;
+    if (action === 'pull-crate') gateAction = 'pull';
+    walkHolding = true; walk.hold(action === 'pull-crate' ? 'pull' : 'push'); beginHold();
+  }
+  const actionOf = (event: Event) => { const button = (event.target as Element).closest<HTMLButtonElement>('[data-walk-action]'); return button && !button.disabled ? { button, action: button.dataset.walkAction as WalkAction } : null; };
+  walkContext.addEventListener('pointerdown', event => {
+    const found = actionOf(event);
+    if (!found || !walkHoldActions.includes(found.action) || (event.pointerType === 'mouse' && event.button !== 0)) return;
+    event.preventDefault(); try { found.button.setPointerCapture(event.pointerId); } catch { /* the pointer is already gone */ } walkHoldStart(found.action);
+  }, { signal });
+  for (const type of ['pointerup', 'pointercancel'] as const) walkContext.addEventListener(type, () => { if (walkHolding) stopKey(type === 'pointercancel'); }, { signal });
+  walkContext.addEventListener('click', event => { const found = actionOf(event); if (found && !walkHoldActions.includes(found.action)) walkTap(found.action); }, { signal });
+  walkContext.addEventListener('contextmenu', event => event.preventDefault(), { signal });
+  root.querySelector('#walk-jump')!.addEventListener('pointerdown', event => { event.preventDefault(); if (!walkBlocked()) walk?.jump(); }, { signal });
+  root.querySelector('#walk-jump')!.addEventListener('click', event => { if ((event as MouseEvent).detail === 0 && !walkBlocked()) walk?.jump(); }, { signal });
+  root.querySelector('#walk-force')!.addEventListener('click', event => {
+    const level = Number((event.target as Element).closest<HTMLButtonElement>('[data-walk-force]')?.dataset.walkForce);
+    if (!level || busy || stageLock || firstShort() || state.force === level) return;
+    state.force = level; reset(); tell(`힘을 바꿨어요. ${nextHint()}`); context.sound(470); commit();
+  }, { signal });
+  walkLookButton.addEventListener('click', () => { if (busy || stageLock || !walk) return; walkLook = !walkLook; walk.inspect(walkLook); walkKey = ''; update(); }, { signal });
+  walkToggle.addEventListener('click', () => {
+    if (busy || stageLock || autoPlaying) return;
+    cancelInput();
+    if (walkOn) leaveWalk();
+    else { walkOn = true; walkMisses = 0; inspecting = false; if (scene) { scene.dispose(); scene = undefined; sceneTried = false; } }
+    tell(walkOn ? '걸어서 하는 방식으로 바꿨어요. 지금까지의 기록은 그대로예요.' : '기존 방식으로 바꿨어요. 지금까지의 기록은 그대로예요.'); update();
+  }, { signal });
+  bindDirectionPad(walkHost.querySelector<HTMLElement>('.walk-pad')!, '[data-direction]', button => button.dataset.direction as MapPadDirection, {
+    signal, blocked: walkBlocked,
+    press: direction => { padDirection = direction; walkSteer(); },
+    release: () => { padDirection = null; walkSteer(); },
+    cancel: () => { padDirection = null; walkSteer(); },
+  });
+  // Keyboard: arrows or WASD walk, Space jumps, E or Enter is the first button of the place.
+  const walkKeyTarget = (event: KeyboardEvent) => { const target = event.target as Element | null; return !target?.closest?.('input,textarea,select,dialog') && (!target?.closest?.('button,a,summary,[role=button]') || !!target.closest('.walk-host')); };
+  document.addEventListener('keydown', event => {
+    if (walkBlocked() || event.ctrlKey || event.altKey || event.metaKey || event.isComposing) return;
+    const direction = mapKeyDirection(event);
+    if (direction) { if ((event.target as Element | null)?.closest?.('input,textarea,select,dialog')) return; event.preventDefault(); walkKeys.set(event.code || event.key, direction); walkSteer(); return; }
+    if (!walkKeyTarget(event)) return;
+    if (event.code === 'Space') { event.preventDefault(); if (!event.repeat) walk?.jump(); return; }
+    if (event.code === 'KeyE' || event.key === 'Enter') {
+      event.preventDefault(); if (event.repeat) return;
+      const action = walkChoices()[0]; if (!action) return;
+      if (walkHoldActions.includes(action)) walkHoldStart(action); else walkTap(action);
+    }
+  }, { signal });
+  document.addEventListener('keyup', event => {
+    if (mapKeyDirection(event)) { walkKeys.delete(event.code || event.key); walkSteer(); return; }
+    if (!walking()) return;
+    if (event.code === 'Space' && walkKeyTarget(event)) event.preventDefault();
+    if ((event.code === 'KeyE' || event.key === 'Enter') && walkHolding) { event.preventDefault(); stopKey(false); }
+  }, { signal });
+  // The workshop stands still while a popup is open or the tab is hidden.
+  walkPause = window.setInterval(() => walk?.setPaused(document.hidden || !!document.querySelector('dialog[open], .modal-layer')), 200);
   tell(state.delivered ? '코어가 도착했어요. 비교 기록을 확인하고 중앙 장치에 다시 끼워요.' : state.gate ? '같은 힘으로 두 빗면을 비교해요. 길을 고른 뒤 코어를 직접 끌어 보세요.' : state.measured ? '코어는 180 g! 벽 옆 상자를 직접 움직여 길을 열어요.' : '빠진 배터리 코어를 다시 끼울 거예요. 먼저 빈 저울을 0으로 맞추고 코어의 무게를 재요.');
+  if (walking() && !state.delivered) tell(['방향판으로 저울 앞까지 걸어가요. 빈 저울을 0으로 맞추고 코어의 무게를 재요.', '문을 막은 상자 앞으로 걸어가 직접 움직여 길을 열어요.', '빗면 입구로 걸어가 길을 고르고, 코어 뒤에서 밀기 버튼을 누르고 있어요.'][phase()]);
   renderClues(); update();
-  return () => { active = false; closeWeightDialog(); cancelAnimationFrame(frame); cancelAnimationFrame(buttonFrame); cancelAnimationFrame(slideFrame); clearTimeout(stageTimer); clearTimeout(stopTimer); events.abort(); scene?.dispose(); companion.dispose(); hint.dispose(); };
+  return () => { active = false; closeWeightDialog(); cancelAnimationFrame(frame); cancelAnimationFrame(buttonFrame); cancelAnimationFrame(slideFrame); clearTimeout(stageTimer); clearTimeout(stopTimer); events.abort(); scene?.dispose(); walk?.dispose(); clearTimeout(walkTimer); clearInterval(walkPause); companion.dispose(); hint.dispose(); };
 }
