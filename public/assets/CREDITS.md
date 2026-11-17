@@ -28,6 +28,13 @@
 | 코어·빈 중앙 장치 3D | `models/core/*.glb` | 사용자가 Meshy로 생성해 전달한 GLB를 폴리곤·텍스처 최적화(2026-10-20 UV 경계를 고정해 다시 축소: 코어 5만·장치 1.2만 삼각형, 2048 텍스처. `npm run assets:core`) | Meshy 계정의 생성·이용 조건은 별도 확인. CC0 등 별도 라이선스를 추정하지 않음 |
 | 배경음악 2곡 (스테이지 반복 `Curious Discovery`·점등식 `Magical Power-Up`) | `audio/bgm-stage.mp3`, `audio/bgm-ending.mp3` | 2026-10-19 사용자가 Suno로 생성해 전달(연주곡) | 생성형 AI 음악. Suno 요금제별 상업적 이용 조건은 별도 확인 |
 | 효과음 3종 (`click_003`, `error_001`, `confirmation_002`) | `audio/*.ogg` | Kenney — Interface Sounds (kenney.nl/assets/interface-sounds) | CC0 1.0. 원문 `audio/LICENSE-Kenney.txt` 동봉 |
+| 효과음 · 지도 공격 휙 | `audio/sfx/attack-swing-03.mp3` | qubodup — SWOSH-01 (freesound.org/people/qubodup/sounds/59988). 2026-11-17 과학34 공통 효과음 라이브러리(`_shared/sfx-library-20261117`)에서 복사: 앞뒤 무음 제거·음량 정규화·모노 MP3 | CC0 1.0 (원본 페이지에서 2026-11-17 재확인) |
+| 효과음 · 지도 1타 톡 | `audio/sfx/wood-knock-01.mp3` | Raclure — Wood knock (freesound.org/people/Raclure/sounds/405549). 2026-11-17 과학34 공통 효과음 라이브러리(`_shared/sfx-library-20261117`)에서 복사: 앞뒤 무음 제거·음량 정규화·모노 MP3 | CC0 1.0 (원본 페이지에서 2026-11-17 재확인) |
+| 효과음 · 지도 2타 덜컹 | `audio/sfx/metal-clank-01.mp3` | Kenney — Impact Sounds `impactMetal_medium_000` (kenney.nl/assets/impact-sounds). 2026-11-17 과학34 공통 효과음 라이브러리(`_shared/sfx-library-20261117`)에서 복사: 앞뒤 무음 제거·음량 정규화·모노 MP3 | CC0 1.0 (원본 페이지에서 2026-11-17 재확인) |
+| 효과음 · 지도 3타 쿵 | `audio/sfx/hit-heavy-02.mp3` | saturdaysoundguy — Loud Pillow Hit 2 (freesound.org/people/saturdaysoundguy/sounds/388035). 2026-11-17 과학34 공통 효과음 라이브러리(`_shared/sfx-library-20261117`)에서 복사: 앞뒤 무음 제거·음량 정규화·모노 MP3 | CC0 1.0 (원본 페이지에서 2026-11-17 재확인) |
+| 효과음 · 지도 악당 퇴장 | `audio/sfx/villain-exit-01.mp3` | martian — classic dizzy take slide whistle (freesound.org/people/martian/sounds/403002). 2026-11-17 과학34 공통 효과음 라이브러리(`_shared/sfx-library-20261117`)에서 복사: 앞뒤 무음 제거·음량 정규화·모노 MP3 | CC0 1.0 (원본 페이지에서 2026-11-17 재확인) |
+| 효과음 · 지도 악당 등장 | `audio/sfx/villain-appear-01.mp3` | javapimp — Pop 5 (freesound.org/people/javapimp/sounds/439186). 2026-11-17 과학34 공통 효과음 라이브러리(`_shared/sfx-library-20261117`)에서 복사: 앞뒤 무음 제거·음량 정규화·모노 MP3 | CC0 1.0 (원본 페이지에서 2026-11-17 재확인) |
+| 효과음 · 지도 접촉 피격 퉁 | `audio/sfx/hurt-bump-03.mp3` | Kenney — Impact Sounds `impactSoft_heavy_000` (kenney.nl/assets/impact-sounds). 2026-11-17 과학34 공통 효과음 라이브러리(`_shared/sfx-library-20261117`)에서 복사: 앞뒤 무음 제거·음량 정규화·모노 MP3 | CC0 1.0 (원본 페이지에서 2026-11-17 재확인) |
 | 제목·버튼 글꼴 | `fonts/jua-*.woff2` | Jua, Woowahan Brothers Corp. (Google Fonts 배포본) | SIL OFL 1.1. 원문 `fonts/Jua-OFL.txt` 동봉. Reserved Font Name "Jua" |
 | 앱 아이콘·파비콘 | `/favicon.svg`, `/icons/icon-192.png`, `/icons/icon-512.png` | 직접 그린 SVG 플라스크 아이콘(PNG는 같은 그림을 변환) | 앱 제작자 보유 |
 | 화면 아이콘(홈·소리·설정·재생·별 등) | `src/icons.ts` (코드 안 SVG) | 직접 그린 SVG 선 아이콘 | 앱 제작자 보유 |

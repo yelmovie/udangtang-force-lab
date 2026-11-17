@@ -19,7 +19,7 @@ import { mountRescue } from './screens/rescue';
 import { mountVillage } from './screens/village';
 import { canPlayMapFinale, defeatedMapVillains } from './map-villains.js';
 import { villageRewards } from './villageStory';
-import { playMusic, playSound, stopMusic, stopSounds, setVolume, type MusicName } from './sound';
+import { playMusic, playSound, stopMusic, stopSounds, setVolume, type MapSound, type MusicName } from './sound';
 import { installKongDialogue } from './kongDialogue';
 installKongDialogue(() => save);
 import { infoContent } from './info';
@@ -60,6 +60,11 @@ function tone(frequency = 520) {
   if (!save.soundOn) return;
   setVolume(save.soundVolume ?? 0.3);
   playSound(frequency >= 680 ? 'success' : frequency < 400 ? 'bump' : 'click');
+}
+function cue(name: MapSound) {
+  if (!save.soundOn) return;
+  setVolume(save.soundVolume ?? 0.3);
+  playSound(name);
 }
 /** While a story video is open it decides the music: the ending plays its own track, the prologue keeps quiet for its own sound. */
 let storyMusic: MusicName | 'quiet' | null = null;
@@ -338,7 +343,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
   }, { once: true });
 }
 
-const context: AppContext = { save, commit: persist, navigate, finish, toast, sound: tone };
+const context: AppContext = { save, commit: persist, navigate, finish, toast, sound: tone, cue };
 
 function setAdminMode(enabled: boolean) {
   adminUnlocked = enabled;

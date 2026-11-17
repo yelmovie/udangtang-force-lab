@@ -20,7 +20,7 @@ export function offlinePlugin() {
     async closeBundle() {
       if (!built) return;
       const paths = (await filesIn(outputDirectory))
-        .filter(path => (path.endsWith(`${sep}npc-welcome.mp3`) || /\.(?:html|css|js|json|webmanifest|webp|png|ogg|svg|woff2?|glb)$/i.test(path)) && !path.endsWith(`${sep}sw.js`)).sort();
+        .filter(path => (path.endsWith(`${sep}npc-welcome.mp3`) || path.includes(`${sep}audio${sep}sfx${sep}`) || /\.(?:html|css|js|json|webmanifest|webp|png|ogg|svg|woff2?|glb)$/i.test(path)) && !path.endsWith(`${sep}sw.js`)).sort();
       const hash = createHash('sha256');
       const urls = [];
       for (const path of paths) {
@@ -31,7 +31,7 @@ export function offlinePlugin() {
       const version = hash.digest('hex').slice(0, 16);
       // First-screen set only: everything else is cached the first time a screen asks for it.
       const core = urls.filter(name => /^(?:index\.html|manifest\.webmanifest|favicon\.svg|icons\/.*|assets\/index-[^/]+\.(?:js|css)|assets\/fonts\/.*\.woff2|assets\/ui\/title\.webp|assets\/backgrounds\/lab\.webp|assets\/characters\/.*\.webp)$/.test(name));
-      const runtimePattern = '/\\.(?:html|css|js|json|webmanifest|webp|png|ogg|svg|woff2?|glb)$/i';
+      const runtimePattern = '/\\.(?:html|css|js|json|webmanifest|webp|png|ogg|svg|woff2?|glb)$|\\/audio\\/sfx\\/[^/]+\\.mp3$/i';
       core.push('assets/audio/npc-welcome.mp3');
       const code = `// Generated from this production build. Do not edit by hand.
 const ROOT = new URL('./', self.location.href);

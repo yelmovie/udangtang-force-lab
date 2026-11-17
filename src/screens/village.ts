@@ -3,6 +3,7 @@ import {dockMapAttack} from '../map-attack-control.js';
 import { canPlayMapFinale, defeatedMapVillains } from '../map-villains.js';
 import { bindDirectionPad } from '../map-controls.js';
 import type { AppContext } from '../appTypes';
+import type { MapSound } from '../sound';
 import { icons } from '../icons';
 import type { StageId } from '../data';
 import { stageIsOpen } from '../state';
@@ -340,6 +341,12 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   let attackTarget: Encounter | undefined;
   let finaleAt=0,clearReady:number|null=null,clearUntil=0,clearShown=false;
   let lastHitAt = -Infinity, studentHurt = -Infinity, dogHurt = -Infinity, studentAttackFacing: 1 | -1 = 1;
+  // Hit sounds wait for the impact frame (the pose changes 80 ms after the press); cleared when the map closes.
+  const cueTimers = new Set<number>();
+  function cueLater(name: MapSound, delay: number) {
+    const id = window.setTimeout(() => { cueTimers.delete(id); if (alive) context.cue(name); }, delay);
+    cueTimers.add(id);
+  }
   let studentHurtFacing: 1 | -1 = 1, dogHurtFacing: 1 | -1 = 1;
   let encounterClock = 0, studentTouching = false, dogTouching = false;
   let focusBeforeAttack: HTMLElement | null = null;
@@ -598,7 +605,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if (attack.getAttribute('aria-disabled') !== String(locked)) attack.setAttribute('aria-disabled', String(locked));
     if(attack.hidden && wasFocused && !paused()) (focusBeforeAttack?.isConnected ? focusBeforeAttack : canvas).focus({preventScroll:true});
     if(paused())clearReady=null;else clearReady??=now;
-    if(options.newlyCompleted&&!options.adminUnlocked&&!clearShown&&clearReady!==null&&now-clearReady>=1250){clearShown=true;clearUntil=now+4200;}
+    if(options.newlyCompleted&&!options.adminUnlocked&&!clearShown&&clearReady!==null&&now-clearReady>=1250){clearShown=true;clearUntil=now+4200;if(encounters.some(e=>e.id===options.newlyCompleted))context.cue('villainAppear');}
     if(clearUntil>now&&!paused()&&options.newlyCompleted){
       encounterHud.hidden=false;encounterPips.hidden=true;
       encounterText.textContent='바퀴 잠금 악당 · “'+encounterLines[options.newlyCompleted][0]+'”';
@@ -634,7 +641,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if (hurtDog) { dogHurt = now; dogHurtFacing = facingToward(dog, nearDog, dogHurtFacing); }
     if (hurtDog) { nearDog.clampUntil = now + 220; nearDog.facing = facingToward(nearDog, dog, nearDog.facing); }
     if (hurtStudent) { nearStudent.clampUntil = now + 220; nearStudent.facing = facingToward(nearStudent, actor, nearStudent.facing); }
-    context.sound(305);
+    context.cue('hurt');
   }
   function hitEnemy() {
     if (!map || paused() || panView || overview) return;
@@ -659,7 +666,9 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     }
     encounterText.textContent = encounterLines[enemy.id][hits+1];
     if (hits===3 && story.complete) hint.textContent=restHint();
-    context.sound([0, 460, 365, 760][hits]);
+    context.cue('attack');
+    cueLater(hits === 3 ? 'hit3' : hits === 2 ? 'hit2' : 'hit1', 80);
+    if (hits === 3) cueLater('villainExit', 480);
     updateEncounters(now);
     draw();
   }
@@ -1169,5 +1178,5 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   retry.addEventListener('click',()=>void loadWorld(),{signal:events.signal});
   reduced.addEventListener('change',()=>{if(reduced.matches)lights.querySelectorAll('.village-spark').forEach(spark=>spark.remove());draw();},{signal:events.signal});
   void loadWorld();
-  return()=>{voice.destroy();dialogueText.destroy();alive=false;generation++;cancelAnimationFrame(raf);fetches.abort();cancelImages.forEach(cancel=>cancel());clearInput();events.abort();observer.disconnect();if(dialog.open)dialog.close();if(board.open)board.close();portrait.removeAttribute('style');tinted.clear();images.clear();metadata.clear();};
+  return()=>{cueTimers.forEach(id=>clearTimeout(id));cueTimers.clear();voice.destroy();dialogueText.destroy();alive=false;generation++;cancelAnimationFrame(raf);fetches.abort();cancelImages.forEach(cancel=>cancel());clearInput();events.abort();observer.disconnect();if(dialog.open)dialog.close();if(board.open)board.close();portrait.removeAttribute('style');tinted.clear();images.clear();metadata.clear();};
 }

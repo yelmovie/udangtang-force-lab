@@ -1,6 +1,15 @@
-type SoundName = 'click' | 'bump' | 'success';
+/** Map villain moments: swing on the press, hits on the impact frame, then the roll-away exit. */
+export type MapSound = 'attack' | 'hit1' | 'hit2' | 'hit3' | 'villainExit' | 'villainAppear' | 'hurt';
+type SoundName = 'click' | 'bump' | 'success' | MapSound;
 export type MusicName = 'stage' | 'ending';
-const files: Record<SoundName, string> = { click: 'click_003.ogg', bump: 'error_001.ogg', success: 'confirmation_002.ogg' };
+const files: Record<SoundName, string> = {
+  click: 'click_003.ogg', bump: 'error_001.ogg', success: 'confirmation_002.ogg',
+  attack: 'sfx/attack-swing-03.mp3', hit1: 'sfx/wood-knock-01.mp3', hit2: 'sfx/metal-clank-01.mp3', hit3: 'sfx/hit-heavy-02.mp3',
+  villainExit: 'sfx/villain-exit-01.mp3', villainAppear: 'sfx/villain-appear-01.mp3', hurt: 'sfx/hurt-bump-03.mp3',
+};
+/** Per-role loudness under the effects volume. The map files are already quieter than the interface sounds, so only the entrance and exit are lowered. */
+const levels: Partial<Record<SoundName, number>> = { villainExit: .8, villainAppear: .7 };
+const level = (name: SoundName) => volume * (levels[name] ?? 1);
 const musicFiles: Record<MusicName, string> = { stage: 'bgm-stage.mp3', ending: 'bgm-ending.mp3' };
 const players = new Map<SoundName, HTMLAudioElement>();
 const tracks = new Map<MusicName, HTMLAudioElement>();
@@ -10,7 +19,7 @@ let wanted: MusicName | null = null;
 const musicVolume = () => volume * 0.7 * (musicDucks.size ? .32 : 1);
 export function setVolume(value: number) {
   volume = Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0.3;
-  players.forEach(audio => { audio.volume = volume; });
+  players.forEach((audio, name) => { audio.volume = level(name); });
   tracks.forEach(audio => { audio.volume = musicVolume(); });
   if (volume === 0) stopSounds();
 }
@@ -20,7 +29,7 @@ export function playSound(name: SoundName) {
   stopSounds();
   let audio = players.get(name);
   if (!audio) { audio = new Audio(`${import.meta.env.BASE_URL}assets/audio/${files[name]}`); players.set(name, audio); }
-  audio.volume = volume;
+  audio.volume = level(name);
   void audio.play().catch(() => { /* Silent mode or browser audio policy must not block play. */ });
 }
 /** Starts one background track (the stage track loops); asking again for the track already playing changes nothing. */
