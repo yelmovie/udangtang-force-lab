@@ -764,7 +764,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if(guided) action.setAttribute('aria-busy','true');
     else action.removeAttribute('aria-busy');
     const guide=!!story.next&&!guided;
-    const next=guided?'길을 따라 가는 중…':story.next?`${withDirectionParticle(villageRewards[story.next].name)} 가기`:'';
+    const next=guided?'길을 따라가는 중…':story.next?`${withDirectionParticle(villageRewards[story.next].name)} 가기`:'';
     if(action.firstChild?.textContent!==next)action.replaceChildren(document.createTextNode(next));
     if(guide&&!action.querySelector('svg'))action.insertAdjacentHTML('beforeend','<svg class="map-direction-cue" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg>');
     if(!guide)action.querySelector('svg')?.remove();
@@ -806,7 +806,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if (building && explainLockedBuilding(building)) return;
     const next=navigation.route(actor,target);
     if(!next){hint.textContent='그곳까지 갈 길이 없어. 흙길이나 다리를 눌러 봐!';updateNearby();draw();return;}
-    clearInput();guided=building;path=next;destination=next.at(-1)??null;updateNearby();hint.textContent=name?`${name} 앞까지 길을 따라 걸어갈게.`:'길을 따라 가는 중… 방향판을 누르면 직접 걸을 수 있어.';canvas.focus();draw();
+    clearInput();guided=building;path=next;destination=next.at(-1)??null;updateNearby();hint.textContent=name?`${name} 앞까지 길을 따라 걸어갈게.`:'길을 따라가는 중… 방향판을 누르면 직접 걸을 수 있어.';canvas.focus();draw();
   }
   function setupLabels() {
     labels.replaceChildren();
