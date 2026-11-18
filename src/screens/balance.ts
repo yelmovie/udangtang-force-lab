@@ -15,6 +15,8 @@ import '../balance.css';
 
 const names: Record<BalanceRun['prediction'], string> = { left: '왼쪽이 내려감', right: '오른쪽이 내려감', level: '수평' };
 const objectName = (id: string) => balanceObjects.find(object => object.id === id)?.label ?? id;
+/** 이/가 after a name: 도자기 블록이, 상자가. */
+const withSubject = (name: string) => { const code = name.charCodeAt(name.length - 1) - 0xac00; return `${name}${code >= 0 && code < 11172 && code % 28 ? '이' : '가'}`; };
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 /** After the pin comes out the beam overshoots a few times, each swing smaller, then rests. */
 function wobble(angle: number): Keyframe[] {
@@ -422,7 +424,7 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
       closePopup();
       const levelRun = state.runs.find(run=>run.actual==='level')!;
       const tilted = state.runs.find(run=>run.actual!=='level')!;
-      context.finish('balance',`${objectName(levelRun.left)}과 ${objectName(levelRun.right)}가 수평임을 관찰했어요. ${reason(tilted)} 예상과 관찰을 ${state.runs.length}번 비교하며 잠금핀을 뽑아 확인했어요. 똑같이 생긴 수수께끼 상자 3개와 4개에서는 수평대 비교 기록을 이어 보고 진짜 기둥 부품을 찾아냈어요.`);
+      context.finish('balance',`${objectName(levelRun.left)}과 ${withSubject(objectName(levelRun.right))} 수평임을 관찰했어요. ${reason(tilted)} 예상과 관찰을 ${state.runs.length}번 비교하며 잠금핀을 뽑아 확인했어요. 똑같이 생긴 수수께끼 상자 3개와 4개에서는 수평대 비교 기록을 이어 보고 진짜 기둥 부품을 찾아냈어요.`);
     }
   },{signal:events.signal});
 

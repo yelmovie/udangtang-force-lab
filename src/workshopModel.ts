@@ -136,6 +136,9 @@ export function workshopL2Complete(record: WorkshopL2Record | undefined): boolea
   return workshopL2Current(record) >= workshopCargos.length;
 }
 
+/** 로/으로 after a quoted label: '…빗면' → '…빗면'으로, '…들기' → '…들기'로 (ㄹ batchim takes 로). */
+const withRo = (label: string) => { const code = label.replace(/['’\s]+$/, '').slice(-1).charCodeAt(0) - 0xac00; const final = code >= 0 && code < 11172 ? code % 28 : 0; return `${label}${final && final !== 8 ? '으로' : '로'}`; };
+
 export function workshopL2DesignLabel(tool: WorkshopL2Tool, setting: number): string {
   return tool === 'direct' ? '직접 들기' : `${tool === 'lever' ? '지레' : '빗면'} · ${getWorkshopDesign(tool, setting).label}`;
 }
@@ -180,7 +183,7 @@ export function workshopL2Recap(record: WorkshopL2Record | undefined): string {
   });
   if (perCargo.some(c => !c.won)) return '';
   if (new Set(perCargo.map(c => c.won)).size === 1 && perCargo.every(c => !c.stalled.length)) return `화물 ${perCargo.length}개를 모두 ${perCargo[0].won} 설계로 올렸어요.`;
-  return perCargo.map(c => `${c.name}은 ${c.stalled.length ? `${c.stalled.join(', ')}로는 멈췄고 ` : ''}${c.won}로 올렸어요.`).join(' ');
+  return perCargo.map(c => `${c.name}은 ${c.stalled.length ? `${withRo(c.stalled.join(', '))}는 멈췄고 ` : ''}${withRo(c.won!)} 올렸어요.`).join(' ');
 }
 
 /** Every two misses on the same cargo the clue gets one step more specific. */

@@ -21,7 +21,7 @@ export function introSentence(intro: LifeIntro | undefined): string {
   const card = intro && lifeCard(intro.card);
   if (!card || !intro.where || !introHelpFor(card.id).includes(intro.help)) return '';
   const note = intro.note.trim();
-  return `나는 ${card.name}${hasFinal(card.name) ? '을' : '를'} 골랐어. ${intro.where}에서 써. ${intro.help} 도와줘. ${card.tool === 'lever' ? '받침점이 있는 지레' : '비스듬한 면이 있는 빗면'}야.${note ? ` ${note}` : ''}`;
+  return `나는 ${card.name}${hasFinal(card.name) ? '을' : '를'} 골랐어. ${intro.where}에서 써. ${intro.help} 도와줘. ${card.tool === 'lever' ? '받침점이 있는 지레' : '비스듬한 면이 있는 빗면'}${card.tool === 'lever' ? '야' : '이야'}.${note ? ` ${note}` : ''}`;
 }
 
 /* ===== Picture cards: each one is a real use of a lever or a ramp. Art: public/assets/life-tools/{id}.webp (320x240). ===== */

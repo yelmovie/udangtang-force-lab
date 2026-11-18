@@ -687,7 +687,7 @@ function renderTitle(root: HTMLElement) {
       <button class="icon-button" data-top="sound" aria-label="소리 ${anySound() ? '끄기' : '켜기'}" aria-pressed="${anySound()}">${soundIcon()}</button>
       <button class="icon-button" data-top="settings" aria-label="설정 열기" aria-haspopup="dialog" title="설정">${settingsIcon()}</button>
     </div>
-    <div class="character" data-pose="title-student" role="img" aria-label="청록 고글과 멜빵바지를 입은 학생 탐구자"></div>
+    <div class="character" data-pose="title-student" role="img" aria-label="청록 고글을 쓰고 멜빵바지를 입은 학생 탐구자"></div>
     <div class="character" data-pose="title-corgi" role="img" aria-label="청록 스카프를 두른 코기 실험 파트너"></div>
     <div class="title-panel">
       <h1 class="illustrated-title"><img src="/assets/ui/title.webp" alt="우당탕 힘 실험실" width="1000" height="375"></h1>

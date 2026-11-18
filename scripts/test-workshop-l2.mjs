@@ -112,7 +112,7 @@ test('the request recap describes only the designs the student actually tried', 
   assert.doesNotMatch(model.workshopL2Recap(kept), /더 길게|바꿔|무거운 화물일수록/);
   // Lever for the first two, a stall on the heavy cargo, then the long ramp: name exactly that.
   const changed = play([[0, 'lever', 0], [1, 'lever', 0], [2, 'lever', 0], [2, 'lever', 0], [2, 'ramp', 1]]);
-  assert.equal(model.workshopL2Recap(changed), "가벼운 화물은 '지레 · 화물 가까이'로 올렸어요. 보통 화물은 '지레 · 화물 가까이'로 올렸어요. 무거운 화물은 '지레 · 화물 가까이'로는 멈췄고 '빗면 · 길고 완만한 빗면'로 올렸어요.");
+  assert.equal(model.workshopL2Recap(changed), "가벼운 화물은 '지레 · 화물 가까이'로 올렸어요. 보통 화물은 '지레 · 화물 가까이'로 올렸어요. 무거운 화물은 '지레 · 화물 가까이'로는 멈췄고 '빗면 · 길고 완만한 빗면'으로 올렸어요.");
   assert.deepEqual(changed.tries.filter(t => t.cargo === 2).length, 2, 'a retried design is kept once');
   // Saves from before tries were recorded give no recap, so the screen falls back to a neutral line.
   assert.equal(model.workshopL2Recap({ cleared: [0, 1, 2], attempts: 3 }), '');
