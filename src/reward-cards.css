@@ -15,7 +15,7 @@
 .rc-slot {
   position: relative; width: 26px; height: 38px; border-radius: 6px; overflow: hidden; flex: none;
   display: grid; place-items: center; background: #0000000f; border: 2px dashed #00000026;
-  color: #0005; font: 800 14px/1 system-ui, sans-serif;
+  color: #0005; font-weight: 800; font-size: 14px; line-height: 1;
 }
 .rc-slot i { font-style: normal; }
 .rc-slot.is-filled { border: 2px solid var(--rc-frame, #c98a4b); background: #fff; box-shadow: 0 0 0 1px #fff8 inset; }
@@ -213,4 +213,28 @@
   .rc-rays, .rc-shine, .rc-slot.is-filled::after, .rc-take.is-ready, .rc-slots.is-complete,
   .rc-card[data-rarity="holo"] .rc-front, .rc-card[data-rarity="legend"] .rc-front { animation: none !important; }
   .rc-fan-item, .rc-complete, .rc-slot.is-new, .rc-layer.is-revealed .rc-stage .rc-stars b { animation-duration: .01s !important; animation-delay: 0s !important; }
+}
+
+/* Host apps often style every button on hover/focus; keep the card buttons' own look. */
+.rc-layer .rc-take:hover, .rc-layer .rc-take:focus { color: #fff; background: linear-gradient(180deg, color-mix(in srgb, var(--rc-accent) 85%, #fff), var(--rc-accent)); }
+.rc-layer .rc-album-item, .rc-layer .rc-album-item:hover, .rc-layer .rc-album-item:focus { background: none; border: 0; box-shadow: none; }
+.rc-layer .rc-album-close:hover, .rc-layer .rc-album-close:focus { color: var(--rc-ink); background: #0000001f; }
+.rc-slots:hover, .rc-slots:focus { background: linear-gradient(180deg, #fffdf6, color-mix(in srgb, var(--rc-accent) 14%, #fff)); }
+
+/* The album row shrinks its cards to fit six (a bonus card) or a narrow screen; small cards show stars only. */
+.rc-album-row { --mh: min(36vh, 270px, calc((min(94vw, 1060px) - 40px - (var(--n, 5) - 1) * 12px) / var(--n, 5) * 1.5)); }
+.rc-album-item .rc-card.is-mini { --h: var(--mh); }
+.rc-album-row .rc-locked { width: calc(var(--mh) * 2 / 3); height: var(--mh); }
+.rc-card.is-mini .rc-rarity { display: none; }
+
+/* Older Safari without color-mix(): plain fallbacks so the buttons never lose their background. */
+@supports not (color: color-mix(in srgb, red, blue)) {
+  .rc-slots, .rc-slots:hover, .rc-slots:focus { border-color: var(--rc-accent); background: #fffdf6; box-shadow: 0 3px 0 #0003, 0 6px 14px #0002; }
+  .rc-take, .rc-layer .rc-take:hover, .rc-layer .rc-take:focus { background: var(--rc-accent); box-shadow: 0 5px 0 #0005, 0 10px 22px #0005; }
+  .rc-new { -webkit-text-stroke-color: var(--rc-accent2); text-shadow: 0 4px 0 var(--rc-accent2), 0 0 22px var(--rc-glow); }
+  .rc-plate span, .rc-locked small { color: var(--rc-ink); }
+  .rc-album-head span { background: #0000001a; }
+  .rc-locked { border-color: #0004; background: #0000000d; }
+  .rc-locked i { color: #0006; }
+  .rc-rays { background: repeating-conic-gradient(from 0deg, #ffffff55 0deg 7deg, #0000 7deg 22deg); }
 }

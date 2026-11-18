@@ -13,6 +13,8 @@ const RARITY = [
 
 const esc = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+// The attribute is set as well as the property: hosts pause on `closest('[inert]')`, also in browsers without native inert.
+const setInert = (root, on) => { if (!root) return; root.inert = on; if (on) root.setAttribute('inert', ''); else root.removeAttribute('inert'); };
 
 /**
  * @param {object} config
@@ -140,7 +142,15 @@ export function createRewardCards(config) {
     const job = queue.shift();
     if (!job) { busy = false; return; }
     busy = true;
-    await play(job.index, job.origin, job.ownedAfter);
+    try {
+      await play(job.index, job.origin, job.ownedAfter);
+    } catch (error) {
+      // A failed reveal must never leave the game frozen: drop the layer, wake the app and still fill the slot.
+      console.error('reward card', error);
+      document.querySelectorAll('.rc-layer').forEach(node => node.remove());
+      setInert(config.inertRoot?.() ?? null, false);
+      syncSlots(job.ownedAfter);
+    }
     job.resolve();
     void next();
   }
@@ -148,6 +158,7 @@ export function createRewardCards(config) {
   async function play(index, origin, ownedAfter) {
     const rm = reduced();
     const root = config.inertRoot?.() ?? null;
+    const wasInert = !!root?.hasAttribute('inert'); // the host's own modal may already hold the app
     const focusBefore = document.activeElement;
     const layer = document.createElement('div');
     layer.className = 'rc-layer';
@@ -163,7 +174,7 @@ export function createRewardCards(config) {
       <button type="button" class="rc-take">카드 보관함에 넣기</button>
       <p class="rc-sr" aria-live="polite"></p>`;
     document.body.append(layer);
-    if (root) root.inert = true;
+    setInert(root, true);
     const fx = rm ? null : particleField(layer);
     const card = layer.querySelector('.rc-card');
     const tilt = layer.querySelector('.rc-tilt');
@@ -246,7 +257,7 @@ export function createRewardCards(config) {
     if (ownedAfter.every(Boolean)) await celebrate(layer, fx, rm);
     fx?.stop();
     layer.remove();
-    if (root) root.inert = false;
+    setInert(root, wasInert);
     if (focusBefore instanceof HTMLElement && focusBefore.isConnected) focusBefore.focus({ preventScroll: true });
   }
 
@@ -286,6 +297,7 @@ export function createRewardCards(config) {
   function openAlbum() {
     if (busy || document.querySelector('.rc-layer')) return;
     const root = config.inertRoot?.() ?? null;
+    const wasInert = !!root?.hasAttribute('inert');
     const focusBefore = document.activeElement;
     const layer = document.createElement('div');
     layer.className = 'rc-layer rc-album is-open is-revealed';
@@ -297,15 +309,15 @@ export function createRewardCards(config) {
     layer.innerHTML = `<div class="rc-scrim" data-album-close></div>
       <div class="rc-album-panel">
         <div class="rc-album-head"><strong>${esc(config.setName)}</strong><span>${count}/${total}</span><button type="button" class="rc-album-close" data-album-close aria-label="보관함 닫기">✕</button></div>
-        <div class="rc-album-row">${cards.map((card, i) => owned[i]
+        <div class="rc-album-row" style="--n:${total}">${cards.map((card, i) => owned[i]
           ? `<button type="button" class="rc-album-item" data-album-card="${i}" aria-label="${esc(card.title)} 크게 보기">${cardHtml(i, 'is-mini')}</button>`
           : `<div class="rc-album-item is-locked" aria-label="아직 못 얻은 카드 ${i + 1}"><div class="rc-locked"><i>?</i><span>${esc(card.stage)}</span><small>악당을 물리치면 열려요</small></div></div>`).join('')}</div>
       </div>`;
     document.body.append(layer);
-    if (root) root.inert = true;
+    setInert(root, true);
     const close = () => {
       layer.remove();
-      if (root) root.inert = false;
+      setInert(root, wasInert);
       removeEventListener('popstate', close);
       if (focusBefore instanceof HTMLElement && focusBefore.isConnected) focusBefore.focus({ preventScroll: true });
     };
