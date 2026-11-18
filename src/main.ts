@@ -426,7 +426,7 @@ function openStoryModal(options: StoryOptions) {
     const dots = options.lines.map(() => '<i></i>').join('');
     modal.innerHTML = `<div class="modal-card story-card story-video-card" role="dialog" aria-modal="true" aria-labelledby="story-title" aria-describedby="story-caption">
       <div class="story-scene cinematic-scene story-video-wrap">
-        <video class="story-video" playsinline controls preload="auto" ${video.poster ? `poster="${video.poster}"` : ''} aria-label="${options.scenes ? '엔딩 영상' : '프롤로그 영상'}" src="${video.src}"></video>
+        <video class="story-video" playsinline preload="auto" ${video.poster ? `poster="${video.poster}"` : ''} aria-label="${options.scenes ? '엔딩 영상' : '프롤로그 영상'}" src="${video.src}"></video>
         <img class="story-end-frame" src="${options.scenes?.at(-1) ?? `/assets/story/intro-0${options.lines.length}.webp`}" alt="" hidden>
         <button type="button" class="button button-primary story-play" data-story="play" hidden>${icons.play} 영상 재생</button>
         <p class="story-video-loading" role="status">영상 준비 중…</p>
@@ -435,7 +435,7 @@ function openStoryModal(options: StoryOptions) {
       <p class="eyebrow" id="story-title"></p>
       <p class="story-text story-caption" id="story-caption" role="status" aria-live="polite"></p>
       <div class="story-dots" aria-hidden="true">${dots}</div>
-      <div class="story-actions">${options.finale ? '<button type="button" class="button button-secondary story-audio-toggle" data-story="audio" aria-pressed="false">영상 소리 켜기</button>' : ''}<button class="button button-secondary" data-story="skip">${options.finale ? '지도로 돌아가기' : '건너뛰기'}</button><button class="button button-primary" data-story="done" hidden>${options.finishLabel}</button></div>
+      <div class="story-actions"><div class="story-film-controls">${options.finale ? '<button type="button" class="button button-secondary story-audio-toggle" data-story="audio" aria-pressed="false">영상 소리 켜기</button>' : ''}<button type="button" class="button button-secondary story-pause-toggle" data-story="pause" aria-pressed="false">일시정지</button><button type="button" class="button button-secondary story-replay" data-story="replay">처음부터</button></div><button class="button button-secondary" data-story="skip">${options.finale ? '지도로 돌아가기' : '건너뛰기'}</button><button class="button button-primary" data-story="done" hidden>${options.finishLabel}</button></div>
     </div>`;
     const el = modal.querySelector<HTMLVideoElement>('video')!;
     el.muted = !anySound();
@@ -446,6 +446,8 @@ function openStoryModal(options: StoryOptions) {
     const playBtn = modal.querySelector<HTMLButtonElement>('[data-story="play"]')!;
     const skipBtn = modal.querySelector<HTMLButtonElement>('[data-story="skip"]')!;
     const doneBtn = modal.querySelector<HTMLButtonElement>('[data-story="done"]')!;
+    const pauseBtn = modal.querySelector<HTMLButtonElement>('[data-story="pause"]')!;
+    const replayBtn = modal.querySelector<HTMLButtonElement>('[data-story="replay"]')!;
     let shown = -1;
     let settled = false;
     const showCue = (i: number) => {
@@ -465,7 +467,7 @@ function openStoryModal(options: StoryOptions) {
     };
     const sync = () => showCue(storyCueIndex(video.cues, el.currentTime));
     const endFrame = modal.querySelector<HTMLImageElement>('.story-end-frame')!;
-    const finishUi = () => { el.controls = false; endFrame.hidden = false; showCue(options.lines.length - 1); skipBtn.hidden = true; doneBtn.hidden = false; playBtn.hidden = true; card.classList.add('is-finished'); celebrate(); doneBtn.focus(); };
+    const finishUi = () => { el.controls = false; endFrame.hidden = false; showCue(options.lines.length - 1); skipBtn.hidden = true; pauseBtn.hidden = true; doneBtn.hidden = false; playBtn.hidden = true; card.classList.add('is-finished'); celebrate(); doneBtn.focus(); };
     const tryPlay = () => {
       const result = el.play();
       if (result && typeof result.then === 'function') result.then(() => { playBtn.hidden = true; }).catch(() => { if (!closed) { playBtn.hidden = false; playBtn.focus(); } });
@@ -481,8 +483,19 @@ function openStoryModal(options: StoryOptions) {
     const loadingNote = modal.querySelector<HTMLElement>('.story-video-loading');
     const onReady = () => { if (loadingNote) loadingNote.hidden = true; };
     el.addEventListener('loadeddata', onReady, { once: true });
-    const onPlay = () => { playBtn.hidden = true; onReady(); };
-    const onPause = () => { if (!el.ended && !el.seeking) playBtn.hidden = false; };
+    const syncPause = () => { const playing = !el.paused && !el.ended; pauseBtn.textContent = playing ? '일시정지' : '재생'; pauseBtn.setAttribute('aria-pressed', String(!playing)); };
+    const onPlay = () => { playBtn.hidden = true; onReady(); syncPause(); };
+    // The captions are burned into the film: once frames really play, the DOM caption stays for screen readers only.
+    const onPlaying = () => { card.classList.add('film-captions'); };
+    const onPause = () => { if (!el.ended && !el.seeking) playBtn.hidden = false; syncPause(); };
+    const togglePause = () => { if (el.ended) return; if (el.paused) tryPlay(); else el.pause(); };
+    pauseBtn.addEventListener('click', () => { tone(470); togglePause(); });
+    el.addEventListener('click', togglePause);
+    replayBtn.addEventListener('click', () => {
+      tone(470);
+      endFrame.hidden = true; card.classList.remove('is-finished'); skipBtn.hidden = false; doneBtn.hidden = true; pauseBtn.hidden = false;
+      el.currentTime = 0; sync(); tryPlay();
+    });
     const audioToggle = modal.querySelector<HTMLButtonElement>('[data-story="audio"]');
     const syncAudio = () => {
       const on = !el.muted && el.volume > 0;
@@ -502,13 +515,14 @@ function openStoryModal(options: StoryOptions) {
     el.addEventListener('timeupdate', sync);
     el.addEventListener('seeked', sync);
     el.addEventListener('play', onPlay);
+    el.addEventListener('playing', onPlaying);
     el.addEventListener('pause', onPause);
     el.addEventListener('ended', finishUi);
     teardownVideo = () => {
       window.clearTimeout(timer);
       el.removeEventListener('loadedmetadata', onMeta); el.removeEventListener('error', fallback);
       el.removeEventListener('timeupdate', sync); el.removeEventListener('seeked', sync);
-      el.removeEventListener('play', onPlay); el.removeEventListener('pause', onPause); el.removeEventListener('ended', finishUi); el.removeEventListener('volumechange', syncAudio);
+      el.removeEventListener('play', onPlay); el.removeEventListener('playing', onPlaying); el.removeEventListener('pause', onPause); el.removeEventListener('click', togglePause); el.removeEventListener('ended', finishUi); el.removeEventListener('volumechange', syncAudio);
       el.pause(); el.removeAttribute('src'); el.load();
     };
     playBtn.addEventListener('click', () => { tone(470); tryPlay(); });
@@ -517,7 +531,7 @@ function openStoryModal(options: StoryOptions) {
   };
   modal.addEventListener('click', event => {
     const button = (event.target as Element).closest<HTMLButtonElement>('[data-story]');
-    if (!button || ['play','audio'].includes(button.dataset.story ?? '')) return;
+    if (!button || ['play','audio','pause','replay'].includes(button.dataset.story ?? '')) return;
     tone(470);
     if (button.dataset.story === 'skip' || button.dataset.story === 'done' || index === options.lines.length - 1) { close(); return; }
     index += 1; draw();

@@ -9,9 +9,20 @@ test('intro and ending videos use the narrated cue plans and every entry point',
   assert.match(main, /video: endingVideo/);
 });
 test('video modal has fallback, play button, cleanup and reduced-motion handling', () => {
-  assert.match(main, /playsinline controls/);
+  assert.match(main, /<video class="story-video" playsinline preload/);
+  assert.doesNotMatch(main, /playsinline controls/, 'native controls would cover the burned-in captions');
   assert.match(main, /addEventListener\('error', fallback\)/);
   assert.match(main, /data-story="play"/);
   assert.match(main, /removeAttribute\('src'\)/);
   assert.match(main, /prefers-reduced-motion: reduce/);
+});
+test('full-screen film keeps the caption zone clear and hides the DOM caption once playing', () => {
+  const css = readFileSync(new URL('../src/storyVideo.css', import.meta.url), 'utf8');
+  assert.match(main, /data-story="pause"/);
+  assert.match(main, /data-story="replay"/);
+  assert.match(main, /addEventListener\('playing', onPlaying\)/);
+  assert.match(main, /classList\.add\('film-captions'\)/);
+  assert.match(css, /\.story-video-card \.story-video \{[^}]*object-fit: contain/);
+  assert.match(css, /\.film-captions > \.story-caption\.story-text/);
+  assert.match(main, /id="story-caption" role="status" aria-live="polite"/);
 });
