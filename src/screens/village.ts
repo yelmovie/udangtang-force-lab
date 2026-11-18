@@ -942,7 +942,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     const mission = story.next ? villageRewards[story.next].name : '열린 실험실';
     const message = `먼저 ${mission} 미션을 끝내고 와 줘! 실험과 의뢰를 마치고 복구하면 다음 건물에 들어갈 수 있어.`;
     hint.textContent = message;
-    openTalk({ name: map?.npcs[0]?.name ?? '마을 안내원', role: `${villageRewards[building.id].name} 입장 안내`, text: message, portrait: 'guide', done: '미션을 끝내고 올게!' });
+    openTalk({ name: map?.npcs[0]?.name ?? '마을 안내원', role: `${villageRewards[building.id].name} 입장 안내`, text: message, portrait: 'guide', done: '미션을 끝내고 올게요!' });
     return true;
   }
   function enterBuilding(building: Building) {
@@ -957,7 +957,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if(!map||paused())return;updateNearby();
     if(nearestNpc){
       const ordered = story.changes.every((stage, index) => stage === stageIds[index]);
-      openTalk({name:nearestNpc.name,role:'마을의 안내원',text:story.lines.join(' '),portrait:'guide',voice:ordered ? `npc-dialogue/guide-${story.next ?? 'complete'}` : undefined,done:'탐구하러 갈게!'});return;
+      openTalk({name:nearestNpc.name,role:'마을의 안내원',text:story.lines.join(' '),portrait:'guide',voice:ordered ? `npc-dialogue/guide-${story.next ?? 'complete'}` : undefined,done:'탐구하러 갈게요!'});return;
     }
     if(nearestClient){openClient(nearestClient);return;}
     if(nearBoard){openBoard();return;}

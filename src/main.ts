@@ -375,8 +375,8 @@ const prologueLines = [
 ];
 type StoryVideo = { src: string; cues: number[]; duration: number; poster?: string };
 type StoryOptions = { lines: { who: string; text: string }[]; finishLabel: string; onDone?: () => void; skippable?: boolean; scenes?: string[]; video?: StoryVideo; music?: MusicName; finale?: boolean };
-const introVideo: StoryVideo = { src: '/assets/story/intro.mp4', cues: [0, 6, 12], duration: 16, poster: '/assets/story/intro-01.webp' };
-const endingVideo: StoryVideo = { src: '/assets/story/ending.mp4', cues: [0, 4, 10], duration: 16, poster: '/assets/story/final-01.webp' };
+const introVideo: StoryVideo = { src: '/assets/story/intro.mp4', cues: [0, 6, 13], duration: 18, poster: '/assets/story/intro-01.webp' };
+const endingVideo: StoryVideo = { src: '/assets/story/ending.mp4', cues: [0, 5, 13], duration: 21.2, poster: '/assets/story/final-01.webp' };
 function storyCueIndex(cues: number[], time: number): number {
   let found = 0;
   cues.forEach((start, i) => { if (time >= start) found = i; });

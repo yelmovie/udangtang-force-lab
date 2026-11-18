@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-18",
+  "purpose": "인트로·엔딩 이야기 영상의 도토리 박사 대사를 마을 대화와 같은 할아버지 목소리로 다시 녹음. 소리를 분리할 수 없어 콩이 대사도 함께 다시 녹음했다.",
+  "provider": "ElevenLabs",
+  "model": "eleven_v4",
+  "flowId": "xcdWAgpQhH3mppto2ttY",
+  "voices": {
+    "guide": { "speaker": "도토리 박사", "voice": "Grandfather Namchun", "voiceId": "5ON5Fnz24cnOozEQfGAm", "note": "마을 대화 음성(docs/npc-dialogue-voice.json)과 같은 목소리" },
+    "kong": { "speaker": "코기 콩이", "voice": "sena - Friendly, Cheerful", "voiceId": "vJ170fCwESgE1tjW39So" }
+  },
+  "lines": [
+    { "video": "intro", "cue": 0, "speaker": "guide", "file": "intro-1-a.mp3", "generationId": "uv6Xm1sT81k7Nu5LKgxi", "prompt": "[surprised, warm grandfather] 우당탕 마을에 전기가 모두 나갔어! 무슨 일이 생긴 걸까?", "asr": "우당탕 마을에 전기가 모두 나갔어! 무슨 일이 생긴 걸까?", "duration": 4.05 },
+    { "video": "intro", "cue": 6, "speaker": "guide", "file": "intro-2-b.mp3", "generationId": "NLbyAcJMI5kgM1fCRgrl", "prompt": "[warm grandfather, brisk and clear] 원인을 찾았어! 마을의 배터리 코어가 중앙 장치에서 분리돼 있어. 다시 끼워야 전기가 돌아와.", "asr": "원인을 찾았어! 마을의 배터리 코어가 중앙 장치에서 분리돼 있어. 다시 끼워야 전기가 돌아와.", "duration": 6.43 },
+    { "video": "intro", "cue": 13, "speaker": "kong", "file": "intro-3-a.mp3", "generationId": "ByFCmABsDrMr0Vr0vIZK", "prompt": "[bright, cute and determined] 코어가 너무 무거워! 힘을 쓰는 방법을 배워서 다시 끼우자!", "asr": "코어가 너무 무거워! 힘을 쓰는 방법을 배워서 다시 끼우자!", "duration": 4.52 },
+    { "video": "ending", "cue": 0, "speaker": "kong", "file": "ending-1-a.mp3", "generationId": "CwOh3zwfMhZUOrO9bhki", "prompt": "[excited, bright and quick] 딸깍! 떨어져 있던 배터리 코어를 중앙 장치에 다시 끼웠어!", "asr": "딸깍! 떨어져 있던 배터리 코어를 중앙 장치에 다시 끼웠어!", "duration": 4.36 },
+    { "video": "ending", "cue": 5, "speaker": "guide", "file": "ending-2-a.mp3", "generationId": "SD974dTq7gJSd2uvUDXi", "prompt": "[proud, warm grandfather, brisk and clear] 무게를 확인하고, 막힌 길을 열고, 도구를 비교했지. 네 건물에서 배운 방법으로 무거운 코어를 옮긴 거야.", "asr": "무게를 확인하고, 막힌 길을 열고, 도구를 비교했지. 네 건물에서 배운 방법으로 무거운 코어를 옮긴 거야.", "duration": 7.39 },
+    { "video": "ending", "cue": 13, "speaker": "kong", "file": "ending-3-a.mp3", "generationId": "vlTT6VWwKB0yVCHi5kr2", "prompt": "[delighted, bright and lively] 와, 코어가 다시 연결되니까 마을 전체에 전기가 돌아왔어! 우리가 힘을 모아 우당탕 마을을 다시 밝혔네!", "asr": "와, 코어가 다시 연결되니까 마을 전체에 전기가 돌아왔어! 우리가 힘을 모아 우당탕 마을을 다시 밝혔네!", "duration": 7.81 }
+  ],
+  "render": {
+    "script": ".tmp/voice-20261118/build/render.sh (SSD 작업 폴더, 저장소 제외)",
+    "voiceFiles": "references/audio/story-voice-20261118/ (저장소 제외, SSD 보관)",
+    "background": "내레이션을 넣기 전 영상(2026-10-18 배포본)의 배경 소리를 장면 길이에 맞춰 늘려 깔았다",
+    "video": "기존 영상의 장면을 대사 길이에 맞게 천천히 재생(intro 6·7·5초, ending 5·8·8.2초)",
+    "intro": { "duration": 18, "cues": [0, 6, 13], "lufs": -16.7, "peakDbfs": -0.9 },
+    "ending": { "duration": 21.2, "cues": [0, 5, 13], "lufs": -16.2, "peakDbfs": -0.4 },
+    "previousFiles": "references/video/story-before-20261118/ (교체 전 intro.mp4, ending.mp4)"
+  }
+}
