@@ -81,7 +81,7 @@ export function openLearningReview(options: {
     const answer = record.answers[step];
     const correct = answer?.chosen === q.correct;
     modal.innerHTML = `<section class="modal-card learning-card" role="dialog" aria-modal="true" aria-labelledby="learning-title">
-      <div class="learning-heading"><img src="/assets/village/corgi/down-1.webp" alt=""><div><p class="eyebrow">문제 풀기 · ${step + 1} / ${task.questions.length}</p><h2 id="learning-title">${task.stage === 'balance' ? '그림을 보고 생각해 봐요' : '내가 발견한 것을 써볼까요?'}</h2></div><button class="learning-close" aria-label="결과로 돌아가기">×</button></div>
+      <div class="learning-heading"><img src="/assets/village/corgi/down-1.webp" alt=""><div><p class="eyebrow">문제 풀기 · ${step + 1} / ${task.questions.length}</p><h2 id="learning-title">${task.stage === 'balance' ? '그림을 보고 생각해 봐요' : '내가 발견한 것을 써볼까요?'}</h2></div></div>
       <div class="learning-body"><div class="learning-records">
       ${predicted ? `<p class="learning-first-thought"><strong>콩이가 간직한 내 첫 생각:</strong> ${escape(predicted)} <span>· ${escape(inquiryPlans[options.stage].observation)}</span></p>` : ''}
       <p class="learning-record-label">▤ 내 실험에서 관찰한 기록</p><div class="learning-evidence-grid">${evidenceMarkup(task)}</div>

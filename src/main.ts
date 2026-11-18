@@ -37,6 +37,7 @@ import { bagIcon, openToolBag, toolCardRevealMarkup, toolCardRowMarkup } from '.
 import './studentUx.css';
 import './tabletUx.css';
 import './glass-ui.css';
+import './layoutBalance.css';
 import { icons } from './icons';
 import { bindRewardSound, rewardSlotsHtml } from './rewardCards';
 
@@ -660,7 +661,7 @@ function header(title: string, subtitle: string) {
   return `<header class="topbar">
     <div class="top-nav">
       <button class="icon-button" data-top="back" aria-label="이전 페이지로" title="이전"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 5l-7 7 7 7"/></svg></button>
-      <button class="icon-button" data-top="home" aria-label="작전 지도로" title="작전 지도"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/></svg></button>
+      ${viewPage === 'map' ? '' : `<button class="icon-button" data-top="home" aria-label="작전 지도로" title="작전 지도"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-6h4v6"/></svg></button>`}
     </div>
     <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48" width="34" height="34"><path d="M18 5h12M21 6v13L11 35a5 5 0 0 0 4 8h18a5 5 0 0 0 4-8L27 19V6" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 32h18l4 6-3 5H14l-3-5z" fill="#73bba2"/><circle cx="20" cy="35" r="2" fill="#f6b45e"/><circle cx="28" cy="38" r="2" fill="#f6b45e"/></svg></span><span>우당탕<br><strong>힘 실험실</strong></span></div>
     <div class="topbar-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기 · 학생 기록과 분리' : '초등 3학년 과학 · 힘과 우리 생활'}</span><strong>${title}</strong><span>${subtitle}</span></div>
