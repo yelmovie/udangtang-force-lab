@@ -1,11 +1,13 @@
 /** Map villain moments: swing on the press, hits on the impact frame, then the roll-away exit. */
-export type MapSound = 'attack' | 'hit1' | 'hit2' | 'hit3' | 'villainExit' | 'villainAppear' | 'hurt';
+export type MapSound = 'attack' | 'hit1' | 'hit2' | 'hit3' | 'villainExit' | 'villainAppear' | 'hurt' | 'cardWhoosh' | 'cardReveal' | 'cardEpic' | 'cardSlot' | 'cardComplete';
 type SoundName = 'click' | 'bump' | 'success' | MapSound;
 export type MusicName = 'stage' | 'ending';
 const files: Record<SoundName, string> = {
   click: 'click_003.ogg', bump: 'error_001.ogg', success: 'confirmation_002.ogg',
   attack: 'sfx/attack-swing-03.mp3', hit1: 'sfx/wood-knock-01.mp3', hit2: 'sfx/metal-clank-01.mp3', hit3: 'sfx/hit-heavy-02.mp3',
   villainExit: 'sfx/villain-exit-01.mp3', villainAppear: 'sfx/villain-appear-01.mp3', hurt: 'sfx/hurt-bump-03.mp3',
+  // Achievement card: fly in, reveal (the two rarest use the longer jingle), land in the slot, full set.
+  cardWhoosh: 'sfx/wind-whoosh-03.mp3', cardReveal: 'sfx/reward-01.mp3', cardEpic: 'sfx/reward-03.mp3', cardSlot: 'sfx/pickup-01.mp3', cardComplete: 'sfx/victory-jingle-01.mp3',
 };
 /** Per-role loudness under the effects volume. The map files are already quieter than the interface sounds, so only the entrance and exit are lowered. */
 const levels: Partial<Record<SoundName, number>> = { villainExit: .8, villainAppear: .7 };

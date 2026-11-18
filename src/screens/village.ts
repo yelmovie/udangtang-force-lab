@@ -10,6 +10,7 @@ import { stageIsOpen } from '../state';
 import { getVillageStory, villageRewards } from '../villageStory';
 import '../village.css';
 import { attackRange, contactRange, drawEncounterFrame, drawStageProp, drawWrenchSparks, encounterAtlas, encounterLines, facingToward, type Encounter } from '../villageEncounters';
+import { revealRewardCard } from '../rewardCards';
 import { mountDialogueText } from '../npcDialogue';
 import { mountDialogueVoice, setDialoguePortrait } from '../npcDialogueVoice';
 import { newlySolved, requestBoard, requestThanks, solvedRequests, villageRequests, type RequestStage } from '../requestBoard';
@@ -669,6 +670,16 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     context.cue('attack');
     cueLater(hits === 3 ? 'hit3' : hits === 2 ? 'hit2' : 'hit1', 80);
     if (hits === 3) cueLater('villainExit', 480);
+    if (hits === 3) {
+      // The card waits for the villain's exit; opening it pauses the map, so the finale follows the card.
+      const id = window.setTimeout(() => {
+        cueTimers.delete(id);
+        if (!alive || !map) return;
+        const bounds = canvas.getBoundingClientRect();
+        void revealRewardCard(enemy.index, { x: bounds.left + enemy.x / map.width * bounds.width, y: bounds.top + (enemy.y - 30) / map.height * bounds.height }, context.save);
+      }, reduced.matches ? 520 : 760);
+      cueTimers.add(id);
+    }
     updateEncounters(now);
     draw();
   }

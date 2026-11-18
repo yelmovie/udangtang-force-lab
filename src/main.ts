@@ -36,6 +36,7 @@ import './studentUx.css';
 import './tabletUx.css';
 import './glass-ui.css';
 import { icons } from './icons';
+import { bindRewardSound, rewardSlotsHtml } from './rewardCards';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 let save: SaveData = readSave() ?? freshSave();
@@ -66,6 +67,7 @@ function cue(name: MapSound) {
   setVolume(save.soundVolume ?? 0.3);
   playSound(name);
 }
+bindRewardSound(cue);
 /** While a story video is open it decides the music: the ending plays its own track, the prologue keeps quiet for its own sound. */
 let storyMusic: MusicName | 'quiet' | null = null;
 /** Background music has its own switch in settings; the header button turns music and effects on or off together. */
@@ -533,6 +535,7 @@ function openStoryModal(options: StoryOptions) {
   if (options.video) drawVideo(options.video); else draw();
 }
 function openEndingCeremony() {
+  stopSounds(); // The card-collection jingle must not run over the ceremony music.
   if (!adminUnlocked && !canPlayMapFinale(save)) {
     toast(`지도 악당 5마리를 모두 물리치면 점등식 영상이 열려요. 지금 ${defeatedMapVillains(save)} / 5`);
     return;
@@ -643,6 +646,7 @@ function header(title: string, subtitle: string) {
     <div class="topbar-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기 · 학생 기록과 분리' : '초등 3학년 과학 · 힘과 우리 생활'}</span><strong>${title}</strong><span>${subtitle}</span></div>
     <div class="top-actions">
       ${viewPage === 'map' ? '' : toolBag}
+      ${rewardSlotsHtml(adminSave ?? save)}
       <button class="icon-button" data-top="sound" aria-label="소리 ${anySound() ? '끄기' : '켜기'}" aria-pressed="${anySound()}">${soundIcon()}</button>
       <button class="icon-button" data-top="settings" aria-label="설정 열기" aria-haspopup="dialog" title="설정">${settingsIcon()}</button>
     </div>
