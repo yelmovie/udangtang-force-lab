@@ -17,7 +17,7 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 /**
  * @param {object} config
  * @param {string} config.setName      Collection name, e.g. '힘 실험실 성취 카드'
- * @param {{id:string,title:string,stage:string,art:string,thumb?:string}[]} config.cards  Five cards in stage order.
+ * @param {{id:string,title:string,stage:string,art:string,thumb?:string,rarity?:number,bonus?:boolean}[]} config.cards  Cards in stage order (five; a sixth boss card sets `bonus`). `rarity` 0-4 defaults to the position.
  * @param {{accent:string,accent2:string,glow:string,ink?:string,back?:string}} config.theme
  * @param {string[]} config.particles  Shapes: star, spark, circle, gear, bolt, drop, leaf, note, petal, snow, bubble, heart
  * @param {string[]} config.colors     Particle colours.
@@ -34,6 +34,8 @@ export function createRewardCards(config) {
     const t = config.theme;
     return `--rc-accent:${t.accent};--rc-accent2:${t.accent2};--rc-glow:${t.glow};--rc-ink:${t.ink ?? '#1d2b33'};--rc-back:${t.back ?? t.accent2}`;
   };
+  const rarityOf = index => RARITY[Math.max(0, Math.min(RARITY.length - 1, cards[index]?.rarity ?? index))];
+  const starsOf = index => RARITY.indexOf(rarityOf(index)) + 1;
   let owned = cards.map(() => false);
   let busy = false;
   const queue = [];
@@ -42,7 +44,7 @@ export function createRewardCards(config) {
   function slotsHtml(ownedList) {
     owned = cards.map((_, i) => !!ownedList[i]);
     const count = owned.filter(Boolean).length;
-    const slots = cards.map((card, i) => `<span class="rc-slot${owned[i] ? ' is-filled' : ''}" data-rarity="${RARITY[i]?.key ?? 'bronze'}" data-reward-slot="${i}">${owned[i] ? `<img src="${esc(card.thumb ?? card.art)}" alt="" draggable="false">` : '<i aria-hidden="true">?</i>'}</span>`).join('');
+    const slots = cards.map((card, i) => `<span class="rc-slot${owned[i] ? ' is-filled' : ''}${card.bonus ? ' is-bonus' : ''}" data-rarity="${rarityOf(i).key}" data-reward-slot="${i}">${owned[i] ? `<img src="${esc(card.thumb ?? card.art)}" alt="" draggable="false">` : `<i aria-hidden="true">${card.bonus ? '★' : '?'}</i>`}</span>`).join('');
     return `<button type="button" class="rc-slots${count === total ? ' is-complete' : ''}" data-reward-album style="${themeStyle()}" aria-label="${esc(config.setName)} ${count}/${total}장, 카드 보관함 열기" title="성취 카드 ${count}/${total}">${slots}</button>`;
   }
   function syncSlots(ownedList, popIndex) {
@@ -67,13 +69,13 @@ export function createRewardCards(config) {
   // ---------- card markup ----------
   function cardHtml(index, extraClass = '') {
     const card = cards[index];
-    const rarity = RARITY[index] ?? RARITY[0];
-    const stars = Array.from({ length: index + 1 }, (_, s) => `<b style="--s:${s}">★</b>`).join('');
+    const rarity = rarityOf(index);
+    const stars = Array.from({ length: starsOf(index) }, (_, s) => `<b style="--s:${s}">★</b>`).join('');
     return `<div class="rc-card ${extraClass}" data-rarity="${rarity.key}">
       <div class="rc-face rc-front">
         <div class="rc-art"><img src="${esc(card.art)}" alt="" draggable="false"></div>
         <div class="rc-shine" aria-hidden="true"></div>
-        <div class="rc-top"><span class="rc-stars" aria-label="별 ${index + 1}개">${stars}</span><span class="rc-rarity">${rarity.label}</span></div>
+        <div class="rc-top"><span class="rc-stars" aria-label="별 ${starsOf(index)}개">${stars}</span><span class="rc-rarity">${card.bonus ? '보너스' : rarity.label}</span></div>
         <div class="rc-plate"><strong>${esc(card.title)}</strong><span>${esc(card.stage)} · ${index + 1}/${total}</span></div>
       </div>
       <div class="rc-face rc-back" aria-hidden="true"><div class="rc-emblem">${config.emblem ?? '★'}</div></div>
@@ -150,7 +152,8 @@ export function createRewardCards(config) {
     const layer = document.createElement('div');
     layer.className = 'rc-layer';
     layer.style.cssText = themeStyle();
-    layer.dataset.rarity = RARITY[index]?.key ?? 'bronze';
+    layer.dataset.rarity = rarityOf(index).key;
+    const tier = starsOf(index) - 1; // 0-4: how big the reveal is
     layer.setAttribute('role', 'dialog');
     layer.setAttribute('aria-modal', 'true');
     layer.setAttribute('aria-label', `새 성취 카드: ${cards[index].title}`);
@@ -171,29 +174,29 @@ export function createRewardCards(config) {
     if (rm) {
       card.animate([{ opacity: 0, transform: 'scale(.92)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 260, easing: 'ease-out', fill: 'both' });
       layer.classList.add('is-revealed');
-      sound(index >= 3 ? 'epic' : 'reveal');
+      sound(tier >= 3 ? 'epic' : 'reveal');
     } else {
       const c = center();
       const from = origin ? { x: origin.x - c.x, y: origin.y - c.y } : { x: 0, y: innerHeight * .35 };
       sound('whoosh');
-      const turns = 1080 + 360 * Math.min(2, Math.floor(index / 2));
+      const turns = 1080 + 360 * Math.min(2, Math.floor(tier / 2));
       const spin = card.animate([
         { transform: `translate(${from.x}px,${from.y}px) scale(.12) rotateY(180deg) rotateZ(-25deg)`, opacity: 0 },
         { offset: .12, opacity: 1 },
         { offset: .78, transform: `translate(0,0) scale(1.14) rotateY(${turns - 40}deg) rotateZ(4deg)` },
         { transform: `translate(0,0) scale(1) rotateY(${turns}deg) rotateZ(0deg)`, opacity: 1 },
-      ], { duration: 1250 + index * 90, easing: 'cubic-bezier(.18,.7,.2,1)', fill: 'both' });
+      ], { duration: 1250 + tier * 90, easing: 'cubic-bezier(.18,.7,.2,1)', fill: 'both' });
       await spin.finished.catch(() => {});
       card.style.transform = 'none';
       spin.cancel();
       layer.classList.add('is-revealed');
       const p = center();
-      fx.burst(p.x, p.y, 46 + index * 22, 1 + index * .12);
-      if (index >= 3) setTimeout(() => fx.burst(p.x, p.y, 40, 1.4), 260);
-      if (index === 4) fx.rain(70);
-      sound(index >= 3 ? 'epic' : 'reveal');
+      fx.burst(p.x, p.y, 46 + tier * 22, 1 + tier * .12);
+      if (tier >= 3) setTimeout(() => fx.burst(p.x, p.y, 40, 1.4), 260);
+      if (tier === 4) fx.rain(70);
+      sound(tier >= 3 ? 'epic' : 'reveal');
     }
-    layer.querySelector('.rc-sr').textContent = `${cards[index].title} 카드를 얻었어요. 별 ${index + 1}개 ${RARITY[index]?.label ?? ''} 카드.`;
+    layer.querySelector('.rc-sr').textContent = `${cards[index].title} 카드를 얻었어요. 별 ${starsOf(index)}개 ${rarityOf(index).label} 카드.`;
 
     // Gentle hover tilt while the student looks at the card.
     const onMove = event => {

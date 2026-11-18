@@ -25,6 +25,7 @@
 .rc-slot[data-rarity="gold"] { --rc-frame: #e8b235; }
 .rc-slot[data-rarity="holo"] { --rc-frame: #b58cf2; }
 .rc-slot[data-rarity="legend"] { --rc-frame: #ff6fae; }
+.rc-slot.is-bonus { border-radius: 50% 50% 6px 6px; border-color: #e8b23599; color: #c98a1e; }
 .rc-slot.is-filled::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(115deg, #0000 30%, #fff9 46%, #0000 60%); background-size: 260% 100%;

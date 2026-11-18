@@ -1,5 +1,5 @@
 export type RewardSound = 'whoosh' | 'reveal' | 'epic' | 'slot' | 'complete';
-export interface RewardCard { id: string; title: string; stage: string; art: string; thumb?: string }
+export interface RewardCard { id: string; title: string; stage: string; art: string; thumb?: string; rarity?: number; bonus?: boolean }
 export interface RewardCardsConfig {
   setName: string;
   cards: RewardCard[];
