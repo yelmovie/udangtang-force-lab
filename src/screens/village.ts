@@ -12,7 +12,7 @@ import '../village.css';
 import { attackRange, contactRange, drawEncounterFrame, drawStageProp, drawWrenchSparks, encounterAtlas, encounterLines, facingToward, type Encounter } from '../villageEncounters';
 import { revealRewardCard } from '../rewardCards';
 import { mountDialogueText } from '../npcDialogue';
-import { mountDialogueVoice, setDialoguePortrait } from '../npcDialogueVoice';
+import { mountDialogueVoice, playVoiceLine, setDialoguePortrait, stopVoiceLine } from '../npcDialogueVoice';
 import { newlySolved, requestBoard, requestThanks, solvedRequests, villageRequests, type RequestStage } from '../requestBoard';
 
 type Point = { x: number; y: number };
@@ -355,6 +355,12 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   let nearestClient: RequestStage | undefined, nearBoard = false;
   type Talk = { name: string; role: string; text: string; portrait: string; voice?: string; done: string };
   const voice = mountDialogueVoice(dialog, () => context.save);
+  // Villain bubble lines are voiced when their text appears; greetings never cut off the doctor's banner line.
+  const villainSay = (id: StageId, index: number, text: string) => {
+    if (encounterText.textContent === text) return;
+    encounterText.textContent = text;
+    playVoiceLine(`villain/${id}-${index + 1}`, { polite: index < 2 });
+  };
   const dialogueText = mountDialogueText(dialog, nextLine, closeDialogue);
   let revealStage = options.newlyCompleted && story.changes.includes(options.newlyCompleted) ? options.newlyCompleted : undefined;
   // Reveal timeline (seconds): windows light up, then light runs along the road to the core.
@@ -609,7 +615,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     if(options.newlyCompleted&&!options.adminUnlocked&&!clearShown&&clearReady!==null&&now-clearReady>=1250){clearShown=true;clearUntil=now+4200;if(encounters.some(e=>e.id===options.newlyCompleted))context.cue('villainAppear');}
     if(clearUntil>now&&!paused()&&options.newlyCompleted){
       encounterHud.hidden=false;encounterPips.hidden=true;
-      encounterText.textContent='바퀴 잠금 악당 · “'+encounterLines[options.newlyCompleted][0]+'”';
+      villainSay(options.newlyCompleted, 0, '바퀴 잠금 악당 · “'+encounterLines[options.newlyCompleted][0]+'”');
       layoutEncounterHud(now);
       return;
     }
@@ -619,7 +625,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     encounterHud.hidden = hidden;
     if (!hudEnemy || hidden) return;
     if (hudEnemy !== previous && hudEnemy === nearbyEnemy) {
-      encounterText.textContent = encounterLines[hudEnemy.id][hudEnemy.visits % 2];
+      villainSay(hudEnemy.id, hudEnemy.visits % 2, encounterLines[hudEnemy.id][hudEnemy.visits % 2]);
       hudEnemy.visits++;
     }
     const hits = hitCount(hudEnemy);
@@ -665,7 +671,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       }
       context.commit();
     }
-    encounterText.textContent = encounterLines[enemy.id][hits+1];
+    villainSay(enemy.id, hits + 1, encounterLines[enemy.id][hits+1]);
     if (hits===3 && story.complete) hint.textContent=restHint();
     context.cue('attack');
     cueLater(hits === 3 ? 'hit3' : hits === 2 ? 'hit2' : 'hit1', 80);
@@ -953,7 +959,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     const mission = story.next ? villageRewards[story.next].name : '열린 실험실';
     const message = `먼저 ${mission} 미션을 끝내고 와 줘! 실험과 의뢰를 마치고 복구하면 다음 건물에 들어갈 수 있어.`;
     hint.textContent = message;
-    openTalk({ name: map?.npcs[0]?.name ?? '마을 안내원', role: `${villageRewards[building.id].name} 입장 안내`, text: message, portrait: 'guide', done: '미션을 끝내고 올게요!' });
+    openTalk({ name: map?.npcs[0]?.name ?? '마을 안내원', role: `${villageRewards[building.id].name} 입장 안내`, text: message, portrait: 'guide', voice: story.next ? `npc-dialogue/locked-${story.next}` : undefined, done: '미션을 끝내고 올게요!' });
     return true;
   }
   function enterBuilding(building: Building) {
@@ -1090,7 +1096,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
         const goal=candidate.buildings.find(b=>b.id===story.next);
         const low=goal&&(goal.y+goal.height*.42)/candidate.height>.45;
         reveal.style.left=low?`${(goal.x+goal.width/2)/candidate.width<.5?57:43}%`:'';
-        reveal.classList.remove('is-compact');reveal.hidden=false;hint.textContent=villageRewards[revealStage].changeDescription;
+        reveal.classList.remove('is-compact');reveal.hidden=false;hint.textContent=villageRewards[revealStage].changeDescription;playVoiceLine(`npc-dialogue/${revealStage}-return`);
       }
       else hint.textContent=story.complete?restHint():returned?`다시 마을이야! 불이 켜진 ${villageRewards[story.next!].name} 이름표를 누르면 걸어가요.`:'불이 켜진 건물 이름을 누르면 실험하러 걸어가요.';
       last=performance.now();if(encounters.length)updateEncounters(last);raf=requestAnimationFrame(tick);canvas.focus({preventScroll:true});
@@ -1189,5 +1195,5 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   retry.addEventListener('click',()=>void loadWorld(),{signal:events.signal});
   reduced.addEventListener('change',()=>{if(reduced.matches)lights.querySelectorAll('.village-spark').forEach(spark=>spark.remove());draw();},{signal:events.signal});
   void loadWorld();
-  return()=>{cueTimers.forEach(id=>clearTimeout(id));cueTimers.clear();voice.destroy();dialogueText.destroy();alive=false;generation++;cancelAnimationFrame(raf);fetches.abort();cancelImages.forEach(cancel=>cancel());clearInput();events.abort();observer.disconnect();if(dialog.open)dialog.close();if(board.open)board.close();portrait.removeAttribute('style');tinted.clear();images.clear();metadata.clear();};
+  return()=>{stopVoiceLine();cueTimers.forEach(id=>clearTimeout(id));cueTimers.clear();voice.destroy();dialogueText.destroy();alive=false;generation++;cancelAnimationFrame(raf);fetches.abort();cancelImages.forEach(cancel=>cancel());clearInput();events.abort();observer.disconnect();if(dialog.open)dialog.close();if(board.open)board.close();portrait.removeAttribute('style');tinted.clear();images.clear();metadata.clear();};
 }

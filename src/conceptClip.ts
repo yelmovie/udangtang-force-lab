@@ -4,6 +4,7 @@
 import './conceptClip.css';
 import './concept-focus.css';
 import {bindConceptFocus} from './concept-focus.js';
+import {playVoiceLine, stopVoiceLine, voiceLinePlaying} from './npcDialogueVoice';
 
 export type ConceptStage = 'cargo' | 'balance' | 'scale' | 'workshop' | 'rescue';
 type Clip = { title: string; cues: { at: number; text: string }[] };
@@ -91,6 +92,14 @@ export function openConceptClip(stage: ConceptStage): void {
   const closeButton = layer.querySelector<HTMLButtonElement>('[data-concept-action="close"]')!;
   const dots = Array.from(layer.querySelectorAll<HTMLElement>('.concept-dots i'));
   let shown = -1, closed = false, failed = false;
+  // Each caption is read aloud (the video stays silent). If a line is still being read when the next cue
+  // comes, the video holds on the current caption until the line ends.
+  let voiced = -1, holding = false;
+  const voice = (index: number) => {
+    if (index === voiced || closed || failed) return;
+    voiced = index;
+    playVoiceLine(`concept/${stage}-${index + 1}`, { onEnd: () => { if (holding && !closed) { holding = false; play(); } } });
+  };
 
   const showCue = (index: number) => {
     if (index === shown) return;
@@ -99,9 +108,12 @@ export function openConceptClip(stage: ConceptStage): void {
     dots.forEach((dot, i) => dot.classList.toggle('on', i === index));
   };
   const sync = () => {
+    if (holding) return;
     let index = 0;
     clip.cues.forEach((cue, i) => { if (video.currentTime >= cue.at) index = i; });
+    if (index !== shown && voiced === shown && voiceLinePlaying()) { if (!video.paused) { holding = true; video.pause(); } return; }
     showCue(index);
+    if (!video.paused) voice(index);
   };
   const play = () => {
     endFrame.hidden = true;
@@ -134,13 +146,13 @@ export function openConceptClip(stage: ConceptStage): void {
     window.clearTimeout(timer);
     if (reduced) { playButton.hidden = false; playButton.focus(); } else play();
   };
-  const onPause = () => { if (!video.ended && !video.seeking && !closed && !failed) playButton.hidden = false; };
+  const onPause = () => { if (!holding && !video.ended && !video.seeking && !closed && !failed) playButton.hidden = false; };
   const timer = window.setTimeout(() => { if (video.readyState < 1) fallback(); }, 6000);
   video.addEventListener('loadedmetadata', onMeta);
   video.addEventListener('error', fallback);
   video.addEventListener('timeupdate', sync);
   video.addEventListener('seeked', sync);
-  video.addEventListener('play', () => { playButton.hidden = true; replayButton.hidden = true; });
+  video.addEventListener('play', () => { playButton.hidden = true; replayButton.hidden = true; voice(shown); });
   video.addEventListener('pause', onPause);
   video.addEventListener('ended', onEnded);
   video.src = asset(stage, video.canPlayType('video/webm; codecs="vp9"') ? 'webm' : 'mp4');
@@ -149,6 +161,7 @@ export function openConceptClip(stage: ConceptStage): void {
   const close = () => {
     if (closed) return;
     closed = true;
+    stopVoiceLine();
     releaseFocus();
     window.clearTimeout(timer);
     document.removeEventListener('keydown', onKey, true);
@@ -170,7 +183,7 @@ export function openConceptClip(stage: ConceptStage): void {
   };
   document.addEventListener('keydown', onKey, true);
   playButton.addEventListener('click', play);
-  replayButton.addEventListener('click', () => { video.currentTime = 0; showCue(0); play(); });
+  replayButton.addEventListener('click', () => { video.currentTime = 0; voiced = -1; holding = false; showCue(0); play(); });
   closeButton.addEventListener('click', close);
   layer.addEventListener('modal-dismiss', close);
   layer.addEventListener('click', event => { if (event.target === layer) close(); });

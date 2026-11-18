@@ -51,7 +51,7 @@ export function installKongDialogue(settings: () => Pick<SaveData, 'soundOn' | '
     removed.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
     dialog.showModal();
     text.show(greeting, '탐구하러 갈게!', true);
-    voice.show('npc-welcome');
+    voice.show('npc-welcome-el');
     next.focus({ preventScroll: true });
   }
 }

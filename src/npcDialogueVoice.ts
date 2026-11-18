@@ -9,6 +9,33 @@ export function setDialoguePortrait(element: HTMLElement, id: string) {
   element.dataset.portrait = id;
 }
 
+// One line of popup speech (mission card, concept clip, discovery, map banner, villain bubble) outside a <dialog>.
+// A new line replaces the previous one; music is ducked while it plays; mute and volume follow the save.
+let lineSettings: () => VoiceSettings = () => ({ soundOn: false, soundVolume: 0 });
+let line: HTMLAudioElement | undefined, lineRelease: (() => void) | undefined, lineDone: (() => void) | undefined;
+const finishLine = () => { lineRelease?.(); lineRelease = undefined; const done = lineDone; lineDone = undefined; done?.(); };
+export function configureVoiceLines(settings: () => VoiceSettings) { lineSettings = settings; }
+export const voiceLinePlaying = () => !!line && !line.paused && !line.ended;
+export function stopVoiceLine() { lineDone = undefined; line?.pause(); finishLine(); }
+/** Plays assets/audio/<clip>.mp3. polite: skip when another line is still playing. onEnd runs when it ends or fails. */
+export function playVoiceLine(clip: string, options: { polite?: boolean; onEnd?: () => void } = {}) {
+  if (options.polite && voiceLinePlaying()) return false;
+  stopVoiceLine();
+  const prefs = lineSettings(), volume = prefs.soundVolume ?? .3;
+  if (!prefs.soundOn || volume <= 0 || document.hidden) return false;
+  if (!line) {
+    line = new Audio();
+    line.addEventListener('playing', () => { lineRelease ??= duckMusic(); });
+    for (const event of ['ended', 'error']) line.addEventListener(event, finishLine);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stopVoiceLine(); });
+  }
+  line.src = `${base()}audio/${clip}.mp3`;
+  line.volume = Math.min(1, volume * 1.9);
+  lineDone = options.onEnd;
+  void line.play().catch(finishLine);
+  return true;
+}
+
 export function mountDialogueVoice(dialog: HTMLDialogElement, settings: () => VoiceSettings) {
   const events = new AbortController();
   const { signal } = events;
@@ -30,6 +57,7 @@ export function mountDialogueVoice(dialog: HTMLDialogElement, settings: () => Vo
     const prefs = settings(), volume = prefs.soundVolume ?? .3;
     if (!prefs.soundOn || volume <= 0) return;
     stop();
+    stopVoiceLine();
     const request = epoch;
     player.currentTime = 0;
     player.volume = Math.min(1, Math.max(0, volume) * 1.9);

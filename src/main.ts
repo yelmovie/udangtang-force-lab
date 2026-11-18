@@ -21,7 +21,9 @@ import { canPlayMapFinale, defeatedMapVillains } from './map-villains.js';
 import { villageRewards } from './villageStory';
 import { playMusic, playSound, stopMusic, stopSounds, setVolume, type MapSound, type MusicName } from './sound';
 import { installKongDialogue } from './kongDialogue';
+import { configureVoiceLines, playVoiceLine, stopVoiceLine } from './npcDialogueVoice';
 installKongDialogue(() => save);
+configureVoiceLines(() => save);
 import { infoContent } from './info';
 import { prepareOffline } from './offline';
 import type { AppContext } from './appTypes';
@@ -182,6 +184,7 @@ function finishWorkshopWithEvidence(stageId: StageId, summary: string) {
       <button class="button button-primary" id="world-continue">달라진 마을 보러 가기</button><p class="world-lock-note" id="world-lock-note" role="status"></p>
     </div>`;
   document.body.append(modal);
+  playVoiceLine(`npc-dialogue/${stageId}-discovery`);
   confetti(modal.querySelector<HTMLElement>('.modal-card')!);
   const appWasInert = app.inert;
   app.inert = true;
@@ -196,7 +199,7 @@ function finishWorkshopWithEvidence(stageId: StageId, summary: string) {
     if (reviewButton) { reviewButton.textContent = solved ? '✓ 문제 다시 보기' : '문제 풀기'; reviewButton.className = `button ${solved ? 'button-secondary' : 'button-primary'}`; }
   };
   syncLock();
-  const dismiss = () => { if (closeMissionResult !== dismiss) return; closeMissionResult = null; app.inert = appWasInert; modal.remove(); };
+  const dismiss = () => { if (closeMissionResult !== dismiss) return; closeMissionResult = null; stopVoiceLine(); app.inert = appWasInert; modal.remove(); };
   closeMissionResult = dismiss;
   modal.addEventListener('modal-dismiss', dismiss);
   const close = () => { dismiss(); navigate('map'); };
@@ -289,6 +292,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
   const close = () => {
     if (closeMissionResult !== close) return;
     closeMissionResult = null;
+    stopVoiceLine();
     app.inert = appWasInert;
     modal.remove();
     if (opener?.isConnected) opener.focus({ preventScroll: true });
@@ -312,6 +316,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
     if (!adminUnlocked) modal.querySelector('#world-status')!.textContent = `실험실 복구 · ${save.completed.length}/5 완료`;
     syncConceptButton(reward.querySelector('.world-concept')!, stageId, true);
     reward.hidden = false;
+    playVoiceLine(`npc-dialogue/${stageId}-discovery`);
     back.hidden = true;
     if (task) {
       const message = review.querySelector('.mission-review-feedback')!.textContent;
@@ -589,7 +594,7 @@ function openMissionCard(stageId: StageId) {
   const orientation = matchMedia('(orientation: portrait)');
   const syncOrientation = () => { start.disabled = orientation.matches; };
   orientation.addEventListener('change', syncOrientation); syncOrientation();
-  const close = () => { orientation.removeEventListener('change', syncOrientation); app.inert = appWasInert; modal.remove(); };
+  const close = () => { orientation.removeEventListener('change', syncOrientation); stopVoiceLine(); app.inert = appWasInert; modal.remove(); };
   modal.addEventListener('modal-dismiss', close);
   modal.querySelectorAll<HTMLButtonElement>('[data-plan]').forEach(button => button.addEventListener('click', () => {
     selected = button.dataset.plan!;
@@ -612,6 +617,7 @@ function openMissionCard(stageId: StageId) {
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
   });
   document.body.append(modal); modal.querySelector<HTMLButtonElement>('[data-plan]')?.focus();
+  playVoiceLine(`npc-dialogue/${stageId}-mission`);
 }
 
 let backNavigation = false;
