@@ -26,7 +26,7 @@
 | 제목 로고 | `ui/title.webp` | 생성형 AI 제작 | 앱 제작자 보유 |
 | 중앙 동력실 실내 배경 | `backgrounds/core-hall-v2.webp` | 2026-10-08 내장 이미지 생성 도구로 제작. 원본·프롬프트는 `references/design/core-studio-v2/`에 보관 | 프로젝트를 위해 생성한 이미지. 조작 모델과 UI는 별도로 구현 |
 | 코어·빈 중앙 장치 3D | `models/core/*.glb` | 사용자가 Meshy로 생성해 전달한 GLB를 폴리곤·텍스처 최적화(2026-10-20 UV 경계를 고정해 다시 축소: 코어 5만·장치 1.2만 삼각형, 2048 텍스처. `npm run assets:core`) | Meshy 계정의 생성·이용 조건은 별도 확인. CC0 등 별도 라이선스를 추정하지 않음 |
-| 배경음악 2곡 (스테이지 반복 `Curious Discovery`·점등식 `Magical Power-Up`) | `audio/bgm-stage.mp3`, `audio/bgm-ending.mp3` | 2026-10-19 사용자가 Suno로 생성해 전달(연주곡) | 생성형 AI 음악. Suno 요금제별 상업적 이용 조건은 별도 확인 |
+| 배경음악 2곡 (스테이지 반복 `Curious Discovery`·점등식 `Magical Power-Up`) | `audio/bgm-stage.mp3`, `audio/bgm-ending.mp3` | 2026-10-19 사용자가 Suno로 생성해 전달(연주곡) | 생성형 AI 음악. 생성 당시 Suno Premier 유료 요금제(상업 이용 가능, 2026-11-18 사용자 확인) |
 | 효과음 3종 (`click_003`, `error_001`, `confirmation_002`) | `audio/*.ogg` | Kenney — Interface Sounds (kenney.nl/assets/interface-sounds) | CC0 1.0. 원문 `audio/LICENSE-Kenney.txt` 동봉 |
 | 효과음 · 지도 공격 휙 | `audio/sfx/attack-swing-03.mp3` | qubodup — SWOSH-01 (freesound.org/people/qubodup/sounds/59988). 2026-11-17 과학34 공통 효과음 라이브러리(`_shared/sfx-library-20261117`)에서 복사: 앞뒤 무음 제거·음량 정규화·모노 MP3 | CC0 1.0 (원본 페이지에서 2026-11-17 재확인) |
 | 효과음 · 지도 1타 톡 | `audio/sfx/wood-knock-01.mp3` | Raclure — Wood knock (freesound.org/people/Raclure/sounds/405549). 2026-11-17 과학34 공통 효과음 라이브러리(`_shared/sfx-library-20261117`)에서 복사: 앞뒤 무음 제거·음량 정규화·모노 MP3 | CC0 1.0 (원본 페이지에서 2026-11-17 재확인) |
