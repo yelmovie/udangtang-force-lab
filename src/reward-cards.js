@@ -266,6 +266,7 @@ export function createRewardCards(config) {
     layer.classList.add('is-complete');
     const fan = document.createElement('div');
     fan.className = 'rc-fan';
+    fan.style.setProperty('--n', String(total));
     fan.innerHTML = cards.map((_, i) => `<div class="rc-fan-item" style="--i:${i - (total - 1) / 2}">${cardHtml(i, 'is-mini')}</div>`).join('');
     const title = document.createElement('div');
     title.className = 'rc-complete';

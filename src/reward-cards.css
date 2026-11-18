@@ -238,3 +238,7 @@
   .rc-locked i { color: #0006; }
   .rc-rays { background: repeating-conic-gradient(from 0deg, #ffffff55 0deg 7deg, #0000 7deg 22deg); }
 }
+
+/* The full-set fan spreads as wide as the screen allows, so fewer name plates hide behind the next card. */
+.rc-fan { --fw: calc(min(34vh, 260px) * 2 / 3); --gap: min(17vmin, calc((76vw - var(--fw)) / (var(--n, 5) - 1))); }
+.rc-fan-item { transform: translateX(calc(var(--i) * var(--gap))) rotate(calc(var(--i) * 40deg / var(--n, 5))); }

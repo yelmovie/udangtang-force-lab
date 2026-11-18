@@ -341,6 +341,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
   let nearbyEnemy: Encounter | undefined;
   let attackTarget: Encounter | undefined;
   let finaleAt=0,clearReady:number|null=null,clearUntil=0,clearShown=false;
+  let cardDue = false; // an achievement card is waiting to open or is open
   let lastHitAt = -Infinity, studentHurt = -Infinity, dogHurt = -Infinity, studentAttackFacing: 1 | -1 = 1;
   // Hit sounds wait for the impact frame (the pose changes 80 ms after the press); cleared when the map closes.
   const cueTimers = new Set<number>();
@@ -597,7 +598,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
       }
     }
     const fading = attackTarget && hitCount(attackTarget) === 3 && now - lastHitAt < 2400;
-    if (finaleAt && now>=finaleAt && !paused()) { finaleAt=0; if (!options.adminUnlocked && canPlayMapFinale(context.save)) options.onFinale(); }
+    if (finaleAt && now>=finaleAt && !paused() && !cardDue) { finaleAt=0; if (!options.adminUnlocked && canPlayMapFinale(context.save)) options.onFinale(); }
     const wasFocused = document.activeElement === attack;
     const isPaused = paused();
     attack.hidden = !(syncAttackDock() && !isPaused);
@@ -677,13 +678,17 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: { 
     cueLater(hits === 3 ? 'hit3' : hits === 2 ? 'hit2' : 'hit1', 80);
     if (hits === 3) cueLater('villainExit', 480);
     if (hits === 3) {
-      // The card waits for the villain's exit; opening it pauses the map, so the finale follows the card.
-      const id = window.setTimeout(() => {
+      // The card waits for the villain's exit, and for any open dialog. Opening it pauses the map; `cardDue` keeps the
+      // finale behind the card even when a dialog closes in between.
+      cardDue = true;
+      const show = () => {
         cueTimers.delete(id);
-        if (!alive || !map) return;
+        if (!alive || !map) { cardDue = false; return; }
+        if (paused()) { id = window.setTimeout(show, 300); cueTimers.add(id); return; }
         const bounds = canvas.getBoundingClientRect();
-        void revealRewardCard(enemy.index, { x: bounds.left + enemy.x / map.width * bounds.width, y: bounds.top + (enemy.y - 30) / map.height * bounds.height }, context.save);
-      }, reduced.matches ? 520 : 760);
+        void revealRewardCard(enemy.index, { x: bounds.left + enemy.x / map.width * bounds.width, y: bounds.top + (enemy.y - 30) / map.height * bounds.height }, context.save).finally(() => { cardDue = false; });
+      };
+      let id = window.setTimeout(show, reduced.matches ? 520 : 760);
       cueTimers.add(id);
     }
     updateEncounters(now);
