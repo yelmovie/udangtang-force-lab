@@ -890,7 +890,8 @@
    "duration": 2.8,
    "sha256": "38d92e820118c2d2a87fe5c0cf051370745b4861ec33ce5b5c9841d8f608049a",
    "file": "public/assets/audio/villain/balance-3.mp3",
-   "loudnessMethod": "gain+limiter (short clip)"
+   "loudnessMethod": "gain+limiter (short clip)",
+   "userCheck": "사용자 청취 확인(2026-11-18): 지금 파일 유지(재생성 없음)"
   },
   {
    "key": "villain-balance-4",
