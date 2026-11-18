@@ -328,7 +328,7 @@ export function createRewardCards(config) {
       const item = target?.closest('[data-album-card]');
       if (item) zoom(layer, Number(item.dataset.albumCard));
     });
-    layer.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); const z = layer.querySelector('.rc-zoom'); if (z) z.remove(); else close(); } });
+    layer.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); const z = layer.querySelector('.rc-zoom'); if (z) { z.remove(); layer.querySelector('.rc-album-close')?.focus({ preventScroll: true }); } else close(); } });
     addEventListener('popstate', close);
     layer.querySelector('.rc-album-close').focus({ preventScroll: true });
   }
@@ -345,7 +345,7 @@ export function createRewardCards(config) {
       const dx = ((event.clientX - r.left) / r.width - .5) * 2, dy = ((event.clientY - r.top) / r.height - .5) * 2;
       tilt.style.transform = `rotateY(${Math.max(-1, Math.min(1, dx)) * 14}deg) rotateX(${Math.max(-1, Math.min(1, -dy)) * 12}deg)`;
     });
-    z.addEventListener('click', event => { if (event.target instanceof Element && (event.target.closest('.rc-take') || !event.target.closest('.rc-card'))) { event.stopPropagation(); z.remove(); } });
+    z.addEventListener('click', event => { if (event.target instanceof Element && (event.target.closest('.rc-take') || !event.target.closest('.rc-card'))) { event.stopPropagation(); z.remove(); layer.querySelector('.rc-album-close')?.focus({ preventScroll: true }); } });
     z.querySelector('.rc-take').focus({ preventScroll: true });
   }
 

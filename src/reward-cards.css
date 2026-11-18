@@ -116,7 +116,7 @@
 .rc-layer.is-revealed .rc-stage .rc-stars b { animation: rc-star-pop .45s cubic-bezier(.3,1.7,.5,1) both; animation-delay: calc(.15s + var(--s) * .12s); }
 @keyframes rc-star-pop { 0% { transform: scale(0) rotate(-90deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
 .rc-rarity {
-  font: 900 calc(var(--h) * .036)/1 inherit; letter-spacing: .04em; padding: .35em .7em; border-radius: 99px;
+  font-family: inherit; font-weight: 900; font-size: calc(var(--h) * .036); line-height: 1; letter-spacing: .04em; padding: .35em .7em; border-radius: 99px;
   color: #fff; background: linear-gradient(180deg, var(--frame-a), var(--frame-c)); box-shadow: 0 2px 0 #0004, inset 0 0 0 2px #fff6;
   text-shadow: 0 1px 1px #0006;
 }
@@ -155,7 +155,7 @@
 .rc-take {
   position: absolute; z-index: 4; bottom: max(18px, 5vh); left: 50%; translate: -50% 0;
   min-height: 56px; padding: 0 30px; border: 0; border-radius: 99px; cursor: pointer;
-  font: 900 22px/1 inherit; color: #fff; background: linear-gradient(180deg, color-mix(in srgb, var(--rc-accent) 85%, #fff), var(--rc-accent));
+  font-family: inherit; font-weight: 900; font-size: 22px; line-height: 1; color: #fff; background: linear-gradient(180deg, color-mix(in srgb, var(--rc-accent) 85%, #fff), var(--rc-accent));
   box-shadow: 0 5px 0 color-mix(in srgb, var(--rc-accent) 60%, #000), 0 10px 22px #0005; text-shadow: 0 2px 0 #0004;
   opacity: 0; transform: translateY(16px); pointer-events: none; transition: opacity .25s ease, transform .3s ease;
   touch-action: manipulation;
