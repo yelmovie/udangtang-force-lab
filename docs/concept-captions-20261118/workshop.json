@@ -1,0 +1,30 @@
+{
+ "src": "framed/workshop.mp4",
+ "out": "out/workshop.mp4",
+ "out_webm": "out/workshop.webm",
+ "theme": {
+  "box": "#16213b",
+  "accent": "#ffd35c",
+  "hot": "#ffd35c"
+ },
+ "bottom": 40,
+ "sweep": false,
+ "note": "원본 workshop.mp4(1280x720, 8.0초, 무음)의 그림을 x0.97 배율로 위로 옮겨 아래 자막 자리를 비운 framed/workshop.mp4 위에 입힘. 문장·시작 초는 src/conceptClip.ts 큐 그대로, [ ]는 concept-focus 강조 단어.",
+ "cues": [
+  {
+   "s": 0,
+   "e": 2.6,
+   "text": "그냥 들어 올리면 길은 짧지만 큰 [힘]이 들어요."
+  },
+  {
+   "s": 2.7,
+   "e": 4.5,
+   "text": "[빗면]을 쓰면 [힘]은 작아지고, 움직이는 길은 길어져요."
+  },
+  {
+   "s": 4.6,
+   "e": 8.5,
+   "text": "같은 판자에서 손으로 누르는 자리는 그대로 두고\n[받침점]을 화물 쪽으로 옮기면 [힘]이 줄어요."
+  }
+ ]
+}

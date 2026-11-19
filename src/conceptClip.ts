@@ -1,6 +1,7 @@
 // 미션별 개념 클립(tools/concept-clips에서 렌더한 무음 영상) 재생 모달.
 // 스포일러 금지: 버튼은 각 미션이 핵심 발견을 확인한 뒤에만 syncConceptButton(..., true)로 보인다.
-// 영상에는 글자가 없고, 자막은 장면 시간에 맞춰 DOM으로 얹는다.
+// 자막은 영상 그림 안에 들어 있다(docs/concept-captions-20261118, 2026-11-18). 화면은 전체 화면(contain)이고,
+// 실제로 재생되면 DOM 자막은 스크린리더용으로만 남긴다. 영상 오류·재생 전에는 DOM 자막이 보인다.
 import './conceptClip.css';
 import './concept-focus.css';
 import {bindConceptFocus} from './concept-focus.js';
@@ -71,17 +72,18 @@ export function openConceptClip(stage: ConceptStage): void {
   const layer = document.createElement('div');
   layer.className = 'modal-layer concept-layer';
   layer.innerHTML = `<div class="modal-card concept-card" role="dialog" aria-modal="true" aria-labelledby="concept-title" aria-describedby="concept-caption">
-    <p class="eyebrow">왜 그럴까?</p>
-    <h2 id="concept-title">${clip.title}</h2>
+    <div class="concept-topbar">
+      <div class="concept-heading"><p class="eyebrow">왜 그럴까?</p><h2 id="concept-title">${clip.title}</h2></div>
+      <div class="concept-actions"><button type="button" class="button button-secondary" data-concept-action="replay" hidden>↺ 다시 보기</button><button type="button" class="button button-primary" data-concept-action="close">닫기</button></div>
+    </div>
     <div class="concept-video-wrap">
-      <video class="concept-video" muted playsinline preload="auto" poster="${asset(stage, 'webp')}" aria-label="${clip.title} 설명 영상, 소리 없음"></video>
+      <video class="concept-video" muted playsinline preload="auto" poster="${asset(stage, 'webp')}" aria-label="${clip.title} 설명 영상, 자막 있음, 소리 없음"></video>
       <img class="concept-end-frame" src="${asset(stage, 'webp')}" alt="" hidden>
       <button type="button" class="button button-primary concept-play" data-concept-action="play" hidden>▶ 영상 재생</button>
     </div>
     <p class="concept-caption" id="concept-caption" role="status" aria-live="polite"></p>
     <ol class="concept-cue-list" hidden>${clip.cues.map(cue => `<li>${cue.text}</li>`).join('')}</ol>
     <div class="concept-dots" aria-hidden="true">${clip.cues.map(() => '<i></i>').join('')}</div>
-    <div class="concept-actions"><button type="button" class="button button-secondary" data-concept-action="replay" hidden>↺ 다시 보기</button><button type="button" class="button button-primary" data-concept-action="close">닫기</button></div>
   </div>`;
   document.body.append(layer);
   const video = layer.querySelector<HTMLVideoElement>('video')!;
@@ -90,6 +92,7 @@ export function openConceptClip(stage: ConceptStage): void {
   const playButton = layer.querySelector<HTMLButtonElement>('[data-concept-action="play"]')!;
   const replayButton = layer.querySelector<HTMLButtonElement>('[data-concept-action="replay"]')!;
   const closeButton = layer.querySelector<HTMLButtonElement>('[data-concept-action="close"]')!;
+  const card = layer.querySelector<HTMLElement>('.concept-card')!;
   const dots = Array.from(layer.querySelectorAll<HTMLElement>('.concept-dots i'));
   let shown = -1, closed = false, failed = false;
   // Each caption is read aloud (the video stays silent). If a line is still being read when the next cue
@@ -107,14 +110,32 @@ export function openConceptClip(stage: ConceptStage): void {
     caption.textContent = clip.cues[index].text;
     dots.forEach((dot, i) => dot.classList.toggle('on', i === index));
   };
+  // The burned caption of a cue fades out from 0.3 s before the next cue starts, so a hold stops the film
+  // HOLD_LEAD before the next cue: the frame it rests on still shows the line being read.
+  const HOLD_LEAD = 0.4;
   const sync = () => {
     if (holding) return;
     let index = 0;
     clip.cues.forEach((cue, i) => { if (video.currentTime >= cue.at) index = i; });
-    if (index !== shown && voiced === shown && voiceLinePlaying()) { if (!video.paused) { holding = true; video.pause(); } return; }
+    const next = clip.cues[shown + 1];
+    if (!video.paused && next && index === shown && voiced === shown && voiceLinePlaying() && video.currentTime >= next.at - HOLD_LEAD) { holding = true; video.pause(); return; }
+    if (index !== shown && voiced === shown && voiceLinePlaying()) {
+      if (!video.paused) { holding = true; video.pause(); if (next && index === shown + 1) video.currentTime = Math.max(0, next.at - HOLD_LEAD); }
+      return;
+    }
     showCue(index);
     if (!video.paused) voice(index);
   };
+  // Timeupdate fires only every ~250 ms; while frames play, check every animation frame so holds land on time.
+  let raf = 0;
+  const tick = () => { raf = 0; if (closed || failed || video.paused) return; sync(); raf = requestAnimationFrame(tick); };
+  // A paused seek to a cue start (step buttons) would rest on the frame where its burned caption is still fading in.
+  const settleSeek = () => {
+    if (!video.paused || holding || closed || failed) return;
+    const cue = clip.cues.find(c => c.at > 0 && video.currentTime >= c.at && video.currentTime < c.at + 0.3);
+    if (cue) video.currentTime = cue.at + 0.3;
+  };
+  const setPlaying = (playing: boolean) => card.classList.toggle('is-playing', playing);
   const play = () => {
     endFrame.hidden = true;
     void video.play().then(() => { playButton.hidden = true; }).catch(() => {
@@ -128,6 +149,7 @@ export function openConceptClip(stage: ConceptStage): void {
     if (closed || failed) return;
     failed = true;
     window.clearTimeout(timer);
+    card.classList.remove('film-captions', 'is-playing');
     video.removeAttribute('src'); video.load();
     video.hidden = true; playButton.hidden = true; replayButton.hidden = true;
     endFrame.hidden = false; endFrame.alt = clip.title;
@@ -136,8 +158,9 @@ export function openConceptClip(stage: ConceptStage): void {
     layer.querySelector<HTMLElement>('.concept-dots')!.hidden = true;
     closeButton.focus();
   };
+  // The film rests on its last frame, which still carries the last burned caption.
   const onEnded = () => {
-    endFrame.hidden = false;
+    setPlaying(false);
     showCue(clip.cues.length - 1);
     replayButton.hidden = false;
     replayButton.focus();
@@ -146,13 +169,22 @@ export function openConceptClip(stage: ConceptStage): void {
     window.clearTimeout(timer);
     if (reduced) { playButton.hidden = false; playButton.focus(); } else play();
   };
-  const onPause = () => { if (!holding && !video.ended && !video.seeking && !closed && !failed) playButton.hidden = false; };
+  const onPause = () => { if (!holding && !video.ended && !video.seeking && !closed && !failed) { playButton.hidden = false; setPlaying(false); } };
   const timer = window.setTimeout(() => { if (video.readyState < 1) fallback(); }, 6000);
   video.addEventListener('loadedmetadata', onMeta);
   video.addEventListener('error', fallback);
   video.addEventListener('timeupdate', sync);
   video.addEventListener('seeked', sync);
-  video.addEventListener('play', () => { playButton.hidden = true; replayButton.hidden = true; voice(shown); });
+  video.addEventListener('seeked', settleSeek);
+  video.addEventListener('play', () => { playButton.hidden = true; replayButton.hidden = true; setPlaying(true); voice(shown); });
+  // Frames really play: the burned captions speak for the film, the DOM caption stays for screen readers only.
+  video.addEventListener('playing', () => { if (failed || closed) return; card.classList.add('film-captions'); setPlaying(true); if (!raf) raf = requestAnimationFrame(tick); });
+  // Tap the film to pause or resume (a tap during a hold stays paused when the line ends).
+  video.addEventListener('click', () => {
+    if (failed || closed || video.ended) return;
+    if (holding) { holding = false; setPlaying(false); playButton.hidden = false; return; }
+    if (video.paused) play(); else video.pause();
+  });
   video.addEventListener('pause', onPause);
   video.addEventListener('ended', onEnded);
   video.src = asset(stage, video.canPlayType('video/webm; codecs="vp9"') ? 'webm' : 'mp4');
@@ -164,6 +196,7 @@ export function openConceptClip(stage: ConceptStage): void {
     stopVoiceLine();
     releaseFocus();
     window.clearTimeout(timer);
+    if (raf) cancelAnimationFrame(raf);
     document.removeEventListener('keydown', onKey, true);
     video.pause(); video.removeAttribute('src'); video.load();
     layer.remove();
@@ -187,6 +220,7 @@ export function openConceptClip(stage: ConceptStage): void {
   closeButton.addEventListener('click', close);
   layer.addEventListener('modal-dismiss', close);
   layer.addEventListener('click', event => { if (event.target === layer) close(); });
-  releaseFocus = bindConceptFocus(layer.querySelector<HTMLElement>('.concept-card')!, video, {steps:clip.cues.map((cue,i)=>({at:cue.at,term:labels[stage][i]})),terms:terms[stage],caption,anchor:layer.querySelector<HTMLElement>('.concept-video-wrap')!});
+  // The step rail sits in the top bar (after the title), clear of the caption zone at the bottom of the film.
+  releaseFocus = bindConceptFocus(card, video, {steps:clip.cues.map((cue,i)=>({at:cue.at,term:labels[stage][i]})),terms:terms[stage],caption,anchor:layer.querySelector<HTMLElement>('.concept-heading')!});
   closeButton.focus();
 }

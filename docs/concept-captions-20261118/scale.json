@@ -1,0 +1,30 @@
+{
+ "src": "framed/scale.mp4",
+ "out": "out/scale.mp4",
+ "out_webm": "out/scale.webm",
+ "theme": {
+  "box": "#16213b",
+  "accent": "#ffd35c",
+  "hot": "#ffd35c"
+ },
+ "bottom": 40,
+ "sweep": false,
+ "note": "원본 scale.mp4(1280x720, 7.0초, 무음)의 그림을 x0.864 배율로 위로 옮겨 아래 자막 자리를 비운 framed/scale.mp4 위에 입힘. 문장·시작 초는 src/conceptClip.ts 큐 그대로, [ ]는 concept-focus 강조 단어.",
+ "cues": [
+  {
+   "s": 0,
+   "e": 1.9,
+   "text": "빈 저울이 15 g을 가리켜요. [0] 버튼으로 [영점]을 맞춰요."
+  },
+  {
+   "s": 2.0,
+   "e": 3.6,
+   "text": "사과 모형을 올리면 [80 g]이에요."
+  },
+  {
+   "s": 3.7,
+   "e": 7.5,
+   "text": "[영점] 전에는 95 g, [영점] 후에는 [80 g]!\n빈 저울을 먼저 [0]으로 맞춰요."
+  }
+ ]
+}

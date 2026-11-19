@@ -1,0 +1,30 @@
+{
+ "src": "framed/rescue.mp4",
+ "out": "out/rescue.mp4",
+ "out_webm": "out/rescue.webm",
+ "theme": {
+  "box": "#16213b",
+  "accent": "#ffd35c",
+  "hot": "#ffd35c"
+ },
+ "bottom": 40,
+ "sweep": false,
+ "note": "원본 rescue.mp4(1280x720, 7.0초, 무음)의 그림을 x0.81 배율로 위로 옮겨 아래 자막 자리를 비운 framed/rescue.mp4 위에 입힘. 문장·시작 초는 src/conceptClip.ts 큐 그대로, [ ]는 concept-focus 강조 단어.",
+ "cues": [
+  {
+   "s": 0,
+   "e": 1.9,
+   "text": "네 건물에서 모은 [힘의 증거]가 코어로 모여요."
+  },
+  {
+   "s": 2.0,
+   "e": 4.5,
+   "text": "[같은 작은 힘]으로 밀면 짧고 [가파른 길]에서는 멈춰요."
+  },
+  {
+   "s": 4.6,
+   "e": 7.5,
+   "text": "길고 [완만한 길]로는 끝까지 도착해요!"
+  }
+ ]
+}

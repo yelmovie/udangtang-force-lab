@@ -1,0 +1,30 @@
+{
+ "src": "framed/cargo.mp4",
+ "out": "out/cargo.mp4",
+ "out_webm": "out/cargo.webm",
+ "theme": {
+  "box": "#16213b",
+  "accent": "#ffd35c",
+  "hot": "#ffd35c"
+ },
+ "bottom": 40,
+ "sweep": false,
+ "note": "원본 cargo.mp4(1280x720, 7.0초, 무음)의 그림을 x0.959 배율로 위로 옮겨 아래 자막 자리를 비운 framed/cargo.mp4 위에 입힘. 문장·시작 초는 src/conceptClip.ts 큐 그대로, [ ]는 concept-focus 강조 단어.",
+ "cues": [
+  {
+   "s": 0,
+   "e": 2.6,
+   "text": "부품 1개 상자와 5개 상자를 밀어요.\n두 화살표 길이가 똑같지요? [똑같은 힘]이에요."
+  },
+  {
+   "s": 2.7,
+   "e": 4.8,
+   "text": "[똑같은 힘]으로 [같은 시간] 동안 밀어요!"
+  },
+  {
+   "s": 4.9,
+   "e": 7.5,
+   "text": "같은 바닥에서 [같은 힘]·시간으로 밀었더니\n[가벼운 상자]가 더 멀리 갔어요."
+  }
+ ]
+}
