@@ -17,6 +17,10 @@ const finishLine = () => { lineRelease?.(); lineRelease = undefined; const done 
 export function configureVoiceLines(settings: () => VoiceSettings) { lineSettings = settings; }
 export const voiceLinePlaying = () => !!line && !line.paused && !line.ended;
 export function stopVoiceLine() { lineDone = undefined; line?.pause(); finishLine(); }
+// Dialogue windows that are open now, so switching sound off can silence whichever one is speaking.
+const dialogueStops = new Set<() => void>();
+/** Sound switched off: the line being spoken stops at once, in a popup or in a dialogue window. */
+export function stopAllVoices() { stopVoiceLine(); dialogueStops.forEach(stop => stop()); }
 /** Plays assets/audio/<clip>.mp3. polite: skip when another line is still playing. onEnd runs when it ends or fails. */
 export function playVoiceLine(clip: string, options: { polite?: boolean; onEnd?: () => void } = {}) {
   if (options.polite && voiceLinePlaying()) return false;
@@ -52,6 +56,7 @@ export function mountDialogueVoice(dialog: HTMLDialogElement, settings: () => Vo
     replay.textContent = '다시 듣기';
   };
   const stop = () => { epoch++; player.pause(); idle(); };
+  dialogueStops.add(stop);
   const play = () => {
     if (!src || !dialog.open || document.hidden) return;
     const prefs = settings(), volume = prefs.soundVolume ?? .3;
@@ -87,7 +92,7 @@ export function mountDialogueVoice(dialog: HTMLDialogElement, settings: () => Vo
     },
     stop,
     destroy() {
-      stop(); events.abort(); player.removeAttribute('src'); player.load(); player.remove();
+      stop(); dialogueStops.delete(stop); events.abort(); player.removeAttribute('src'); player.load(); player.remove();
     },
   };
 }

@@ -10,6 +10,7 @@ import { earnedToolCards } from './toolCards';
 import { bagIcon, openToolBag } from './toolBag';
 import { icons } from './icons';
 import { introVideo, openStoryModal, prologueLines } from './storyModal';
+import { stopAllVoices } from './npcDialogueVoice';
 
 export type SettingsHost = {
   app: HTMLElement;
@@ -114,7 +115,7 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
       button.setAttribute('aria-checked', String(save.soundOn));
       button.textContent = switchLabel('효과음', save.soundOn);
       host.updateSoundButton();
-      if (save.soundOn) tone(520); else stopSounds();
+      if (save.soundOn) tone(520); else { stopSounds(); stopAllVoices(); }
     }
     else if (action === 'music') {
       save.musicOn = !save.musicOn;
@@ -141,6 +142,7 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
     if (!(event.target instanceof HTMLInputElement) || event.target.id !== 'sound-volume') return;
     save.soundVolume = Number(event.target.value) / 100;
     setVolume(save.soundVolume);
+    if (!save.soundVolume) stopAllVoices();
     overlay.querySelector('#volume-value')!.textContent = `${event.target.value}%`;
   });
   overlay.addEventListener('change', event => {

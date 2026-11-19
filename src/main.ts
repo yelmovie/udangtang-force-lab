@@ -21,7 +21,7 @@ import { canPlayMapFinale, defeatedMapVillains } from './map-villains.js';
 import { villageRewards } from './villageStory';
 import { playMusic, playSound, stopMusic, stopSounds, setVolume, type MapSound, type MusicName } from './sound';
 import { installKongDialogue } from './kongDialogue';
-import { configureVoiceLines, playVoiceLine, stopVoiceLine } from './npcDialogueVoice';
+import { configureVoiceLines, playVoiceLine, stopAllVoices, stopVoiceLine } from './npcDialogueVoice';
 installKongDialogue(() => save);
 configureVoiceLines(() => save);
 import { prepareOffline } from './offline';
@@ -73,16 +73,15 @@ function cue(name: MapSound) {
   playSound(name);
 }
 bindRewardSound(cue);
-/** While a story video is open it decides the music: the ending plays its own track, the prologue keeps quiet for its own sound. */
-let storyMusic: MusicName | 'quiet' | null = null;
-/** Background music has its own switch in settings; the header button turns music and effects on or off together. */
+/** The lighting ceremony asks for its own track while it is open; a story film turns the music down itself instead of stopping it. */
+let storyMusic: MusicName | null = null;
+/** Background music has its own switch in settings; the header button turns music and effects on or off together.
+ * The research record (the screen after the ceremony) plays the ending track. A start the browser refuses is retried by sound.ts on the first tap or key. */
 function syncMusic() {
-  if (!save.musicOn || storyMusic === 'quiet') { stopMusic(); return; }
+  if (!save.musicOn) { stopMusic(); return; }
   setVolume(save.soundVolume ?? 0.3);
-  playMusic(storyMusic ?? 'stage');
+  playMusic(storyMusic ?? (viewPage === 'complete' ? 'ending' : 'stage'));
 }
-// Browsers only start audio after a tap, so the first tap anywhere retries the music.
-document.addEventListener('pointerdown', syncMusic, { once: true });
 
 /** Confetti burst: 28 pieces with their own drift, delay and colour. Skipped under reduced motion. */
 configureStoryModal({ app, tone, confetti, soundOn: () => anySound(), volume: () => save.soundVolume ?? .3, setMusic: music => { storyMusic = music; syncMusic(); } });
@@ -599,7 +598,7 @@ function bindHeader() {
     save.soundOn = on; save.musicOn = on;
     persist();
     updateSoundButton();
-    if (on) tone(620); else stopSounds();
+    if (on) tone(620); else { stopSounds(); stopAllVoices(); }
     syncMusic();
   });
   app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.addEventListener('click', () => openSettings());

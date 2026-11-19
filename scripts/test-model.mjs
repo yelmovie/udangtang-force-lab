@@ -647,7 +647,7 @@ test('a newly better workshop result needs a fresh choice, survives reload, and 
   assert.equal(restored.workshop.leverFinding,true,'repeating a worse design does not invalidate the supported choice');
 });
 test('music has its own switch, and older saves keep music with the effect switch', () => {
-  assert.equal(state.freshSave().musicOn, false);
+  assert.equal(state.freshSave().musicOn, true);
   const legacy = state.freshSave(); delete legacy.musicOn; legacy.soundOn = true;
   localStorage.setItem(state.SAVE_KEY, JSON.stringify(legacy));
   assert.equal(state.readSave().musicOn, true, 'a save from before the split keeps its music on');
@@ -684,4 +684,24 @@ test('spring summary does not attribute changed zero settings to eye position', 
   const unrelated={object:'orange',eye:'above',value:95,zeroed:false,offset:10};
   assert.doesNotMatch(scaleModel.springSummary([level,unrelated]), /정면과 달랐어요/);
   assert.match(scaleModel.springSummary([level,{...level,eye:'above',value:85}]), /정면과 달랐어요/);
+});
+test('sound starts on, and a save from when it started off is switched on once', () => {
+  const fresh = state.freshSave();
+  assert.deepEqual([fresh.soundOn, fresh.musicOn, fresh.soundStartsOn], [true, true, true]);
+  const old = { ...state.freshSave(), soundOn: false, musicOn: false }; delete old.soundStartsOn;
+  localStorage.setItem(state.SAVE_KEY, JSON.stringify(old));
+  const moved = state.readSave();
+  assert.deepEqual([moved.soundOn, moved.musicOn, moved.soundStartsOn], [true, true, true], 'the old starting value is not a choice');
+  moved.soundOn = false; moved.musicOn = false; state.writeSave(moved);
+  const kept = state.readSave();
+  assert.deepEqual([kept.soundOn, kept.musicOn], [false, false], 'switching off after the move is kept');
+  const oldest = { ...old }; delete oldest.musicOn;
+  localStorage.setItem(state.SAVE_KEY, JSON.stringify(oldest));
+  assert.deepEqual([state.readSave().soundOn, state.readSave().musicOn], [true, true], 'a save from before the music switch is moved too');
+  for (const [soundOn, musicOn] of [[true, false], [false, true], [true, true]]) {
+    localStorage.setItem(state.SAVE_KEY, JSON.stringify({ ...old, soundOn, musicOn }));
+    const chosen = state.readSave();
+    assert.deepEqual([chosen.soundOn, chosen.musicOn], [soundOn, musicOn], 'a switch someone turned on shows a choice: nothing is changed');
+  }
+  localStorage.setItem(state.SAVE_KEY, JSON.stringify(state.freshSave()));
 });

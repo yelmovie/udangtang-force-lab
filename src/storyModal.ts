@@ -1,6 +1,6 @@
 // 이야기 창: 시작 이야기·점등식 영상(자막 큐)과 그림 장면. main.ts에서 그대로 옮김(2026-11-19, 동작 변경 없음).
 // 앱 상태(소리 켬·크기, 배경 음악)는 configureStoryModal로 main.ts가 넘겨준다.
-import type { MusicName } from './sound';
+import { duckMusic, type MusicName } from './sound';
 import { icons } from './icons';
 
 export type StoryModalHost = {
@@ -11,8 +11,8 @@ export type StoryModalHost = {
   soundOn(): boolean;
   /** 저장된 전체 소리 크기(0~1, 기본 .3) */
   volume(): number;
-  /** 이야기 창이 원하는 배경 음악(영상이면 'quiet', 닫히면 null) */
-  setMusic(music: MusicName | 'quiet' | null): void;
+  /** 이야기 창이 원하는 배경 음악(없으면 지금 화면의 곡 그대로, 닫히면 null) */
+  setMusic(music: MusicName | null): void;
 };
 let host: StoryModalHost | null = null;
 export function configureStoryModal(next: StoryModalHost) { host = next; }
@@ -83,6 +83,12 @@ export function openStoryModal(options: StoryOptions) {
     const el = modal.querySelector<HTMLVideoElement>('video')!;
     el.muted = !host!.soundOn();
     el.volume = Math.min(1, Math.max(0, host!.volume() * 2.4));
+    // The film carries its own voices: the music keeps playing underneath, turned down until the film ends or is silenced.
+    let filmOver = false, releaseMusic: (() => void) | undefined;
+    const syncFilmMusic = () => {
+      if (!filmOver && !el.muted && el.volume > 0) releaseMusic ??= duckMusic('film');
+      else { releaseMusic?.(); releaseMusic = undefined; }
+    };
     const who = modal.querySelector<HTMLElement>('#story-title')!;
     const caption = modal.querySelector<HTMLElement>('#story-caption')!;
     const dotNodes = Array.from(modal.querySelectorAll<HTMLElement>('.story-dots i'));
@@ -110,7 +116,7 @@ export function openStoryModal(options: StoryOptions) {
     };
     const sync = () => showCue(storyCueIndex(video.cues, el.currentTime));
     const endFrame = modal.querySelector<HTMLImageElement>('.story-end-frame')!;
-    const finishUi = () => { el.controls = false; endFrame.hidden = false; showCue(options.lines.length - 1); skipBtn.hidden = true; pauseBtn.hidden = true; doneBtn.hidden = false; playBtn.hidden = true; card.classList.add('is-finished'); celebrate(); doneBtn.focus(); };
+    const finishUi = () => { filmOver = true; syncFilmMusic(); el.controls = false; endFrame.hidden = false; showCue(options.lines.length - 1); skipBtn.hidden = true; pauseBtn.hidden = true; doneBtn.hidden = false; playBtn.hidden = true; card.classList.add('is-finished'); celebrate(); doneBtn.focus(); };
     const tryPlay = () => {
       const result = el.play();
       if (result && typeof result.then === 'function') result.then(() => { playBtn.hidden = true; }).catch(() => { if (!closed) { playBtn.hidden = false; playBtn.focus(); } });
@@ -137,10 +143,12 @@ export function openStoryModal(options: StoryOptions) {
     replayBtn.addEventListener('click', () => {
       tone(470);
       endFrame.hidden = true; card.classList.remove('is-finished'); skipBtn.hidden = false; doneBtn.hidden = true; pauseBtn.hidden = false;
+      filmOver = false; syncFilmMusic();
       el.currentTime = 0; sync(); tryPlay();
     });
     const audioToggle = modal.querySelector<HTMLButtonElement>('[data-story="audio"]');
     const syncAudio = () => {
+      syncFilmMusic();
       const on = !el.muted && el.volume > 0;
       audioToggle?.setAttribute('aria-pressed', String(on));
       if (audioToggle) audioToggle.textContent = on ? '영상 소리 끄기' : '영상 소리 켜기';
@@ -167,6 +175,7 @@ export function openStoryModal(options: StoryOptions) {
       el.removeEventListener('timeupdate', sync); el.removeEventListener('seeked', sync);
       el.removeEventListener('play', onPlay); el.removeEventListener('playing', onPlaying); el.removeEventListener('pause', onPause); el.removeEventListener('click', togglePause); el.removeEventListener('ended', finishUi); el.removeEventListener('volumechange', syncAudio);
       el.pause(); el.removeAttribute('src'); el.load();
+      filmOver = true; syncFilmMusic();
     };
     playBtn.addEventListener('click', () => { tone(470); tryPlay(); });
     showCue(0);
@@ -193,6 +202,7 @@ export function openStoryModal(options: StoryOptions) {
   });
   document.addEventListener('keydown', onEscape, true);
   document.body.append(modal);
-  host!.setMusic(options.video ? 'quiet' : options.music ?? null);
+  // The film turns the music down first, so a track that starts for it starts quiet.
   if (options.video) drawVideo(options.video); else draw();
+  host!.setMusic(options.music ?? null);
 }

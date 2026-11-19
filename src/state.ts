@@ -49,6 +49,8 @@ export interface SaveData {
   /** Background music, switched separately from the effects. Older saves follow soundOn. */
   musicOn?: boolean;
   soundVolume?: number;
+  /** Sound starts switched on. A save from when it started off has no mark: its untouched "everything off" is switched on once, and later choices are kept. */
+  soundStartsOn?: true;
   /** orders: delivering force step per finished bakery order (level 2); present once the level 1 finding is chosen. */
   cargo: { parts: number; action: 'push' | 'pull'; runs: CargoRun[]; orders?: number[] };
   balance: { left: string | null; right: string | null; prediction: BalanceRun['prediction'] | null; runs: BalanceRun[] };
@@ -81,8 +83,9 @@ export function freshSave(): SaveData {
     completed: [],
     evidence: {},
     inquiryPlans: {},
-    soundOn: false,
-    musicOn: false,
+    soundOn: true,
+    musicOn: true,
+    soundStartsOn: true,
     soundVolume: 0.3,
     cargo: { parts: 1, action: 'push', runs: [] },
     balance: { left: null, right: null, prediction: null, runs: [] },
@@ -112,6 +115,8 @@ export function readSave(): SaveData | null {
     // Missions unlock in order, so a completion only counts when every earlier mission is completed too.
     const firstMissing = stageIds.findIndex(id => !listed.includes(id));
     const completed = firstMissing < 0 ? [...stageIds] : stageIds.slice(0, firstMissing);
+    // Both switches off and no mark: nobody chose that, it was the old starting value.
+    const startedOff = item.soundStartsOn !== true && item.soundOn !== true && item.musicOn !== true;
     const evidence: SaveData['evidence'] = {};
     for (const id of completed) if (typeof item.evidence?.[id] === 'string') evidence[id] = item.evidence[id];
     const restored: SaveData = {
@@ -121,8 +126,8 @@ export function readSave(): SaveData | null {
       currentPage: pageIds.includes(item.currentPage as PageId) ? item.currentPage as PageId : 'map',
       completed,
       evidence,
-      soundOn: item.soundOn === true,
-      musicOn: typeof item.musicOn === 'boolean' ? item.musicOn : item.soundOn === true,
+      soundOn: startedOff || item.soundOn === true,
+      musicOn: startedOff || (typeof item.musicOn === 'boolean' ? item.musicOn : item.soundOn === true),
       soundVolume: typeof item.soundVolume === 'number' && Number.isFinite(item.soundVolume) ? Math.min(1, Math.max(0, item.soundVolume)) : 0.3,
       cargo: {
         parts: [1, 3, 5].includes(item.cargo?.parts ?? 0) ? item.cargo!.parts : 1,
