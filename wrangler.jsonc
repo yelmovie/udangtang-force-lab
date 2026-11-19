@@ -1,8 +1,12 @@
 {
   "name": "udangtang-force-lab",
   "compatibility_date": "2026-10-01",
+  // Only videos go through worker/media-range.js (byte ranges for seeking and iPad Safari).
+  "main": "./worker/media-range.js",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/assets/concepts/*", "/assets/story/*"],
     "not_found_handling": "single-page-application"
   }
 }
