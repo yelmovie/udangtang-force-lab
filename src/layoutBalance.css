@@ -72,6 +72,8 @@
      방향판·점프가 화면 밖(스크롤도 안 됨)에 있었다(운영본에서도 같음). 제목·무대 두 줄로 화면 높이에 맞춘다. */
   #app .experiment-screen.core-studio { height:var(--app-height, 100dvh); min-height:0; grid-template-rows:auto minmax(0, 1fr) auto; }
   #app .experiment-screen.core-studio .rescue-stage .rescue-playfield { min-height:0; }
+  /* 낮아진 걷는 무대에서 왼쪽 위 콩이 힌트가 방향판 ↑ 가운데를 덮어 ↑를 누르면 힌트가 열렸다. 오른쪽 위로 옮긴다. */
+  #app .experiment-screen.core-studio .rescue-playfield.is-walk > .rescue-hint-corgi { left:auto; right:12px; top:8px; }
   #app .workshop-stage > .workshop-drawer { flex-wrap:wrap; row-gap:6px; }
   #app .workshop-stage > .workshop-drawer > .workshop-instruction { order:-1; flex:1 1 100%; max-width:none; width:auto; }
   /* 배송소 조작판 왼쪽의 콩이 힌트(약 92px)가 「부품 1개」 카드를 덮었다. 그만큼 비워 둔다. */
