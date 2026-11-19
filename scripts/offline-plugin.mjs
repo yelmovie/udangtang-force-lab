@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join, relative, resolve, sep } from 'node:path';
 
@@ -7,6 +7,12 @@ async function filesIn(directory) {
   const entries = (await readdir(directory, { withFileTypes: true })).filter(entry => !entry.name.startsWith('._'));
   return (await Promise.all(entries.map(entry => entry.isDirectory() ? filesIn(join(directory, entry.name)) : [join(directory, entry.name)]))).flat();
 }
+
+const unusedPublicFiles = [
+  'assets/backgrounds/islands.webp',
+  'assets/fonts/jua-korean-400.woff2', 'assets/fonts/jua-latin-400.woff2', 'assets/fonts/Jua-OFL.txt',
+  ...['Regular', 'Bold', 'ExtraBold', 'Heavy'].map(weight => `assets/fonts/NanumSquareNeo-${weight}.woff`),
+];
 
 export function offlinePlugin() {
   let outputDirectory;
@@ -19,6 +25,9 @@ export function offlinePlugin() {
     generateBundle() { built = true; },
     async closeBundle() {
       if (!built) return;
+      // Files kept in public/ (never deleted there) that no screen loads, left out of the deployed build:
+      // an old background, the old Jua fonts and their licence, and the .woff copies (the CSS loads .woff2 only).
+      await Promise.all(unusedPublicFiles.map(file => rm(join(outputDirectory, file), { force: true })));
       const paths = (await filesIn(outputDirectory))
         .filter(path => (path.endsWith(`${sep}npc-welcome.mp3`) || path.includes(`${sep}audio${sep}sfx${sep}`) || /\.(?:html|css|js|json|webmanifest|webp|png|ogg|svg|woff2?|glb)$/i.test(path)) && !path.endsWith(`${sep}sw.js`)).sort();
       const hash = createHash('sha256');

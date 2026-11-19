@@ -3,7 +3,7 @@ import type { SaveData } from './state';
 import { inquiryPlans, predictionRecap } from './inquiryPlan';
 import './predictionChip.css';
 
-const escape = (text: string) => text.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+import { escapeHtml as escape } from './escapeHtml';
 
 /** Flies the student's first prediction next to the result they just observed.
  * Call it once, at the moment the mission's key comparison first appears.

@@ -4,7 +4,7 @@ import { balanceObjects, type StageId } from './data';
 import { inquiryPlans, planLabel } from './inquiryPlan';
 import { fingerIcon } from './interactionHints';
 
-const escape = (text: string) => text.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+import { escapeHtml as escape } from './escapeHtml';
 
 /** The balance-stage parts (base, beam, pans) rebuilt small: a record tilts, a question waits level with a "?". */
 const balancePair = (pair: [string, string], tilt?: 'left' | 'right' | 'level') => {

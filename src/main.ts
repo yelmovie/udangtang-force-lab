@@ -1,4 +1,5 @@
 import './style.css';
+import { escapeHtml } from './escapeHtml';
 import './adventure.css';
 import './display.css';
 import './settings.css';
@@ -373,9 +374,6 @@ function guessMarkup(recap: PredictionRecap): string {
 function predictionMarkup(recap: PredictionRecap, className = 'discovery-prediction'): string {
   const verdict = predictionVerdict(recap);
   return `<div class="${className} prediction-recap" data-matched="${recap.matched ?? 'none'}"><p><span class="prediction-tag">처음 생각</span>${escapeHtml(recap.predicted ?? '기록된 예상이 없어')}</p><p><span class="prediction-tag is-result">실제 결과</span>${escapeHtml(recap.result)}</p>${verdict ? `<strong class="prediction-verdict">${verdict}</strong>` : ''}</div>`;
-}
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!);
 }
 
 function openEndingCeremony() {

@@ -1,4 +1,5 @@
 import './toolBag.css';
+import { escapeHtml } from './escapeHtml';
 import { stages, type StageId } from './data';
 import type { SaveData } from './state';
 import { toolCards, type ToolCard } from './toolCards';
@@ -8,10 +9,6 @@ export function toolCardIcon(stage: StageId): string {
   return `<img class="toolcard-icon" src="${import.meta.env.BASE_URL}assets/game/toolcard-${stage}.webp" alt="" draggable="false">`;
 }
 
-const htmlEntities: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>"]/g, char => htmlEntities[char]);
-}
 const color = (stage: StageId) => stages.find(item => item.id === stage)!.color;
 
 /** Card front: drawing, name, what the tool taught, and the student's own record (hidden when missing). */
