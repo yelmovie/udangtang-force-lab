@@ -9,6 +9,8 @@ export type StoryModalHost = {
   confetti(host: HTMLElement): void;
   /** 효과음이나 배경 음악이 하나라도 켜져 있나 */
   soundOn(): boolean;
+  /** 설정의 목소리 스위치. 이야기 영상은 대사가 소리 트랙에 섞여 있어 꺼지면 영상을 음소거한다 */
+  voiceOn(): boolean;
   /** 저장된 전체 소리 크기(0~1, 기본 .3) */
   volume(): number;
   /** 이야기 창이 원하는 배경 음악(없으면 지금 화면의 곡 그대로, 닫히면 null) */
@@ -81,7 +83,8 @@ export function openStoryModal(options: StoryOptions) {
       <div class="story-actions"><div class="story-film-controls">${options.finale ? '<button type="button" class="button button-secondary story-audio-toggle" data-story="audio" aria-pressed="false">영상 소리 켜기</button>' : ''}<button type="button" class="button button-secondary story-pause-toggle" data-story="pause" aria-pressed="false">일시정지</button><button type="button" class="button button-secondary story-replay" data-story="replay">처음부터</button></div><button class="button button-secondary" data-story="skip">${options.finale ? '지도로 돌아가기' : '건너뛰기'}</button><button class="button button-primary" data-story="done" hidden>${options.finishLabel}</button></div>
     </div>`;
     const el = modal.querySelector<HTMLVideoElement>('video')!;
-    el.muted = !host!.soundOn();
+    // The film's lines are mixed into its soundtrack, so the voice switch mutes the whole film (the music then plays on at its usual level).
+    el.muted = !host!.soundOn() || !host!.voiceOn();
     el.volume = Math.min(1, Math.max(0, host!.volume() * 2.4));
     // The film carries its own voices: the music keeps playing underneath, turned down until the film ends or is silenced.
     let filmOver = false, releaseMusic: (() => void) | undefined;

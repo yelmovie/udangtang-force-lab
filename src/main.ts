@@ -87,7 +87,7 @@ function syncMusic() {
 }
 
 /** Confetti burst: 28 pieces with their own drift, delay and colour. Skipped under reduced motion. */
-configureStoryModal({ app, tone, confetti, soundOn: () => anySound(), volume: () => save.soundVolume ?? .3, setMusic: music => { storyMusic = music; syncMusic(); } });
+configureStoryModal({ app, tone, confetti, soundOn: () => anySound(), voiceOn: () => save.voiceOn ?? save.soundOn, volume: () => save.soundVolume ?? .3, setMusic: music => { storyMusic = music; syncMusic(); } });
 function confetti(host: HTMLElement) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const burst = document.createElement('div'); burst.className = 'story-confetti'; burst.setAttribute('aria-hidden', 'true');
