@@ -1,0 +1,21 @@
+/* 한국어 줄바꿈 균형 (과학34 공통, 2026-11-19)
+   - 단어 중간에서 끊지 않는다(keep-all). 너무 긴 낱말만 상자 끝에서 끊는다.
+   - 문단은 끝줄에 한두 낱말만 떨어지지 않게(pretty).
+   - 제목·버튼·팝업·안내처럼 짧은 글은 줄 길이를 고르게(balance).
+   모든 선택자를 :where()로 감싸 우선순위 0이다. 프로젝트에 따로 정한 규칙이 있으면 항상 그쪽이 이긴다. */
+:where(html) {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-break: strict;
+  text-wrap: pretty;
+}
+:where(h1, h2, h3, h4, h5, h6, button, label, legend, figcaption, caption, summary, th, dt,
+  dialog, [role="dialog"], [role="alertdialog"], [role="status"], [role="alert"], [role="tooltip"]) {
+  text-wrap: balance;
+}
+/* 글자가 한 자씩 나오는 대사는 치는 동안 줄이 출렁이지 않게 보통 줄바꿈을 쓴다 */
+:where(.dialogue-typing, [data-typing] [aria-hidden="true"]) {
+  text-wrap: wrap;
+}
+
+/* ── 프로젝트 보정: 이 아래에 이 프로젝트에서만 필요한 규칙을 둔다(공통 위쪽은 그대로) ── */
