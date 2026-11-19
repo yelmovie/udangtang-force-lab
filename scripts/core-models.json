@@ -1,5 +1,5 @@
 {
-  "prepared": "2026-10-20",
+  "prepared": "2026-11-19",
   "assets": [
     {
       "id": "core",
@@ -8,7 +8,7 @@
       "sourceBytes": 51815960,
       "sourceTriangles": 1101816,
       "sourceSha256": "192f94141eaa08497b46c57ddbdc47c5990550eabb94022c542adc9cbd2e4136",
-      "bytes": 2709464,
+      "bytes": 1299628,
       "triangles": 49974,
       "vertices": 51739,
       "simplificationError": 0.001195850782096386,
@@ -17,7 +17,7 @@
         "sourceHeight": 4096,
         "width": 2048,
         "height": 2048,
-        "bytes": 752521,
+        "bytes": 562008,
         "maps": 1
       },
       "bounds": {
@@ -32,7 +32,7 @@
           0.8454139828681946
         ]
       },
-      "sha256": "e53fce409aa0ab0e5450ed5811382a7fa7e01d76998cad0dd64966ff41d20e78"
+      "sha256": "da4e8def8c3810d2548b8dd222ed5af8ea7978cc954b4284882268a61060c637"
     },
     {
       "id": "dock",
@@ -41,7 +41,7 @@
       "sourceBytes": 36795972,
       "sourceTriangles": 621238,
       "sourceSha256": "c680a4b2e057eb9c63929f6950da0cc2783b63be4297ff817d6846b641c64d8d",
-      "bytes": 1217916,
+      "bytes": 728080,
       "triangles": 11998,
       "vertices": 13232,
       "simplificationError": 0.002760601229965687,
@@ -50,7 +50,7 @@
         "sourceHeight": 4096,
         "width": 2048,
         "height": 2048,
-        "bytes": 721063,
+        "bytes": 527778,
         "maps": 1
       },
       "bounds": {
@@ -65,7 +65,7 @@
           0.9510300159454346
         ]
       },
-      "sha256": "9b59191b12ecdcabc787d9d100e8265aa57f8e7f025ef5990caac64e806b012e"
+      "sha256": "9bf3911b51f8e32b9d0097f969d6d4a946c418eb570d30f2c686317b2132b0ee"
     }
   ]
 }

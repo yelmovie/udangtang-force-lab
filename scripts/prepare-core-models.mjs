@@ -2,17 +2,17 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import sharp from 'sharp';
-import { MeshoptSimplifier } from 'meshoptimizer';
+import { MeshoptSimplifier, MeshoptEncoder } from 'meshoptimizer';
 
 // Static Meshy source models only. Originals are retained outside public/.
 const assets = [
   { id: 'core', source: 'references/models/original/core-cube-source.glb', output: 'public/assets/models/core/core.glb' },
   { id: 'dock', source: 'references/models/original/core-dock-source.glb', output: 'public/assets/models/core/dock.glb' },
 ];
-await MeshoptSimplifier.ready;
+await MeshoptSimplifier.ready; await MeshoptEncoder.ready;
 // 2026-10-20: 22k triangles with free UV seams tore the core's surface. Seams are now locked (LockBorder)
 // and more triangles are kept; the texture stays at 2048 so the baked panels stay sharp.
-const TARGET = { core: 50000, dock: 12000 }, TEXTURE = 2048, OUT_DIR = process.env.CORE_OUT_DIR ?? 'public/assets/models/core';
+const TARGET = { core: 50000, dock: 12000 }, TEXTURE = 2048, TEXTURE_QUALITY = Number(process.env.CORE_TEXTURE_QUALITY ?? 86), OUT_DIR = process.env.CORE_OUT_DIR ?? 'public/assets/models/core';
 const report = [];
 for (const asset of assets) {
   const source = await readFile(resolve(asset.source));
@@ -42,26 +42,54 @@ for (const asset of assets) {
     }
     return out;
   }
-  const pos = compact(positions, 3), normal = compact(normals, 3), texcoord = compact(uv, 2);
+  // 2026-11-19: vertex-cache order first, so the meshopt stream below compresses well.
+  const orderedIndices = Uint32Array.from(reduced);
+  const [order] = MeshoptEncoder.reorderMesh(orderedIndices, true, false);
+  function reorder(input, components) {
+    const out = new Float32Array(vertexCount * components);
+    for (let old = 0; old < vertexCount; old++) for (let k = 0; k < components; k++) out[order[old] * components + k] = input[old * components + k];
+    return out;
+  }
+  const pos = reorder(compact(positions, 3), 3), normal = reorder(compact(normals, 3), 3), texcoord = reorder(compact(uv, 2), 2);
   const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
   for (let i = 0; i < pos.length; i++) { const k = i % 3; min[k] = Math.min(min[k], pos[i]); max[k] = Math.max(max[k], pos[i]); }
   const image = original.images[original.textures[original.materials[primitive.material].pbrMetallicRoughness.baseColorTexture.index].source];
   const imageView = original.bufferViews[image.bufferView];
   const imageBytes = binary.subarray(imageView.byteOffset ?? 0, (imageView.byteOffset ?? 0) + imageView.byteLength);
   const sourceTexture = await sharp(imageBytes).metadata();
-  const texture = await sharp(imageBytes).resize(TEXTURE, TEXTURE, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 86, mozjpeg: true }).toBuffer();
-  const chunks = [], views = []; let offset = 0;
-  function append(bytes, target) {
-    const data = Buffer.from(bytes.buffer ?? bytes, bytes.byteOffset ?? 0, bytes.byteLength ?? bytes.length);
-    const index = views.length; views.push({ buffer: 0, byteOffset: offset, byteLength: data.length, ...(target ? { target } : {}) });
-    chunks.push(data); offset += data.length;
+  // 2026-11-19: WebP (EXT_texture_webp) keeps the 2048 atlas at about half the JPEG bytes.
+  const texture = await sharp(imageBytes).resize(TEXTURE, TEXTURE, { fit: 'inside', withoutEnlargement: true }).webp({ quality: TEXTURE_QUALITY, effort: 6 }).toBuffer();
+  // Geometry goes out as EXT_meshopt_compression streams (decoded by three's MeshoptDecoder).
+  // Buffer 0 holds the compressed bytes and the texture; buffer 1 is the uncompressed layout the decoder fills.
+  const chunks = [], views = []; let offset = 0, fallbackOffset = 0;
+  const pad4 = value => value + (4 - value % 4) % 4;
+  function push(data) {
+    const start = offset; chunks.push(data); offset += data.length;
     const padding = (4 - offset % 4) % 4; if (padding) { chunks.push(Buffer.alloc(padding)); offset += padding; }
-    return index;
+    return start;
   }
-  const indexArray = vertexCount <= 65535 ? Uint16Array.from(reduced) : reduced;
-  const positionView = append(pos, 34962), normalView = append(normal, 34962), uvView = append(texcoord, 34962), indicesView = append(indexArray, 34963), textureView = append(texture);
+  function appendRaw(bytes) {
+    const data = Buffer.from(bytes.buffer ?? bytes, bytes.byteOffset ?? 0, bytes.byteLength ?? bytes.length);
+    const byteOffset = push(data); views.push({ buffer: 0, byteOffset, byteLength: data.length }); return views.length - 1;
+  }
+  function appendCompressed(raw, byteStride, count, mode, target, filter) {
+    const encoded = mode === 'ATTRIBUTES' ? MeshoptEncoder.encodeVertexBuffer(raw, count, byteStride) : MeshoptEncoder.encodeIndexBuffer(raw, count, byteStride);
+    const byteOffset = push(Buffer.from(encoded.buffer, encoded.byteOffset, encoded.byteLength));
+    views.push({
+      buffer: 1, byteOffset: fallbackOffset, byteLength: raw.byteLength, ...(mode === 'ATTRIBUTES' ? { byteStride } : {}), target,
+      extensions: { EXT_meshopt_compression: { buffer: 0, byteOffset, byteLength: encoded.byteLength, byteStride, count, mode, ...(filter ? { filter } : {}) } },
+    });
+    fallbackOffset = pad4(fallbackOffset + raw.byteLength);
+    return views.length - 1;
+  }
+  const attribute = (values, components, bits, mode) => appendCompressed(MeshoptEncoder.encodeFilterExp(values, vertexCount, components * 4, bits, mode), components * 4, vertexCount, 'ATTRIBUTES', 34962, 'EXPONENTIAL');
+  const indexArray = vertexCount <= 65535 ? Uint16Array.from(orderedIndices) : orderedIndices;
+  const positionView = attribute(pos, 3, 14, 'SharedComponent'), normalView = attribute(normal, 3, 10, 'Separate'), uvView = attribute(texcoord, 2, 14, 'SharedComponent');
+  const indicesView = appendCompressed(new Uint8Array(indexArray.buffer, indexArray.byteOffset, indexArray.byteLength), indexArray.BYTES_PER_ELEMENT, indexArray.length, 'TRIANGLES', 34963);
+  const textureView = appendRaw(texture);
   const document = {
-    asset: { version: '2.0', generator: 'udangtang tablet preparation / meshoptimizer 0.25' },
+    asset: { version: '2.0', generator: 'udangtang tablet preparation / meshoptimizer 0.25 (EXT_meshopt_compression)' },
+    extensionsUsed: ['EXT_meshopt_compression', 'EXT_texture_webp'], extensionsRequired: ['EXT_meshopt_compression', 'EXT_texture_webp'],
     scene: 0, scenes: [{ nodes: [0] }], nodes: [{ name: asset.id, mesh: 0 }],
     meshes: [{ name: asset.id, primitives: [{ attributes: { POSITION: 0, NORMAL: 1, TEXCOORD_0: 2 }, indices: 3, material: 0 }] }],
     accessors: [
@@ -71,8 +99,8 @@ for (const asset of assets) {
       { bufferView: indicesView, componentType: indexArray instanceof Uint16Array ? 5123 : 5125, count: reduced.length, type: 'SCALAR' },
     ],
     materials: [{ name: `${asset.id}-matte`, pbrMetallicRoughness: { baseColorTexture: { index: 0 }, metallicFactor: .06, roughnessFactor: .72 }, alphaMode: 'OPAQUE', doubleSided: false }],
-    images: [{ bufferView: textureView, mimeType: 'image/jpeg' }], textures: [{ source: 0, sampler: 0 }],
-    samplers: [{ magFilter: 9729, minFilter: 9987, wrapS: 33071, wrapT: 33071 }], bufferViews: views, buffers: [{ byteLength: offset }],
+    images: [{ bufferView: textureView, mimeType: 'image/webp' }], textures: [{ sampler: 0, extensions: { EXT_texture_webp: { source: 0 } } }],
+    samplers: [{ magFilter: 9729, minFilter: 9987, wrapS: 33071, wrapT: 33071 }], bufferViews: views, buffers: [{ byteLength: offset }, { byteLength: fallbackOffset, extensions: { EXT_meshopt_compression: { fallback: true } } }],
   };
   const json = Buffer.from(JSON.stringify(document));
   const paddedJson = Buffer.concat([json, Buffer.alloc((4 - json.length % 4) % 4, 0x20)]);
@@ -87,4 +115,4 @@ for (const asset of assets) {
   report.push(result); console.log(JSON.stringify(result));
 }
 if (report.reduce((sum, item) => sum + item.bytes, 0) > 6000000) throw new Error('Combined tablet model budget exceeded');
-await writeFile(resolve('scripts/core-models.json'), JSON.stringify({ prepared: '2026-10-20', assets: report }, null, 2) + '\n');
+await writeFile(resolve('scripts/core-models.json'), JSON.stringify({ prepared: '2026-11-19', assets: report }, null, 2) + '\n');

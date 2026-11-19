@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { coreRoutePoint, coreRoutes, type CoreRoute } from '../coreSceneModel';
@@ -31,7 +32,7 @@ function disposeObjects(root: THREE.Object3D) {
 }
 
 export async function createCoreScene(host: HTMLElement, signal: AbortSignal, onProjection: (projection: CoreProjection) => void): Promise<CoreScene> {
-  const loader = new GLTFLoader(), request = new AbortController();
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder), request = new AbortController();
   const abortRequest = () => request.abort();
   signal.addEventListener('abort', abortRequest, { once: true });
   if (signal.aborted) request.abort();

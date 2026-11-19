@@ -861,7 +861,9 @@ function openSettings(focusAction?: 'bag') {
       ${content}${section === 'menu' ? '' : '<button class="button button-secondary settings-back" data-settings="back">설정으로 돌아가기</button>'}
     </div>`;
     const target = section === 'menu' && focusAction ? focusAction : 'close';
-    overlay.querySelector<HTMLButtonElement>(`[data-settings="${target}"]`)?.focus();
+    // 같은 동작 버튼이 둘(위 ×·아래 「닫기」)일 때 CSS로 숨긴 쪽에는 초점이 가지 않는다. 보이는 쪽에 둬야 Esc가 창 안에서 잡힌다.
+    const targets = [...overlay.querySelectorAll<HTMLButtonElement>(`[data-settings="${target}"]`)];
+    (targets.find(button => button.getClientRects().length) ?? targets[0])?.focus();
     focusAction = undefined;
   };
   overlay.addEventListener('click', event => {

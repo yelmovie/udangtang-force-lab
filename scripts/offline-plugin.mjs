@@ -30,7 +30,8 @@ export function offlinePlugin() {
       }
       const version = hash.digest('hex').slice(0, 16);
       // First-screen set only: everything else is cached the first time a screen asks for it.
-      const core = urls.filter(name => /^(?:index\.html|manifest\.webmanifest|favicon\.svg|icons\/.*|assets\/index-[^/]+\.(?:js|css)|assets\/fonts\/.*\.woff2|assets\/ui\/title\.webp|assets\/backgrounds\/lab\.webp|assets\/characters\/.*\.webp)$/.test(name));
+      // 2026-11-19: only the NanumSquareNeo fonts the CSS uses (the old Jua files stay in public/ but no screen loads them).
+      const core = urls.filter(name => /^(?:index\.html|manifest\.webmanifest|favicon\.svg|icons\/.*|assets\/index-[^/]+\.(?:js|css)|assets\/fonts\/NanumSquareNeo-[^/]+\.woff2|assets\/ui\/title\.webp|assets\/backgrounds\/lab\.webp|assets\/characters\/.*\.webp)$/.test(name));
       const runtimePattern = '/\\.(?:html|css|js|json|webmanifest|webp|png|ogg|svg|woff2?|glb)$|\\/audio\\/sfx\\/[^/]+\\.mp3$/i';
       core.push('assets/audio/npc-welcome.mp3');
       const code = `// Generated from this production build. Do not edit by hand.

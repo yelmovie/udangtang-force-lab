@@ -10,8 +10,9 @@
 /* 의뢰 편지: ×와 「나중에 볼게요」가 같은 닫기. 글자 버튼만 남긴다. */
 #request-letter-close { display:none; }
 
-/* 설정: 위 ×와 아래 「닫기」가 같은 닫기. 다른 설정 화면·도구 가방과 같게 위 ×만 남긴다. */
-.science-settings-footer [data-settings="close"] { display:none; }
+/* 설정: 위 ×와 아래 「닫기」가 같은 닫기. 16개 공통 기준(2026-11-19)에 따라 아래 오른쪽 「닫기」만 남기고 위 ×를 숨긴다.
+   「닫기」가 없는 하위 화면(전체 단계 해금·기록 초기화·개념 영상)은 × 유지. Esc 닫기는 그대로. */
+.settings-card[data-science-settings]:has(.science-settings-footer [data-settings="close"]) .settings-close { display:none; }
 
 /* 균형 다리 조작판: 안내 라벨을 숨긴 뒤 물체 카드가 왼쪽 칸에 몰려 오른쪽이 비었다. 가운데로 모은다. */
 #app .balance-screen .balance-dock .instrument-tools { grid-template-columns:minmax(0, 1fr); justify-items:center; }
@@ -50,3 +51,29 @@
    밝은 바탕 + 밝은 아이콘이 되어 거의 안 보였다. 어두운 바탕을 다시 지정한다. */
 #app:has(.core-studio) > .topbar .icon-button { background:#1b3941; border-color:#6d929559; backdrop-filter:none; -webkit-backdrop-filter:none; }
 #app:has(.core-studio) > .topbar .icon-button:hover { background:#2d5058; }
+
+/* 텍스트 확대(C25, 2026-11-19): 1280×800에서 200%로 키우면 CSS 화면이 640×400이 된다. 낮은 가로 화면(높이 600px 이하, 폰 가로 포함)은
+   원래 세로로 스크롤되는데, 조작판이 무대 아래로 밀려 스크롤해야만 보였다. 조작판을 화면 아래에 붙여(sticky) 늘 보이게 하고,
+   스크롤하면 무대 아래쪽도 그대로 드러난다. 버튼·핸들러·자동 진행 순서는 그대로다(배송소·균형 다리·보급소). */
+@media (orientation:landscape) and (max-height:600px) {
+  /* 운반 공방은 붙이지 않는다: 아래 조작판이 무대 속 손잡이(학생이 끄는 주 조작)를 덮는다. 공방은 한 번 스크롤하면 무대와 조작판이 함께 보인다. */
+  /* 「자동으로 보기」 시연 중(.is-autoplaying)에는 붙이지 않아, 시연 장면이 예전처럼 조작판에 가리지 않는다(AGENTS.md E-1). */
+  #app .experiment-screen:not(.is-autoplaying) .cargo-dock,
+  #app .instrument-screen:not(.is-autoplaying) .instrument-dock { position:sticky; bottom:0; z-index:7; box-shadow:0 -6px 14px #4a35181f; }
+  /* 균형 다리·보급소는 높이 650~680px로 고정돼 조작판 아래에 빈 띠가 남았다. 내용 높이만큼만 쓴다. */
+  #app .instrument-screen.experiment-screen { min-height:0; }
+}
+/* 폭 760px 이하 가로 화면(200% 확대): 세로 화면용 규칙이 제목 줄을 56px 아래로 내리고 빈 아래 줄(66px)을 남겼다. 빈칸을 없앤다.
+   공방 도구 줄은 한 줄에 다 안 들어가 「기록 보기」·시점 버튼이 화면 오른쪽 밖으로 나갔다. 두 줄로 접는다. */
+@media (max-width:760px) and (orientation:landscape) {
+  #app .experiment-screen > .experiment-heading { margin-top:10px; }
+  #app .experiment-screen > .experiment-footer:not(:has(.is-ready)) { display:none; }
+  /* 중앙 코어: 격자 한 줄(1fr)짜리 화면인데, 이 폭에서는 제목 줄이 그 줄을 차지해 무대가 높이 0으로 접히고
+     방향판·점프가 화면 밖(스크롤도 안 됨)에 있었다(운영본에서도 같음). 제목·무대 두 줄로 화면 높이에 맞춘다. */
+  #app .experiment-screen.core-studio { height:var(--app-height, 100dvh); min-height:0; grid-template-rows:auto minmax(0, 1fr) auto; }
+  #app .experiment-screen.core-studio .rescue-stage .rescue-playfield { min-height:0; }
+  #app .workshop-stage > .workshop-drawer { flex-wrap:wrap; row-gap:6px; }
+  #app .workshop-stage > .workshop-drawer > .workshop-instruction { order:-1; flex:1 1 100%; max-width:none; width:auto; }
+  /* 배송소 조작판 왼쪽의 콩이 힌트(약 92px)가 「부품 1개」 카드를 덮었다. 그만큼 비워 둔다. */
+  #app .experiment-screen .cargo-dock { padding-left:112px; }
+}

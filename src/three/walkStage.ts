@@ -350,8 +350,8 @@ export async function createWalkStage(host: HTMLElement, signal: AbortSignal, st
     if (model || modelLoading) { if (model) model.visible = inspecting; return; }
     modelLoading = true;
     try {
-      const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
-      const loadedModel = (await new GLTFLoader().loadAsync(coreAssets.core)).scene;
+      const [{ GLTFLoader }, { MeshoptDecoder }] = await Promise.all([import('three/addons/loaders/GLTFLoader.js'), import('three/addons/libs/meshopt_decoder.module.js')]);
+      const loadedModel = (await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(coreAssets.core)).scene;
       if (disposed) return;
       const bounds = new THREE.Box3().setFromObject(loadedModel), size = bounds.getSize(new THREE.Vector3()), centre = bounds.getCenter(new THREE.Vector3());
       loadedModel.position.set(-centre.x, -bounds.min.y, -centre.z);
