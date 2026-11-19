@@ -20,3 +20,33 @@
 /* 중앙 코어: 다른 실험처럼 숨긴 제목 줄(h1·.eyebrow)과 달리 .core-eyebrow만 남아,
    넓은 창(1920×1080)에서 「마지막」 글자 조각이 상단 띠 아래로 삐져나왔다. 같은 규칙으로 숨긴다. */
 #app .experiment-screen > .experiment-heading .core-eyebrow { display:none; }
+
+/* 균형 다리 띠 3줄 → 2줄(L3, 2026-11-19): 위 기능 띠 아래에 따로 있던 「목표 칩 · 자동으로 보기 · 기록 보기」 줄을 없앤다.
+   목표 칩은 위 기능 띠의 빈 가운데로, 버튼은 무대 오른쪽 위로(배송소·보급소와 같은 자리), 단계 안내는 무대 왼쪽 위로 옮긴다.
+   버튼·문구·순서·핸들러는 그대로라 자동 보기 동작은 바뀌지 않는다. */
+/* 폭 860px 이하(200% 확대 등)에서는 목표 칩이 여러 줄로 접혀 겹치므로 예전 배치(별도 줄)를 그대로 쓴다. */
+@media (min-width:861px) {
+  #app .balance-screen > .balance-topbar { display:contents; }
+  #app .balance-screen > .balance-topbar .balance-goal {
+    position:absolute; z-index:calc(var(--z-hud, 50) + 1); top:12px; left:132px; max-width:calc(100% - 520px);
+    display:flex; flex-wrap:wrap; align-items:center; align-content:center; min-height:44px; gap:4px 6px; pointer-events:none;
+  }
+  #app .balance-screen > .balance-topbar .balance-top-tools {
+    position:absolute; z-index:6; top:68px; right:22px; margin:0;
+  }
+  #app .balance-screen #balance-phase { left:12px; top:10px; transform:none; max-width:calc(100% - 440px); width:max-content; }
+}
+@media (min-width:861px) and (max-width:1000px) {
+  #app .balance-screen > .balance-topbar .balance-goal { left:124px; max-width:calc(100% - 490px); gap:4px; }
+  #app .balance-screen > .balance-topbar .balance-goal > span { padding:3px 6px; }
+}
+/* 넓은 창: 위 기능 띠 버튼이 60px로 커지고 무대가 84px부터 시작한다(glass-ui.css). */
+@media (min-width:1600px) and (min-height:900px) {
+  #app .balance-screen > .balance-topbar .balance-goal { top:16px; left:164px; }
+  #app .balance-screen > .balance-topbar .balance-top-tools { top:92px; }
+}
+
+/* 중앙 코어 위 기능 띠(C9): 어두운 띠 전용 버튼색(coreStudio.css)이 유리 버튼 규칙(glass-ui.css, 같은 우선순위·뒤에 읽힘)에 밀려
+   밝은 바탕 + 밝은 아이콘이 되어 거의 안 보였다. 어두운 바탕을 다시 지정한다. */
+#app:has(.core-studio) > .topbar .icon-button { background:#1b3941; border-color:#6d929559; backdrop-filter:none; -webkit-backdrop-filter:none; }
+#app:has(.core-studio) > .topbar .icon-button:hover { background:#2d5058; }
