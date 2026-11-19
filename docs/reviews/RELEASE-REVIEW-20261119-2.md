@@ -81,3 +81,21 @@
 - 배포 뒤 운영 주소로 같은 32장면을 다시 돌려 분리 전 운영본과 비교: **32장면 모두 같음, 캔버스 23장 중 21장은 PNG까지 똑같고 2장(게시판 앞·게시판 열림)은 칸 평균 차이 0**, 오류 0. 개발 서버 두 번 실행끼리도 32장면 같음(위의 0.02px·1/255 차이는 개발 빌드와 운영 빌드의 차이).
 - 운영 반영(`18b09beb`): `cmp.sh` `assets/index-Drx3nlmO.js`·index MATCH, CSS·`sw.js` MATCH, 영상 Range 206. 이 배포에 다른 세션의 `f194fbd`(소리 1차 수정: 기본 소리 켜짐 등)도 함께 나감.
 - 판정은 그대로 **배포 가능**(FAIL 0, NOT TESTED 2). E2가 PASS가 되어 로직 점수 4→5(성적표 `SCORE-20261119-2.md` 80점).
+
+## 추가 3: 남은 문제 정리 (`0151cfa`, 운영 `bb528690-cc5d-4770-a3d5-e7936fa164c8`)
+
+공유 노트 `REMAINING-FIX-20261119.md` 기준으로 남은 WARNING을 다시 봤다. 코드로 안전하게 고칠 수 있는 것만 고쳤다.
+
+| 항목 | 전 | 후 | 증거등급 | 근거·이유 |
+|---|---|---|---|---|
+| D6 미사용 | WARNING | **PASS** | 확인됨 | 안 쓰는 public 파일을 배포본에서 뺌(`scripts/offline-plugin.mjs`의 `unusedPublicFiles`; AGENTS.md에 따라 `public/`에서는 지우지 않음): `backgrounds/islands.webp`, Jua 글꼴 2개와 `Jua-OFL.txt`, `NanumSquareNeo-*.woff` 4개(CSS는 `.woff2`만 읽음 — 11-19 2차 조사에서 놓친 것). 배포본 약 3.9MB 감소. 운영에서 woff2는 200 font/woff2, 뺀 파일은 앱 화면(text/html)으로 응답 |
+| E13 이벤트 위생 | WARNING | **PASS** | 확인됨 | 전역 키·화면 방향 리스너를 다는 창(이야기·미션 시작 카드·개념 영상·발견 결과)은 모두 `modal-dismiss`로 스스로 정리하고, `popstate`가 창을 지우기 전에 그 이벤트를 보낸다(`main.ts` popstate). 브라우저 확인(`.tmp/remaining-20261119/e13.mjs`): 배송소에서 설정 창·이야기 창을 연 채 뒤로 가기 → 창 0개, `#app` inert 아님, 뒤이은 Esc·Space에 오류 0(개발·운영 둘 다) |
+| E1 중복 | WARNING | WARNING | 확인됨 | HTML 이스케이프 네 벌(`main.ts`·`toolBag.ts`·`learningReview.ts`·`predictionChip.ts`)을 `src/escapeHtml.ts` 하나로 합침(`toolBag`만 `'`를 안 바꾸던 것도 같아짐 — 화면 글자는 같음). `reward-cards.js`·`concept-focus.js`는 다른 과학 프로젝트와 같이 쓰는 의존성 없는 파일이라 그대로. 포커스 가두기 9벌은 창마다 초점 대상이 달라 합치지 않음(발견 결과 창은 자동 보기 직후 화면이라 E-1) |
+| B15 비활성 이유 | WARNING | WARNING | 추정 | 다섯 미션의 완료 버튼(`#cargo-finish` 등)은 자동 보기와 같은 바닥줄에 있어, E-1(버튼 노출·문구 유지)에 따라 사용자 확인 없이 이유 문구를 붙이지 않음 |
+| D10·D13 저사양·애니 | WARNING | WARNING | 추정 | 무한 box-shadow는 공방 두 곳(자동 보기 화면, E-1)과 `reward-cards.css`(공용 파일). Mac 실측 60fps라 학교 태블릿 측정 없이 모양을 바꾸지 않음 |
+| E6·E14·F11·F12·F15 | WARNING | WARNING | 추정 | 하드코딩·파일 이름은 바꿔도 동작 이득이 없고 위험만 있음, F11·F12는 권리 증빙 문서, F15는 저장·해금 로직(범위 밖) |
+
+- 회귀: 분리·정리 전 운영본(`18b09beb`)과 개발본의 17항목 비교 같음, 테스트 214·빌드 통과.
+- 운영 반영(`bb528690`): `cmp.sh` `assets/index-BpOvTxNt.js`·index·CSS·`sw.js` MATCH, 영상 Range 206.
+- 판정 그대로 **배포 가능**(FAIL 0, NOT TESTED 2). 점수 80→82(로직 6, 성능 8).
+- 실기기에서만 볼 수 있는 것(그대로 NOT TESTED·WARNING): D8·D9 태블릿 FPS·메모리 — iPad·Android Chrome에서 다섯 미션을 오가며 원격 디버깅 Performance로 확인. D10·D13 — 같은 기기에서 공방·보상 카드 화면 프레임 확인. C25 실제 글자 확대 — Safari 「aA」 200%, Chrome 확대 200%로 각 미션 조작판이 손에 닿는지.
