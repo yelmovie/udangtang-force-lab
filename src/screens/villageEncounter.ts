@@ -2,6 +2,7 @@ import { villainPatrol } from '../map-villain-patrol.js';
 import { canPlayMapFinale } from '../map-villains.js';
 import { attackRange, contactRange, encounterLines, facingToward, type Encounter } from '../villageEncounters';
 import { revealRewardCard } from '../rewardCards';
+import { voiceLinePending, voiceLinePlaying } from '../npcDialogueVoice';
 import { distance, requesterSpots, stageIds, createVillageNavigation } from './villageMap';
 import type { Point, VillageMap } from './villageMap';
 import type { VillageScene } from './villageScene';
@@ -153,7 +154,8 @@ export function createVillageEncounters(v: VillageScene) {
       }
       context.commit();
     }
-    v.villainSay(enemy.id, hits + 1, encounterLines[enemy.id][hits+1]);
+    // The villain answers 300 ms after the hit sound (which lands 80 ms after the press).
+    v.villainSay(enemy.id, hits + 1, encounterLines[enemy.id][hits+1], 380);
     if (hits===3 && story.complete) hint.textContent=v.restHint();
     context.cue('attack');
     v.cueLater(hits === 3 ? 'hit3' : hits === 2 ? 'hit2' : 'hit1', 80);
@@ -166,7 +168,8 @@ export function createVillageEncounters(v: VillageScene) {
         cueTimers.delete(id);
         const map = v.map;
         if (!v.alive || !map) { cardDue = false; return; }
-        if (v.paused()) { id = window.setTimeout(show, 300); cueTimers.add(id); return; }
+        // The card also waits for the villain's exit line to finish (at most 6 s after the hit).
+        if (v.paused() || ((voiceLinePlaying() || voiceLinePending()) && performance.now() - now < 6000)) { id = window.setTimeout(show, v.paused() ? 300 : 150); cueTimers.add(id); return; }
         const bounds = canvas.getBoundingClientRect();
         void revealRewardCard(enemy.index, { x: bounds.left + enemy.x / map.width * bounds.width, y: bounds.top + (enemy.y - 30) / map.height * bounds.height }, context.save).finally(() => { cardDue = false; });
       };

@@ -1,6 +1,11 @@
 /** Map villain moments: swing on the press, hits on the impact frame, then the roll-away exit. */
-export type MapSound = 'attack' | 'hit1' | 'hit2' | 'hit3' | 'villainExit' | 'villainAppear' | 'hurt' | 'cardWhoosh' | 'cardReveal' | 'cardEpic' | 'cardSlot' | 'cardComplete';
+export type MapSound = 'attack' | 'hit1' | 'hit2' | 'hit3' | 'villainExit' | 'villainAppear' | 'hurt' | 'cardWhoosh' | 'cardReveal' | 'cardEpic' | 'cardSlot' | 'cardComplete'
+  | 'jump' | 'labOpen' | 'labSparkle' | 'step';
 type SoundName = 'click' | 'bump' | 'success' | MapSound;
+/** Interface sounds: a new one cuts only the previous interface sound. Fight, card and lab-opening sounds overlap
+ * (at most four at once) and are never cut by a tap; footsteps run on their own two players. */
+const uiSounds: ReadonlySet<SoundName> = new Set(['click', 'bump', 'success']);
+const MAX_LAYERED = 4;
 export type MusicName = 'stage' | 'ending';
 /** Why the music is turned down: a spoken line, or a story film that carries its own voices. */
 export type DuckReason = 'voice' | 'film';
@@ -10,12 +15,22 @@ const files: Record<SoundName, string> = {
   villainExit: 'sfx/villain-exit-01.mp3', villainAppear: 'sfx/villain-appear-01.mp3', hurt: 'sfx/hurt-bump-03.mp3',
   // Achievement card: fly in, reveal (the two rarest use the longer jingle), land in the slot, full set.
   cardWhoosh: 'sfx/wind-whoosh-03.mp3', cardReveal: 'sfx/reward-01.mp3', cardEpic: 'sfx/reward-03.mp3', cardSlot: 'sfx/pickup-01.mp3', cardComplete: 'sfx/victory-jingle-01.mp3',
+  // Rescue walk hop; a newly opened lab: the latch clicks, then a short sparkle 0.12 s later.
+  jump: 'sfx/wind-whoosh-03.mp3', labOpen: 'sfx/open-02.mp3', labSparkle: 'sfx/twinkle-02.mp3',
+  step: 'sfx/step-01.mp3', // played through stepPlayers (step-01 and step-02 in turn)
 };
 /** Per-role loudness under the effects volume. The map files are already quieter than the interface sounds, so only the entrance and exit are lowered. */
-const levels: Partial<Record<SoundName, number>> = { villainExit: .8, villainAppear: .7 };
+const levels: Partial<Record<SoundName, number>> = { villainExit: .8, villainAppear: .7, jump: .6 };
 const level = (name: SoundName) => volume * (levels[name] ?? 1);
 const musicFiles: Record<MusicName, string> = { stage: 'bgm-stage.mp3', ending: 'bgm-ending.mp3' };
 const players = new Map<SoundName, HTMLAudioElement>();
+const startedAt = new Map<SoundName, number>();
+/** Footsteps: two files in turn, each on its own player so one step never cuts the last. 0.18 of a spoken line
+ * (lines play at volume × 1.9), half that while a line is speaking; pitch wanders up to ±6 %. */
+const stepFiles = ['sfx/step-01.mp3', 'sfx/step-02.mp3'];
+const stepPlayers: HTMLAudioElement[] = [];
+let stepTurn = 0;
+export const STEP_LEVEL = 1.9 * .18;
 const tracks = new Map<MusicName, HTMLAudioElement>();
 let volume = 0.3;
 /** The track the app asked for, and the one really running: the ending plays once, then the stage loop carries on. */
@@ -24,7 +39,9 @@ let wanted: MusicName | null = null, current: MusicName | null = null;
 const duckLevels: Record<DuckReason, number> = { voice: .25, film: .45 };
 const musicDucks = new Map<symbol, DuckReason>();
 // Music sits under the effects so feedback sounds stay easy to hear.
-const musicVolume = () => volume * 0.7 * Math.min(1, ...[...musicDucks.values()].map(reason => duckLevels[reason]));
+// After the ceremony track has ended, the stage loop carries on under the ceremony screens at 0.45 of its usual level.
+const afterEnding = () => wanted === 'ending' && current === 'stage' ? .45 : 1;
+const musicVolume = () => volume * 0.7 * afterEnding() * Math.min(1, ...[...musicDucks.values()].map(reason => duckLevels[reason]));
 let fade: ReturnType<typeof setInterval> | undefined;
 /** Brings every track to the level it should have now. glide: take about 0.18 s instead of jumping. */
 function levelMusic(glide = false) {
@@ -47,13 +64,44 @@ export function setVolume(value: number) {
   levelMusic();
   if (volume === 0) stopSounds();
 }
-export function stopSounds() { players.forEach(audio => { audio.pause(); audio.currentTime = 0; }); }
+const halt = (audio: HTMLAudioElement | undefined) => { if (audio) { audio.pause(); audio.currentTime = 0; } };
+const sounding = (audio: HTMLAudioElement | undefined) => !!audio && !audio.paused && !audio.ended;
+/** Mute, a hidden tab or the finale: every effect and footstep stops. */
+export function stopSounds() { players.forEach(halt); stepPlayers.forEach(halt); }
+/** Milliseconds left of an effect that is playing now (0 when it is not). */
+export function soundLeft(name: SoundName) {
+  const audio = players.get(name);
+  if (!sounding(audio)) return 0;
+  const { duration, currentTime, playbackRate } = audio!;
+  return Number.isFinite(duration) ? Math.max(0, (duration - currentTime) / (playbackRate || 1) * 1000) : 2500;
+}
+const voiceSpeaking = () => [...musicDucks.values()].includes('voice');
+function playStep() {
+  const turn = stepTurn++ % stepFiles.length;
+  const audio = stepPlayers[turn] ??= new Audio(`${import.meta.env.BASE_URL}assets/audio/${stepFiles[turn]}`);
+  (audio as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = false;
+  audio.playbackRate = .94 + Math.random() * .12;
+  audio.volume = Math.min(1, volume * STEP_LEVEL * (voiceSpeaking() ? .5 : 1));
+  audio.currentTime = 0;
+  void audio.play().catch(() => { /* Silent mode or browser audio policy must not block play. */ });
+}
 export function playSound(name: SoundName) {
   if (volume === 0 || document.hidden) return;
-  stopSounds();
+  if (name === 'step') { playStep(); return; }
+  if (uiSounds.has(name)) uiSounds.forEach(other => halt(players.get(other)));
+  else {
+    // Layered sounds overlap; past four at once, the oldest one gives way.
+    const layered = [...players].filter(([other, audio]) => other !== name && !uiSounds.has(other) && sounding(audio));
+    if (layered.length >= MAX_LAYERED) {
+      const [oldest] = layered.sort(([a], [b]) => (startedAt.get(a) ?? 0) - (startedAt.get(b) ?? 0))[0];
+      halt(players.get(oldest));
+    }
+  }
   let audio = players.get(name);
   if (!audio) { audio = new Audio(`${import.meta.env.BASE_URL}assets/audio/${files[name]}`); players.set(name, audio); }
   audio.volume = level(name);
+  audio.currentTime = 0;
+  startedAt.set(name, performance.now());
   void audio.play().catch(() => { /* Silent mode or browser audio policy must not block play. */ });
 }
 // Browsers refuse audio until the page has been tapped or a key pressed, so a refused start tries again on the next one.
@@ -77,7 +125,7 @@ function startMusic() {
     audio.loop = current === 'stage';
     audio.volume = musicVolume();
     // The ceremony track plays once; the stage loop takes over so the screen never falls silent.
-    if (current === 'ending') audio.addEventListener('ended', () => { if (wanted === 'ending' && current === 'ending') { current = 'stage'; startMusic(); } });
+    if (current === 'ending') audio.addEventListener('ended', () => { if (wanted === 'ending' && current === 'ending') { current = 'stage'; levelMusic(); startMusic(); } });
     tracks.set(current, audio);
   }
   if (audio.paused && !audio.ended && !document.hidden) void audio.play().catch(retryOnInput);
@@ -87,6 +135,7 @@ export function playMusic(name: MusicName) {
   if (wanted !== name) {
     wanted = name;
     if (current !== name) { tracks.forEach(audio => { audio.pause(); audio.currentTime = 0; }); current = name; }
+    levelMusic();
   }
   startMusic();
 }

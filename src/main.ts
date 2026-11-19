@@ -20,7 +20,7 @@ import { mountRescue } from './screens/rescue';
 import { mountVillage } from './screens/village';
 import { canPlayMapFinale, defeatedMapVillains } from './map-villains.js';
 import { villageRewards } from './villageStory';
-import { playMusic, playSound, stopMusic, stopSounds, setVolume, type MapSound, type MusicName } from './sound';
+import { playMusic, playSound, soundLeft, stopMusic, stopSounds, setVolume, type MapSound, type MusicName } from './sound';
 import { installKongDialogue } from './kongDialogue';
 import { configureVoiceLines, playVoiceLine, stopAllVoices, stopVoiceLine } from './npcDialogueVoice';
 installKongDialogue(() => save);
@@ -376,8 +376,15 @@ function predictionMarkup(recap: PredictionRecap, className = 'discovery-predict
   return `<div class="${className} prediction-recap" data-matched="${recap.matched ?? 'none'}"><p><span class="prediction-tag">처음 생각</span>${escapeHtml(recap.predicted ?? '기록된 예상이 없어')}</p><p><span class="prediction-tag is-result">실제 결과</span>${escapeHtml(recap.result)}</p>${verdict ? `<strong class="prediction-verdict">${verdict}</strong>` : ''}</div>`;
 }
 
+let ceremonyWait = 0;
 function openEndingCeremony() {
-  stopSounds(); // The card-collection jingle must not run over the ceremony music.
+  // The card-collection jingle is the "all driven off" cheer: the film and its music wait until it has finished.
+  const jingle = soundLeft('cardComplete');
+  if (jingle > 0) {
+    if (!ceremonyWait) ceremonyWait = window.setTimeout(() => { ceremonyWait = 0; openEndingCeremony(); }, jingle + 150);
+    return;
+  }
+  stopSounds();
   if (!adminUnlocked && !canPlayMapFinale(save)) {
     toast(`지도 악당 5마리를 모두 물리치면 점등식 영상이 열려요. 지금 ${defeatedMapVillains(save)} / 5`);
     return;

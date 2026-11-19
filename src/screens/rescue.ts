@@ -566,6 +566,7 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
       frame: onWalkFrame,
       bump: () => { tell('바퀴잠금 봇에 부딪혔어요! 코어와 기록은 그대로예요.'); context.sound(300); },
       returned: () => tell('직전 지점으로 돌아왔어요. 다시 가 봐요.'),
+      jumped: () => context.cue('jump'),
     }) : undefined).then(stage => {
       walkLoading = false;
       if (!stage) return;
@@ -605,8 +606,11 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
       : walkWaiting(state, walkPlace) || clue;
     renderWalkActions();
   }
+  let lastFootstep = -Infinity;
   function onWalkFrame(next: WalkFrame) {
     walkFrame = next;
+    // Footsteps every 300 ms while the explorer walks on the floor (not in the air, not holding the crate or the core).
+    if (next.stepping && !walkBlocked()) { const now = performance.now(); if (now - lastFootstep >= 300) { lastFootstep = now; context.cue('step'); } }
     const place = walkZone(next.spot, state);
     if (place !== walkPlace) { walkPlace = place; walkRefused = null; syncWalk(phase()); }
     // Walking into a ramp entrance picks that ramp; the bench's own rule may still refuse the long one.

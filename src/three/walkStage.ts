@@ -9,7 +9,8 @@ import { coreAssets } from './coreAssets';
 // Stage (floor, ramps, props), figure (upright pictures), fixed follow camera and walking live here.
 // What the experiment does is not decided here: rescue.ts tells this scene where the crate and the core are.
 type ScreenPoint = { x: number; y: number };
-export type WalkFrame = { spot: WalkSpot; scale: ScreenPoint; short: ScreenPoint; long: ScreenPoint; core: ScreenPoint };
+/** stepping: the explorer is walking on the floor (the walk strip is showing), for footstep sounds. */
+export type WalkFrame = { spot: WalkSpot; scale: ScreenPoint; short: ScreenPoint; long: ScreenPoint; core: ScreenPoint; stepping?: boolean };
 export type WalkHold = 'pull' | 'push' | null;
 export interface WalkStage {
   sync(view: WalkView): void;
@@ -22,7 +23,7 @@ export interface WalkStage {
   dock(): Promise<boolean>;
   dispose(): void;
 }
-export type WalkEvents = { frame(frame: WalkFrame): void; bump(): void; returned(): void };
+export type WalkEvents = { frame(frame: WalkFrame): void; bump(): void; returned(): void; jumped?(): void };
 
 type Strip = { file: string; frames: number; fps: number; cols?: number; rows?: number; row?: number };
 const art = `${import.meta.env.BASE_URL}assets/`;
@@ -258,7 +259,7 @@ export async function createWalkStage(host: HTMLElement, signal: AbortSignal, st
     const grounded = airTime < .1, push = dt * (grounded ? ACCEL : ACCEL * .3);
     const diagonal = inputX && inputZ ? Math.SQRT1_2 : 1;
     if (free) { velocity.x += inputX * push * diagonal; velocity.z += inputZ * push * diagonal; if (inputX) facing = inputX; }
-    if (free && grounded && now - jumpAt < 160) { velocity.y = JUMP; onFloor = false; airTime = .1; jumpAt = -1; }
+    if (free && grounded && now - jumpAt < 160) { velocity.y = JUMP; onFloor = false; airTime = .1; jumpAt = -1; events.jumped?.(); }
     let damping = Math.exp(-DAMPING * dt) - 1;
     if (!onFloor) velocity.y -= GRAVITY * dt;
     if (!grounded) damping *= .1;
@@ -324,7 +325,7 @@ export async function createWalkStage(host: HTMLElement, signal: AbortSignal, st
     renderer.domElement.dataset.spot = `${at.x.toFixed(2)},${at.y.toFixed(2)},${at.z.toFixed(2)}`;
     const screen = (x: number, y: number, z: number): ScreenPoint => { const p = new THREE.Vector3(x, y, z).project(camera); return { x: (p.x + 1) / 2 * host.clientWidth, y: (1 - p.y) / 2 * host.clientHeight }; };
     events.frame({
-      spot: at, scale: screen(scaleSpot.x - .17, .93, scaleSpot.z + .06),
+      spot: at, stepping: name === 'walk', scale: screen(scaleSpot.x - .17, .93, scaleSpot.z + .06),
       long: screen(coreRoutes.long.start.x + 3.6, 2.95, coreRoutes.long.start.z), short: screen(coreRoutes.short.start.x + 1.7, 2.95, coreRoutes.short.start.z),
       core: screen(corePosition.x, corePosition.y + .55, corePosition.z),
     });

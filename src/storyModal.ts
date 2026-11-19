@@ -169,7 +169,15 @@ export function openStoryModal(options: StoryOptions) {
     el.addEventListener('playing', onPlaying);
     el.addEventListener('pause', onPause);
     el.addEventListener('ended', finishUi);
+    // A hidden tab pauses the film (its voices would play on unseen); it carries on when the tab comes back.
+    let resumeOnShow = false;
+    const onVisibility = () => {
+      if (document.hidden) { if (!el.paused && !el.ended) { resumeOnShow = true; el.pause(); } }
+      else if (resumeOnShow) { resumeOnShow = false; tryPlay(); }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
     teardownVideo = () => {
+      document.removeEventListener('visibilitychange', onVisibility);
       window.clearTimeout(timer);
       el.removeEventListener('loadedmetadata', onMeta); el.removeEventListener('error', fallback);
       el.removeEventListener('timeupdate', sync); el.removeEventListener('seeked', sync);

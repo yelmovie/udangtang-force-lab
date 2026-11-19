@@ -8,6 +8,8 @@ import { getVillageStory, villageRewards } from '../villageStory';
 import '../village.css';
 import { encounterAtlas } from '../villageEncounters';
 import { playVoiceLine, stopVoiceLine } from '../npcDialogueVoice';
+import { stageIsOpen } from '../state';
+import { stages } from '../data';
 import { newlySolved, requestBoard, solvedRequests, villageRequests, type RequestStage } from '../requestBoard';
 
 import { directions, distance, walkingSpeed, createVillageInput, moveVillagePoint, createVillageNavigation, validateMap, withParticle } from './villageMap';
@@ -23,6 +25,9 @@ import { createVillageCamera } from './villageCamera';
 import { createVillageActions } from './villageActions';
 /** Requests solved at the last village visit, so a client walks out only once per new solve. */
 let seenRequests: RequestStage[] | undefined;
+/** Labs already shown open at an earlier map visit in this page load. A lab that is open now but was not
+ * gets the opening sound once; the first visit after a load only records (a reload never repeats it). */
+let knownOpenLabs: StageId[] | undefined;
 
 /** The village map screen. The parts live in villageDraw (canvas), villageEncounter (villains), villageCamera
  * (follow, whole map, hand mode, zoom) and villageActions (routes, talk, board, entering); they share `VillageScene`.
@@ -63,6 +68,8 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: Vi
   const results = root.querySelector<HTMLButtonElement>('#village-results')!; results.hidden = !story.complete; results.classList.toggle('is-next', story.complete);
   let generation = 0, raf = 0, lastDraw = 0;
   let wasMoving = false, wasDogMoving = false;
+  // Footsteps every 300 ms while the student really moves (held keys, the pad or a walked route); none against a wall.
+  let lastStep = -Infinity;
   let fetches = new AbortController();
   const revealStage = options.newlyCompleted && story.changes.includes(options.newlyCompleted) ? options.newlyCompleted : undefined;
   // Reveal timeline (seconds): windows light up, then light runs along the road to the core.
@@ -100,10 +107,13 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: Vi
       v.cueTimers.add(id);
     },
     // Villain bubble lines are voiced when their text appears; greetings never cut off the doctor's banner line.
-    villainSay(id: StageId, index: number, text: string) {
+    villainSay(id: StageId, index: number, text: string, voiceDelay = 0) {
       if (encounterText.textContent === text) return;
       encounterText.textContent = text;
-      playVoiceLine(`villain/${id}-${index + 1}`, { polite: index < 2 });
+      const speak = () => playVoiceLine(`villain/${id}-${index + 1}`, { polite: index < 2, villain: true });
+      if (!voiceDelay) { speak(); return; }
+      const timer = window.setTimeout(() => { v.cueTimers.delete(timer); if (v.alive) speak(); }, voiceDelay);
+      v.cueTimers.add(timer);
     },
     syncAttackDock,
     paused() { return document.hidden || dialog.open || board.open || !!root.closest('[inert]') || !!document.querySelector('.modal-layer'); },
@@ -153,7 +163,7 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: Vi
     if(direction.x||direction.y){v.stopRoute();move(direction.x*walkingSpeed*dt,direction.y*walkingSpeed*dt);}
     else if(v.path.length){const path=v.path,target=path[0],d=distance(actor,target);if(d<3)path.shift();else move((target.x-actor.x)/d*Math.min(d,walkingSpeed*dt),(target.y-actor.y)/d*Math.min(d,walkingSpeed*dt));if(!path.length){v.destination=null;arrived=true;}}
     const trail=v.trail;
-    const moved=distance(old,actor)>.05;if(moved){v.walkingTime+=dt;if(!trail.length||distance(actor,trail.at(-1)!)>9)trail.push({x:actor.x,y:actor.y});}else v.walkingTime=0;
+    const moved=distance(old,actor)>.05;if(moved&&now-lastStep>=300){lastStep=now;context.cue('step');}if(moved){v.walkingTime+=dt;if(!trail.length||distance(actor,trail.at(-1)!)>9)trail.push({x:actor.x,y:actor.y});}else v.walkingTime=0;
     const guided=v.guided;
     if(guided&&distance(actor,guided.entry)<=Math.min(16,guided.entry.radius)&&v.enterBuilding(guided))return;
     if(arrived)v.guided=undefined;
@@ -228,6 +238,14 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: Vi
       }).catch(()=>{ /* Keep the encounter playable when optional artwork is unavailable. */ });
       v.entering=false;v.stopRoute();
       if (!options.adminUnlocked && context.save.mapFinalePending && canPlayMapFinale(context.save)) v.finaleAt=performance.now()+360;
+      // A lab that has just become open (never on the teacher's unlock-all view): one latch click and sparkle.
+      let labOpened=false;
+      if(!options.adminUnlocked){
+        const open=stages.map(stage=>stage.id).filter(id=>stageIsOpen(context.save,id));
+        labOpened=!!knownOpenLabs&&open.some(id=>!knownOpenLabs!.includes(id));
+        knownOpenLabs=open;
+        if(labOpened){context.cue('labOpen');v.cueLater('labSparkle',120);}
+      }
       v.walkingTime=v.dogTime=v.revealTime=0;v.destination=null;acts.setupLabels();setupLights();loading.hidden=true;v.resize();v.updateNearby();
       if(revealStage){
         reveal.innerHTML=`<strong>${villageRewards[revealStage].changeTitle}</strong><span>도토리 박사: ${villageRewards[revealStage].afterLines[0]}</span>`;
@@ -235,7 +253,10 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: Vi
         const goal=candidate.buildings.find(b=>b.id===story.next);
         const low=goal&&(goal.y+goal.height*.42)/candidate.height>.45;
         reveal.style.left=low?`${(goal.x+goal.width/2)/candidate.width<.5?57:43}%`:'';
-        reveal.classList.remove('is-compact');reveal.hidden=false;hint.textContent=villageRewards[revealStage].changeDescription;playVoiceLine(`npc-dialogue/${revealStage}-return`);
+        reveal.classList.remove('is-compact');reveal.hidden=false;hint.textContent=villageRewards[revealStage].changeDescription;
+        // The doctor's line waits for the lab-opening sound (latch + sparkle, about 0.45 s).
+        const line=()=>playVoiceLine(`npc-dialogue/${revealStage}-return`);
+        if(labOpened){const id=window.setTimeout(()=>{v.cueTimers.delete(id);if(v.alive)line();},450);v.cueTimers.add(id);}else line();
       }
       else hint.textContent=story.complete?v.restHint():returned?`다시 마을이야! 불이 켜진 ${villageRewards[story.next!].name} 이름표를 누르면 걸어가요.`:'불이 켜진 건물 이름을 누르면 실험하러 걸어가요.';
       v.last=performance.now();if(v.encounters.length)v.updateEncounters(v.last);raf=requestAnimationFrame(tick);canvas.focus({preventScroll:true});

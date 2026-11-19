@@ -43,7 +43,8 @@ export interface VillageScene {
   /** Hit sounds and the reward card wait on these timers; cleared when the map closes. */
   cueTimers: Set<number>;
   paused(): boolean; clearInput(): void; assetURL(file: string): string; cueLater(name: MapSound, delay: number): void;
-  villainSay(id: StageId, index: number, text: string): void; syncAttackDock(): boolean;
+  /** voiceDelay: ms before the line is spoken (the bubble text shows at once). */
+  villainSay(id: StageId, index: number, text: string, voiceDelay?: number): void; syncAttackDock(): boolean;
   // villageDraw.ts
   draw(moving?: boolean, dogMoving?: boolean): void; npcHeight(): number; clientFilter(stage: RequestStage): string; visibleClients(): RequestStage[];
   // villageEncounter.ts
