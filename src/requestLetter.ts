@@ -10,7 +10,7 @@ export const requestOpenLabel = '실험 마치고 의뢰 보기';
 
 /** The client's letter that arrives when a request opens on a mission screen.
  * "의뢰 받기" runs the screen's own entry function; closing keeps the screen's request bar as it was. */
-export function showRequestLetter(root: HTMLElement, stage: RequestStage, accept: () => void, settings: () => Pick<SaveData, 'soundOn' | 'soundVolume'> = () => ({ soundOn: false })): HTMLDialogElement {
+export function showRequestLetter(root: HTMLElement, stage: RequestStage, accept: () => void, settings: () => Pick<SaveData, 'soundOn' | 'voiceOn' | 'soundVolume'> = () => ({ soundOn: false })): HTMLDialogElement {
   const existing = root.querySelector<HTMLDialogElement>('.request-letter[open]');
   if (existing) return existing;
   const request = villageRequests[stage];

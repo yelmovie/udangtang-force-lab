@@ -171,6 +171,26 @@ test('footsteps take turns, wander in pitch and duck under a spoken line', () =>
   film();
 });
 
+test('the effects level scales every effect and footstep, leaves music alone, and is the old level at 100 %', () => {
+  const { sound, effect, track, near } = soundHarness();
+  sound.setVolume(.3); sound.playMusic('stage');
+  sound.playSound('hit1'); sound.playSound('villainExit'); sound.playSound('step');
+  const [hit] = effect('wood-knock-01.mp3'), [exit] = effect('villain-exit-01.mp3'), [step] = effect('step-01.mp3');
+  near(hit.volume, .3, 'default: unchanged'); near(exit.volume, .3 * .8); near(step.volume, .3 * sound.STEP_LEVEL);
+  sound.setEffectVolume(.5);
+  near(hit.volume, .15, 'a playing effect follows at once'); near(exit.volume, .3 * .8 * .5);
+  sound.playSound('step'); sound.playSound('step');
+  near(step.volume, .3 * sound.STEP_LEVEL * .5, 'footsteps too');
+  near(track('stage').volume, .3 * .7, 'music keeps its level');
+  sound.setEffectVolume(0);
+  assert.ok([hit, exit, step].every(audio => audio.paused), 'zero stops the effects');
+  sound.playSound('click');
+  assert.equal(effect('click_003.ogg').length, 0, 'and plays none');
+  assert.equal(track('stage').paused, false, 'music plays on');
+  sound.setEffectVolume(1); sound.playSound('hit1');
+  near(hit.volume, .3, 'back to the old level');
+});
+
 test('soundLeft tells how long an effect still has to play', () => {
   const { sound, effect } = soundHarness();
   sound.setVolume(.3);

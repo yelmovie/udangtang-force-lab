@@ -48,7 +48,13 @@ export interface SaveData {
   soundOn: boolean;
   /** Background music, switched separately from the effects. Older saves follow soundOn. */
   musicOn?: boolean;
+  /** Whole-app loudness (0–1, default .3): music, effects and voices all follow it. */
   soundVolume?: number;
+  /** Character lines, narration, villain bubbles and concept-caption voices, switched apart from the effects.
+   * Older saves have none: lines followed the effects switch until 2026-11-20, so they keep that value. */
+  voiceOn?: boolean;
+  /** Effects level on top of soundVolume (0–1 in 5 % steps, default 1 = the level effects always had). */
+  effectVolume?: number;
   /** Sound starts switched on. A save from when it started off has no mark: its untouched "everything off" is switched on once, and later choices are kept. */
   soundStartsOn?: true;
   /** orders: delivering force step per finished bakery order (level 2); present once the level 1 finding is chosen. */
@@ -87,6 +93,8 @@ export function freshSave(): SaveData {
     musicOn: true,
     soundStartsOn: true,
     soundVolume: 0.3,
+    voiceOn: true,
+    effectVolume: 1,
     cargo: { parts: 1, action: 'push', runs: [] },
     balance: { left: null, right: null, prediction: null, runs: [] },
     scale: { zeroed: false, parts: [], runs: [] },
@@ -117,6 +125,7 @@ export function readSave(): SaveData | null {
     const completed = firstMissing < 0 ? [...stageIds] : stageIds.slice(0, firstMissing);
     // Both switches off and no mark: nobody chose that, it was the old starting value.
     const startedOff = item.soundStartsOn !== true && item.soundOn !== true && item.musicOn !== true;
+    const soundOn = startedOff || item.soundOn === true;
     const evidence: SaveData['evidence'] = {};
     for (const id of completed) if (typeof item.evidence?.[id] === 'string') evidence[id] = item.evidence[id];
     const restored: SaveData = {
@@ -126,7 +135,9 @@ export function readSave(): SaveData | null {
       currentPage: pageIds.includes(item.currentPage as PageId) ? item.currentPage as PageId : 'map',
       completed,
       evidence,
-      soundOn: startedOff || item.soundOn === true,
+      soundOn,
+      voiceOn: typeof item.voiceOn === 'boolean' ? item.voiceOn : soundOn,
+      effectVolume: typeof item.effectVolume === 'number' && Number.isFinite(item.effectVolume) ? Math.min(1, Math.max(0, Math.round(item.effectVolume * 20) / 20)) : 1,
       musicOn: startedOff || (typeof item.musicOn === 'boolean' ? item.musicOn : item.soundOn === true),
       soundVolume: typeof item.soundVolume === 'number' && Number.isFinite(item.soundVolume) ? Math.min(1, Math.max(0, item.soundVolume)) : 0.3,
       cargo: {

@@ -1,7 +1,9 @@
 import type { SaveData } from './state';
 import { duckMusic } from './sound';
 
-type VoiceSettings = Pick<SaveData, 'soundOn' | 'soundVolume'>;
+type VoiceSettings = Pick<SaveData, 'soundOn' | 'voiceOn' | 'soundVolume'>;
+/** Lines follow the voice switch (a save without one follows the effects switch, as lines did before) and the overall volume. */
+export const voiceAllowed = (prefs: VoiceSettings) => (prefs.voiceOn ?? prefs.soundOn) === true && (prefs.soundVolume ?? .3) > 0;
 const base = () => `${import.meta.env.BASE_URL}assets/`;
 
 export function setDialoguePortrait(element: HTMLElement, id: string) {
@@ -42,7 +44,7 @@ export function playVoiceLine(clip: string, options: { polite?: boolean; villain
   stopVoiceLine();
   lineIsVillain = !!options.villain;
   const prefs = lineSettings(), volume = prefs.soundVolume ?? .3;
-  if (!prefs.soundOn || volume <= 0 || document.hidden) return false;
+  if (!voiceAllowed(prefs) || document.hidden) return false;
   if (!line) {
     line = new Audio();
     line.addEventListener('playing', () => { lineRelease ??= duckMusic(); });
@@ -79,7 +81,7 @@ export function mountDialogueVoice(dialog: HTMLDialogElement, settings: () => Vo
     if (!src || !dialog.open || document.hidden) return;
     if (villainSpeaking() && waited < VILLAIN_WAIT) { held = setTimeout(() => play(waited + WAIT_STEP), WAIT_STEP); return; }
     const prefs = settings(), volume = prefs.soundVolume ?? .3;
-    if (!prefs.soundOn || volume <= 0) return;
+    if (!voiceAllowed(prefs)) return;
     stop();
     stopVoiceLine();
     const request = epoch;
@@ -105,7 +107,7 @@ export function mountDialogueVoice(dialog: HTMLDialogElement, settings: () => Vo
     show(clip?: string) {
       stop();
       src = clip ? `${base()}audio/${clip}.mp3` : undefined;
-      replay.hidden = !src || !settings().soundOn || (settings().soundVolume ?? .3) <= 0;
+      replay.hidden = !src || !voiceAllowed(settings());
       if (!src || replay.hidden) return;
       player.src = src;
       play();

@@ -21,7 +21,7 @@ const files: Record<SoundName, string> = {
 };
 /** Per-role loudness under the effects volume. The map files are already quieter than the interface sounds, so only the entrance and exit are lowered. */
 const levels: Partial<Record<SoundName, number>> = { villainExit: .8, villainAppear: .7, jump: .6 };
-const level = (name: SoundName) => volume * (levels[name] ?? 1);
+const level = (name: SoundName) => volume * effectLevel * (levels[name] ?? 1);
 const musicFiles: Record<MusicName, string> = { stage: 'bgm-stage.mp3', ending: 'bgm-ending.mp3' };
 const players = new Map<SoundName, HTMLAudioElement>();
 const startedAt = new Map<SoundName, number>();
@@ -33,6 +33,8 @@ let stepTurn = 0;
 export const STEP_LEVEL = 1.9 * .18;
 const tracks = new Map<MusicName, HTMLAudioElement>();
 let volume = 0.3;
+/** The settings' effects level (0–1, default 1) on every effect and footstep; music and voices do not follow it. */
+let effectLevel = 1;
 /** The track the app asked for, and the one really running: the ending plays once, then the stage loop carries on. */
 let wanted: MusicName | null = null, current: MusicName | null = null;
 // Every holder that turns the music down keeps its own token, so it comes back only when all of them have let go.
@@ -64,6 +66,13 @@ export function setVolume(value: number) {
   levelMusic();
   if (volume === 0) stopSounds();
 }
+export function setEffectVolume(value: number) {
+  const next = Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 1;
+  if (next === effectLevel) return;
+  effectLevel = next;
+  players.forEach((audio, name) => { audio.volume = level(name); });
+  if (effectLevel === 0) stopSounds();
+}
 const halt = (audio: HTMLAudioElement | undefined) => { if (audio) { audio.pause(); audio.currentTime = 0; } };
 const sounding = (audio: HTMLAudioElement | undefined) => !!audio && !audio.paused && !audio.ended;
 /** Mute, a hidden tab or the finale: every effect and footstep stops. */
@@ -81,12 +90,12 @@ function playStep() {
   const audio = stepPlayers[turn] ??= new Audio(`${import.meta.env.BASE_URL}assets/audio/${stepFiles[turn]}`);
   (audio as HTMLAudioElement & { preservesPitch?: boolean }).preservesPitch = false;
   audio.playbackRate = .94 + Math.random() * .12;
-  audio.volume = Math.min(1, volume * STEP_LEVEL * (voiceSpeaking() ? .5 : 1));
+  audio.volume = Math.min(1, volume * effectLevel * STEP_LEVEL * (voiceSpeaking() ? .5 : 1));
   audio.currentTime = 0;
   void audio.play().catch(() => { /* Silent mode or browser audio policy must not block play. */ });
 }
 export function playSound(name: SoundName) {
-  if (volume === 0 || document.hidden) return;
+  if (volume === 0 || effectLevel === 0 || document.hidden) return;
   if (name === 'step') { playStep(); return; }
   if (uiSounds.has(name)) uiSounds.forEach(other => halt(players.get(other)));
   else {

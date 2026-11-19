@@ -705,3 +705,21 @@ test('sound starts on, and a save from when it started off is switched on once',
   }
   localStorage.setItem(state.SAVE_KEY, JSON.stringify(state.freshSave()));
 });
+test('voices get their own switch and effects their own level; older saves keep voices with the effect switch', () => {
+  const fresh = state.freshSave();
+  assert.deepEqual([fresh.voiceOn, fresh.effectVolume], [true, 1], 'a new student starts with everything on, effects at 100 %');
+  const before = { ...state.freshSave() }; delete before.voiceOn; delete before.effectVolume;
+  for (const [soundOn, voiceOn] of [[false, false], [true, true]]) {
+    localStorage.setItem(state.SAVE_KEY, JSON.stringify({ ...before, soundOn }));
+    const restored = state.readSave();
+    assert.deepEqual([restored.soundOn, restored.voiceOn, restored.effectVolume], [soundOn, voiceOn, 1], 'voices follow the effect switch they used to share');
+  }
+  const unset = { ...before }; delete unset.soundOn; delete unset.musicOn; delete unset.soundStartsOn;
+  localStorage.setItem(state.SAVE_KEY, JSON.stringify(unset));
+  assert.deepEqual([state.readSave().soundOn, state.readSave().voiceOn, state.readSave().effectVolume], [true, true, 1], 'no values: the old start is switched on, voices with it');
+  localStorage.setItem(state.SAVE_KEY, JSON.stringify({ ...state.freshSave(), soundOn: true, voiceOn: false, effectVolume: .45 }));
+  assert.deepEqual([state.readSave().soundOn, state.readSave().voiceOn, state.readSave().effectVolume], [true, false, .45], 'chosen values are kept');
+  localStorage.setItem(state.SAVE_KEY, JSON.stringify({ ...state.freshSave(), effectVolume: 7 }));
+  assert.equal(state.readSave().effectVolume, 1, 'out of range is clamped');
+  localStorage.setItem(state.SAVE_KEY, JSON.stringify(state.freshSave()));
+});

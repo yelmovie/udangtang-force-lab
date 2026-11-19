@@ -20,7 +20,7 @@ import { mountRescue } from './screens/rescue';
 import { mountVillage } from './screens/village';
 import { canPlayMapFinale, defeatedMapVillains } from './map-villains.js';
 import { villageRewards } from './villageStory';
-import { playMusic, playSound, soundLeft, stopMusic, stopSounds, setVolume, type MapSound, type MusicName } from './sound';
+import { playMusic, playSound, soundLeft, stopMusic, stopSounds, setVolume, setEffectVolume, type MapSound, type MusicName } from './sound';
 import { installKongDialogue } from './kongDialogue';
 import { configureVoiceLines, playVoiceLine, stopAllVoices, stopVoiceLine } from './npcDialogueVoice';
 installKongDialogue(() => save);
@@ -66,11 +66,13 @@ window.addEventListener('resize', setHeight);
 function tone(frequency = 520) {
   if (!save.soundOn) return;
   setVolume(save.soundVolume ?? 0.3);
+  setEffectVolume(save.effectVolume ?? 1);
   playSound(frequency >= 680 ? 'success' : frequency < 400 ? 'bump' : 'click');
 }
 function cue(name: MapSound) {
   if (!save.soundOn) return;
   setVolume(save.soundVolume ?? 0.3);
+  setEffectVolume(save.effectVolume ?? 1);
   playSound(name);
 }
 bindRewardSound(cue);
@@ -452,8 +454,10 @@ function settingsIcon() {
   return `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 14 5l2.5-.3.8 2.4 2.2 1.2-.8 2.4.8 2.4-2.2 1.2-.8 2.4-2.5-.3-2 1.5-2-1.5-2.5.3-.8-2.4-2.2-1.2.8-2.4-.8-2.4 2.2-1.2.8-2.4L10 5z"/><circle cx="12" cy="11.2" r="2.6"/></svg>`;
 }
 
-/** True while effects or music are on: the header speaker shows sound and mutes both. */
-function anySound() { return save.soundOn || save.musicOn === true; }
+/** True while effects, music or voices are on: the header speaker shows sound and mutes all three. */
+function anySound() { return save.soundOn || save.musicOn === true || save.voiceOn === true; }
+/** The sound settings a fresh start keeps. */
+function soundPrefs(from: SaveData) { return { soundOn: from.soundOn, musicOn: from.musicOn, voiceOn: from.voiceOn, soundVolume: from.soundVolume, effectVolume: from.effectVolume }; }
 function soundIcon() {
   return `<svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/>${anySound() ? '<path d="M17 8a5 5 0 0 1 0 8M19.5 5a9 9 0 0 1 0 14"/>' : '<path d="m17 9 4 6m0-6-4 6"/>'}</svg>`;
 }
@@ -506,7 +510,7 @@ function renderTitle(root: HTMLElement) {
     if (hasSave && !await confirmBox('기존 탐구 기록을 지우고 새로 시작할까요?', '도구 카드와 실험 기록이 이 기기에서 모두 지워져요. 소리 설정은 그대로예요.', '기록 지우고 시작')) return;
     adminUnlocked = false;
     adminSave = null;
-    save = { ...freshSave(), soundOn: save.soundOn, musicOn: save.musicOn, soundVolume: save.soundVolume };
+    save = { ...freshSave(), ...soundPrefs(save) };
     missionCardShown.clear();
     villageReturn = undefined;
     villageCelebration = undefined;
@@ -529,7 +533,7 @@ function renderTitle(root: HTMLElement) {
 async function restartFromBeginning() {
   if(!await confirmBox('처음부터 다시 해볼까요?', '도구 카드와 실험 기록을 지우고 처음부터 시작해요. 소리 설정은 그대로예요.', '처음부터 다시 시작')) return;
   const previous=context.save;
-  save={...freshSave(),soundOn:previous.soundOn,musicOn:previous.musicOn,soundVolume:previous.soundVolume};
+  save={...freshSave(),...soundPrefs(previous)};
   adminUnlocked=false; adminSave=null; context.save=save; missionCardShown.clear(); villageReturn=undefined; villageCelebration=undefined;
   persist(); navigate('title');
   openStoryModal({lines:prologueLines,finishLabel:'출발!',skippable:true,onDone:()=>navigate('map'),video:introVideo});
@@ -580,7 +584,7 @@ const settingsHost: SettingsHost = {
   app, save: () => save, adminSave: () => adminSave, adminUnlocked: () => adminUnlocked,
   tone, toast, persist, navigate, setAdminMode, updateSoundButton, syncMusic, openEndingCeremony,
   resetRecords() {
-    const sound = { soundOn: save.soundOn, musicOn: save.musicOn, soundVolume: save.soundVolume };
+    const sound = soundPrefs(save);
     adminUnlocked = false; adminSave = null;
     save = { ...freshSave(), ...sound }; context.save = save; missionCardShown.clear();
     persist(); viewPage = 'title'; render();
@@ -597,10 +601,10 @@ function updateSoundButton() {
   button.setAttribute('aria-label', `소리 ${anySound() ? '끄기' : '켜기'}`);
 }
 function bindHeader() {
-  // One quick switch for the classroom: it mutes everything, or brings back music and effects together.
+  // One quick switch for the classroom: it mutes everything, or brings back music, effects and voices together.
   app.querySelector<HTMLButtonElement>('[data-top="sound"]')?.addEventListener('click', () => {
     const on = !anySound();
-    save.soundOn = on; save.musicOn = on;
+    save.soundOn = on; save.musicOn = on; save.voiceOn = on;
     persist();
     updateSoundButton();
     if (on) tone(620); else { stopSounds(); stopAllVoices(); }

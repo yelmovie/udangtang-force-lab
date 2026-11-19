@@ -3,7 +3,7 @@
 import { stages, type PageId, type StageId } from './data';
 import type { SaveData } from './state';
 import { canPlayMapFinale } from './map-villains.js';
-import { setVolume, stopSounds } from './sound';
+import { setEffectVolume, setVolume, stopSounds } from './sound';
 import { infoContent } from './info';
 import { conceptClipTitle, conceptPoster, openConceptClip } from './conceptClip';
 import { earnedToolCards } from './toolCards';
@@ -41,14 +41,15 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
       const cardCount = earnedToolCards(adminSave ?? save).length;
       const canWatch = canPlayMapFinale(save) || adminUnlocked;
       const canRead = save.completed.length === stages.length || adminUnlocked;
-      const volume = Math.round((save.soundVolume ?? .3) * 100);
-      const soundSwitch = (action: 'sound' | 'music', name: string, on: boolean) =>
+      const volume = Math.round((save.soundVolume ?? .3) * 100), effects = Math.round((save.effectVolume ?? 1) * 100);
+      const soundSwitch = (action: 'sound' | 'music' | 'voice', name: string, on: boolean) =>
         `<button type="button" role="switch" class="button button-secondary setting-row" data-settings="${action}" aria-label="${name}" aria-checked="${on}">${switchLabel(name, on)}</button>`;
       const summary = (title: string, body: string) => `<details class="science-settings-detail"><summary>${title}</summary>${body}</details>`;
       content = `<div class="science-settings-body">
         <div class="science-settings-audio" aria-label="소리 설정">
-          ${soundSwitch('music','배경 음악',save.musicOn === true)}${soundSwitch('sound','효과음',save.soundOn)}
-        <label class="setting-row settings-wide" for="sound-volume">전체 소리 크기 <input id="sound-volume" type="range" min="0" max="100" step="5" value="${volume}"><output id="volume-value" for="sound-volume">${volume}%</output></label></div>
+          ${soundSwitch('music','배경 음악',save.musicOn === true)}${soundSwitch('sound','효과음',save.soundOn)}${soundSwitch('voice','목소리',save.voiceOn ?? save.soundOn)}
+        <label class="setting-row settings-wide" for="sound-volume">전체 소리 크기 <input id="sound-volume" type="range" min="0" max="100" step="5" value="${volume}"><output id="volume-value" for="sound-volume">${volume}%</output></label>
+        <label class="setting-row settings-wide" for="effect-volume">효과음 크기 <input id="effect-volume" type="range" min="0" max="100" step="5" value="${effects}"><output id="effect-volume-value" for="effect-volume">${effects}%</output></label></div>
         <div class="settings-links science-settings-actions" aria-label="바로 가기">
           <button type="button" data-settings="bag" aria-haspopup="dialog"><span>${bagIcon()}</span> 도구 가방 <small>${cardCount}장</small></button>
           <button type="button" data-settings="prologue"><span>${icons.play}</span> 이 탐험을 하는 이유 다시 보기</button>
@@ -115,7 +116,16 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
       button.setAttribute('aria-checked', String(save.soundOn));
       button.textContent = switchLabel('효과음', save.soundOn);
       host.updateSoundButton();
-      if (save.soundOn) tone(520); else { stopSounds(); stopAllVoices(); }
+      if (save.soundOn) tone(520); else stopSounds();
+    }
+    else if (action === 'voice') {
+      // Lines only: effects and music carry on; a line being spoken stops (and lets the music come back up).
+      save.voiceOn = !(save.voiceOn ?? save.soundOn);
+      host.persist();
+      button.setAttribute('aria-checked', String(save.voiceOn));
+      button.textContent = switchLabel('목소리', save.voiceOn);
+      host.updateSoundButton();
+      if (!save.voiceOn) stopAllVoices();
     }
     else if (action === 'music') {
       save.musicOn = !save.musicOn;
@@ -139,6 +149,12 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
     else if (action === 'home') { close(); host.setAdminMode(false); host.goTitle(); }
   });
   overlay.addEventListener('input', event => {
+    if (event.target instanceof HTMLInputElement && event.target.id === 'effect-volume') {
+      save.effectVolume = Number(event.target.value) / 100;
+      setEffectVolume(save.effectVolume);
+      overlay.querySelector('#effect-volume-value')!.textContent = `${event.target.value}%`;
+      return;
+    }
     if (!(event.target instanceof HTMLInputElement) || event.target.id !== 'sound-volume') return;
     save.soundVolume = Number(event.target.value) / 100;
     setVolume(save.soundVolume);
@@ -146,7 +162,7 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
     overlay.querySelector('#volume-value')!.textContent = `${event.target.value}%`;
   });
   overlay.addEventListener('change', event => {
-    if ((event.target as HTMLElement).id === 'sound-volume') { host.persist(); tone(520); }
+    if (['sound-volume', 'effect-volume'].includes((event.target as HTMLElement).id)) { host.persist(); tone(520); }
   });
   overlay.addEventListener('keydown', event => {
     if (event.key === 'Escape') { event.preventDefault(); close(); }

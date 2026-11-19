@@ -4,7 +4,7 @@ import type { SaveData } from './state';
 
 const greeting = '안녕! 나는 콩이야. 물건을 밀고 당기면서 힘이 하는 일을 함께 알아보자. 한 번에 한 가지씩 바꾸며 살펴보면 새로운 발견을 할 수 있어!';
 
-export function installKongDialogue(settings: () => Pick<SaveData, 'soundOn' | 'soundVolume'>) {
+export function installKongDialogue(settings: () => Pick<SaveData, 'soundOn' | 'voiceOn' | 'soundVolume'>) {
   let closeCurrent: (() => void) | undefined;
   const ensureButton = () => {
     document.querySelectorAll<HTMLElement>('.corgi-hint-body').forEach(body => {
