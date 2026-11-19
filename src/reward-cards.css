@@ -207,6 +207,10 @@
 .rc-locked i { font-style: normal; font-size: 52px; font-weight: 900; color: color-mix(in srgb, var(--rc-ink) 35%, #fff); }
 .rc-locked span { font-size: 18px; font-weight: 800; }
 .rc-locked small { font-size: 14px; color: color-mix(in srgb, var(--rc-ink) 65%, #fff); word-break: keep-all; }
+/* 잠긴 카드가 좁아 「악당을 물리치면 / 열려요」로 끝줄에 세 글자만 떨어질 때는 낱말마다 한 줄씩 고르게 쌓는다.
+   한 줄에 들어가는 넓은 카드와, 세 줄 자리가 없는 낮은 화면(폰 가로)은 그대로 둔다. */
+.rc-locked { container: rc-locked / inline-size; }
+@media (min-height: 600px) { @container rc-locked (max-width: 152px) { .rc-locked small { max-width: 4.6em; } } }
 .rc-zoom { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; background: rgb(8 18 28 / .28); }
 
 @media (prefers-reduced-motion: reduce) {
