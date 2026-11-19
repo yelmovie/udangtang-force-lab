@@ -24,14 +24,13 @@ import { installKongDialogue } from './kongDialogue';
 import { configureVoiceLines, playVoiceLine, stopVoiceLine } from './npcDialogueVoice';
 installKongDialogue(() => save);
 configureVoiceLines(() => save);
-import { infoContent } from './info';
 import { prepareOffline } from './offline';
 import type { AppContext } from './appTypes';
 import { abilityStatements, challenges } from './challenges';
 import { mountMissionReview, openLearningReview } from './learningReview';
-import { conceptClipTitle, conceptPoster, openConceptClip, syncConceptButton } from './conceptClip';
+import { openConceptClip, syncConceptButton } from './conceptClip';
 import { learningTask, missionReviewTask, missionReviewRecord, learningRecordComplete, learningSummary } from './learningModel';
-import { inquiryPlans, predictionRecap, predictionVerdict, type PredictionRecap } from './inquiryPlan';
+import { predictionRecap, predictionVerdict, type PredictionRecap } from './inquiryPlan';
 import { earnedToolCards, toolCardInfo, toolCards } from './toolCards';
 import { bagIcon, openToolBag, toolCardRevealMarkup, toolCardRowMarkup } from './toolBag';
 import './studentUx.css';
@@ -40,6 +39,9 @@ import './glass-ui.css';
 import './layoutBalance.css';
 import { icons } from './icons';
 import { bindRewardSound, rewardSlotsHtml } from './rewardCards';
+import { configureStoryModal, endingVideo, introVideo, openStoryModal, prologueLines } from './storyModal';
+import { openSettings as openSettingsPanel, type SettingsHost } from './settingsPanel';
+import { openMissionCard as openMissionCardPanel } from './missionCard';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 let save: SaveData = readSave() ?? freshSave();
@@ -83,6 +85,7 @@ function syncMusic() {
 document.addEventListener('pointerdown', syncMusic, { once: true });
 
 /** Confetti burst: 28 pieces with their own drift, delay and colour. Skipped under reduced motion. */
+configureStoryModal({ app, tone, confetti, soundOn: () => anySound(), volume: () => save.soundVolume ?? .3, setMusic: music => { storyMusic = music; syncMusic(); } });
 function confetti(host: HTMLElement) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const burst = document.createElement('div'); burst.className = 'story-confetti'; burst.setAttribute('aria-hidden', 'true');
@@ -376,184 +379,6 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!);
 }
 
-const prologueLines = [
-  { who: '도토리 박사', text: '우당탕 마을에 전기가 모두 나갔어! 무슨 일이 생긴 걸까?' },
-  { who: '도토리 박사', text: '원인을 찾았어! 마을의 배터리 ‘코어’가 중앙 장치에서 분리돼 있어. 다시 끼워야 전기가 돌아와.' },
-  { who: '코기 콩이', text: '코어가 너무 무거워! 힘을 쓰는 방법을 배워서 다시 끼우자!' },
-];
-type StoryVideo = { src: string; cues: number[]; duration: number; poster?: string };
-type StoryOptions = { lines: { who: string; text: string }[]; finishLabel: string; onDone?: () => void; skippable?: boolean; scenes?: string[]; video?: StoryVideo; music?: MusicName; finale?: boolean };
-const introVideo: StoryVideo = { src: '/assets/story/intro.mp4', cues: [0, 6, 13], duration: 18, poster: '/assets/story/intro-01.webp' };
-const endingVideo: StoryVideo = { src: '/assets/story/ending.mp4', cues: [0, 5, 13], duration: 21.2, poster: '/assets/story/final-01.webp' };
-function storyCueIndex(cues: number[], time: number): number {
-  let found = 0;
-  cues.forEach((start, i) => { if (time >= start) found = i; });
-  return found;
-}
-function openStoryModal(options: StoryOptions) {
-  const modal = document.createElement('div');
-  modal.className = 'modal-layer story-layer';
-  const appWasInert = app.inert; app.inert = true;
-  const opener = document.activeElement as HTMLElement | null;
-  let index = 0;
-  let closed = false;
-  let teardownVideo: (() => void) | null = null;
-  const onEscape = (event: KeyboardEvent) => { if (event.key === 'Escape' && modal.querySelector('.story-video-card')) { event.preventDefault(); tone(470); close(); } };
-  // dismissed: the back button removed the modal, so tear down without running onDone.
-  const close = (dismissed = false) => {
-    if (closed) return; closed = true;
-    teardownVideo?.(); teardownVideo = null;
-    document.removeEventListener('keydown', onEscape, true);
-    app.inert = appWasInert; modal.remove();
-    storyMusic = null; syncMusic();
-    if (opener?.isConnected) opener.focus?.();
-    if (!dismissed) options.onDone?.();
-  };
-  modal.addEventListener('modal-dismiss', () => close(true));
-  const draw = () => {
-    const line = options.lines[index];
-    const last = index === options.lines.length - 1;
-    modal.innerHTML = `<div class="modal-card story-card" role="dialog" aria-modal="true" aria-labelledby="story-title">
-      <div class="story-scene cinematic-scene" data-scene="${index}"><img class="story-frame" src="${options.scenes?.[index] ?? `/assets/story/intro-0${index+1}.webp`}" alt="${options.scenes?'다섯 실험으로 다시 빛나는 힘 마을':'동력이 멈춰 불이 꺼진 힘 마을'}"></div>
-      <p class="eyebrow" id="story-title">${line.who}</p>
-      <p class="story-text">${line.text}</p>
-      <div class="story-dots">${options.lines.map((_, i) => `<i class="${i === index ? 'on' : ''}"></i>`).join('')}</div>
-      <div class="story-actions">${options.skippable && !last ? '<button class="button button-secondary" data-story="skip">건너뛰기</button>' : ''}<button class="button button-primary" data-story="next">${last ? options.finishLabel : '다음 →'}</button></div>
-    </div>`;
-    modal.querySelector<HTMLButtonElement>('[data-story="next"]')!.focus();
-  };
-  const drawVideo = (video: StoryVideo) => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const dots = options.lines.map(() => '<i></i>').join('');
-    modal.innerHTML = `<div class="modal-card story-card story-video-card" role="dialog" aria-modal="true" aria-labelledby="story-title" aria-describedby="story-caption">
-      <div class="story-scene cinematic-scene story-video-wrap">
-        <video class="story-video" playsinline preload="auto" ${video.poster ? `poster="${video.poster}"` : ''} aria-label="${options.scenes ? '엔딩 영상' : '프롤로그 영상'}" src="${video.src}"></video>
-        <img class="story-end-frame" src="${options.scenes?.at(-1) ?? `/assets/story/intro-0${options.lines.length}.webp`}" alt="" hidden>
-        <button type="button" class="button button-primary story-play" data-story="play" hidden>${icons.play} 영상 재생</button>
-        <p class="story-video-loading" role="status">영상 준비 중…</p>
-      </div>
-      <div class="story-finish-banner" aria-hidden="true"><span>★</span>${options.scenes ? '마을에 불이 켜졌어!' : '코어를 옮길 방법을 찾자!'}<span>★</span></div>
-      <p class="eyebrow" id="story-title"></p>
-      <p class="story-text story-caption" id="story-caption" role="status" aria-live="polite"></p>
-      <div class="story-dots" aria-hidden="true">${dots}</div>
-      <div class="story-actions"><div class="story-film-controls">${options.finale ? '<button type="button" class="button button-secondary story-audio-toggle" data-story="audio" aria-pressed="false">영상 소리 켜기</button>' : ''}<button type="button" class="button button-secondary story-pause-toggle" data-story="pause" aria-pressed="false">일시정지</button><button type="button" class="button button-secondary story-replay" data-story="replay">처음부터</button></div><button class="button button-secondary" data-story="skip">${options.finale ? '지도로 돌아가기' : '건너뛰기'}</button><button class="button button-primary" data-story="done" hidden>${options.finishLabel}</button></div>
-    </div>`;
-    const el = modal.querySelector<HTMLVideoElement>('video')!;
-    el.muted = !anySound();
-    el.volume = Math.min(1, Math.max(0, (save.soundVolume ?? .3) * 2.4));
-    const who = modal.querySelector<HTMLElement>('#story-title')!;
-    const caption = modal.querySelector<HTMLElement>('#story-caption')!;
-    const dotNodes = Array.from(modal.querySelectorAll<HTMLElement>('.story-dots i'));
-    const playBtn = modal.querySelector<HTMLButtonElement>('[data-story="play"]')!;
-    const skipBtn = modal.querySelector<HTMLButtonElement>('[data-story="skip"]')!;
-    const doneBtn = modal.querySelector<HTMLButtonElement>('[data-story="done"]')!;
-    const pauseBtn = modal.querySelector<HTMLButtonElement>('[data-story="pause"]')!;
-    const replayBtn = modal.querySelector<HTMLButtonElement>('[data-story="replay"]')!;
-    let shown = -1;
-    let settled = false;
-    const showCue = (i: number) => {
-      if (i === shown) return; shown = i;
-      who.textContent = options.lines[i].who; caption.textContent = options.lines[i].text;
-      // Replay the pop-in so each new line jumps out like a comic caption.
-      for (const node of [who, caption]) { node.classList.remove('is-new'); void node.offsetWidth; node.classList.add('is-new'); }
-      dotNodes.forEach((dot, n) => dot.classList.toggle('on', n === i));
-    };
-    const card = modal.querySelector<HTMLElement>('.story-video-card')!;
-    if (options.scenes) card.classList.add('is-ending');
-    // Confetti burst for the finish: 28 pieces with their own drift, delay and colour.
-    const celebrate = () => {
-      confetti(card);
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      [0, 160, 320].forEach((ms, k) => window.setTimeout(() => tone(680 + k * 60), ms));
-    };
-    const sync = () => showCue(storyCueIndex(video.cues, el.currentTime));
-    const endFrame = modal.querySelector<HTMLImageElement>('.story-end-frame')!;
-    const finishUi = () => { el.controls = false; endFrame.hidden = false; showCue(options.lines.length - 1); skipBtn.hidden = true; pauseBtn.hidden = true; doneBtn.hidden = false; playBtn.hidden = true; card.classList.add('is-finished'); celebrate(); doneBtn.focus(); };
-    const tryPlay = () => {
-      const result = el.play();
-      if (result && typeof result.then === 'function') result.then(() => { playBtn.hidden = true; }).catch(() => { if (!closed) { playBtn.hidden = false; playBtn.focus(); } });
-    };
-    const fallback = () => {
-      if (closed) return;
-      teardownVideo?.(); teardownVideo = null;
-      draw();
-    };
-    const timer = window.setTimeout(() => { if (!settled && el.readyState < 1) fallback(); }, 8000);
-    const onMeta = () => { window.clearTimeout(timer); settled = true; if (reduced) playBtn.hidden = false; else tryPlay(); };
-    // The poster and a "준비 중" note cover the wait; both go once the first frame is ready.
-    const loadingNote = modal.querySelector<HTMLElement>('.story-video-loading');
-    const onReady = () => { if (loadingNote) loadingNote.hidden = true; };
-    el.addEventListener('loadeddata', onReady, { once: true });
-    const syncPause = () => { const playing = !el.paused && !el.ended; pauseBtn.textContent = playing ? '일시정지' : '재생'; pauseBtn.setAttribute('aria-pressed', String(!playing)); };
-    const onPlay = () => { playBtn.hidden = true; onReady(); syncPause(); };
-    // The captions are burned into the film: once frames really play, the DOM caption stays for screen readers only.
-    const onPlaying = () => { card.classList.add('film-captions'); };
-    const onPause = () => { if (!el.ended && !el.seeking) playBtn.hidden = false; syncPause(); };
-    const togglePause = () => { if (el.ended) return; if (el.paused) tryPlay(); else el.pause(); };
-    pauseBtn.addEventListener('click', () => { tone(470); togglePause(); });
-    el.addEventListener('click', togglePause);
-    replayBtn.addEventListener('click', () => {
-      tone(470);
-      endFrame.hidden = true; card.classList.remove('is-finished'); skipBtn.hidden = false; doneBtn.hidden = true; pauseBtn.hidden = false;
-      el.currentTime = 0; sync(); tryPlay();
-    });
-    const audioToggle = modal.querySelector<HTMLButtonElement>('[data-story="audio"]');
-    const syncAudio = () => {
-      const on = !el.muted && el.volume > 0;
-      audioToggle?.setAttribute('aria-pressed', String(on));
-      if (audioToggle) audioToggle.textContent = on ? '영상 소리 끄기' : '영상 소리 켜기';
-    };
-    audioToggle?.addEventListener('click', () => {
-      if (el.muted || !el.volume) { if (!el.volume) el.volume = .72; el.muted = false; }
-      else el.muted = true;
-      syncAudio();
-      if (!el.ended && el.paused) tryPlay();
-    });
-    el.addEventListener('volumechange', syncAudio);
-    syncAudio();
-    el.addEventListener('loadedmetadata', onMeta);
-    el.addEventListener('error', fallback);
-    el.addEventListener('timeupdate', sync);
-    el.addEventListener('seeked', sync);
-    el.addEventListener('play', onPlay);
-    el.addEventListener('playing', onPlaying);
-    el.addEventListener('pause', onPause);
-    el.addEventListener('ended', finishUi);
-    teardownVideo = () => {
-      window.clearTimeout(timer);
-      el.removeEventListener('loadedmetadata', onMeta); el.removeEventListener('error', fallback);
-      el.removeEventListener('timeupdate', sync); el.removeEventListener('seeked', sync);
-      el.removeEventListener('play', onPlay); el.removeEventListener('playing', onPlaying); el.removeEventListener('pause', onPause); el.removeEventListener('click', togglePause); el.removeEventListener('ended', finishUi); el.removeEventListener('volumechange', syncAudio);
-      el.pause(); el.removeAttribute('src'); el.load();
-    };
-    playBtn.addEventListener('click', () => { tone(470); tryPlay(); });
-    showCue(0);
-    skipBtn.focus();
-  };
-  modal.addEventListener('click', event => {
-    const button = (event.target as Element).closest<HTMLButtonElement>('[data-story]');
-    if (!button || ['play','audio','pause','replay'].includes(button.dataset.story ?? '')) return;
-    tone(470);
-    if (button.dataset.story === 'skip' || button.dataset.story === 'done' || index === options.lines.length - 1) { close(); return; }
-    index += 1; draw();
-  });
-  modal.addEventListener('keydown', event => {
-    if (event.key !== 'Tab') return;
-    if (modal.querySelector('.story-video-card')) {
-      const items = Array.from(modal.querySelectorAll<HTMLElement>('button:not([hidden]), video[controls]'));
-      if (!items.length) return;
-      const at = items.indexOf(document.activeElement as HTMLElement);
-      event.preventDefault();
-      items[(at + (event.shiftKey ? items.length - 1 : 1)) % items.length].focus();
-      return;
-    }
-    event.preventDefault(); modal.querySelector<HTMLButtonElement>('[data-story="next"]')?.focus();
-  });
-  document.addEventListener('keydown', onEscape, true);
-  document.body.append(modal);
-  storyMusic = options.video ? 'quiet' : options.music ?? null; syncMusic();
-  if (options.video) drawVideo(options.video); else draw();
-}
 function openEndingCeremony() {
   stopSounds(); // The card-collection jingle must not run over the ceremony music.
   if (!adminUnlocked && !canPlayMapFinale(save)) {
@@ -577,63 +402,8 @@ function openEndingCeremony() {
     },
   });
 }
-const missionLearn: Record<StageId, string> = {
-  cargo: '무거운 상자와 가벼운 상자를 밀고 당길 때 달라지는 점',
-  balance: '수평대에서 어느 쪽이 더 무거운지 알아내는 법',
-  scale: '겉모습으로 헷갈리는 무게를 저울로 비교해요.',
-  workshop: '지레와 빗면을 쓰면 필요한 힘이 어떻게 달라지는지',
-  rescue: '배운 방법으로 배터리 코어를 옮겨 중앙 장치에 다시 끼우기',
-};
 const missionCardShown = new Set<StageId>();
-/** Experiment done, questions open: a card that only leads to the questions (or back to the experiment). */
-function openMissionCard(stageId: StageId) {
-  const stage = stages.find(item => item.id === stageId)!;
-  const plan = inquiryPlans[stageId];
-  const activeSave = adminSave ?? save;
-  let selected = activeSave.inquiryPlans?.[stageId] ?? '';
-  const modal = document.createElement('div');
-  modal.className = 'modal-layer story-layer';
-  const appWasInert = app.inert; app.inert = true;
-  modal.innerHTML = `<div class="modal-card mission-card" role="dialog" aria-modal="true" aria-labelledby="mission-title">
-
-    <p class="eyebrow">MISSION 0${stage.mission} · ${stage.concept}</p>
-    <h2 id="mission-title">${stage.title}</h2>
-    <p class="mission-purpose">${missionLearn[stageId]}</p>
-
-    <section class="mission-prediction question-zone" aria-labelledby="mission-question"><span class="question-label">실험 전 처음 생각 (선택)</span><h3 class="question-prompt" id="mission-question">${plan.prompt}</h3><div class="mission-answer-grid" style="--answer-count:${plan.choices.length}">${plan.choices.map((choice,index) => `<button type="button" data-plan="${choice.id}" aria-pressed="${selected === choice.id}"><span class="answer-number" aria-hidden="true">${index+1}</span><span>${choice.label}</span></button>`).join('')}</div></section>
-
-    <p class="mission-orientation" role="status">시작하기 전에 태블릿을 가로로 돌려요. 고른 처음 생각은 그대로 있어요.</p>
-    <button class="button button-primary" id="mission-start">실험 시작 →</button>
-  </div>`;
-  const start = modal.querySelector<HTMLButtonElement>('#mission-start')!;
-  const orientation = matchMedia('(orientation: portrait)');
-  const syncOrientation = () => { start.disabled = orientation.matches; };
-  orientation.addEventListener('change', syncOrientation); syncOrientation();
-  const close = () => { orientation.removeEventListener('change', syncOrientation); stopVoiceLine(); app.inert = appWasInert; modal.remove(); };
-  modal.addEventListener('modal-dismiss', close);
-  modal.querySelectorAll<HTMLButtonElement>('[data-plan]').forEach(button => button.addEventListener('click', () => {
-    selected = button.dataset.plan!;
-    modal.querySelectorAll<HTMLButtonElement>('[data-plan]').forEach(choice => choice.setAttribute('aria-pressed', String(choice === button)));
-    tone(470);
-  }));
-  start.addEventListener('click', () => {
-    activeSave.inquiryPlans ??= {};
-    if (selected) activeSave.inquiryPlans[stageId] = selected;
-    if (stageId === 'rescue' && (selected === 'short' || selected === 'long') && !activeSave.rescue.runs.length) activeSave.rescue.route = selected;
-    if (!adminUnlocked) persist();
-    tone(470); close();
-    if (stageId === 'rescue' || stageId === 'workshop') render();
-  }, { once: true });
-  modal.addEventListener('keydown', event => {
-    if (event.key !== 'Tab') return;
-    const buttons = [...modal.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')];
-    const first = buttons[0], last = buttons.at(-1);
-    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-  });
-  document.body.append(modal); modal.querySelector<HTMLButtonElement>('[data-plan]')?.focus();
-  playVoiceLine(`npc-dialogue/${stageId}-mission`);
-}
+function openMissionCard(stageId: StageId) { openMissionCardPanel(stageId, { app, activeSave: () => adminSave ?? save, adminUnlocked: () => adminUnlocked, tone, persist, render }); }
 
 let backNavigation = false;
 window.addEventListener('popstate', event => {
@@ -802,142 +572,18 @@ function renderComplete(root: HTMLElement) {
   replay();
 }
 
-function openSettings(focusAction?: 'bag') {
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-layer settings-layer';
-  const appWasInert = app.inert;
-  app.inert = true;
-  const close = () => { app.inert = appWasInert; overlay.remove(); app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.focus(); };
-  type Section = 'menu' | 'admin' | 'reset' | 'concepts';
-  const headings: Record<Section, string> = { menu: '설정', admin: '전체 단계 해금', reset: '탐구 기록 초기화', concepts: '개념 영상 다시 보기' };
-  const show = (section: Section) => {
-    let content: string;
-    if (section === 'menu') {
-      const cardCount = earnedToolCards(adminSave ?? save).length;
-      const canWatch = canPlayMapFinale(save) || adminUnlocked;
-      const canRead = save.completed.length === stages.length || adminUnlocked;
-      const volume = Math.round((save.soundVolume ?? .3) * 100);
-      const soundSwitch = (action: 'sound' | 'music', name: string, on: boolean) =>
-        `<button type="button" role="switch" class="button button-secondary setting-row" data-settings="${action}" aria-label="${name}" aria-checked="${on}">${switchLabel(name, on)}</button>`;
-      const summary = (title: string, body: string) => `<details class="science-settings-detail"><summary>${title}</summary>${body}</details>`;
-      content = `<div class="science-settings-body">
-        <div class="science-settings-audio" aria-label="소리 설정">
-          ${soundSwitch('music','배경 음악',save.musicOn === true)}${soundSwitch('sound','효과음',save.soundOn)}
-        <label class="setting-row settings-wide" for="sound-volume">전체 소리 크기 <input id="sound-volume" type="range" min="0" max="100" step="5" value="${volume}"><output id="volume-value" for="sound-volume">${volume}%</output></label></div>
-        <div class="settings-links science-settings-actions" aria-label="바로 가기">
-          <button type="button" data-settings="bag" aria-haspopup="dialog"><span>${bagIcon()}</span> 도구 가방 <small>${cardCount}장</small></button>
-          <button type="button" data-settings="prologue"><span>${icons.play}</span> 이 탐험을 하는 이유 다시 보기</button>
-          <button type="button" data-settings="ending"${canWatch ? '' : ' disabled aria-describedby="finale-locked"'}><span>${icons.sparkle}</span> 점등식 다시 보기</button>
-          <button type="button" data-settings="record"${canRead ? '' : ' disabled aria-describedby="record-locked"'}><span>${icons.book}</span> 나의 탐구 결과 보기</button>
-          <button type="button" data-settings="concepts"><span>${icons.film}</span> 개념 영상 다시 보기</button>
-        </div>
-        ${canWatch ? '' : '<p class="settings-lock" id="finale-locked">지도에서 다섯 악당을 모두 물리치면 점등식이 열려요.</p>'}
-        ${canRead ? '' : '<p class="settings-lock" id="record-locked">다섯 미션을 마치면 탐구 결과를 볼 수 있어요.</p>'}
-        ${summary('앱 정보 · 배움과 보상',infoContent.about)}
-        ${summary('학생용 가이드',infoContent.help)}
-        ${summary('교사용 가이드',infoContent.teacher+`<details class="science-settings-detail"> <summary>성취기준</summary>${infoContent.curriculum}</details><div class="settings-reading"><h3>교사용 도구</h3><div class="settings-links"><button type="button" data-settings="admin"><span>${icons.gear}</span> 전체 단계 해금 <small>${adminUnlocked ? '사용 중' : '꺼짐'}</small></button></div><p>수업에서 바로 살펴볼 수 있어요. 미리보기 진행은 학생 기록에 남지 않아요.</p></div>`)}
-        ${summary('이미지·소리·저작권 고지',infoContent.info)}
-      </div>
-      <footer class="science-settings-footer settings-links">
-        <button type="button" data-settings="home"><span>${icons.home}</span> 메인 화면</button>
-        <button type="button" data-settings="save"><span>${icons.check}</span> 지금 저장</button>
-        <button type="button" class="settings-danger" data-settings="reset"><span>${icons.reset}</span> 탐구 기록 초기화</button>
-        <button type="button" class="button button-primary" data-settings="close">닫기</button>
-      </footer>`;
-    } else if (section === 'admin') {
-      content = `<p class="settings-lead">${adminUnlocked ? '실험 5개가 모두 열려 있어요.' : '실험 5개와 결과 화면을 미리 볼 수 있어요.'} 미리보기 조작은 학생 기록에 반영되지 않아요.</p><button class="button button-primary full" data-settings="toggle-admin">${adminUnlocked ? '전체 단계 해금 종료' : '전체 단계 해금'}</button><p class="settings-lead">해금은 이 탭에서만 유지되고 새로고침하면 종료돼요.</p>`;
-      if (adminUnlocked) content += `<div class="settings-links" aria-label="미리 볼 실험">${stages.map(stage=>`<button data-preview-stage="${stage.id}">${stage.mission}. ${stage.title}</button>`).join('')}<button data-preview-stage="complete">결과 화면</button></div>`;
-    } else if (section === 'concepts') {
-      // One clip per mission; a clip opens only after its mission, so it never spoils the discovery.
-      content = `<p class="settings-lead">미션을 마치면 그 미션의 개념 영상이 열려요. 보고 싶은 영상을 골라요.</p><div class="concept-gallery">${stages.map(stage => {
-        const open = adminUnlocked || save.completed.includes(stage.id);
-        return `<button type="button" class="concept-gallery-item" data-concept-open="${stage.id}"${open ? '' : ' disabled'}><img src="${conceptPoster(stage.id)}" alt=""><span><small>MISSION 0${stage.mission} · ${stage.concept}</small><strong>${conceptClipTitle(stage.id)}</strong><em>${open ? '▶ 영상 보기' : `미션 ${stage.mission}${[2,4,5].includes(stage.mission)?'를':'을'} 마치면 열려요`}</em></span></button>`;
-      }).join('')}</div>`;
-    } else if (section === 'reset') {
-      content = '<p class="settings-lead">이 브라우저의 모든 실험 기록과 복구 진행을 지울까요? 지운 기록은 되돌릴 수 없어요. 소리 설정은 유지해요.</p><button class="button button-secondary settings-danger" data-settings="confirm-reset">기록을 지우고 처음으로</button>';
-    } else return;
-    overlay.innerHTML = `<div class="modal-card settings-card"${section === 'menu' ? ' data-science-settings' : ''} role="dialog" aria-modal="true" aria-labelledby="settings-title">
-      <div class="settings-heading"><h2 id="settings-title">${headings[section]}</h2><button type="button" class="settings-close" data-settings="close" aria-label="설정 닫기">×</button></div>
-      ${content}${section === 'menu' ? '' : '<button class="button button-secondary settings-back" data-settings="back">설정으로 돌아가기</button>'}
-    </div>`;
-    const target = section === 'menu' && focusAction ? focusAction : 'close';
-    // 같은 동작 버튼이 둘(위 ×·아래 「닫기」)일 때 CSS로 숨긴 쪽에는 초점이 가지 않는다. 보이는 쪽에 둬야 Esc가 창 안에서 잡힌다.
-    const targets = [...overlay.querySelectorAll<HTMLButtonElement>(`[data-settings="${target}"]`)];
-    (targets.find(button => button.getClientRects().length) ?? targets[0])?.focus();
-    focusAction = undefined;
-  };
-  overlay.addEventListener('click', event => {
-    if (event.target === overlay) { close(); return; }
-    const preview = (event.target as Element).closest<HTMLButtonElement>('[data-preview-stage]')?.dataset.previewStage;
-    if (preview && adminUnlocked) { close(); navigate(preview as PageId); return; }
-    const concept = (event.target as Element).closest<HTMLButtonElement>('[data-concept-open]')?.dataset.conceptOpen;
-    if (concept) { openConceptClip(concept as StageId); return; }
-    const button = (event.target as Element).closest<HTMLButtonElement>('button[data-settings]');
-    if (!button) return;
-    const action = button.dataset.settings;
-    if (action === 'close') close();
-    else if (action === 'back') show('menu');
-    else if (action === 'bag') {
-      close();
-      tone(470);
-      openToolBag({ app, save: adminSave ?? save, sound: () => tone(470), preview: adminUnlocked, onClose: () => openSettings('bag') });
-    }
-    else if (action === 'concepts') show('concepts');
-    else if (action === 'admin' || action === 'reset') show(action);
-    else if (action === 'sound') {
-      save.soundOn = !save.soundOn;
-      persist();
-      button.setAttribute('aria-checked', String(save.soundOn));
-      button.textContent = switchLabel('효과음', save.soundOn);
-      updateSoundButton();
-      if (save.soundOn) tone(520); else stopSounds();
-    }
-    else if (action === 'music') {
-      save.musicOn = !save.musicOn;
-      persist();
-      button.setAttribute('aria-checked', String(save.musicOn));
-      button.textContent = switchLabel('배경 음악', save.musicOn);
-      updateSoundButton();
-      syncMusic();
-    }
-    else if (action === 'confirm-reset') {
-      const sound = { soundOn: save.soundOn, musicOn: save.musicOn, soundVolume: save.soundVolume };
-      close(); adminUnlocked = false; adminSave = null;
-      save = { ...freshSave(), ...sound }; context.save = save; missionCardShown.clear();
-      persist(); viewPage = 'title'; render();
-    }
-    else if (action === 'ending') { close(); openEndingCeremony(); }
-    else if (action === 'record') { close(); navigate('complete'); }
-    else if (action === 'prologue') { close(); openStoryModal({ lines: prologueLines, finishLabel: '닫기', video: introVideo }); }
-    else if (action === 'toggle-admin') {
-      const enable = !adminUnlocked;
-      close(); setAdminMode(enable); navigate('map');
-    }
-    else if (action === 'save') { if (persist()) toast('진행 기록을 저장했어요.'); }
-    else if (action === 'home') { close(); setAdminMode(false); viewPage = 'title'; render(); }
-  });
-  overlay.addEventListener('input', event => {
-    if (!(event.target instanceof HTMLInputElement) || event.target.id !== 'sound-volume') return;
-    save.soundVolume = Number(event.target.value) / 100;
-    setVolume(save.soundVolume);
-    overlay.querySelector('#volume-value')!.textContent = `${event.target.value}%`;
-  });
-  overlay.addEventListener('change', event => {
-    if ((event.target as HTMLElement).id === 'sound-volume') { persist(); tone(520); }
-  });
-  overlay.addEventListener('keydown', event => {
-    if (event.key === 'Escape') { event.preventDefault(); close(); }
-    if (event.key === 'Tab') {
-      const focusable = [...overlay.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href], summary, [tabindex="0"]')].filter(el => el.getClientRects().length);
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-    }
-  });
-  document.body.append(overlay);
-  show('menu');
-}
+const settingsHost: SettingsHost = {
+  app, save: () => save, adminSave: () => adminSave, adminUnlocked: () => adminUnlocked,
+  tone, toast, persist, navigate, setAdminMode, updateSoundButton, syncMusic, openEndingCeremony,
+  resetRecords() {
+    const sound = { soundOn: save.soundOn, musicOn: save.musicOn, soundVolume: save.soundVolume };
+    adminUnlocked = false; adminSave = null;
+    save = { ...freshSave(), ...sound }; context.save = save; missionCardShown.clear();
+    persist(); viewPage = 'title'; render();
+  },
+  goTitle() { viewPage = 'title'; render(); },
+};
+function openSettings(focusAction?: 'bag') { openSettingsPanel(settingsHost, focusAction); }
 
 function updateSoundButton() {
   const button = app.querySelector<HTMLButtonElement>('[data-top="sound"]');
@@ -946,11 +592,6 @@ function updateSoundButton() {
   button.setAttribute('aria-pressed', String(anySound()));
   button.setAttribute('aria-label', `소리 ${anySound() ? '끄기' : '켜기'}`);
 }
-/** Settings switch text: what is on now, then what a press does. */
-function switchLabel(name: string, on: boolean): string {
-  return `${name} ${on ? '켜짐' : '꺼짐'}`;
-}
-
 function bindHeader() {
   // One quick switch for the classroom: it mutes everything, or brings back music and effects together.
   app.querySelector<HTMLButtonElement>('[data-top="sound"]')?.addEventListener('click', () => {
