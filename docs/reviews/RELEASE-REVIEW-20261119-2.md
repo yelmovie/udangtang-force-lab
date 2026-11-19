@@ -55,3 +55,17 @@
 1. 학교 태블릿(iPad Safari·Android Chrome)에서 FPS·메모리 한 번 더(이번 수치는 Mac), 다섯 미션 연속 플레이·터치·회전·백그라운드 복귀.
 2. iPad Safari에서 중앙 코어 3D가 압축 모델을 받아 그리는지(WebP·meshopt는 Safari 14 이상 지원, 못 그리면 기존 2D 그림으로 넘어감).
 3. 실제 브라우저 글자 확대(Safari 「aA」, Chrome 확대)로 200%를 한 번 눌러 보기.
+
+## 추가: 큰 파일 분리 (`fbfd158`, 운영 `abc945cc-a195-4017-be40-541502893bfc`)
+
+| 항목 | 전 | 후 | 증거등급 | 근거 |
+|---|---|---|---|---|
+| E2 큰 파일 | WARNING | WARNING(줄어듦) | 확인됨 | `src/main.ts` 1058→699줄: 이야기 창 → `src/storyModal.ts`, 설정 창 → `src/settingsPanel.ts`, 미션 시작 카드 → `src/missionCard.ts`(앱 상태를 바꾸는 일은 main.ts가 host 함수로 넘김). `src/screens/village.ts` 1204→871줄: 지도 순수 로직 → `src/screens/villageMap.ts`, 불빛 SVG → `src/screens/villageLights.ts`(예전 공개 이름은 village.ts에서 다시 내보냄). main.ts는 다른 화면 파일(600~700줄) 수준이 됐지만 village.ts의 `mountVillage`는 아직 약 575줄짜리 한 함수라 WARNING 유지 |
+| 회귀(분리 전후) | — | PASS | 확인됨 | 같은 스크립트(`.tmp/zoom-20261119/regress.mjs`)로 분리 전 운영본과 분리 후 개발본을 비교: 새로 시작 확인 창·이야기 영상 버튼·건너뛰기 뒤 지도, 설정 메뉴 구성·초점·이야기 다시 보기·효과음 스위치·저장 안내·기록 초기화(소리 설정 유지), 미션 시작 카드 문구·처음 생각 저장, 지도 불빛 SVG(22묶음, 마크업 길이까지) — 17항목 모두 같음, 오류 0 |
+| C3·C4·C17·C20·B14·F14 | PASS | PASS | 확인됨 | 24화면 측정 결과가 분리 전과 완전히 같음, 새로고침 복원·깨진 저장 백업 |
+| E11 빌드·테스트 | PASS | PASS | 확인됨 | `npm test` 209/209(지도 테스트 41개는 village.ts를 통해 그대로 불러옴), `npm run build` 통과 |
+
+- 운영 반영(`abc945cc`): `cmp.sh` `assets/index-5ITP5Wmy.js`·index·CSS·`sw.js` MATCH, 영상 Range 206. 배포 뒤 운영 주소로 같은 17항목 비교 → 분리 전 운영본과 같음, 오류 0. smoke: load 1.00초(FCP 0.82초), 오프라인 재방문 열림. 개발본 FPS 6화면 60, 누수 3바퀴 힙 12.9→13.3→13.3MB(분리 전과 같은 수준).
+- 판정은 그대로 **배포 가능**(FAIL 0, NOT TESTED 2). 점수도 79(E2가 WARNING으로 남아 로직 4점 그대로).
+- 다음에 E2를 끝내려면 `mountVillage` 안의 악당 만남(약 130줄)·그리기(약 110줄)·카메라/손가락 확대(약 80줄)를 상태 객체 하나로 묶어 나눠야 한다. 지도 동작 전체를 다시 비교해야 해서 별도 작업으로 둔다.
+
