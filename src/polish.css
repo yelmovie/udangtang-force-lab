@@ -220,6 +220,12 @@ button.button:not(:disabled):active {
 .title-student { background: url('/assets/game/student-idle.webp') center bottom / contain no-repeat; bottom: 4%; z-index: 2; }
 .title-corgi { background: url('/assets/game/corgi-idle.webp') center bottom / contain no-repeat; bottom: 0; z-index: 2; }
 .title-squirrel { z-index: 4; }
+/* Credit line: small, quiet, bottom-right of the title only. Never takes a tap. */
+.title-credit {
+  position: absolute; right: calc(22px + env(safe-area-inset-right, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 5;
+  margin: 0; font-size: clamp(10px, .9vw, 13px); font-weight: 700; line-height: 1.2; white-space: nowrap; pointer-events: none; user-select: none;
+  color: #fff; text-shadow: 0 1px 2px rgba(30, 18, 6, .9), 0 0 6px rgba(30, 18, 6, .75);
+}
 /* Landscape balance: logo centre, student left, corgi right, squirrel left of corgi.
    Sizes follow the smaller of vw/vh so short windows shrink everything instead of overlapping. */
 @media (min-width: 761px) and (orientation: landscape) {

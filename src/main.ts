@@ -500,6 +500,7 @@ function renderTitle(root: HTMLElement) {
       <button class="button button-secondary" id="continue" ${hasSave ? '' : 'disabled'}>이어 하기</button>
     </div>
     <div class="character" data-pose="title-squirrel" role="img" aria-label="기록판을 든 다람쥐 연구 기록관"></div>
+    <p class="title-credit">기획·제작: 옐샘 &amp; ⓒ 아이스크림미디어</p>
   </section>`;
   // The three pose sheets (~1MB) take their class — and start downloading — only after the title logo and buttons have painted.
   const reveal = () => root.querySelectorAll<HTMLElement>('[data-pose]').forEach(node => node.classList.add(node.dataset.pose!));
