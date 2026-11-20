@@ -138,3 +138,63 @@ A11은 「성취기준·검수 정보가 데이터와 테스트에 없다」는 
 ## 그 밖에 눈에 띈 말(줄 없음, 참고)
 
 - 「설계」(공방 전체, 예: `workshop.ts:401` 「'[화물 가까이]' 설계로 움직였어요.」), 「힘 단계」(`cargo.ts:199`)도 풀이 없이 쓰인다. 필요하면 다음 초안에서 다룬다.
+
+## 바꿀 코드 위치 (3-2a 덧붙임, 2026-11-21)
+
+사용자가 줄마다 고르면 바로 넣을 수 있게, 줄마다 고칠 자리를 적었다. 기준 `main` `8c9321c`. 위 표의 「지금 문구」 위치를 지금 코드에서 다시 찾아 모두 맞는지 확인했다(`.tmp/score-fix-20261121/copy-locs.txt`). 이 단계에서는 코드를 바꾸지 않았다.
+
+- 방식 — **문자열만**: 그 줄의 따옴표 안 글만 바꾼다. **문자열 + 표시 코드**: 문구가 지금 결과 화면에 안 나와서 `src/learningReview.ts:24-52`(결과 화면 문제 칸)에 talk 줄을 보이게 하는 몇 줄이 더 필요하다. **데이터(why 키) 수정**: `learningModel.ts` 문항의 `why`에 선택지 id를 키로 한 줄을 더한다. **문장 추가**: 꺼진 완료 버튼 옆에 이유를 보일 자리(버튼 `title`·`aria-describedby` 또는 같은 바닥줄 `feedback` 칸)를 정해야 한다.
+- ⚠ 표시가 있는 줄은 적용 전에 확인할 것이 있다: E-1(자동 보기 화면의 문구·버튼 노출 유지, `AGENTS.md` E-1), 음성 파일과 대사 짝, 영상에 박힌 자막.
+- 고른 뒤 넣을 때 확인: `npm test`(학습 문항 테스트 `scripts/test-*.mjs`), `npm run build`, 해당 화면 1280·1024·1920 스크린숏(줄바꿈 균형 규칙), E-1 줄은 자동 보기 전후 비교(`.tmp/score-fix-20261121/fix.mjs` PART=auto), 완주 `fullplay.mjs`.
+
+| 줄 | 바꿀 곳(파일:줄) | 방식 | 같이 볼 곳 |
+|---|---|---|---|
+| A4-1 | `src/learningReview.ts:40` | 문자열만 | `src/main.ts:328-331` |
+| A4-2 | `src/learningReview.ts:27` | 문자열만 | — |
+| A4-3 | `src/learningModel.ts:37` | 문자열 + 표시 코드 | `src/learningReview.ts:24-52` |
+| A4-4 | `src/learningModel.ts:48` | 문자열 + 표시 코드 | `src/learningReview.ts:24-52` |
+| A4-5 | `src/learningModel.ts:85` | 문자열 + 표시 코드 | `src/learningReview.ts:24-52` |
+| A4-6 | `src/learningModel.ts:74` | 문자열만 | — |
+| A4-7 | `src/learningReview.ts:92` | 문자열만 | — |
+| A4-8 | `src/screens/cargo.ts:589` | 문자열만 | — |
+| A5-1 | `src/learningModel.ts:35` | 문자열만 | — |
+| A5-2 | `src/learningModel.ts:35` | 문자열만 | — |
+| A5-3 | `src/learningModel.ts:46` | 데이터(why 키) 수정 | — |
+| A5-4 | `src/learningModel.ts:46` | 문자열만 | — |
+| A5-5 | `src/learningModel.ts:84` | 문자열만 | — |
+| A5-6 | `src/learningModel.ts:84` | 문자열만 | — |
+| A5-7 | `src/learningModel.ts:72`; `src/learningReview.ts:113` | 문자열만 | — |
+| A5-8 | `src/learningModel.ts:72` | 문자열만 | — |
+| A5-9 | `src/learningModel.ts:73` | 문자열만 | — |
+| A5-10 | `src/learningModel.ts:73` | 문자열만 | — |
+| A5-11 | `src/learningReview.ts:113` | 문자열만 | — |
+| A5-12 | `src/screens/workshop.ts:525` | 문자열만 · ⚠ E-1 확인(자동 보기 화면) | — |
+| A9-1 | `src/workshopModel.ts:197` | 문자열만 | — |
+| A9-2 | `src/workshopModel.ts:199` | 문자열만 | — |
+| A9-3 | `src/cargoModel.ts:74` | 문자열만 | — |
+| A9-4 | `src/cargoModel.ts:74` | 문자열만 | — |
+| A13-1 | `src/cargoModel.ts:74` | 문자열만 | — |
+| A13-2 | `src/lifeObservation.ts:18` | 문자열만 | — |
+| A13-3 | `src/lifeObservation.ts:18` | 문자열만 | — |
+| A13-4 | `src/conceptClip.ts:32` | 문자열만 · ⚠ 영상 자막 확인 | — |
+| A13-5 | `src/info.ts:6` | 문자열만 | `src/workshopModel.ts:22` |
+| A14-1 | `src/screens/villageActions.ts:74` | 문자열만 | — |
+| A14-2 | `src/requestLetter.ts:25` | 문자열만 | `src/requestLetter.ts:40` |
+| A14-3 | `src/requestLetter.ts:9` | 문자열만 · ⚠ 인용하는 문장도 함께 | `src/screens/cargo.ts:148·609`; `src/screens/balance.ts:141` |
+| A14-4 | `src/screens/scale.ts:503` | 문자열만 | — |
+| A14-5 | `src/screens/rescue.ts:314` | 문자열만 | — |
+| A14-6 | `src/screens/scale.ts:422` | 문자열만 | — |
+| A14-7 | `src/screens/rescue.ts:90·149`; `src/screens/rescue.ts:228` | 문자열만 | `src/storyModal.ts:24` |
+| A14-8 | `src/screens/rescue.ts:227` | 문자열만 | — |
+| A14-9 | `src/data.ts:18`; `src/main.ts:692`; `src/villageStory.ts:74`; `src/villageStory.ts:77`; `src/main.ts:547` | 문자열만 · ⚠ 음성 파일 대조(엔딩·마을 대사) | `public/assets/audio/npc-dialogue/` 대사 파일 |
+| A14-10 | `src/workshopModel.ts:201` | 문자열만 | — |
+| A14-11 | `src/screens/workshop.ts:94` | 문자열만 · ⚠ E-1 확인(자동 보기 화면) | — |
+| A14-12 | `src/screens/workshop.ts:284`; `src/screens/workshop.ts:373·378·379` | 제안 1은 문자열만, 제안 2는 2단계에 풀이를 보일 표시 코드 필요 · ⚠ E-1 확인(자동 보기 화면) | — |
+| A14-13 | `src/screens/workshop.ts:360`; `src/screens/workshop.ts:366`; `src/screens/workshop.ts:482` | 문자열만 · ⚠ E-1 확인(자동 보기 화면) | — |
+| B15-1 | `src/screens/cargo.ts:62`; `src/screens/cargo.ts:235` | 문장 추가(꺼짐 이유를 보일 자리 필요) · ⚠ E-1 확인(자동 보기 화면) | `src/screens/cargo.ts:54` |
+| B15-2 | `src/screens/balance.ts:104`; `src/screens/balance.ts:72·193` | 문장 추가(꺼짐 이유를 보일 자리 필요) · ⚠ E-1 확인(자동 보기 화면) | `src/screens/balance.ts:86` |
+| B15-3 | `src/screens/scale.ts:97`; `src/screens/scale.ts:120·266` | 문장 추가(꺼짐 이유를 보일 자리 필요) · ⚠ E-1 확인(자동 보기 화면) | `src/screens/scale.ts:70` |
+| B15-4 | `src/screens/workshop.ts:56`; `src/screens/workshop.ts:279` | 문장 추가(꺼짐 이유를 보일 자리 필요) · ⚠ E-1 확인(자동 보기 화면) | `src/screens/workshop.ts:48` |
+| B15-5 | `src/screens/rescue.ts:90`; `src/screens/rescue.ts:262`; `src/rescueModel.ts:70-72` | 문장 추가(꺼짐 이유를 보일 자리 필요). 코어는 자동 보기가 없어 E-1 대상 아님 | `src/screens/rescue.ts:47·232` |
+
+줄 수: 47 = 문자열만 37(⚠ 확인이 붙은 줄 포함) · 문자열 + 표시 코드 3(A4-3·4·5) · 데이터 키 1(A5-3) · 문장 추가 5(B15) · 제안에 따라 1(A14-12). ⚠ E-1 확인 8줄(A5-12, A14-11·12·13, B15-1~4 — 공방·배송소·균형 다리·보급소는 자동 보기와 같은 화면).
