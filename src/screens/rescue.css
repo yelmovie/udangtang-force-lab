@@ -146,14 +146,15 @@
 @keyframes rescue-row-flash { 0%, 45% { background:#efc78866; } 100% { background:transparent; } }
 .core-record-recent { margin:8px 0 0; color:#566450; font-size:15px; line-height:1.4; }
 /* New stage: the heading and the step button glow briefly while the button ignores taps. */
-.rescue-stage-head.is-new-stage { animation:rescue-stage-glow .9s ease-out; }
-.rescue-step-button.is-new-stage { animation:rescue-stage-glow .9s ease-out; }
-@keyframes rescue-stage-glow { 0%, 50% { box-shadow:inset 0 0 0 3px #f5bd42, 0 0 14px #f5bd4288; } 100% { box-shadow:inset 0 0 0 0 transparent, 0 0 0 transparent; } }
+.rescue-step-button.is-new-stage, .rescue-force-control.is-nudge { position:relative; }
+.rescue-stage-head.is-new-stage::after, .rescue-step-button.is-new-stage::after, .rescue-force-control.is-nudge::after { content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; box-shadow:inset 0 0 0 3px #f5bd42, 0 0 14px #f5bd4288; opacity:0; animation:rescue-stage-glow .9s ease-out; }
+.rescue-force-control.is-nudge::after { animation-duration:1.6s; animation-iteration-count:infinite; }
+@keyframes rescue-stage-glow { 0%, 50% { opacity:1; } 100% { opacity:0; } }
 
 /* 미는 힘 단계를 화살표 길이로 보여 준다 (손가락 압력이 아니라 게임 속 힘 단계) */
 .rescue-force-control .force-step-arrow { grid-column:1/-1; position:relative; display:block; height:10px; width:calc(28% + (var(--level,1) - 1) * 33%); margin:2px 0 0; border-radius:999px 0 0 999px; background:#e0a33a; transition:width .25s ease-out; }
 .rescue-force-control .force-step-arrow::after { content:''; position:absolute; right:-12px; top:50%; border:9px solid transparent; border-left:13px solid #e0a33a; transform:translateY(-50%); }
 /* 같은 힘에서 두 길 결과가 같을 때: 다음 할 일은 힘 바꾸기라서 슬라이더를 깜빡여 알려 준다 */
-.rescue-force-control.is-nudge { border-radius:12px; animation:rescue-stage-glow 1.6s ease-out infinite; }
+.rescue-force-control.is-nudge { border-radius:12px; }
 .rescue-playfield .prediction-chip { right:auto; left:14px; top:46px; }
-@media (prefers-reduced-motion: reduce) { .rescue-force-control .force-step-arrow { transition:none; } .rescue-force-control.is-nudge { animation:none; box-shadow:inset 0 0 0 3px #f5bd42; } }
+@media (prefers-reduced-motion: reduce) { .rescue-force-control .force-step-arrow { transition:none; } .rescue-force-control.is-nudge::after { animation:none; opacity:0; } .rescue-force-control.is-nudge { box-shadow:inset 0 0 0 3px #f5bd42; } }

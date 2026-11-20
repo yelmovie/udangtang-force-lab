@@ -385,10 +385,11 @@
 /* 실험 순서 안내: 끝낸 도구는 ✓, 다음 도구는 금색으로 빛나며 '다음' 표시 */
 .workshop-drawer > button[data-done="true"],.workshop-drawer > button[data-next="true"] { position:relative; }
 .workshop-drawer > button[data-done="true"]::after { content:'✓'; position:absolute; bottom:-9px; right:-7px; width:22px; height:22px; display:grid; place-items:center; border-radius:50%; background:#2f8a62; color:#fff; font-size:14px; box-shadow:0 2px 0 #1d5b40; }
-.workshop-drawer > button[data-next="true"] { border-color:#d99a2b; background:#fff1c4; color:#5a3a0c; box-shadow:0 4px 0 #b37a22, 0 0 0 4px #ffd77b99; animation:tool-next-glow 1.6s ease-in-out infinite; }
+.workshop-drawer > button[data-next="true"] { border-color:#d99a2b; background:#fff1c4; color:#5a3a0c; box-shadow:0 4px 0 #b37a22, 0 0 0 4px #ffd77b99; }
+.workshop-drawer > button[data-next="true"]::before { content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; box-shadow:0 0 0 8px #ffd77b33; opacity:0; animation:tool-next-glow 1.6s ease-in-out infinite; }
 .workshop-drawer > button[data-next="true"]::after { content:'다음'; position:absolute; bottom:-12px; right:-10px; z-index:2; padding:2px 8px; border-radius:999px; background:#e0532f; color:#fff; font-size:13px; line-height:1.3; box-shadow:0 2px 0 #9c3317; }
-@keyframes tool-next-glow { 0%,100% { box-shadow:0 4px 0 #b37a22, 0 0 0 3px #ffd77b88; } 50% { box-shadow:0 4px 0 #b37a22, 0 0 0 8px #ffd77b33; } }
-@media (prefers-reduced-motion:reduce) { .workshop-drawer > button[data-next="true"] { animation:none; } }
+@keyframes tool-next-glow { 50% { opacity:1; } }
+@media (prefers-reduced-motion:reduce) { .workshop-drawer > button[data-next="true"]::before { animation:none; } }
 .workshop-choice .workshop-next-tool { justify-self:center; min-height:56px; padding:0 24px; font-size:20px; }
 
 /* 빗면 길이 독: 제목 + 두 개의 큰 선택 버튼(슬라이더도 그대로). 한 번 밀면 다른 길이를 해 보라고 빛난다. */
@@ -401,11 +402,12 @@
 .design-stop:disabled { opacity:.55; box-shadow:none; cursor:default; }
 .design-stop:focus-visible { outline:3px solid #ffc247; outline-offset:3px; }
 .design-dock-hint { position:absolute; left:50%; bottom:calc(100% + 10px); transform:translateX(-50%); padding:8px 16px; border-radius:999px; background:#e0532f; color:#fff; font-size:18px; font-weight:900; white-space:nowrap; box-shadow:0 3px 0 #9c3317; opacity:0; pointer-events:none; transition:opacity .2s ease; }
-.workshop-design-dock[data-attention="true"] { box-shadow:inset 0 0 0 3px #ffb938, 0 -6px 18px #ffcf6a88; animation:design-dock-glow 1.6s ease-in-out infinite; }
+.workshop-design-dock[data-attention="true"] { box-shadow:inset 0 0 0 3px #ffb938, 0 -6px 18px #ffcf6a88; }
+.workshop-design-dock[data-attention="true"]::before { content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; box-shadow:inset 0 0 0 3px #ffb938, 0 -10px 26px #ffcf6a44; opacity:0; animation:design-dock-glow 1.6s ease-in-out infinite; }
 .workshop-design-dock[data-attention="true"] .design-dock-hint { opacity:1; }
 .workshop-design-dock[data-attention="true"] .design-stop[aria-pressed="false"] { border-color:#d99a2b; background:#fff1c4; }
-@keyframes design-dock-glow { 50% { box-shadow:inset 0 0 0 3px #ffb938, 0 -10px 26px #ffcf6a44; } }
-@media (prefers-reduced-motion:reduce) { .workshop-design-dock[data-attention="true"] { animation:none; } }
+@keyframes design-dock-glow { 50% { opacity:1; } }
+@media (prefers-reduced-motion:reduce) { .workshop-design-dock[data-attention="true"]::before { animation:none; } }
 @media (max-width:900px) { .design-dock-title small { display:none; } .design-stop { padding:0 12px; font-size:16px; } }
 
 /* 평면(2D) 작업대: 3D 를 못 켤 때 같은 자리에 SVG 로 그린다 */

@@ -52,6 +52,7 @@
 .walk-inspect[aria-pressed='true'] { background:#d3af72; color:#283a38; }
 .rescue-walk-toggle { flex:none; min-height:48px; padding:6px 14px; font-size:var(--text-caption); white-space:nowrap; }
 .rescue-walk-toggle[hidden] { display:none !important; }
+.rescue-walk-toggle.button-secondary { color:#0a5d60; }
 .rescue-walk-toggle.is-suggested { outline:3px solid #ffc247; outline-offset:2px; }
 #app .core-studio .rescue-playfield.is-walk > .core-records { z-index:3; top:12px; right:12px; width:196px; max-height:calc(100% - 110px); padding:12px; }
 #app .core-studio .rescue-playfield.is-walk > .core-records .core-record-help { display:none; }

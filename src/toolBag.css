@@ -36,7 +36,7 @@ button.toolcard:focus-visible { outline: 3px solid #ffc247; outline-offset: 3px;
 .modal-card.toolbag-card { width: min(100%, 980px); max-height: min(94dvh, 720px); padding: 22px 26px 26px; }
 .toolbag-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .toolbag-heading h2 { margin: 0; }
-.toolbag-heading h2 small { font-size: 17px; color: #657b77; margin-left: 6px; }
+.toolbag-heading h2 small { font-size: 17px; color: #5a6f6b; margin-left: 6px; }
 .toolbag-lead { margin: 6px 0 14px; color: #516c63; font-size: 16px; font-weight: 800; }
 .toolbag-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0 0 4px; list-style: none; }
 .toolbag-grid li { display: flex; min-height: 300px; }
