@@ -78,7 +78,7 @@ export function createRewardCards(config) {
         <div class="rc-art"><img src="${esc(card.art)}" alt="" draggable="false"></div>
         <div class="rc-shine" aria-hidden="true"></div>
         <div class="rc-top"><span class="rc-stars" aria-label="별 ${starsOf(index)}개">${stars}</span><span class="rc-rarity">${card.bonus ? '보너스' : rarity.label}</span></div>
-        <div class="rc-plate"><strong>${esc(card.title)}</strong><span>${esc(card.stage)} · ${index + 1}/${total}</span></div>
+        <div class="rc-plate"><strong>${esc(card.title)}</strong><span>${esc(card.stage)}&nbsp;·&nbsp;${index + 1}/${total}</span></div>
       </div>
       <div class="rc-face rc-back" aria-hidden="true"><div class="rc-emblem">${config.emblem ?? '★'}</div></div>
     </div>`;

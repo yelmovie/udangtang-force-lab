@@ -176,7 +176,11 @@
 @keyframes rc-fan-in { from { transform: translateY(40vh) rotate(0deg) scale(.4); opacity: 0; } }
 .rc-card.is-mini { --h: min(34vh, 260px); }
 .rc-card.is-mini .rc-plate strong { font-size: max(14px, calc(var(--h) * .055)); }
-.rc-card.is-mini .rc-plate span { font-size: max(12px, calc(var(--h) * .04)); }
+.rc-card.is-mini .rc-plate span { font-size: max(16px, calc(var(--h) * .04)); }
+/* 2026-11-21: 보관함 작은 카드 아래 글 12px → 16px. 「· 1/5」가 끝줄에 혼자 떨어지지 않게 앞 낱말과 붙였다(reward-cards.js).
+   폰 가로처럼 카드 폭이 110px 아래면 16px 이름판이 그림을 거의 다 덮어 예전 12px를 둔다. */
+.rc-album-item .rc-card.is-mini { container: rc-mini / inline-size; }
+@container rc-mini (max-width: 110px) { .rc-card.is-mini .rc-plate span { font-size: 12px; } }
 .rc-complete {
   position: absolute; z-index: 4; top: max(14px, 6vh); left: 50%; translate: -50% 0; display: grid; justify-items: center; gap: 8px; text-align: center;
   animation: rc-complete-in .7s cubic-bezier(.3,1.6,.5,1) both .2s;
@@ -207,11 +211,15 @@
 }
 .rc-locked i { font-style: normal; font-size: 52px; font-weight: 900; color: color-mix(in srgb, var(--rc-ink) 35%, #fff); }
 .rc-locked span { font-size: 18px; font-weight: 800; }
-.rc-locked small { font-size: 14px; color: color-mix(in srgb, var(--rc-ink) 65%, #fff); word-break: keep-all; }
+.rc-locked small { font-size: 18px; line-height: 1.25; color: color-mix(in srgb, var(--rc-ink) 85%, #fff); word-break: keep-all; }
 /* 잠긴 카드가 좁아 「악당을 물리치면 / 열려요」로 끝줄에 세 글자만 떨어질 때는 낱말마다 한 줄씩 고르게 쌓는다.
-   한 줄에 들어가는 넓은 카드와, 세 줄 자리가 없는 낮은 화면(폰 가로)은 그대로 둔다. */
-.rc-locked { container: rc-locked / inline-size; }
-@media (min-height: 600px) { @container rc-locked (max-width: 152px) { .rc-locked small { max-width: 4.6em; } } }
+   18px에서는 앨범 카드(가장 넓어도 180px)에 한 줄로 들어가지 않으므로 넓은 카드도 쌓는다. 세 줄 자리가 없는 낮은 화면(폰 가로)은 그대로 둔다.
+   2026-11-20: 카드 높이가 낮아 내용이 카드 밖으로 넘치던 화면(1024×600·768×1024·폰 가로)에서는 장식 「?」를 빼고,
+   폰 가로처럼 아주 낮은 카드는 안내 문구도 빼서 이름만 남긴다(안내는 카드의 읽기 이름에 남아 있다). */
+.rc-locked { container: rc-locked / size; }
+@media (min-height: 600px) { @container rc-locked (max-width: 200px) { .rc-locked small { max-width: 4.6em; } } }
+@container rc-locked (max-height: 230px) { .rc-locked i { display: none; } }
+@container rc-locked (max-height: 130px) { .rc-locked small { display: none; } }
 .rc-zoom { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; background: rgb(8 18 28 / .28); }
 
 @media (prefers-reduced-motion: reduce) {
