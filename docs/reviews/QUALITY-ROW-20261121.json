@@ -1,5 +1,5 @@
 {
-  "no": "01", "name": "우당탕 힘 실험실", "appCommit": "cb36ba2", "measuredAt": "2026-11-21T07:53+09:00",
+  "no": "01", "name": "우당탕 힘 실험실", "appCommit": "351cc0e", "measuredAt": "2026-11-21T07:53+09:00",
   "score": {"total": 85, "noDevice": 87,
     "items": {"learning": 3, "fun": 9, "function": 9, "code": 6, "design": 10, "a11y": 10, "perf": 9, "firstScreen": 10, "data": 9, "deploy": 10}},
   "structure": {"zones": 5, "activities": 10, "stepsPerActivityMedian": 6.5, "autoRunSeconds": 120},
@@ -7,7 +7,7 @@
   "feedback": {"wrongAnswerLevels": 2, "hintBeforeAnswer": true, "retryGoal": false, "rewardEffects": 4, "transitionEffects": 3},
   "screen": {"playAreaHeightPctMedian": 79, "playAreaAreaPctMedian": 77, "bodyTextMinPx": 18, "bodyTextMedianPx": 18, "imagesOnScreenMedian": 8},
   "sound": {"bgm": true, "sfx": true, "voice": true, "voiceLines": 76},
-  "weight": {"firstScreenKB": 1571, "distMB": 68},
+  "weight": {"firstScreenKB": 1715, "distMB": 68},
   "robust": {"reloadRestores": true, "corruptSaveHandled": true, "offlineRevisit": true, "backButtonStaysInApp": true, "certificatePrintsOnePage": null},
-  "notes": "09:40 F12 PASS 반영(권리 장부 출처 미확인 0, 사용자 확인). 운영 f91acb8d(앱 cb36ba2) 1280×800 실측(.tmp/score-fix-20261121/quality.mjs·fullplay.mjs). activities=5미션×(1단계 실험+2단계 의뢰), steps=자동 보기 경로에서 학생이 누른 수(1·1·2·4·5·8·8·8·9·26), autoRunSeconds=새 저장에서 완료 화면까지 자동 완주. 화면은 배송소·균형 다리·공방(78·79·92%), 본문 글자 최소: 배송소 16px·다리 18px·공방 18px → 가운데 값 18. wrongAnswerLevels 2: 결과 질문 일부만 선택지별 까닭(why)+힌트, 나머지는 힌트만(A5). transitionEffects는 코드로 셈(인트로 영상·점등식 영상·마을 불 켜짐), rewardEffects(색종이·도구 카드 공개·성취 카드·마을 불빛). voiceLines=npc-dialogue 34+villain 25+개념 15+환영 2 파일. firstScreenKB=새 브라우저 load+4초 전송량(배경음은 스트리밍이라 일부만). certificatePrintsOnePage=null: 인쇄·인증서 기능 없음(G19 해당 없음). corruptSave: 깨진 JSON은 시작 화면(이어 하기 꺼짐), 모양이 틀린 저장은 이어 하기 정상, 오류 0."
+  "notes": "10시 3-3a: 제목 2048px·학생·콩이 원본 크기로 첫 화면 1571→1715KB(운영 cab79db4, load 1.27초·FCP 0.72초). 09:40 F12 PASS 반영(권리 장부 출처 미확인 0, 사용자 확인). 운영 f91acb8d(앱 cb36ba2) 1280×800 실측(.tmp/score-fix-20261121/quality.mjs·fullplay.mjs). activities=5미션×(1단계 실험+2단계 의뢰), steps=자동 보기 경로에서 학생이 누른 수(1·1·2·4·5·8·8·8·9·26), autoRunSeconds=새 저장에서 완료 화면까지 자동 완주. 화면은 배송소·균형 다리·공방(78·79·92%), 본문 글자 최소: 배송소 16px·다리 18px·공방 18px → 가운데 값 18. wrongAnswerLevels 2: 결과 질문 일부만 선택지별 까닭(why)+힌트, 나머지는 힌트만(A5). transitionEffects는 코드로 셈(인트로 영상·점등식 영상·마을 불 켜짐), rewardEffects(색종이·도구 카드 공개·성취 카드·마을 불빛). voiceLines=npc-dialogue 34+villain 25+개념 15+환영 2 파일. firstScreenKB=새 브라우저 load+4초 전송량(배경음은 스트리밍이라 일부만). certificatePrintsOnePage=null: 인쇄·인증서 기능 없음(G19 해당 없음). corruptSave: 깨진 JSON은 시작 화면(이어 하기 꺼짐), 모양이 틀린 저장은 이어 하기 정상, 오류 0."
 }
