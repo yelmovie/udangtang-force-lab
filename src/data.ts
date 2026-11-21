@@ -35,3 +35,12 @@ export const scaleParts = [
 ] as const;
 
 export const targetWeight = 150;
+
+/** The line on the stage finish popup (moved from main.ts, E2 2026-11-21). */
+export const stageFinishLines: Record<StageId, string> = {
+  cargo: '빵집 주문을 다 배달했어요. 이제 운반 레일을 고칠 수 있어요!',
+  balance: '어느 쪽이 무거운지 수평대로 알아냈어요. 발견을 저장해요!',
+  scale: '저울로 무게를 비교했어요. 비교 기록을 저장해요!',
+  workshop: '지레와 빗면으로 힘을 줄이는 법을 찾았어요. 생활 속 도구를 찾으러 가요!',
+  rescue: '코어가 중앙 장치에 도착했어요. 다시 끼워 마을의 전기를 되찾아요!',
+};

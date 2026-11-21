@@ -10,7 +10,7 @@ import './questionUI.css';
 import './storyVideo.css';
 import './stagePopup.css';
 import { introSentence, openLifeObservation } from './lifeObservation';
-import { stages, type PageId, type StageId } from './data';
+import { stageFinishLines, stages, type PageId, type StageId } from './data';
 import { completeStage, freshSave, markExperimentDone, readSave, stageIsOpen, writeSave, type SaveData } from './state';
 import { mountCargo } from './screens/cargo';
 import { mountBalance } from './screens/balance';
@@ -19,7 +19,6 @@ import { mountWorkshop } from './screens/workshop';
 import { mountRescue } from './screens/rescue';
 import { mountVillage } from './screens/village';
 import { canPlayMapFinale, defeatedMapVillains } from './map-villains.js';
-import { villageRewards } from './villageStory';
 import { playMusic, playSound, soundLeft, stopMusic, stopSounds, setVolume, setEffectVolume, type MapSound, type MusicName } from './sound';
 import { installKongDialogue } from './kongDialogue';
 import { configureVoiceLines, playVoiceLine, stopAllVoices, stopVoiceLine } from './npcDialogueVoice';
@@ -27,13 +26,13 @@ installKongDialogue(() => save);
 configureVoiceLines(() => save);
 import { prepareOffline } from './offline';
 import type { AppContext } from './appTypes';
-import { abilityStatements, challenges } from './challenges';
+import { challenges } from './challenges';
 import { mountMissionReview, openLearningReview } from './learningReview';
 import { openConceptClip, syncConceptButton } from './conceptClip';
-import { learningTask, missionReviewTask, missionReviewRecord, learningRecordComplete, learningSummary } from './learningModel';
-import { predictionRecap, predictionVerdict, type PredictionRecap } from './inquiryPlan';
+import { learningTask, missionReviewTask, missionReviewRecord, learningRecordComplete } from './learningModel';
+import { predictionRecap } from './inquiryPlan';
 import { earnedToolCards, toolCardInfo, toolCards } from './toolCards';
-import { bagIcon, openToolBag, toolCardRevealMarkup, toolCardRowMarkup } from './toolBag';
+import { bagIcon, openToolBag, toolCardRevealMarkup } from './toolBag';
 import './studentUx.css';
 import './tabletUx.css';
 import './glass-ui.css';
@@ -44,6 +43,7 @@ import { configureStoryModal, endingVideo, introVideo, openStoryModal, prologueL
 import { openSettings as openSettingsPanel, type SettingsHost } from './settingsPanel';
 import { openMissionCard as openMissionCardPanel } from './missionCard';
 import { shownItems, wrapTabAtEnds } from './focusTrap';
+import { completeScreenMarkup, guessMarkup, titleScreenMarkup } from './screenMarkup';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 let save: SaveData = readSave() ?? freshSave();
@@ -363,18 +363,6 @@ function setAdminMode(enabled: boolean) {
     (viewPage === 'complete' && save.completed.length < stages.length))) viewPage = 'map';
 }
 
-/** One line for the completion modal: the student's guess and whether the records agreed. */
-function guessMarkup(recap: PredictionRecap): string {
-  if (!recap.predicted) return '';
-  return `<p class="discovery-guess" data-matched="${recap.matched}"><span class="prediction-tag">처음 생각</span>${escapeHtml(recap.predicted)}<b>${recap.matched ? '✓ 처음 생각과 같아요!' : '실험으로 새로 알았어!'}</b></p>`;
-}
-
-/** First thought, what the records showed, and whether they matched — never a score. */
-function predictionMarkup(recap: PredictionRecap, className = 'discovery-prediction'): string {
-  const verdict = predictionVerdict(recap);
-  return `<div class="${className} prediction-recap" data-matched="${recap.matched ?? 'none'}"><p><span class="prediction-tag">처음 생각</span>${escapeHtml(recap.predicted ?? '기록된 예상이 없어')}</p><p><span class="prediction-tag is-result">실제 결과</span>${escapeHtml(recap.result)}</p>${verdict ? `<strong class="prediction-verdict">${verdict}</strong>` : ''}</div>`;
-}
-
 let ceremonyWait = 0;
 function openEndingCeremony() {
   // The card-collection jingle is the "all driven off" cheer: the film and its music wait until it has finished.
@@ -482,23 +470,7 @@ function confirmBox(title: string, body: string, okLabel: string): Promise<boole
 
 function renderTitle(root: HTMLElement) {
   const hasSave = readSave() !== null;
-  root.innerHTML = `<section class="title-screen">
-    <div class="title-actions">
-      <button class="icon-button" data-top="sound" aria-label="소리 ${anySound() ? '끄기' : '켜기'}" aria-pressed="${anySound()}">${soundIcon()}</button>
-      <button class="icon-button" data-top="settings" aria-label="설정 열기" aria-haspopup="dialog" title="설정">${settingsIcon()}</button>
-    </div>
-    <div class="character" data-pose="title-student" role="img" aria-label="청록 고글을 쓰고 멜빵바지를 입은 학생 탐구자"></div>
-    <div class="character" data-pose="title-corgi" role="img" aria-label="청록 스카프를 두른 코기 실험 파트너"></div>
-    <div class="title-panel">
-      <h1 class="illustrated-title"><img src="/assets/ui/title.webp" alt="우당탕 힘 실험실" width="1000" height="375"></h1>
-    </div>
-    <div class="title-buttons">
-      <button class="button button-primary" id="new-start">${readSave() ? '새로 시작' : '시작하기'}</button>
-      <button class="button button-secondary" id="continue" ${hasSave ? '' : 'disabled'}>이어 하기</button>
-    </div>
-    <div class="character" data-pose="title-squirrel" role="img" aria-label="기록판을 든 다람쥐 연구 기록관"></div>
-    <p class="title-credit">기획·제작: 옐샘 &amp; ⓒ 아이스크림미디어</p>
-  </section>`;
+  root.innerHTML = titleScreenMarkup(hasSave, anySound, soundIcon, settingsIcon);
   // The three pose sheets (~1MB) take their class — and start downloading — only after the title logo and buttons have painted.
   const reveal = () => root.querySelectorAll<HTMLElement>('[data-pose]').forEach(node => node.classList.add(node.dataset.pose!));
   if (document.readyState === 'complete') requestAnimationFrame(reveal);
@@ -540,21 +512,7 @@ async function restartFromBeginning() {
 function renderComplete(root: HTMLElement) {
   const save = adminSave ?? context.save;
   const completed = save.completed.length;
-  root.innerHTML = `<section class="complete-screen">
-    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1><p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 끼웠어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><div class="ending-actions"> ${adminUnlocked || canPlayMapFinale(save) ? '<button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button>' : `<p>지도에서 악당 5마리를 물리치면 점등식 영상이 열려요. 지금 ${defeatedMapVillains(save)} / 5</p>`}<button class="button button-primary" id="restart-ending">처음부터 다시 해보기 ↻</button></div></div></div>
-    <details class="complete-details"><summary>내 실험과 발견 살펴보기 · ${completed} / 5</summary>
-    <div class="report-grid">${stages.map(stage => {
-      const record = save.learning?.[stage.id];
-      const candidates = [missionReviewTask(save, stage.id), learningTask(save, stage.id)];
-      const task = candidates.find(item => item && item.signature === record?.signature);
-      const checked = task && record && learningRecordComplete(task, record);
-      return `<article class="report-card"><span>MISSION 0${stage.mission} · ${stage.concept}</span><h2>${stage.evidence}</h2><p class="report-card-insight">${escapeHtml(villageRewards[stage.id].afterLines[1])}</p>${predictionMarkup(predictionRecap(save, stage.id), 'report-first')}${save.completed.includes(stage.id) ? `<button type="button" class="report-concept" data-concept="${stage.id}">▶ 개념 영상 보기</button>` : ''}<details class="report-detail"><summary>내 실험과 답변 살펴보기</summary><p>${escapeHtml(save.evidence[stage.id] ?? '아직 기록이 없습니다.')}</p>${checked ? `<p>${escapeHtml(learningSummary(task, record))}</p>` : ''}</details></article>`;
-    }).join('')}</div>
-    </details><details class="complete-details"><summary>스스로 돌아보기 · 더 탐구하기 (선택)</summary><div class="ability-card"><h2>나는 이제 할 수 있어요!</h2><p>할 수 있게 된 것을 눌러 골라 봐. 연구 기록에 함께 저장돼.</p><div class="ability-list">${abilityStatements.map((text, i) => `<button class="ability-item" data-ability="${i}" aria-pressed="${(save.abilities ?? []).includes(i)}"><span>${(save.abilities ?? []).includes(i) ? '✓' : ''}</span>${text}</button>`).join('')}</div></div>
-    <div class="challenge-card"><h2>도전 과제 <small id="challenge-count"></small></h2><p>실험실로 돌아가서 더 시험해 봐. 해 본 과제는 완료로 표시돼.</p><div class="challenge-list">${challenges(save).map(item => `<div class="challenge-item ${item.done ? 'done' : ''}"><span aria-hidden="true">${item.done ? '✓' : '○'}</span><div><strong>${item.label}</strong><small>${item.done ? '완료' : item.hint}</small></div></div>`).join('')}</div></div>
-    </details>${toolCardRowMarkup(save)}<div class="transfer-card"><h2>내가 찾은 생활 속 도구</h2><p>${save.lifeObservation ? escapeHtml(save.lifeObservation.object) + ' · ' + escapeHtml(save.lifeObservation.use) : '주변에서 지레나 빗면을 찾아 어떻게 쓰이는지 살펴봐요.'}</p><p>이 기록을 보며 친구에게 도구의 쓰임을 설명해요.</p></div>
-    <div class="complete-footer"><p>${adminUnlocked ? '관리자 미리보기 결과는 학생의 기록에 반영되지 않아요.' : ''}</p><button class="button button-secondary" id="back-map">작전 지도로</button></div>
-  </section>`;
+  root.innerHTML = completeScreenMarkup(save, completed, adminUnlocked);
   root.querySelector<HTMLButtonElement>('#back-map')?.addEventListener('click', () => navigate('map'));
   root.querySelectorAll<HTMLButtonElement>('[data-toolcard]').forEach(button => button.addEventListener('click', () => {
     tone(470); openToolBag({ app, save, open: button.dataset.toolcard as StageId, sound: () => tone(470), preview: adminUnlocked });
@@ -665,7 +623,7 @@ function watchFinish(screen: HTMLElement, stageId: StageId) {
     const dialog = document.createElement('dialog');
     finishDialog = dialog;
     dialog.className = 'stage-popup stage-finish';
-    dialog.innerHTML = `<div class="stage-popup-card"><span class="stage-popup-label">MISSION 0${stages.find(item => item.id === stageId)!.mission} 완료</span><span class="stage-stamp" aria-hidden="true">✓ 완료</span><h2>다 했어요! 멋져요</h2><button class="stage-popup-close" aria-label="닫기">×</button><div class="stage-popup-body"><p>${finishLines[stageId]}</p></div><div class="stage-popup-actions"><button class="stage-finish-later">조금 더 실험할래요</button><button class="button button-primary stage-finish-go">${button.textContent}</button></div></div>`;
+    dialog.innerHTML = `<div class="stage-popup-card"><span class="stage-popup-label">MISSION 0${stages.find(item => item.id === stageId)!.mission} 완료</span><span class="stage-stamp" aria-hidden="true">✓ 완료</span><h2>다 했어요! 멋져요</h2><button class="stage-popup-close" aria-label="닫기">×</button><div class="stage-popup-body"><p>${stageFinishLines[stageId]}</p></div><div class="stage-popup-actions"><button class="stage-finish-later">조금 더 실험할래요</button><button class="button button-primary stage-finish-go">${button.textContent}</button></div></div>`;
     dialog.querySelector('.stage-popup-close')!.addEventListener('click', () => dialog.close());
     dialog.querySelector('.stage-finish-later')!.addEventListener('click', () => dialog.close());
     dialog.querySelector('.stage-finish-go')!.addEventListener('click', () => { dialog.close(); button.click(); });
@@ -681,14 +639,6 @@ function watchFinish(screen: HTMLElement, stageId: StageId) {
   const previous = cleanup; cleanup = () => { stop(); previous?.(); };
   scheduleShow();
 }
-const finishLines: Record<StageId, string> = {
-  cargo: '빵집 주문을 다 배달했어요. 이제 운반 레일을 고칠 수 있어요!',
-  balance: '어느 쪽이 무거운지 수평대로 알아냈어요. 발견을 저장해요!',
-  scale: '저울로 무게를 비교했어요. 비교 기록을 저장해요!',
-  workshop: '지레와 빗면으로 힘을 줄이는 법을 찾았어요. 생활 속 도구를 찾으러 가요!',
-  rescue: '코어가 중앙 장치에 도착했어요. 다시 끼워 마을의 전기를 되찾아요!',
-};
-
 render();
 // The offline worker installs after the title has settled so its precache never competes with the first paint.
 const startOffline = () => { if ('requestIdleCallback' in window) window.requestIdleCallback(prepareOffline, { timeout: 3000 }); else prepareOffline(); };
