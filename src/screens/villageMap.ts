@@ -246,6 +246,20 @@ export const requesterSpots: Record<RequestStage, Point & { bubble: Point; sign:
   scale: { x: 600, y: 700, bubble: { x: 662, y: 625 }, sign: { x: 300, y: 680 } },
   workshop: { x: 1410, y: 770, bubble: { x: 1340, y: 718 }, sign: { x: 1560, y: 692 } },
 };
+/** E6 (2026-11-21): a finished mission's reward on the map — the spot the fog clears around and the reveal ring marks (map pixels). */
+export const rewardSpots: Record<StageId, Point> = {
+  cargo: { x: 455, y: 374 }, balance: { x: 1183, y: 282 }, scale: { x: 574, y: 735 }, workshop: { x: 1344, y: 732 }, rescue: { x: 838, y: 243 },
+};
+/** Props drawn for a finished mission, in drawing order: file, foot point and height (map pixels). */
+export const rewardProps: Record<StageId, { file: string; at: Point; height: number }[]> = {
+  cargo: [{ file: 'props/prop-01.webp', at: { x: 455, y: 374 }, height: 70 }, { file: 'props/prop-01.webp', at: { x: 504, y: 389 }, height: 55 }],
+  balance: [],
+  scale: [{ file: 'props/prop-05.webp', at: { x: 576, y: 735 }, height: 60 }, { file: 'props/prop-04.webp', at: { x: 613, y: 755 }, height: 39 }],
+  workshop: [{ file: 'props/prop-11.webp', at: { x: 1344, y: 732 }, height: 50 }, { file: 'props/prop-09.webp', at: { x: 1540, y: 738 }, height: 40 }, { file: 'props/prop-10.webp', at: { x: 1540, y: 703 }, height: 16 }],
+  rescue: [{ file: 'props/prop-12.webp', at: { x: 838, y: 243 }, height: 55 }],
+};
+/** The repaired cargo rail: a yellow stripe drawn after the cargo props (map pixels). */
+export const cargoRewardRail = { x: 382, y: 389, width: 65, height: 6, color: '#f8db74' };
 /** NPC silhouettes use the same scale and standing height as the student. */
 export const mapCharacterHeight = 83;
 

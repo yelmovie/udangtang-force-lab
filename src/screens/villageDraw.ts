@@ -2,7 +2,7 @@ import { villainPatrol } from '../map-villain-patrol.js';
 import type { StageId } from '../data';
 import { drawEncounterFrame, drawStageProp, drawWrenchSparks, encounterAtlas, type Encounter } from '../villageEncounters';
 import { villageRequests, type RequestStage } from '../requestBoard';
-import { directions, mapCharacterHeight, requestBoardSpot, requesterSpots, villageLights } from './villageMap';
+import { cargoRewardRail, directions, mapCharacterHeight, requestBoardSpot, requesterSpots, rewardProps, rewardSpots, villageLights } from './villageMap';
 import type { Building, Point } from './villageMap';
 import type { VillageScene } from './villageScene';
 
@@ -45,14 +45,12 @@ export function createVillageRenderer(v: VillageScene) {
     if(outline){const {art,pad}=outlinedSprite(file,image,w,h);ctx.drawImage(art,x-pad,y-pad,w+2*pad,h+2*pad);}
     else ctx.drawImage(image,x,y,w,h);
   }
-  function rewardPoint(id: StageId): Point { return id==='rescue'?{x:838,y:243}:id==='balance'?{x:1183,y:282}:id==='cargo'?{x:455,y:374}:id==='scale'?{x:574,y:735}:{x:1344,y:732}; }
+  function rewardPoint(id: StageId): Point { return rewardSpots[id]; }
   // Light glows live in the SVG overlay (setupLights); the canvas keeps only the reward props.
   function drawRewards(id: StageId, alpha: number) {
     ctx.save();ctx.globalAlpha=alpha;
-    if(id==='cargo'){sprite('props/prop-01.webp',{x:455,y:374},70);sprite('props/prop-01.webp',{x:504,y:389},55);ctx.fillStyle='#f8db74';ctx.fillRect(382,389,65,6);}
-    if(id==='scale'){sprite('props/prop-05.webp',{x:576,y:735},60);sprite('props/prop-04.webp',{x:613,y:755},39);}
-    if(id==='workshop'){sprite('props/prop-11.webp',{x:1344,y:732},50);sprite('props/prop-09.webp',{x:1540,y:738},40);sprite('props/prop-10.webp',{x:1540,y:703},16);}
-    if(id==='rescue'){sprite('props/prop-12.webp',{x:838,y:243},55);}
+    for (const prop of rewardProps[id]) sprite(prop.file, prop.at, prop.height);
+    if (id === 'cargo') { const rail = cargoRewardRail; ctx.fillStyle = rail.color; ctx.fillRect(rail.x, rail.y, rail.width, rail.height); }
     ctx.restore();
   }
   function clientFilter(stage: RequestStage) { const { hue } = villageRequests[stage]; return hue ? `hue-rotate(${hue}deg) saturate(1.2)` : 'none'; }
