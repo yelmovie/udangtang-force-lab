@@ -4,6 +4,7 @@ import { icons } from '../icons';
 import { balanceObjects } from '../data';
 import type { BalanceRun } from '../state';
 import { mountCompanion } from '../sprites';
+import { balanceObjectArt, balanceScreenMarkup } from './balanceMarkup';
 import { mountCorgiHint } from '../corgiHint';
 import { setTapHint } from '../interactionHints';
 import { requestOpenLabel, showRequestLetter } from '../requestLetter';
@@ -76,33 +77,12 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     ? mysteryDone() ? '의뢰를 모두 해결했어요. 발견 저장을 눌러요.' : '수수께끼 상자 의뢰를 이어서 해요. 두 상자를 양쪽에 놓고 비교해요.'
     : canFinish() ? '다리 점검원의 의뢰가 도착했어요. 의뢰를 받아 수수께끼 상자를 풀어요.' : '같은 크기의 물체 두 개를 놓고, 잠금핀을 뽑기 전에 예상해 봐요.';
 
-  const objectArt = (id: string) => `<span class="instrument-object object-${id}" aria-hidden="true"><img src="${balanceObjects.find(object => object.id === id)!.image}" alt="" draggable="false"></span>`;
+  const objectArt = balanceObjectArt;
   // Every mystery box uses the same wrapping; only the letter tag tells them apart.
   const mysteryArt = (id: string) => `<span class="instrument-object mystery-box" aria-hidden="true"><span class="mystery-wrap"><b>${id}</b></span></span>`;
   const itemArt = (id: string) => level === 1 ? objectArt(id) : mysteryArt(id);
   // Full-width bench: title, progress chips and the record button share one top row; results and questions open as a popup.
-  root.innerHTML = `<section class="experiment-screen instrument-screen balance-screen">
-    <div class="experiment-heading balance-topbar"><div><p class="eyebrow">02 · 균형 다리</p><h1>어느 물체가 더 무거울까?</h1></div>
-      <div class="balance-goal" role="status" aria-live="polite"><span id="balance-tilt-goal">○ 기울기 발견</span><span id="balance-level-goal">○ 수평 발견</span><span id="balance-mystery-goal">○ 수수께끼 상자 0/${mysteryRoundCount}</span><span id="balance-uses" hidden></span></div>
-      <div class="balance-top-tools"><button class="button button-secondary stage-auto-go" id="balance-auto-go" aria-pressed="false" hidden>▶ 자동으로 보기</button><button class="button button-primary" id="balance-request-open" hidden>${requestOpenLabel} →</button><button class="balance-record-button" id="balance-record" aria-haspopup="dialog"><span id="balance-record-label">기록 보기</span><b id="balance-count">0</b></button></div>
-    </div>
-    <div class="instrument-stage game-panel balance-field">
-      <div class="instrument-phase" id="balance-phase" role="status"></div>
-      <div class="balance-apparatus"><div class="balance-board" id="balance-board">
-        <button class="balance-pan left" data-pan="left" aria-label="왼쪽 자리"><span class="balance-side">왼쪽</span><div class="pan-object" id="left-object"></div><strong class="balance-pan-name" id="left-name">물체 놓기</strong></button>
-        <div class="balance-beam"></div>
-        <button class="balance-pan right" data-pan="right" aria-label="오른쪽 자리"><span class="balance-side">오른쪽</span><div class="pan-object" id="right-object"></div><strong class="balance-pan-name" id="right-name">물체 놓기</strong></button>
-      </div><div class="balance-pivot"></div><div class="balance-stand"></div></div>
-      <div class="balance-lock" id="balance-lock"><span class="balance-lock-socket" aria-hidden="true"></span><button id="balance-test" class="balance-pin" aria-label="고리에 달린 잠금핀을 오른쪽으로 뽑아 기울기 확인"><img src="/assets/game/balance-lock-pin.webp" alt=""></button><span class="balance-lock-callout" id="balance-lock-callout">고리를 잡고 뽑기 →</span></div>
-      <div class="balance-result" id="balance-result"></div>
-      <div class="instrument-companion" id="balance-companion" aria-hidden="true"></div>
-    </div>
-    <div class="instrument-dock balance-dock">
-      <div class="instrument-tools" data-level="1"><span class="dock-label">① 물체 두 개를 놓아요</span><div class="object-options">${balanceObjects.map(object => `<button class="object-card" data-object="${object.id}" aria-label="${object.label} 선택 또는 자리로 끌기">${objectArt(object.id)}<strong>${object.label}</strong></button>`).join('')}</div></div>
-      <div class="instrument-tools" data-level="2"><span class="dock-label">① 상자 두 개를 놓아요 <small>겉모습은 모두 같아요</small></span><div class="object-options mystery-options" id="mystery-options"></div></div>
-    </div>
-    <div class="experiment-footer"><span class="feedback" id="balance-feedback" role="status"></span><button class="button button-primary" id="balance-finish" disabled>발견 저장 →</button></div>
-  </section>`;
+  root.innerHTML = balanceScreenMarkup();
   const board = root.querySelector<HTMLElement>('#balance-board')!;
   const result = root.querySelector<HTMLElement>('#balance-result')!;
   const pin = root.querySelector<HTMLButtonElement>('#balance-test')!;
