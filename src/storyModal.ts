@@ -2,6 +2,7 @@
 // 앱 상태(소리 켬·크기, 배경 음악)는 configureStoryModal로 main.ts가 넘겨준다.
 import { duckMusic, type MusicName } from './sound';
 import { icons } from './icons';
+import { stepTabRing } from './focusTrap';
 
 export type StoryModalHost = {
   app: HTMLElement;
@@ -202,11 +203,7 @@ export function openStoryModal(options: StoryOptions) {
   modal.addEventListener('keydown', event => {
     if (event.key !== 'Tab') return;
     if (modal.querySelector('.story-video-card')) {
-      const items = Array.from(modal.querySelectorAll<HTMLElement>('button:not([hidden]), video[controls]'));
-      if (!items.length) return;
-      const at = items.indexOf(document.activeElement as HTMLElement);
-      event.preventDefault();
-      items[(at + (event.shiftKey ? items.length - 1 : 1)) % items.length].focus();
+      stepTabRing(event, Array.from(modal.querySelectorAll<HTMLElement>('button:not([hidden]), video[controls]')), false);
       return;
     }
     event.preventDefault(); modal.querySelector<HTMLButtonElement>('[data-story="next"]')?.focus();

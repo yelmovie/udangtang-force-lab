@@ -5,6 +5,7 @@ import { inquiryPlans, planLabel } from './inquiryPlan';
 import { fingerIcon } from './interactionHints';
 
 import { escapeHtml as escape } from './escapeHtml';
+import { wrapTabAtEnds } from './focusTrap';
 
 /** The balance-stage parts (base, beam, pans) rebuilt small: a record tilts, a question waits level with a "?". */
 const balancePair = (pair: [string, string], tilt?: 'left' | 'right' | 'level') => {
@@ -123,10 +124,7 @@ export function openLearningReview(options: {
   modal.addEventListener('keydown', event => {
     if (event.key === 'Escape') { event.preventDefault(); abort(); }
     if (event.key !== 'Tab') return;
-    const buttons = [...modal.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')];
-    const first = buttons[0], last = buttons.at(-1);
-    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    wrapTabAtEnds(event, [...modal.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')]);
   });
   document.body.append(modal);
   draw();

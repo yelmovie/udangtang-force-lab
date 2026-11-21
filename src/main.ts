@@ -43,6 +43,7 @@ import { bindRewardSound, rewardSlotsHtml } from './rewardCards';
 import { configureStoryModal, endingVideo, introVideo, openStoryModal, prologueLines } from './storyModal';
 import { openSettings as openSettingsPanel, type SettingsHost } from './settingsPanel';
 import { openMissionCard as openMissionCardPanel } from './missionCard';
+import { shownItems, wrapTabAtEnds } from './focusTrap';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 let save: SaveData = readSave() ?? freshSave();
@@ -217,9 +218,7 @@ function finishWorkshopWithEvidence(stageId: StageId, summary: string) {
   });
   modal.addEventListener('keydown', event => {
     if (event.key !== 'Tab') return;
-    const items = [...modal.querySelectorAll<HTMLElement>('button,summary')].filter(el => el.getClientRects().length);
-    if (event.shiftKey && document.activeElement === items[0]) { event.preventDefault(); items.at(-1)?.focus(); }
-    else if (!event.shiftKey && document.activeElement === items.at(-1)) { event.preventDefault(); items[0]?.focus(); }
+    wrapTabAtEnds(event, shownItems(modal, 'button,summary'));
   });
   next.addEventListener('click', close, { once: true });
   (next.disabled && reviewButton ? reviewButton : next).focus();
@@ -347,9 +346,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
   modal.addEventListener('keydown', event => {
     if (event.key === 'Escape' && next.disabled) { event.preventDefault(); close(); return; }
     if (event.key !== 'Tab') return;
-    const items = [...modal.querySelectorAll<HTMLElement>('button:not(:disabled),summary')].filter(el => el.getClientRects().length);
-    if (event.shiftKey && document.activeElement === items[0]) { event.preventDefault(); items.at(-1)?.focus(); }
-    else if (!event.shiftKey && document.activeElement === items.at(-1)) { event.preventDefault(); items[0]?.focus(); }
+    wrapTabAtEnds(event, shownItems(modal, 'button:not(:disabled),summary'));
   });
   next.addEventListener('click', () => {
     close(); navigate('map');

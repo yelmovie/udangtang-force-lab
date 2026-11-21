@@ -11,6 +11,7 @@ import { bagIcon, openToolBag } from './toolBag';
 import { icons } from './icons';
 import { introVideo, openStoryModal, prologueLines } from './storyModal';
 import { stopAllVoices } from './npcDialogueVoice';
+import { shownItems, wrapTabAtEnds } from './focusTrap';
 
 export type SettingsHost = {
   app: HTMLElement;
@@ -166,13 +167,7 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
   });
   overlay.addEventListener('keydown', event => {
     if (event.key === 'Escape') { event.preventDefault(); close(); }
-    if (event.key === 'Tab') {
-      const focusable = [...overlay.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href], summary, [tabindex="0"]')].filter(el => el.getClientRects().length);
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-    }
+    if (event.key === 'Tab') wrapTabAtEnds(event, shownItems(overlay, 'button:not(:disabled), input:not(:disabled), a[href], summary, [tabindex="0"]'));
   });
   document.body.append(overlay);
   show('menu');

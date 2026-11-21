@@ -3,6 +3,7 @@ import { stages, type StageId } from './data';
 import type { SaveData } from './state';
 import { inquiryPlans } from './inquiryPlan';
 import { playVoiceLine, stopVoiceLine } from './npcDialogueVoice';
+import { wrapTabAtEnds } from './focusTrap';
 
 export type MissionCardHost = {
   app: HTMLElement;
@@ -63,10 +64,7 @@ export function openMissionCard(stageId: StageId, host: MissionCardHost) {
   }, { once: true });
   modal.addEventListener('keydown', event => {
     if (event.key !== 'Tab') return;
-    const buttons = [...modal.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')];
-    const first = buttons[0], last = buttons.at(-1);
-    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    wrapTabAtEnds(event, [...modal.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')]);
   });
   document.body.append(modal); modal.querySelector<HTMLButtonElement>('[data-plan]')?.focus();
   playVoiceLine(`npc-dialogue/${stageId}-mission`);

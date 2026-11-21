@@ -3,6 +3,7 @@ import { escapeHtml } from './escapeHtml';
 import { stages, type StageId } from './data';
 import type { SaveData } from './state';
 import { toolCards, type ToolCard } from './toolCards';
+import { shownItems, wrapTabAtEnds } from './focusTrap';
 
 /** Generated card art: public/assets/game/toolcard-{stage}.webp (256x256, transparent). */
 export function toolCardIcon(stage: StageId): string {
@@ -88,10 +89,7 @@ export function openToolBag(options: BagOptions): () => void {
       return;
     }
     if (event.key !== 'Tab') return;
-    const items = [...overlay.querySelectorAll<HTMLElement>('button:not(:disabled)')].filter(el => el.getClientRects().length);
-    const first = items[0], last = items.at(-1);
-    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    wrapTabAtEnds(event, shownItems(overlay, 'button:not(:disabled)'));
   });
   document.body.append(overlay);
   if (options.open && cards.some(card => card.stage === options.open && card.earned)) showDetail(options.open);

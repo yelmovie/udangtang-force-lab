@@ -6,6 +6,7 @@ import './conceptClip.css';
 import './concept-focus.css';
 import {bindConceptFocus} from './concept-focus.js';
 import {playVoiceLine, stopVoiceLine, voiceLinePlaying} from './npcDialogueVoice';
+import { stepTabRing } from './focusTrap';
 
 export type ConceptStage = 'cargo' | 'balance' | 'scale' | 'workshop' | 'rescue';
 type Clip = { title: string; cues: { at: number; text: string }[] };
@@ -207,12 +208,7 @@ export function openConceptClip(stage: ConceptStage): void {
   const onKey = (event: KeyboardEvent) => {
     if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); return; }
     if (event.key !== 'Tab') return;
-    const items = Array.from(layer.querySelectorAll<HTMLButtonElement>('button:not([hidden])'));
-    if (!items.length) return;
-    event.preventDefault();
-    const at = items.indexOf(document.activeElement as HTMLButtonElement);
-    const step = event.shiftKey ? items.length - 1 : 1;
-    items[at < 0 ? 0 : (at + step) % items.length].focus();
+    stepTabRing(event, Array.from(layer.querySelectorAll<HTMLButtonElement>('button:not([hidden])')), true);
   };
   document.addEventListener('keydown', onKey, true);
   playButton.addEventListener('click', play);

@@ -1,3 +1,4 @@
+import { shownItems, wrapTabAtEnds } from './focusTrap';
 export type LifeTool = 'lever' | 'ramp';
 /**
  * Sorting record for "생활 속 도구를 찾아요". `object` / `use` are readable lists rebuilt from `sorted`
@@ -305,9 +306,7 @@ export function openLifeObservation(options: {
       return;
     }
     if (e.key !== 'Tab') return;
-    const controls = [...modal.querySelectorAll<HTMLElement>('button:not(:disabled)')].filter(el => el.getClientRects().length);
-    if (e.shiftKey && document.activeElement === controls[0]) { e.preventDefault(); controls.at(-1)?.focus(); }
-    else if (!e.shiftKey && document.activeElement === controls.at(-1)) { e.preventDefault(); controls[0]?.focus(); }
+    wrapTabAtEnds(e, shownItems(modal, 'button:not(:disabled)'));
   });
 
   render();
