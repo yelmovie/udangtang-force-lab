@@ -25,7 +25,8 @@ const backgrounds = [
 ];
 await mkdir(resolve(root, 'public/assets/ui'), { recursive: true });
 await sharp(resolve(root, 'references/images/ChatGPT Image 2026년 9월 22일 오후 02_09_24 (2).png'))
-  .resize({ width: 1000 }).webp({ quality: 86 }).toFile(resolve(root, 'public/assets/ui/title.webp'));
+  // 2026-11-21: 원본 너비(2048) 그대로. 시작 화면 최대 1150px·화면 배율 2에서도 확대되지 않게.
+  .webp({ quality: 86 }).toFile(resolve(root, 'public/assets/ui/title.webp'));
 await mkdir(resolve(root, 'public/assets/props'), { recursive: true });
 const propSheet = resolve(root, 'references/images/ChatGPT Image 2026년 9월 22일 오후 02_07_38 (1).png');
 for (const [name, region] of [

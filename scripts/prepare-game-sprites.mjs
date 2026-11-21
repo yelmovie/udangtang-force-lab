@@ -7,6 +7,7 @@ import { resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '..');
 const destination = resolve(root, 'public/assets/game');
 await mkdir(destination, { recursive: true });
+// 2026-11-21: 학생·콩이 자세 8장은 줄이지 않고 원본에서 자른 크기 그대로 둔다(시작 화면에서 1.3~2배 확대돼 흐렸음).
 const crops = [
   ['scale', '02_08_02 (1)', 0, 65, 388, 287, 520],
   ['tray', '02_08_02 (1)', 776, 142, 338, 201, 440],
@@ -21,14 +22,14 @@ const crops = [
   ['balance-beam', '02_08_22 (1)', 445, 128, 163, 51, 320],
   ['crate-empty', '02_08_41 (1)', 24, 117, 457, 373, 480],
   ['cargo-metal', '02_08_41 (1)', 1100, 529, 337, 215, 180],
-  ['student-idle', '02_08_03 (3)', 47, 0, 294, 435, 220],
-  ['student-effort', '02_08_03 (3)', 392, 8, 331, 425, 220],
-  ['student-observe', '02_08_03 (3)', 726, 42, 364, 387, 220],
-  ['student-success', '02_08_03 (3)', 1110, 0, 329, 437, 220],
-  ['corgi-idle', '02_08_03 (3)', 41, 440, 306, 307, 190],
-  ['corgi-effort', '02_08_03 (3)', 388, 428, 341, 319, 190],
-  ['corgi-observe', '02_08_03 (3)', 1121, 438, 325, 310, 190],
-  ['corgi-success', '02_08_03 (3)', 760, 430, 337, 326, 190],
+  ['student-idle', '02_08_03 (3)', 47, 0, 294, 435, 294],
+  ['student-effort', '02_08_03 (3)', 392, 8, 331, 425, 331],
+  ['student-observe', '02_08_03 (3)', 726, 42, 364, 387, 364],
+  ['student-success', '02_08_03 (3)', 1110, 0, 329, 437, 329],
+  ['corgi-idle', '02_08_03 (3)', 41, 440, 306, 307, 306],
+  ['corgi-effort', '02_08_03 (3)', 388, 428, 341, 319, 341],
+  ['corgi-observe', '02_08_03 (3)', 1121, 438, 325, 310, 325],
+  ['corgi-success', '02_08_03 (3)', 760, 430, 337, 326, 337],
 ];
 const manifest = [];
 for (const [name, source, left, top, width, height, targetWidth] of crops) {

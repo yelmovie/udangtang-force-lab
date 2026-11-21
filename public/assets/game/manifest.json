@@ -177,9 +177,9 @@
       "width": 294,
       "height": 435
     },
-    "width": 220,
-    "height": 326,
-    "bytes": 25026
+    "width": 294,
+    "height": 435,
+    "bytes": 37242
   },
   {
     "name": "student-effort",
@@ -190,9 +190,9 @@
       "width": 331,
       "height": 425
     },
-    "width": 220,
-    "height": 282,
-    "bytes": 22834
+    "width": 331,
+    "height": 425,
+    "bytes": 40878
   },
   {
     "name": "student-observe",
@@ -203,9 +203,9 @@
       "width": 364,
       "height": 387
     },
-    "width": 220,
-    "height": 234,
-    "bytes": 18666
+    "width": 364,
+    "height": 387,
+    "bytes": 37736
   },
   {
     "name": "student-success",
@@ -216,9 +216,9 @@
       "width": 329,
       "height": 437
     },
-    "width": 220,
-    "height": 292,
-    "bytes": 22928
+    "width": 329,
+    "height": 437,
+    "bytes": 40048
   },
   {
     "name": "corgi-idle",
@@ -229,9 +229,9 @@
       "width": 306,
       "height": 307
     },
-    "width": 190,
-    "height": 191,
-    "bytes": 14298
+    "width": 306,
+    "height": 307,
+    "bytes": 27530
   },
   {
     "name": "corgi-effort",
@@ -242,9 +242,9 @@
       "width": 341,
       "height": 319
     },
-    "width": 190,
-    "height": 178,
-    "bytes": 14702
+    "width": 341,
+    "height": 319,
+    "bytes": 32354
   },
   {
     "name": "corgi-observe",
@@ -255,9 +255,9 @@
       "width": 325,
       "height": 310
     },
-    "width": 190,
-    "height": 181,
-    "bytes": 16522
+    "width": 325,
+    "height": 310,
+    "bytes": 34108
   },
   {
     "name": "corgi-success",
@@ -268,8 +268,8 @@
       "width": 337,
       "height": 326
     },
-    "width": 190,
-    "height": 184,
-    "bytes": 14420
+    "width": 337,
+    "height": 326,
+    "bytes": 32382
   }
 ]
