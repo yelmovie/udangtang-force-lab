@@ -7,9 +7,9 @@ const destination = resolve(root, 'public', 'assets', 'characters');
 await mkdir(destination, { recursive: true });
 
 const selected = [
-  ['ChatGPT Image 2026년 9월 22일 오후 03_26_49 (3).png', 'student_poses.webp'],
-  ['ChatGPT Image 2026년 9월 22일 오후 03_26_48 (1).png', 'corgi_poses.webp'],
-  ['ChatGPT Image 2026년 9월 22일 오후 03_26_48 (2).png', 'squirrel_poses.webp'],
+  ['ChatGPT Image 2026년 9월 22일 오후 03_26_49 (3).png', 'student-poses.webp'],
+  ['ChatGPT Image 2026년 9월 22일 오후 03_26_48 (1).png', 'corgi-poses.webp'],
+  ['ChatGPT Image 2026년 9월 22일 오후 03_26_48 (2).png', 'squirrel-poses.webp'],
 ];
 
 for (const [source, target] of selected) {

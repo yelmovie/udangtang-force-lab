@@ -80,8 +80,8 @@ button:active:not(:disabled) { transform: translateY(2px); }
 @media (max-width:760px) { .ending-title { left:12%; width:76%; top:5%; } .ending-title .button { margin-top:12px; } }
 .ending-rays { position:absolute; z-index:2; inset:15% 32%; border-radius:50%; background:radial-gradient(ellipse,#ffffc6ab,transparent 64%); opacity:0; pointer-events:none; }
 .lit .ending-rays { animation:core-light 4s ease-out forwards; }
-.ending-student { background:url('/assets/characters/student_poses.webp') 0 0 / 400% 200%; width:190px; aspect-ratio:362 / 543; left:3%; bottom:-10px; z-index:3; }
-.ending-corgi { background:url('/assets/characters/corgi_poses.webp') 0 0 / 400% 200%; width:180px; aspect-ratio:362 / 543; right:3%; bottom:-20px; z-index:3; }
+.ending-student { background:url('/assets/characters/student-poses.webp') 0 0 / 400% 200%; width:190px; aspect-ratio:362 / 543; left:3%; bottom:-10px; z-index:3; }
+.ending-corgi { background:url('/assets/characters/corgi-poses.webp') 0 0 / 400% 200%; width:180px; aspect-ratio:362 / 543; right:3%; bottom:-20px; z-index:3; }
 .transfer-card { background:#dff0e1; border:2px solid #accfb7; border-radius:22px; padding:20px 26px; }
 .transfer-card h2 { margin:0 0 10px; font-size:22px; }
 .transfer-card p { margin:0; font-size:18px; line-height:1.7; }

@@ -66,7 +66,7 @@ if (has('explorer-pull')) await strip('explorer-pull', await frames(path.join(so
 // The corgi original keeps a faint haze around the fur; a higher alpha cut removes it.
 if (has('corgi-walk')) await strip('corgi-walk', await frames(path.join(source, 'corgi-walk.png'), 6, 1, null, 150), 200);
 // Standing, jumping and cheering come from the project's own pose sheet (4 x 2), at one shared scale.
-const poses = 'public/assets/characters/student_poses.webp';
+const poses = 'public/assets/characters/student-poses.webp';
 const [idle, cheer, jump] = await frames(poses, 4, 2, [[0, 0], [1, 1], [3, 1]]);
 const poseScale = await strip('explorer-idle', [idle], 222);
 await strip('explorer-cheer', [cheer], 0, poseScale);
