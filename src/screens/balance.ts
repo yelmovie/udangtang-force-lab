@@ -449,7 +449,13 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     if(hit && root.contains(hit)) return hit;
     return [...root.querySelectorAll<HTMLButtonElement>('[data-pan]')].find(pan=>{const b=pan.getBoundingClientRect();return x>=b.left-20&&x<=b.right+20&&y>=b.top-20&&y<=b.bottom+20;});
   }
-  function endDrag() { if (!drag) return; const current=drag; drag=null; current.ghost?.remove(); root.querySelectorAll('.is-drop-target').forEach(pan=>pan.classList.remove('is-drop-target')); if(current.source.hasPointerCapture(current.pointer)) current.source.releasePointerCapture(current.pointer); pin.style.setProperty('--pin-x','0px'); }
+  function endDrag() { if (!drag) return;
+    const current=drag;
+    drag=null;
+    current.ghost?.remove();
+    root.querySelectorAll('.is-drop-target').forEach(pan=>pan.classList.remove('is-drop-target'));
+    if(current.source.hasPointerCapture(current.pointer)) current.source.releasePointerCapture(current.pointer);
+    pin.style.setProperty('--pin-x','0px'); }
   root.addEventListener('dragstart',event=>event.preventDefault(),{signal:events.signal});
   root.addEventListener('pointerdown',event=>{
     if(frozen() || event.button!==0 || drag) return;

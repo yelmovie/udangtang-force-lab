@@ -120,7 +120,18 @@ export function openStoryModal(options: StoryOptions) {
     };
     const sync = () => showCue(storyCueIndex(video.cues, el.currentTime));
     const endFrame = modal.querySelector<HTMLImageElement>('.story-end-frame')!;
-    const finishUi = () => { filmOver = true; syncFilmMusic(); el.controls = false; endFrame.hidden = false; showCue(options.lines.length - 1); skipBtn.hidden = true; pauseBtn.hidden = true; doneBtn.hidden = false; playBtn.hidden = true; card.classList.add('is-finished'); celebrate(); doneBtn.focus(); };
+    const finishUi = () => { filmOver = true;
+      syncFilmMusic();
+      el.controls = false;
+      endFrame.hidden = false;
+      showCue(options.lines.length - 1);
+      skipBtn.hidden = true;
+      pauseBtn.hidden = true;
+      doneBtn.hidden = false;
+      playBtn.hidden = true;
+      card.classList.add('is-finished');
+      celebrate();
+      doneBtn.focus(); };
     const tryPlay = () => {
       const result = el.play();
       if (result && typeof result.then === 'function') result.then(() => { playBtn.hidden = true; }).catch(() => { if (!closed) { playBtn.hidden = false; playBtn.focus(); } });

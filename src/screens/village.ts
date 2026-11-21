@@ -168,7 +168,13 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: Vi
     if(guided&&distance(actor,guided.entry)<=Math.min(16,guided.entry.radius)&&v.enterBuilding(guided))return;
     if(arrived)v.guided=undefined;
     let dogMoved=false;
-    if(trail.length>5){const target=trail[0],d=distance(dog,target);if(d<4)trail.shift();else{const amount=Math.min(d,(walkingSpeed+40)*dt),next={x:dog.x+(target.x-dog.x)/d*amount,y:dog.y+(target.y-dog.y)/d*amount};if(v.navigation!.stand(next)){dog.direction=Math.abs(target.x-dog.x)>Math.abs(target.y-dog.y)?target.x<dog.x?'left':'right':target.y<dog.y?'up':'down';dog.x=next.x;dog.y=next.y;dogMoved=true;}else trail.shift();}}
+    if(trail.length>5){const target=trail[0],d=distance(dog,target);
+      if(d<4)trail.shift();
+      else{const amount=Math.min(d,(walkingSpeed+40)*dt),next={x:dog.x+(target.x-dog.x)/d*amount,y:dog.y+(target.y-dog.y)/d*amount};
+        if(v.navigation!.stand(next)){dog.direction=Math.abs(target.x-dog.x)>Math.abs(target.y-dog.y)?target.x<dog.x?'left':'right':target.y<dog.y?'up':'down';
+          dog.x=next.x;
+          dog.y=next.y;
+          dogMoved=true;}else trail.shift();}}
     v.dogTime=dogMoved?v.dogTime+dt:0;v.revealTime+=dt;
     if (v.encounters.length) fight.updateEnemyPatrol(now,dt);
     v.updateEncounters(now);
@@ -189,7 +195,22 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: Vi
     raf=requestAnimationFrame(tick);
   }
   async function loadWorld() {
-    const token=++generation;cancelAnimationFrame(raf);fetches.abort();fetches=new AbortController();cancelImages.forEach(cancel=>cancel());v.clearInput();v.map=null;v.path=[];v.images.clear();art.clearFacades();labels.replaceChildren();lights.replaceChildren();loading.hidden=false;retry.hidden=true;action.disabled=true;reveal.hidden=true;
+    const token=++generation;
+    cancelAnimationFrame(raf);
+    fetches.abort();
+    fetches=new AbortController();
+    cancelImages.forEach(cancel=>cancel());
+    v.clearInput();
+    v.map=null;
+    v.path=[];
+    v.images.clear();
+    art.clearFacades();
+    labels.replaceChildren();
+    lights.replaceChildren();
+    loading.hidden=false;
+    retry.hidden=true;
+    action.disabled=true;
+    reveal.hidden=true;
     loading.querySelector('strong')!.textContent='마을로 가는 길을 준비해요…';
     const progress=loading.querySelector('progress')!,detail=root.querySelector('#village-loading-detail')!;progress.hidden=false;progress.value=0;detail.textContent='마을 지도를 읽는 중이에요';
     try {
@@ -298,5 +319,22 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: Vi
   retry.addEventListener('click',()=>void loadWorld(),{signal:events.signal});
   reduced.addEventListener('change',()=>{if(reduced.matches)lights.querySelectorAll('.village-spark').forEach(spark=>spark.remove());v.draw();},{signal:events.signal});
   void loadWorld();
-  return()=>{stopVoiceLine();v.cueTimers.forEach(id=>clearTimeout(id));v.cueTimers.clear();acts.destroyDialogue();v.alive=false;generation++;cancelAnimationFrame(raf);fetches.abort();cancelImages.forEach(cancel=>cancel());v.clearInput();events.abort();observer.disconnect();if(dialog.open)dialog.close();if(board.open)board.close();portrait.removeAttribute('style');art.clearTints();v.images.clear();v.metadata.clear();};
+  return()=>{stopVoiceLine();
+    v.cueTimers.forEach(id=>clearTimeout(id));
+    v.cueTimers.clear();
+    acts.destroyDialogue();
+    v.alive=false;
+    generation++;
+    cancelAnimationFrame(raf);
+    fetches.abort();
+    cancelImages.forEach(cancel=>cancel());
+    v.clearInput();
+    events.abort();
+    observer.disconnect();
+    if(dialog.open)dialog.close();
+    if(board.open)board.close();
+    portrait.removeAttribute('style');
+    art.clearTints();
+    v.images.clear();
+    v.metadata.clear();};
 }

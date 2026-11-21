@@ -92,7 +92,12 @@ configureStoryModal({ app, tone, confetti, soundOn: () => anySound(), voiceOn: (
 function confetti(host: HTMLElement) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const burst = document.createElement('div'); burst.className = 'story-confetti'; burst.setAttribute('aria-hidden', 'true');
-  for (let n = 0; n < 28; n++) { const bit = document.createElement('i'); bit.style.setProperty('--x', `${Math.random() * 100}%`); bit.style.setProperty('--d', `${(Math.random() * 1.2).toFixed(2)}s`); bit.style.setProperty('--r', `${Math.round(Math.random() * 720 - 360)}deg`); bit.style.setProperty('--c', ['#ffd27a', '#ff8a65', '#7fd7c4', '#fff6d8', '#ffb3c7'][n % 5]); burst.append(bit); }
+  for (let n = 0; n < 28; n++) { const bit = document.createElement('i');
+    bit.style.setProperty('--x', `${Math.random() * 100}%`);
+    bit.style.setProperty('--d', `${(Math.random() * 1.2).toFixed(2)}s`);
+    bit.style.setProperty('--r', `${Math.round(Math.random() * 720 - 360)}deg`);
+    bit.style.setProperty('--c', ['#ffd27a', '#ff8a65', '#7fd7c4', '#fff6d8', '#ffb3c7'][n % 5]);
+    burst.append(bit); }
   host.append(burst);
 }
 

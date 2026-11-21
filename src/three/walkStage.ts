@@ -309,7 +309,11 @@ export async function createWalkStage(host: HTMLElement, signal: AbortSignal, st
     for (const item of [explorer.sprite, corgi.sprite, explorerShadow, corgiShadow]) item.visible = !inspecting;
     // The trolley and its cable show only while the core rides the rail.
     trolley.visible = cable.visible = !!rail && view.phase === 2;
-    if (rail) { const drop = Math.max(.05, railY - .1 - (corePosition.y + .8)); trolley.position.set(corePosition.x, railY - .1, railZ); cable.position.set(corePosition.x, railY - .1 - drop / 2, railZ + (corePosition.z - railZ) / 2); cable.scale.set(1, drop, 1); cable.visible = corePosition.z < railZ + .6; }
+    if (rail) { const drop = Math.max(.05, railY - .1 - (corePosition.y + .8));
+      trolley.position.set(corePosition.x, railY - .1, railZ);
+      cable.position.set(corePosition.x, railY - .1 - drop / 2, railZ + (corePosition.z - railZ) / 2);
+      cable.scale.set(1, drop, 1);
+      cable.visible = corePosition.z < railZ + .6; }
     coreShadow.visible = view.phase === 2 && !rail && !docking && !docked; coreShadow.position.set(corePosition.x, corePosition.y + .03, corePosition.z);
     if (model?.visible) { model.position.copy(corePosition); }
     rails.long.emissive.set(view.phase === 2 && view.route === 'long' ? '#1f6e63' : '#000000'); rails.short.emissive.set(view.phase === 2 && view.route === 'short' ? '#7a5a1e' : '#000000');

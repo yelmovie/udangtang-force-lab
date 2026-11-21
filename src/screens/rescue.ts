@@ -305,7 +305,12 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   }
   function commit() { context.commit(); update(); }
   function reset() { mounted3D = false; overview(); restProgress = 0; travel = 0; state.delivered = false; pose(0); }
-  function selectRoute(route: RescueRun['route']) { if(route==='long'&&firstShort()) { tell('먼저 A 짧은 빗면을 작은 힘으로 끝까지 밀어 봐요. 그다음 같은 힘으로 다른 길과 비교해요.'); return; } state.route = route; reset(); tell(`${routeNames[route]}을 골랐어요. ${say('코어를 길을 따라 끌어 봐요.', '코어 뒤에서 밀기 버튼을 누르고 있어요.')}`); companion.setMood('observe'); commit(); }
+  function selectRoute(route: RescueRun['route']) { if(route==='long'&&firstShort()) { tell('먼저 A 짧은 빗면을 작은 힘으로 끝까지 밀어 봐요. 그다음 같은 힘으로 다른 길과 비교해요.');
+      return; } state.route = route;
+    reset();
+    tell(`${routeNames[route]}을 골랐어요. ${say('코어를 길을 따라 끌어 봐요.', '코어 뒤에서 밀기 버튼을 누르고 있어요.')}`);
+    companion.setMood('observe');
+    commit(); }
   controls.addEventListener('click', event => {
     if (busy) return;
     const button = (event.target as Element).closest<HTMLButtonElement>('button'); if (!button) return;
@@ -501,7 +506,11 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
     if (inspecting) overview();
     keyHeld = true; busy = true; restProgress = 0; travel = 0; companion.setMood('effort'); controls.inert = true; finish.disabled = true;
     const started = performance.now(), duration = phase() === 1 ? 1000 : state.route === 'long' ? 2500 : 1400;
-    const tick = (now: number) => { if (!active || !keyHeld) return; drawTravel(phase() === 1 && gateAction === 'push' ? -.07 : (now-started)/duration); const threshold = phase() === 1 || canLift(state.route,state.force) ? .95 : stallTravel; if (travel >= threshold || travel < 0) stopKey(false); else frame = requestAnimationFrame(tick); };
+    const tick = (now: number) => { if (!active || !keyHeld) return;
+      drawTravel(phase() === 1 && gateAction === 'push' ? -.07 : (now-started)/duration);
+      const threshold = phase() === 1 || canLift(state.route,state.force) ? .95 : stallTravel;
+      if (travel >= threshold || travel < 0) stopKey(false);
+      else frame = requestAnimationFrame(tick); };
     frame = requestAnimationFrame(tick);
   }
   root.addEventListener('keydown', event => {
@@ -696,5 +705,18 @@ export function mountRescue(root: HTMLElement, context: AppContext): () => void 
   tell(state.delivered ? '코어가 도착했어요. 비교 기록을 확인하고 중앙 장치에 다시 끼워요.' : state.gate ? '같은 힘으로 두 빗면을 비교해요. 길을 고른 뒤 코어를 직접 끌어 보세요.' : state.measured ? '코어는 180 g! 벽 옆 상자를 직접 움직여 길을 열어요.' : '빠진 배터리 코어를 다시 끼울 거예요. 먼저 빈 저울을 0으로 맞추고 코어의 무게를 재요.');
   if (walking() && !state.delivered) tell(['방향판으로 저울 앞까지 걸어가요. 빈 저울을 0으로 맞추고 코어의 무게를 재요.', '문을 막은 상자 앞으로 걸어가 직접 움직여 길을 열어요.', '빗면 입구로 걸어가 길을 고르고, 코어 뒤에서 밀기 버튼을 누르고 있어요.'][phase()]);
   renderClues(); update();
-  return () => { active = false; closeWeightDialog(); cancelAnimationFrame(frame); cancelAnimationFrame(buttonFrame); cancelAnimationFrame(slideFrame); clearTimeout(stageTimer); clearTimeout(stopTimer); events.abort(); scene?.dispose(); walk?.dispose(); clearTimeout(walkTimer); clearInterval(walkPause); companion.dispose(); hint.dispose(); };
+  return () => { active = false;
+    closeWeightDialog();
+    cancelAnimationFrame(frame);
+    cancelAnimationFrame(buttonFrame);
+    cancelAnimationFrame(slideFrame);
+    clearTimeout(stageTimer);
+    clearTimeout(stopTimer);
+    events.abort();
+    scene?.dispose();
+    walk?.dispose();
+    clearTimeout(walkTimer);
+    clearInterval(walkPause);
+    companion.dispose();
+    hint.dispose(); };
 }

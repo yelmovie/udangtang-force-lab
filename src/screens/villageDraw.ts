@@ -161,7 +161,9 @@ export function createVillageRenderer(v: VillageScene) {
     if(destination){ctx.strokeStyle='#fff5b1';ctx.lineWidth=4;ctx.setLineDash([5,5]);ctx.beginPath();ctx.ellipse(destination.x,destination.y,15,8,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);}
     for(const building of map.buildings){if(story.next===building.id){ctx.fillStyle='#ffe68799';ctx.beginPath();ctx.ellipse(building.entry.x,building.entry.y+8,26,11,0,0,Math.PI*2);ctx.fill();}}
     const layers:{y:number;draw:()=>void}[]=map.buildings.map(building=>({y:building.y+(v.metadata.get(building.asset)?.pivot?.y??images.get(building.asset)!.naturalHeight)/images.get(building.asset)!.naturalHeight*building.height,draw:()=>drawFacade(building)}));
-    for(const id of story.changes){const p=rewardPoint(id),building=map.buildings.find(b=>b.id===id);const depth=id==='balance'?p.y:Math.max(p.y,(building?.y??0)+(building?.height??0)+1);layers.push({y:depth,draw:()=>drawRewards(id,id===v.revealStage&&!reduced.matches?Math.min(1,v.revealTime/1.1):1)});}
+    for(const id of story.changes){const p=rewardPoint(id),building=map.buildings.find(b=>b.id===id);
+      const depth=id==='balance'?p.y:Math.max(p.y,(building?.y??0)+(building?.height??0)+1);
+      layers.push({y:depth,draw:()=>drawRewards(id,id===v.revealStage&&!reduced.matches?Math.min(1,v.revealTime/1.1):1)});}
     for(const npc of map.npcs)if(!dialog.open||portrait.dataset.portrait!=='guide')layers.push({y:npc.y,draw:()=>{ctx.save();ctx.translate(npc.x*2,0);ctx.scale(-1,1);sprite(npc.asset,npc,npcHeight());ctx.restore();}});
     layers.push({y:requestBoardSpot.y,draw:drawBoard});
     for(const stage of v.solved){const at=clientAt(stage);if(at&&(!dialog.open||portrait.dataset.portrait!==villageRequests[stage].pose))layers.push({y:at.y,draw:()=>drawClient(stage,at)});}
@@ -203,7 +205,15 @@ export function createVillageRenderer(v: VillageScene) {
     layers.sort((a,b)=>a.y-b.y).forEach(layer=>layer.draw());
     drawVillageLight();
     const revealStage = v.revealStage, revealTime = v.revealTime;
-    if(revealStage && revealTime<2.4 && !reduced.matches){const p=rewardPoint(revealStage);ctx.save();ctx.globalAlpha=Math.max(0,1-revealTime/2.4);ctx.strokeStyle='#fff4b4';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(p.x,p.y-22,20+revealTime*48,12+revealTime*23,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
+    if(revealStage && revealTime<2.4 && !reduced.matches){const p=rewardPoint(revealStage);
+      ctx.save();
+      ctx.globalAlpha=Math.max(0,1-revealTime/2.4);
+      ctx.strokeStyle='#fff4b4';
+      ctx.lineWidth=5;
+      ctx.beginPath();
+      ctx.ellipse(p.x,p.y-22,20+revealTime*48,12+revealTime*23,0,0,Math.PI*2);
+      ctx.stroke();
+      ctx.restore();}
   }
   return {
     draw, npcHeight, clientFilter, visibleClients,

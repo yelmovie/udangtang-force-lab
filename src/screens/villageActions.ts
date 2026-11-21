@@ -61,12 +61,30 @@ export function createVillageActions(v: VillageScene) {
     const map = v.map!, signal = v.events;
     labels.replaceChildren();
     for(const building of map.buildings){const button=document.createElement('button');button.className='village-building-label';button.dataset.stage=building.id;button.style.left=`${(building.x+building.width/2)/map.width*100}%`;button.style.top=`max(${(building.y+building.height*0.42)/map.height*100}%, var(--label-floor, 0px))`;const name=document.createElement('span');const open=options.adminUnlocked||stageIsOpen(context.save,building.id);name.textContent=villageRewards[building.id].name;button.innerHTML=`<svg class="map-lock-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="${open?'M8 11V7a4 4 0 0 1 7.5-2':'M8 11V7a4 4 0 0 1 8 0v4'}"/></svg>`;button.append(name);button.classList.toggle('is-current',story.next===building.id);button.classList.toggle('is-complete',story.changes.includes(building.id));button.classList.toggle('is-locked',!options.adminUnlocked&&!stageIsOpen(context.save,building.id));button.setAttribute('aria-label',`${villageRewards[building.id].name} 문 앞으로 걷기 · ${open?'열림':'잠김'}`);button.addEventListener('click',()=>goTo(building.entry,villageRewards[building.id].name,building),{signal});labels.append(button);}
-    for(const npc of map.npcs){const bubble=document.createElement('button');bubble.className='village-client-bubble';bubble.dataset.nearNpc=npc.name;bubble.hidden=true;bubble.style.left=`${(npc.x-30)/map.width*100}%`;bubble.style.top=`${(npc.y-82)/map.height*100}%`;bubble.innerHTML=icons.speech;bubble.setAttribute('aria-label',`${npc.name}와 이야기`);bubble.addEventListener('click',interact,{signal});labels.append(bubble);}
+    for(const npc of map.npcs){const bubble=document.createElement('button');
+      bubble.className='village-client-bubble';
+      bubble.dataset.nearNpc=npc.name;
+      bubble.hidden=true;
+      bubble.style.left=`${(npc.x-30)/map.width*100}%`;
+      bubble.style.top=`${(npc.y-82)/map.height*100}%`;
+      bubble.innerHTML=icons.speech;
+      bubble.setAttribute('aria-label',`${npc.name}와 이야기`);
+      bubble.addEventListener('click',interact,{signal});
+      labels.append(bubble);}
     const open=cards.filter(card=>card.status==='open').length;
     const boardLabel=document.createElement('button');boardLabel.className='village-board-label';boardLabel.style.left=`${requestBoardSpot.x/map.width*100}%`;boardLabel.style.top=`${(requestBoardSpot.y+6)/map.height*100}%`;
     boardLabel.textContent='의뢰 게시판';if(open){const count=document.createElement('span');count.className='village-board-count';count.textContent=String(open);boardLabel.append(count);}
     boardLabel.setAttribute('aria-label',`의뢰 게시판 열기${open?`, 도와줄 수 있는 의뢰 ${open}개`:''}`);boardLabel.addEventListener('click',openBoard,{signal});labels.append(boardLabel);
-    for(const stage of solved){const {bubble}=requesterSpots[stage],button=document.createElement('button');button.className='village-client-bubble';button.dataset.client=stage;button.style.left=`${bubble.x/map.width*100}%`;button.style.top=`${bubble.y/map.height*100}%`;button.innerHTML=icons.speech;button.setAttribute('aria-label',`${villageRequests[stage].client}의 인사 듣기`);button.classList.toggle('is-waiting',!v.arrivalShown&&arriving.includes(stage));button.addEventListener('click',()=>openClient(stage),{signal});labels.append(button);}
+    for(const stage of solved){const {bubble}=requesterSpots[stage],button=document.createElement('button');
+      button.className='village-client-bubble';
+      button.dataset.client=stage;
+      button.style.left=`${bubble.x/map.width*100}%`;
+      button.style.top=`${bubble.y/map.height*100}%`;
+      button.innerHTML=icons.speech;
+      button.setAttribute('aria-label',`${villageRequests[stage].client}의 인사 듣기`);
+      button.classList.toggle('is-waiting',!v.arrivalShown&&arriving.includes(stage));
+      button.addEventListener('click',()=>openClient(stage),{signal});
+      labels.append(button);}
   }
   function openBoard() {
     if(!v.map||v.paused()||!boardAvailable)return;
