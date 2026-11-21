@@ -194,10 +194,10 @@ export function workshopL2HintLevel(misses: number): 0 | 1 | 2 | 3 {
 /** Where to look → what to change → narrow the range. Never names the exact answer setting. */
 export function workshopL2Hint(level: number, tool: WorkshopL2Tool, setting?: number): string {
   if (tool === 'direct') return '콩이 혼자서는 들 수 없어요. 지레나 빗면을 골라 봐요.';
-  if (level <= 0) return '설계를 바꿔 다시 해 봐요.';
+  if (level <= 0) return '어떤 설계로 바꾸면 빨간 칸이 줄어들까요?';
   // The learner chooses which tool and setting to test next.
-  if (tool === 'lever' && setting === 0) return '같은 화물에서 다른 도구도 시험해 봐요. 힘 막대의 빨간 칸 수를 비교해요.';
+  if (tool === 'lever' && setting === 0) return '이 지레로 더 줄일 수 있을까요? 내 기록에서 힘이 더 작았던 도구를 찾아봐요.';
   if (level === 1) return '힘 막대의 빨간 칸을 보세요. 설계를 바꾸면 빨간 칸이 줄어드는지 살펴봐요.';
-  if (level === 2) return tool === 'lever' ? '받침대 위치를 바꿔 보세요. 어느 쪽으로 옮기면 힘이 작아졌나요?' : '빗면 길이를 바꿔 보세요. 어떤 빗면에서 힘이 작았나요?';
+  if (level === 2) return tool === 'lever' ? '받침점 위치를 바꿔 보세요. 어느 쪽으로 옮기면 힘이 작아졌나요?' : '빗면 길이를 바꿔 보세요. 어떤 빗면에서 힘이 작았나요?';
   return '앞 화물을 올렸던 설계와 지금 설계를 비교해 봐요. 어느 쪽으로 바꿀 때 빨간 칸이 줄었나요?';
 }

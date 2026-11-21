@@ -24,7 +24,7 @@ const evidenceMarkup = (task: LearningTask) => task.cards.map(card => `<article 
 export function mountMissionReview(host: HTMLElement, task: LearningTask, record: LearningRecord, onAnswer: (correct: boolean) => void) {
   const q = task.questions[0];
   host.innerHTML = `<div class="mission-review-evidence"><p class="learning-record-label">내가 관찰한 기록</p><div class="learning-evidence-grid">${evidenceMarkup(task)}</div></div>
-    <section class="question-zone" aria-labelledby="mission-review-question"><span class="question-label">발견을 써 봐요</span><h3 class="question-prompt" id="mission-review-question">${escape(q.prompt)}</h3>
+    <section class="question-zone" aria-labelledby="mission-review-question"><span class="question-label">기록을 근거로 골라요</span><h3 class="question-prompt" id="mission-review-question">${escape(q.prompt)}</h3>
     ${q.pair ? `<div class="learning-question-pair">${balancePair(q.pair)}</div>` : ''}<div class="question-choices">${q.choices.map(choice => `<button type="button" data-review-choice="${escape(choice.id)}" aria-pressed="false">${escape(choice.text)}</button>`).join('')}</div><p class="mission-review-feedback" role="status"></p></section>`;
   const choices = [...host.querySelectorAll<HTMLButtonElement>('[data-review-choice]')];
   const feedback = host.querySelector<HTMLElement>('.mission-review-feedback')!;
@@ -37,7 +37,7 @@ export function mountMissionReview(host: HTMLElement, task: LearningTask, record
       choice.classList.toggle('is-wrong', selected && !record.completed);
       choice.disabled = record.completed;
     }
-    feedback.textContent = !answer ? '' : record.completed ? `✓ ${q.explanation}` : [q.why?.[answer.chosen], q.hint].filter(Boolean).join(' ');
+    feedback.textContent = !answer ? '' : record.completed ? `✓ ${q.explanation} 어느 기록을 보고 골랐는지 짝에게 말해 봐요.` : [q.why?.[answer.chosen], q.hint].filter(Boolean).join(' ');
   };
   for (const choice of choices) choice.addEventListener('click', () => {
     const chosen = choice.dataset.reviewChoice!;
@@ -89,7 +89,7 @@ export function openLearningReview(options: {
       <div class="learning-quiz"><section class="question-zone" aria-labelledby="learning-question"><span class="question-label">생각해 볼 문제 ${step + 1}</span><h3 id="learning-question" class="learning-question question-prompt">${escape(q.prompt)}</h3>
       ${q.pair ? `<div class="learning-question-pair">${balancePair(q.pair)}</div>` : ''}
       <p class="answer-label">${fingerIcon} 아래에서 답을 하나 골라요</p><div class="learning-options">${q.choices.map((choice,index) => `<button data-learning-choice="${choice.id}" class="learning-option ${answer?.chosen === choice.id ? 'is-selected' : ''}" aria-pressed="${answer?.chosen === choice.id}" ${correct || performance.now() < lockUntil ? 'disabled' : ''}><span class="answer-number" aria-hidden="true">${index+1}</span><span>${escape(choice.text)}</span></button>`).join('')}</div></section>
-      <p class="learning-feedback ${correct ? 'is-correct' : ''}" role="status"><strong class="feedback-label">${correct ? '✓ 선택 결과 · 내 발견' : answer ? '다시 살펴볼 단서' : '답을 고를 때 살펴봐요'}</strong>${escape(feedback || (correct ? q.explanation : '내 기록을 보고 골라봐요. 처음 생각이 달라도 괜찮아요.'))}</p>
+      <p class="learning-feedback ${correct ? 'is-correct' : ''}" role="status"><strong class="feedback-label">${correct ? '✓ 선택 결과 · 내 발견' : answer ? '다시 살펴볼 단서' : '답을 고를 때 살펴봐요'}</strong>${escape(feedback || (correct ? q.explanation : '어느 기록이 답의 근거일지 먼저 찾아봐요. 처음 생각이 달라도 괜찮아요.'))}</p>
       <div class="learning-actions"><button class="button button-secondary" data-learning="back">결과로 돌아가기</button><button class="button button-primary" data-learning="next" ${correct ? '' : 'disabled'}>${step === task.questions.length - 1 ? '문제 다 풀었어요 →' : '다음 발견 →'}</button></div></div></div>
     </section>`;
     // Keep the evidence picture in view: focus the control without scrolling the card down.
@@ -110,7 +110,7 @@ export function openLearningReview(options: {
       options.commit();
       if (choice === q.correct) feedback = `✓ ${q.explanation}`;
       else {
-        feedback = `${q.why?.[choice] ?? '기록을 다시 살펴봐요.'} ${q.hint} 위의 내 기록을 다시 본 뒤 골라요.`;
+        feedback = `${q.why?.[choice] ?? '이 답은 내 기록과 달라요.'} ${q.hint} 위의 내 기록을 다시 본 뒤 골라요.`;
         lockUntil = performance.now() + lockMs;
         window.setTimeout(() => { if (!closed) draw(); }, lockMs);
       }

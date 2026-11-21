@@ -71,5 +71,5 @@ export function ordersComplete(orders: readonly number[] | undefined): boolean {
 export function orderHint(result: Exclude<OrderResult, 'hit'>, misses: number): string {
   const seen = result === 'over' ? '노란 칸을 지나쳤어요.' : '노란 칸까지 못 갔어요.';
   if (misses < 2) return `${seen} 힘을 한 단계 바꿔 봐요.`;
-  return result === 'short' ? `${seen} 무거운 상자는 더 큰 힘이 필요해요.` : `${seen} 힘을 더 작게 골라 봐요.`;
+  return `${seen} 흔적을 보고, 힘을 어느 쪽으로 바꿀지 골라 봐요.`;
 }

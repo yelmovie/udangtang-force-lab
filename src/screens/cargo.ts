@@ -586,7 +586,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         const light = comparisonRun(1), heavy = comparisonRun(5);
         if (!light || !heavy) return '1개와 5개를 먼저 해 봐요.';
         if (!ready()) return '밀기와 당기기도 먼저 해 봐요.';
-        if (correct) return '맞아요! 같은 힘·시간으로 움직인 이 실험에서는 가벼운 상자가 더 멀리 갔어요.';
+        if (correct) return '맞아요! 같은 힘·시간이면 가벼운 상자가 더 멀리 갔어요. 몇 칸 차이였나요?';
         return findingTried ? '부품 5개 막대가 정말 더 길었나요? 두 막대의 끝을 견주어 봐요.' : '막대를 보고 골라 봐요.';
     }
     root.addEventListener('click', event => {

@@ -6,7 +6,7 @@ import { mountDialogueVoice, setDialoguePortrait } from './npcDialogueVoice';
 import type { SaveData } from './state';
 
 /** Label of the button that ends level 1 and opens the letter. Guide lines quote this, so they never name a button that is not there. */
-export const requestOpenLabel = '실험 마치고 의뢰 보기';
+export const requestOpenLabel = '실험 마치고 부탁 보기';
 
 /** The client's letter that arrives when a request opens on a mission screen.
  * "의뢰 받기" runs the screen's own entry function; closing keeps the screen's request bar as it was. */
@@ -22,7 +22,7 @@ export function showRequestLetter(root: HTMLElement, stage: RequestStage, accept
     <button class="npc-dialogue-close" id="request-letter-close" aria-label="의뢰 대화 닫기">×</button>
     <p class="request-letter-body" data-dialogue-text></p>
     <div class="npc-dialogue-bottom"><div class="npc-dialogue-meta"><span>${villageRewards[stage].name} 의뢰인</span><button class="npc-dialogue-replay" type="button" data-dialogue-voice hidden>다시 듣기</button></div>
-    <div class="request-letter-actions"><button class="request-letter-later" id="request-letter-later">나중에 볼게요</button><button class="npc-dialogue-next" id="request-letter-accept">의뢰 받기</button></div></div>
+    <div class="request-letter-actions"><button class="request-letter-later" id="request-letter-later">나중에 볼게요</button><button class="npc-dialogue-next" id="request-letter-accept">부탁 들어주기</button></div></div>
   </div></div>`;
   setDialoguePortrait(dialog.querySelector<HTMLElement>('.npc-dialogue-frame')!, request.pose);
   const voice = mountDialogueVoice(dialog, settings);
@@ -37,7 +37,7 @@ export function showRequestLetter(root: HTMLElement, stage: RequestStage, accept
     accept();
   });
   function showLine() {
-    text.show(request.quote, '의뢰 받기', true);
+    text.show(request.quote, '부탁 들어주기', true);
     voice.show(`npc-dialogue/${stage}-request`);
   }
   dialog.querySelector('#request-letter-later')!.addEventListener('click', () => dialog.close());

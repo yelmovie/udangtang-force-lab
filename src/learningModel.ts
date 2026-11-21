@@ -32,9 +32,9 @@ export function learningTask(save: SaveData, stage: StageId): LearningTask | nul
     for (const run of [light, heavy]) cards.push({ title: `부품 ${run.parts}개 상자`, detail: `${run.action === 'push' ? '밀기' : '당기기'} · 같은 힘을 같은 시간 동안`, bars: [{ label: `${run.distance}칸 이동`, value: run.distance, maximum: max }] });
     // "Time" here is how long the force is applied (the model fixes it), not how long the crate keeps moving.
     const pushing = light.action === 'push' ? '미는' : '당기는';
-    questions.push({ id: 'fair', prompt: '무게에 따른 움직임을 비교하려고 같게 둔 것은?', choices: choices(['force-time', '힘과 힘을 준 시간'], ['weight', '담은 부품 수'], ['distance', '움직인 거리']), correct: 'force-time', hint: '두 기록에서 같은 것과 달라진 것을 찾아봐요.', explanation: `${pushing} 힘의 크기와 힘을 준 시간은 같게 두고, 부품 수만 바꾸어 움직인 거리를 비교했어요.` });
+    questions.push({ id: 'fair', prompt: '무게에 따른 움직임을 비교하려고 같게 둔 것은?', choices: choices(['force-time', '힘과 힘을 준 시간'], ['weight', '담은 부품 수'], ['distance', '움직인 거리']), correct: 'force-time', why: { weight: '부품 수는 일부러 바꾼 것이에요.', distance: '움직인 거리는 실험을 해서 알아낸 결과예요.' }, hint: '두 기록에서 같은 것과 달라진 것을 찾아봐요.', explanation: `${pushing} 힘의 크기와 힘을 준 시간은 같게 두고, 부품 수만 바꾸어 움직인 거리를 비교했어요.` });
     questions.push({ id: 'effort', prompt: '두 상자를 같은 시간 동안 밀어 같은 거리까지 옮기려면 어느 쪽에 더 큰 힘이 필요할까?', choices: choices(['heavy', '부품 5개 상자'], ['light', '부품 1개 상자'], ['same', '항상 힘이 같아요']), correct: 'heavy', why: { same: '두 상자가 같은 힘에 움직인 거리가 달랐어요.' }, hint: '같은 힘으로 움직였을 때 어느 상자가 더 짧게 움직였는지 봐요.', explanation: '내 실험 모형에서는 무거운 상자가 같은 힘으로 더 짧게 갔어요. 같은 시간 동안 밀어 같은 거리까지 보내려면 더 큰 힘이 필요해요.' });
-    talk = '무거운 상자를 밀거나 당길 때 필요한 힘을 친구와 이야기해봐요.';
+    talk = '1개와 5개 상자가 몇 칸 갔는지 짚으며 친구에게 내 생각을 말해 봐요.';
   } else if (stage === 'balance') {
     const tilted = save.balance.runs.find(r => r.actual !== 'level');
     const level = save.balance.runs.find(r => r.actual === 'level');
@@ -43,9 +43,9 @@ export function learningTask(save: SaveData, stage: StageId): LearningTask | nul
     const afterSwap = tilted.actual === 'left' ? 'right' : 'left';
     const afterSide = afterSwap === 'left' ? '왼쪽' : '오른쪽';
     cards.push({ title: '기울어진 기록', pair: [tilted.left, tilted.right], tilt: tilted.actual, detail: `${blockName(heavy)} 쪽이 내려갔어요.` }, { title: '수평이 된 기록', pair: [level.left, level.right], tilt: 'level', detail: '두 물체의 무게가 같았어요.' });
-    questions.push({ id: 'swap', prompt: `그림 속 ${blockName(tilted.left)}과 ${blockName(tilted.right)}의 자리를 서로 바꾸면?`, pair: [tilted.left, tilted.right], choices: directionChoices, correct: afterSwap, hint: `자리를 바꾼 뒤 더 무거운 ${blockName(heavy)}이 어느 쪽으로 옮겨질지 생각해 봐요.`, explanation: `자리를 바꾸면 ${blockName(heavy)}이 ${afterSide}으로 옮겨져서 ${afterSide}이 내려가요. 물체의 무게는 그대로예요.` });
+    questions.push({ id: 'swap', prompt: `그림 속 ${blockName(tilted.left)}과 ${blockName(tilted.right)}의 자리를 서로 바꾸면?`, pair: [tilted.left, tilted.right], choices: directionChoices, correct: afterSwap, why: { [tilted.actual]: '자리를 바꿔도 같은 쪽이 내려간다고 생각했나요?', level: '수평은 두 물체의 무게가 같을 때예요. 두 블록의 무게가 같았나요?' }, hint: `자리를 바꾼 뒤 더 무거운 ${blockName(heavy)}이 어느 쪽으로 옮겨질지 생각해 봐요.`, explanation: `자리를 바꾸면 ${blockName(heavy)}이 ${afterSide}으로 옮겨져서 ${afterSide}이 내려가요. 물체의 무게는 그대로예요.` });
     questions.push({ id: 'equal', prompt: `${blockName(level.left)}과 ${blockName(level.right)}을 놓았을 때 수평이었던 까닭은?`, pair: [level.left, level.right], choices: choices(['equal', '두 물체의 무게가 같아요'], ['look', '큰 물체가 반드시 무거워요'], ['side', '왼쪽에 놓인 물체가 무거워요']), correct: 'equal', why: { look: '크기가 커도 가벼운 물체가 있어요. 크기가 아니라 수평대가 어떻게 되었는지 봐요.', side: '놓은 쪽이 왼쪽인지 오른쪽인지는 무게와 상관없어요.' }, hint: '수평이었던 기록을 다시 봐요.', explanation: '받침점에서 같은 거리의 자리에 놓아 수평이면 두 물체의 무게가 같아요.' });
-    talk = '무거운 물체의 자리를 바꾸면 내려가는 쪽도 바뀔까요?';
+    talk = '자리를 바꿨을 때 어느 쪽이 내려갔는지, 내 기록을 짚으며 이유를 말해 봐요.';
   } else if (stage === 'scale') {
     const compared = scaleComparison(save.scale.runs);
     if (compared.length === 2) {
@@ -69,9 +69,9 @@ export function learningTask(save: SaveData, stage: StageId): LearningTask | nul
     const best = sorted[0], other = sorted.at(-1)!;
     const forceMax = Math.max(best.force, other.force), distanceMax = Math.max(best.distance, other.distance);
     for (const r of [best, other]) cards.push({ title: `내 ${r.tool === 'lever' ? '지레' : '빗면'} · ${getWorkshopDesign(r.tool, r.setting).label}`, detail: '같은 화물 · 같은 도착 높이', bars: [{ label: '필요한 힘', value: r.force, maximum: forceMax }, { label: r.tool === 'lever' ? '손잡이가 움직인 길' : '화물이 움직인 길', value: r.distance, maximum: distanceMax }] });
-    questions.push({ id: 'design', prompt: '작은 힘으로 옮기려면 내 두 기록 중 어떤 설계를 고를까요?', choices: choices(['best', getWorkshopDesign(best.tool, best.setting).label], ['other', getWorkshopDesign(other.tool, other.setting).label], ['same', '두 설계의 힘이 같아요']), correct: 'best', hint: '같은 화물과 높이에서 힘 막대를 비교해봐요.', explanation: `${getWorkshopDesign(best.tool, best.setting).label}에서 더 작은 힘이 필요했어요.` });
-    questions.push({ id: 'daily-tool', prompt: '무거운 책 수레를 높은 턱 위로 올리려고 해요. 어떤 도구를 쓰면 좋을까요?', choices: choices(['ramp', '완만한 경사판(빗면)'], ['scale', '무게를 재는 저울'], ['rope', '눈금이 그려진 줄자']), correct: 'ramp', hint: '내가 시험한 두 도구 중 바퀴 달린 물체가 따라 올라갈 수 있는 길은 무엇일까요?', explanation: '경사판은 물체를 높은 곳까지 올릴 때 쓰는 빗면이에요. 일상에서 쓰이는 다른 빗면도 찾아봐요.' });
-    talk = '집이나 학교에서 지레 또는 빗면을 찾아 친구에게 어떻게 쓰는지 이야기해봐요.';
+    questions.push({ id: 'design', prompt: '작은 힘으로 옮기려면 내 두 기록 중 어떤 설계를 고를까요?', choices: choices(['best', getWorkshopDesign(best.tool, best.setting).label], ['other', getWorkshopDesign(other.tool, other.setting).label], ['same', '두 설계의 힘이 같아요']), correct: 'best', why: { other: '움직인 길 막대를 보고 골랐나요?', same: '두 힘 막대의 길이가 정말 같았나요?' }, hint: '같은 화물과 높이에서 힘 막대를 비교해봐요.', explanation: `${getWorkshopDesign(best.tool, best.setting).label}에서 더 작은 힘이 필요했어요.` });
+    questions.push({ id: 'daily-tool', prompt: '무거운 책 수레를 높은 턱 위로 올리려고 해요. 어떤 도구를 쓰면 좋을까요?', choices: choices(['ramp', '완만한 경사판(빗면)'], ['scale', '무게를 재는 저울'], ['rope', '눈금이 그려진 줄자']), correct: 'ramp', why: { scale: '저울은 무게를 재는 도구예요. 수레를 올려 주지는 않아요.', rope: '줄자는 길이를 재는 도구예요. 수레를 올려 주지는 않아요.' }, hint: '내가 시험한 두 도구 중 바퀴 달린 물체가 따라 올라갈 수 있는 길은 무엇일까요?', explanation: '경사판은 물체를 높은 곳까지 올릴 때 쓰는 빗면이에요. 일상에서 쓰이는 다른 빗면도 찾아봐요.' });
+    talk = '집이나 학교에서 지레나 빗면을 찾아, 왜 그 도구인지 친구에게 말해 봐요.';
   } else {
     const failed = save.rescue.runs.find(r => !r.success && save.rescue.runs.some(s => s.success && s.force === r.force && s.route !== r.route));
     const success = failed && save.rescue.runs.find(r => r.success && r.force === failed.force && r.route !== failed.route);
@@ -81,7 +81,7 @@ export function learningTask(save: SaveData, stage: StageId): LearningTask | nul
     if (usedPrior) for (const r of prior) cards.push({ title: `앞서 모은 내 공방 기록 · ${getWorkshopDesign('ramp', r.setting).label}`, detail: '같은 화물·높이에서 비교한 빗면', bars: [{ label: '필요한 힘', value: r.force, maximum: Math.max(...prior.map(v => v.force)) }] });
     cards.push({ title: `내 코어 운반 · 같은 ${['작은 힘', '중간 힘', '큰 힘'][failed.force - 1]}`, detail: `${failed.route === 'long' ? '긴 길' : '짧은 길'}에서 멈춤 → ${success.route === 'long' ? '긴 길' : '짧은 길'}에서 도착` });
     questions.push({ id: 'evidence', prompt: '힘이 덜 드는 길을 설명할 때 근거가 되는 기록은?', choices: choices(['comparison', usedPrior ? '내 공방·코어의 빗면 비교' : '같은 힘으로 두 길을 비교한 기록'], ['color', '코어와 건물의 색깔'], ['count', '실험 버튼을 누른 횟수']), correct: 'comparison', hint: '어떤 기록이 길을 바꾸었을 때 필요한 힘과 도착 결과를 보여주나요?', explanation: '같은 조건의 실제 비교 기록을 보고 길을 선택할 수 있어요.' });
-    questions.push({ id: 'books', prompt: '도서관 책 수레를 같은 높이로 올려요. 내 실험처럼 작은 힘으로 옮기려면?', choices: choices(['long', '길고 완만한 길을 만들어요'], ['short', '짧고 가파른 길을 만들어요'], ['height', '길이와 높이를 모두 바꿔 비교해요']), correct: 'long', hint: '내 코어가 도착한 길과 공방에서 힘을 비교한 기록을 떠올려봐요.', explanation: '같은 높이까지 가는 긴 빗면에서는 작은 힘으로 옮길 수 있어요. 대신 이동하는 길은 길어져요.' });
+    questions.push({ id: 'books', prompt: '도서관 책 수레를 같은 높이로 올려요. 내 실험처럼 작은 힘으로 옮기려면?', choices: choices(['long', '길고 완만한 길을 만들어요'], ['short', '짧고 가파른 길을 만들어요'], ['height', '길이와 높이를 모두 바꿔 비교해요']), correct: 'long', why: { short: '길이 짧으면 힘도 덜 들 것 같았나요?', height: '높이는 그대로예요. 이 문제는 같은 높이로 올리는 방법을 물어요.' }, hint: '내 코어가 도착한 길과 공방에서 힘을 비교한 기록을 떠올려봐요.', explanation: '같은 높이까지 가는 긴 빗면에서는 작은 힘으로 옮길 수 있어요. 대신 이동하는 길은 길어져요.' });
     talk = '어떤 내 실험 기록을 근거로 책 수레의 길을 골랐는지 친구에게 설명해봐요.';
   }
   const stageIndex = ['cargo', 'balance', 'scale', 'workshop', 'rescue'].indexOf(stage);

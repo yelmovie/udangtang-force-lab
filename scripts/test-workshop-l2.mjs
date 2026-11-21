@@ -89,11 +89,11 @@ test('the clue gets one step more specific every two misses', () => {
   assert.deepEqual([0, 1, 2, 3, 4, 5, 6, 9].map(model.workshopL2HintLevel), [0, 0, 1, 1, 2, 2, 3, 3]);
   const hints = [0, 1, 2, 3].map(level => model.workshopL2Hint(level, 'ramp'));
   assert.equal(new Set(hints).size, 4);
-  assert.match(model.workshopL2Hint(2, 'lever'), /받침대/);
+  assert.match(model.workshopL2Hint(2, 'lever'), /받침점/);
   assert.match(model.workshopL2Hint(3, 'lever'), /앞 화물을 올렸던 설계/);
   assert.doesNotMatch(model.workshopL2Hint(3, 'lever'), /화물 가까이|길고 완만/, 'the last clue still never names the answer setting');
   assert.match(model.workshopL2Hint(0, 'direct'), /지레나 빗면/);
-  assert.match(model.workshopL2Hint(1, 'lever', 0), /힘 막대.*비교/, 'a missed trial points to evidence for another test');
+  assert.match(model.workshopL2Hint(1, 'lever', 0), /내 기록/, 'a missed trial points to the student records (A9, 2026-11-21)');
   assert.doesNotMatch(model.workshopL2Hint(1, 'lever', 0), /길고 완만/);
   assert.match(model.workshopL2Hint(1, 'lever', 1), /빨간 칸/, 'other fulcrum positions keep the ordinary clue');
 });

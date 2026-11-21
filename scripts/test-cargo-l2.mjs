@@ -70,15 +70,16 @@ test('the medium step is the level 1 "same push", so level 1 distances do not ch
   assert.deepEqual([1, 3, 5].map(parts => cargo.cargoDistance(parts, 2)), [66, 44, 22]);
 });
 
-test('misses say over or short; the second miss on an order names which way to change', () => {
+test('misses say over or short; the second miss points to the trace without naming the answer (A9, 2026-11-21)', () => {
   const [light, , heavy] = cargo.cargoOrders;
   assert.equal(cargo.orderResult(light, cargo.cargoDistance(1, 2)), 'over');
   assert.equal(cargo.orderResult(heavy, cargo.cargoDistance(5, 2)), 'short');
   const first = cargo.orderHint('short', 1), second = cargo.orderHint('short', 2);
   assert.match(first, /한 단계/);
   assert.notEqual(first, second);
-  assert.match(second, /더 큰 힘/);
-  assert.match(cargo.orderHint('over', 2), /더 작게/);
+  assert.match(second, /흔적/);
+  assert.match(cargo.orderHint('over', 2), /흔적/);
+  for (const hint of [second, cargo.orderHint('over', 2)]) assert.doesNotMatch(hint, /더 큰 힘|더 작게/, 'the second clue does not state which way');
   for (const hint of [first, second, cargo.orderHint('over', 1)]) assert.doesNotMatch(hint, /틀렸|실패|땡/);
 });
 

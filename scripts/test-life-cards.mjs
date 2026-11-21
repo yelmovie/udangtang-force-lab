@@ -127,3 +127,13 @@ test('tool introductions cannot attach an unrelated scientific use to a picture'
   const kept = life.retainLifeObservation({...sortAll(), intro:{card:'slide',where:life.introWhere[0],help:life.introHelp[0],note:''}});
   assert.equal(kept.intro.help, '', 'old incompatible choices need a fresh choice');
 });
+
+test('a chip chosen with the earlier wording stays chosen after the A13 rewording (2026-11-21)', () => {
+  const all = sortAll();
+  const saved = JSON.parse(JSON.stringify({ ...all, intro: { card: 'seesaw', where: life.introWhere[0], help: '작은 힘으로 들어 올리게', note: '' } }));
+  const kept = life.retainLifeObservation(saved);
+  assert.equal(kept.intro.help, '받침점을 잘 두어 작은 힘으로 들게');
+  const ramp = life.retainLifeObservation(JSON.parse(JSON.stringify({ ...all, intro: { card: 'wheelchair-ramp', where: '', help: '적은 힘으로 높은 곳에 올라가게', note: '' } })));
+  assert.equal(ramp.intro.help, '길게 돌아 적은 힘으로 올라가게');
+  assert.equal(life.retainLifeObservation(JSON.parse(JSON.stringify({ ...all, intro: { card: 'seesaw', where: '', help: '아무 말', note: '' } }))).intro.help, '', 'unknown wording is still dropped');
+});

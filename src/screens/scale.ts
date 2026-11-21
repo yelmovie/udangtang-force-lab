@@ -500,7 +500,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     if(button.id==='zero-button') {
       if(loaded().length) {feedback='물체를 모두 내려놓고 0을 맞춰요.'; callout={ text: '물체를 모두 내려놓고 0을 맞춰요.', until: 'empty' }; context.sound(340); update(); return;}
       if(level===2) { if(!fakeZeroed) measured.clear(); fakeZeroed=true; } else state.zeroed=true;
-      reading=null; feedback='빈 저울이 0 g이에요! 이제 부품의 무게만 잴 수 있어요.';context.commit();context.sound(700);update();
+      reading=null; feedback='빈 저울이 0 g이에요! 이것을 영점 맞추기라고 해요.';context.commit();context.sound(700);update();
     }
     if(button.id==='scale-measure') { if(level===2) fakeOn=null; else state.parts=[]; reading=null; feedback=level===2 ? '빈 저울이에요. 다른 부품 하나를 올려요. 잰 기록은 그대로예요.' : '빈 저울이에요. 잰 기록은 그대로예요. 다른 모형 하나를 올려요.'; context.commit(); update(); }
     if(button.id==='scale-finish'&&canFinish()) {

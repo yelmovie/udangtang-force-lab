@@ -15,7 +15,9 @@ export type LifeObservation = {
 };
 export type LifeIntro = { card: string; where: string; help: string; note: string };
 export const introWhere = ['학교·놀이터', '집·부엌', '길·건물 앞', '공사장·가게'] as const;
-export const introHelp = ['작은 힘으로 들어 올리게', '적은 힘으로 높은 곳에 올라가게', '작은 힘으로 자르거나 열게', '작은 힘으로 못을 뽑게', '높은 곳에서 미끄러져 내려오게'] as const;
+/** A13 (2026-11-21): earlier chip wording, kept so a chip chosen in an older save stays chosen. */
+const renamedHelp: Record<string, string> = { '작은 힘으로 들어 올리게': '받침점을 잘 두어 작은 힘으로 들게', '적은 힘으로 높은 곳에 올라가게': '길게 돌아 적은 힘으로 올라가게' };
+export const introHelp = ['받침점을 잘 두어 작은 힘으로 들게', '길게 돌아 적은 힘으로 올라가게', '작은 힘으로 자르거나 열게', '작은 힘으로 못을 뽑게', '높은 곳에서 미끄러져 내려오게'] as const;
 /** The sentence the student can read to a partner; empty until a tool, a place and a help are chosen. */
 export function introSentence(intro: LifeIntro | undefined): string {
   const card = intro && lifeCard(intro.card);
@@ -71,7 +73,7 @@ export function retainLifeObservation(value: unknown): LifeObservation | undefin
     if (intro && typeof intro.card === 'string' && sorted.includes(intro.card)) rebuilt.intro = {
       card: intro.card,
       where: introWhere.find(item => item === intro.where) ?? '',
-      help: introHelpFor(intro.card).find(item => item === intro.help) ?? '',
+      help: introHelpFor(intro.card).find(item => item === (renamedHelp[intro.help as string] ?? intro.help)) ?? '',
       note: typeof intro.note === 'string' ? intro.note.trim().slice(0, 40) : '',
     };
     return rebuilt;

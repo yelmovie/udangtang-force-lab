@@ -544,7 +544,7 @@ function renderComplete(root: HTMLElement) {
   const save = adminSave ?? context.save;
   const completed = save.completed.length;
   root.innerHTML = `<section class="complete-screen">
-    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1><p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 장착했어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><div class="ending-actions"> ${adminUnlocked || canPlayMapFinale(save) ? '<button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button>' : `<p>지도에서 악당 5마리를 물리치면 점등식 영상이 열려요. 지금 ${defeatedMapVillains(save)} / 5</p>`}<button class="button button-primary" id="restart-ending">처음부터 다시 해보기 ↻</button></div></div></div>
+    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1><p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 끼웠어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><div class="ending-actions"> ${adminUnlocked || canPlayMapFinale(save) ? '<button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button>' : `<p>지도에서 악당 5마리를 물리치면 점등식 영상이 열려요. 지금 ${defeatedMapVillains(save)} / 5</p>`}<button class="button button-primary" id="restart-ending">처음부터 다시 해보기 ↻</button></div></div></div>
     <details class="complete-details"><summary>내 실험과 발견 살펴보기 · ${completed} / 5</summary>
     <div class="report-grid">${stages.map(stage => {
       const record = save.learning?.[stage.id];
@@ -689,7 +689,7 @@ const finishLines: Record<StageId, string> = {
   balance: '어느 쪽이 무거운지 수평대로 알아냈어요. 발견을 저장해요!',
   scale: '저울로 무게를 비교했어요. 비교 기록을 저장해요!',
   workshop: '지레와 빗면으로 힘을 줄이는 법을 찾았어요. 생활 속 도구를 찾으러 가요!',
-  rescue: '코어가 중앙 장치에 도착했어요. 다시 장착해 마을의 전기를 되찾아요!',
+  rescue: '코어가 중앙 장치에 도착했어요. 다시 끼워 마을의 전기를 되찾아요!',
 };
 
 render();

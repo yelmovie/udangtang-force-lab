@@ -91,7 +91,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   /** Red cells past the bar's 12 still count: say how many the bar could not show. */
   const missingText = (result: WorkshopL2Result) => { const outside = Math.max(0, result.budgetCells + result.overCells - budgetCellCount); return `모자란 힘 ${result.overCells}칸${outside ? ` (막대 밖 ${outside}칸 더)` : ''}`; };
   const cellsMarkup = (result: WorkshopL2Result) => cellClasses(result, true).map(name => `<i class="${name}"></i>`).join('');
-  const budgetNextStep = (used: WorkshopTool | 'direct') => used === 'lever' ? '받침대 위치를 바꿔 빨간 칸을 비교해요' : used === 'ramp' ? '빗면 길이를 바꿔 빨간 칸을 비교해요' : '지레나 빗면을 골라 봐요';
+  const budgetNextStep = (used: WorkshopTool | 'direct') => used === 'lever' ? '받침점 위치를 바꿔 빨간 칸을 비교해요' : used === 'ramp' ? '빗면 길이를 바꿔 빨간 칸을 비교해요' : '지레나 빗면을 골라 봐요';
   function renderBudget() {
     const bar = root.querySelector<HTMLElement>('#workshop-budget')!;
     bar.hidden = level !== 2;
@@ -281,7 +281,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     const leverRuns=state.trials.filter(r=>r.tool==='lever'), rampRuns=state.trials.filter(r=>r.tool==='ramp');
     setMissionProgress(root,[steps.direct,steps.lever,steps.ramp,workshopL2Complete(levelRecord())],
       !steps.direct?'먼저 직접 들어요'
-      :!steps.lever?(leverRuns.length===0?'받침대를 옮기고 지레로 들어 봐요':leverRuns.length===1?'받침대를 다른 곳으로 옮겨 한 번 더 들어 봐요':'아직 안 해 본 받침대 위치에서도 들어 봐요')
+      :!steps.lever?(leverRuns.length===0?'받침점을 옮기고 지레로 들어 봐요':leverRuns.length===1?'받침점을 다른 곳으로 옮겨 한 번 더 들어 봐요':'아직 안 해 본 받침점 위치에서도 들어 봐요')
       :!steps.ramp?(rampRuns.length===0?'빗면으로도 같은 높이까지 올려 봐요':'이번엔 길이를 바꿔 같은 높이까지 올려 봐요')
       :level === 1 && !levelRecord() ? '공방 친구의 의뢰를 받아요'
       :!workshopL2Complete(levelRecord()) ? `의뢰 화물 ${levelRecord()?.cleared.length ?? 0} / ${workshopCargos.length} · 콩이의 힘 안에서 올려요`
@@ -357,26 +357,26 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   function configure(next: WorkshopTool | 'direct') {
     resetGesture(); tool = next; toolChangedAt = performance.now(); scene?.configure(tool, currentSetting());
     scene?.setCargoWeight(level === 2 ? workshopCargos[cargoIndex()].weight : 1);
-    if (level === 2) { setFeedback(tool === 'direct' ? '콩이 혼자 들어 볼까요? 손잡이를 위로 움직여요.' : tool === 'lever' ? '받침대를 옮기고 손잡이를 아래로 눌러요. 힘 막대를 지켜봐요.' : '빗면 길이를 고르고 오른쪽으로 밀어요. 힘 막대를 지켜봐요.'); update(); return; }
+    if (level === 2) { setFeedback(tool === 'direct' ? '콩이 혼자 들어 볼까요? 손잡이를 위로 움직여요.' : tool === 'lever' ? '받침점을 옮기고 손잡이를 아래로 눌러요. 힘 막대를 지켜봐요.' : '빗면 길이를 고르고 오른쪽으로 밀어요. 힘 막대를 지켜봐요.'); update(); return; }
     setFeedback(tool === 'direct' ? '손잡이를 위로 움직여 화물을 들어 봐요.' : tool === 'lever' ? '받침대가 판자를 받치는 곳이 받침점이에요. 받침점 위치에 따라 힘이 어떻게 달라질까요?' : '빗면 길이에 따라 힘이 어떻게 달라질까요?');
     update();
   }
   /** One line telling the student the next physical action. */
   function instruction() {
-    if (level === 2) return tool === 'direct' ? '지레나 빗면을 골라요' : tool === 'lever' ? '받침대를 옮기고, 손잡이를 아래로 눌러요' : '길이를 고르고, 손잡이를 오른쪽으로 밀어요';
+    if (level === 2) return tool === 'direct' ? '지레나 빗면을 골라요' : tool === 'lever' ? '받침점을 옮기고, 손잡이를 아래로 눌러요' : '길이를 고르고, 손잡이를 오른쪽으로 밀어요';
     const steps = workshopActivitySteps(state);
     if (tool === 'direct') return state.direct ? '② 지레를 눌러 이어서 해요' : '손잡이를 위로 끝까지 끌어요';
     const tried = state.trials.some(run => run.tool === tool && run.setting === currentSetting());
     const finding = tool === 'lever' ? state.leverFinding : state.rampFinding;
     if (workshopExplorationReady(state) && !finding) return '기록 보기를 눌러 질문에 답해요';
     const allDone = workshopL2Complete(levelRecord()) ? '모두 했어요!' : '기록 보기에서 의뢰를 받아요';
-    if (tool === 'lever') return steps.lever && tried ? (steps.ramp ? allDone : '③ 빗면을 눌러 이어서 해요') : tried ? '받침대를 다른 곳으로 옮겨요' : '손잡이를 아래로 끝까지 눌러요';
+    if (tool === 'lever') return steps.lever && tried ? (steps.ramp ? allDone : '③ 빗면을 눌러 이어서 해요') : tried ? '받침점을 다른 곳으로 옮겨요' : '손잡이를 아래로 끝까지 눌러요';
     return steps.ramp && tried ? (steps.lever ? allDone : '② 지레로 돌아가 비교해요') : tried ? '아래에서 빗면 길이를 바꿔요' : '손잡이를 오른쪽 끝까지 밀어요';
   }
   function nextHint() {
     const steps = workshopActivitySteps(state);
-    if (tool === 'lever' && !hasWorkshopComparison(state.trials, 'lever')) return '받침대를 다른 곳으로 옮겨 한 번 더 들어 봐요.';
-    if (tool === 'lever' && !steps.lever) return '받침대 세 위치를 모두 시험해요. 아직 안 해 본 위치로 옮겨요.';
+    if (tool === 'lever' && !hasWorkshopComparison(state.trials, 'lever')) return '받침점을 다른 곳으로 옮겨 한 번 더 들어 봐요.';
+    if (tool === 'lever' && !steps.lever) return '받침점 세 위치를 모두 시험해요. 아직 안 해 본 위치로 옮겨요.';
     if (tool === 'ramp' && !steps.ramp) return '이번엔 길이를 바꿔 같은 높이까지 올려 봐요.';
     if (!steps.lever) return '지레도 세 위치에서 모두 비교해 봐요.';
     if (!steps.ramp) return '빗면도 두 길이로 올려 봐요.';
@@ -479,7 +479,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
   function changeFulcrum(next:LeverSetting) {
     if(next===state.fulcrumPosition) return;
     state.fulcrumPosition=next; progress=0; completedGesture=false; scene?.configure('lever',next);
-    setFeedback(`받침대: ${getWorkshopDesign('lever',next).label}`); update();
+    setFeedback(`받침점: ${getWorkshopDesign('lever',next).label}`); update();
   }
   function endDesign(cancelled:boolean) {
     if(designPointer===null) return;
@@ -522,7 +522,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
       context.sound(740); context.commit(); update();
     } else {
       // A miss pauses the choices briefly so the next pick follows a look at the bars, not a reflex.
-      const message='초록색 힘 막대가 더 짧은 설계를 찾아봐요. 막대 두 개의 끝을 견주어 보고 잠시 뒤 다시 골라요.';
+      const message='고른 설계의 힘 막대가 더 길어요. 막대 두 개의 끝을 견주어 보고 잠시 뒤 다시 골라요.';
       choiceLockUntil = performance.now() + choiceLockMs; context.sound(520); setFeedback(message); update();
       root.querySelector('#workshop-choice')!.textContent=message;
       window.setTimeout(() => { if (active) update(); }, choiceLockMs);

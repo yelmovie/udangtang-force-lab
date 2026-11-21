@@ -71,7 +71,7 @@ export function createVillageActions(v: VillageScene) {
   function openBoard() {
     if(!v.map||v.paused()||!boardAvailable)return;
     v.clearInput();stopRoute();updateNearby();
-    board.querySelector('.village-board-lead')!.textContent='마을 사람들의 부탁이에요. 실험 1단계를 마치면 그 건물에서 의뢰를 받을 수 있어요.';
+    board.querySelector('.village-board-lead')!.textContent='마을 사람들의 부탁(의뢰)이에요. 실험 1단계를 마치면 그 건물에서 받을 수 있어요.';
     const list=board.querySelector('.village-board-cards')!;list.replaceChildren();
     for(const card of cards){
       const item=document.createElement('li');item.className=`village-board-card is-${card.status}`;
