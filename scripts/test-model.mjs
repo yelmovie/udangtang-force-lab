@@ -210,6 +210,9 @@ test('optional challenges require distinct comparison evidence rather than repea
   save.rescue.runs.push({route:'long',force:3,success:true});
   assert.equal(earned('rescue'), true);
 });
+// F15 (2026-11-21): real saves always carry the summary completeStage writes; fixtures that list completions need it too.
+const withSummaries = save => { for (const id of save.completed) if (stages.includes(id) && typeof save.evidence[id] !== 'string') save.evidence[id] = `${id} evidence`; return save; };
+
 function restore(value) {
   memory.set(key, JSON.stringify(value));
   return state.readSave();
@@ -349,6 +352,7 @@ test('a completion edited in by hand does not skip earlier missions', () => {
   assert.deepEqual(restored.completed, []);
   assert.equal(state.stageIsOpen(restored, 'workshop'), false);
   save.completed = ['balance', 'cargo', 'workshop'];
+  withSummaries(save);
   assert.deepEqual(restore(save).completed, ['cargo', 'balance']);
 });
 
@@ -410,6 +414,7 @@ test('valid finished missions and the final route survive save and restore', () 
   const save = state.freshSave();
   save.rescue = readyRescue();
   save.completed = [...stages];
+  withSummaries(save);
   save.evidence.rescue = 'same force, different routes';
   save.currentPage = 'complete';
   assert.equal(state.writeSave(save), true);
@@ -455,6 +460,7 @@ test('replaying a completed rescue retains earned progress while requiring a new
   const save = state.freshSave();
   save.rescue = {...readyRescue(), route: 'short', force: 1, delivered: false};
   save.completed = [...stages];
+  withSummaries(save);
   save.evidence.rescue = 'earned completion evidence';
   save.currentPage = 'rescue';
   const restored = restore(save);
@@ -474,6 +480,7 @@ test('resume of a locked stage falls back to a usable map', () => {
 test('invalid shapes, enumerations and numeric values are sanitized without crashing', () => {
   const save = state.freshSave();
   save.completed = ['cargo','cargo','alien'];
+  withSummaries(save);
   save.currentPage = 'alien';
   save.cargo = {parts:99,action:'alien',runs:[null,{parts:1,action:'push',gesture:Infinity,distance:60},{parts:1,action:'push',gesture:50,distance:-1}]};
   save.balance = {left:'<script>',right:'B',prediction:'invalid',runs:[null,{left:'A',right:'B',prediction:'left',actual:'invalid'}]};
@@ -506,6 +513,7 @@ test('long replay sessions preserve the earned comparison and latest trial throu
   const save = state.freshSave();
   save.rescue = readyRescue();
   save.completed = [...stages];
+  withSummaries(save);
   save.evidence.rescue = 'earned completion evidence';
   for (let trial = 0; trial < 60; trial++) {
     const run = {route:'short',force:3,success:true};
@@ -528,6 +536,7 @@ test('restore compaction preserves an early valid comparison but rejects impossi
   const save = state.freshSave();
   save.rescue = {...readyRescue(), route:'short',force:3,runs:[...comparison,...recent]};
   save.completed = [...stages];
+  withSummaries(save);
   const restored = restore(save);
   assert.equal(restored.rescue.runs.length, 20);
   assert.deepEqual(restored.rescue.runs.slice(0,2), comparison);
@@ -617,6 +626,7 @@ test('legacy workshop progress survives migration without claiming new experimen
   const save=state.freshSave();
   save.workshop={direct:true,lever:true,ramp:true,fulcrumSnapped:true,plankSnapped:true,rampSnapped:true};
   save.completed=stages.slice(0,4);
+  withSummaries(save);
   const restored=restore(save);
   assert.equal(restored.workshop.direct,true);
   assert.equal(restored.workshop.lever,true);
@@ -630,6 +640,7 @@ test('legacy workshop progress survives migration without claiming new experimen
 test('a newly better workshop result needs a fresh choice, survives reload, and keeps the earned badge', () => {
   const save = state.freshSave();
   save.completed = stages.slice(0,4);
+  withSummaries(save);
   save.workshop = {...save.workshop,direct:true,leverFinding:true,rampFinding:true,
     trials:workshop.retainWorkshopRuns([{tool:'lever',setting:1},{tool:'lever',setting:2},{tool:'ramp',setting:0},{tool:'ramp',setting:1}])};
   assert.equal(workshop.canCompleteWorkshop(save.workshop),true);

@@ -1,12 +1,13 @@
 import type { PageId, StageId } from './data';
 import { hasFairComparison, retainRescueRuns } from './rescueModel';
-import { hasWorkshopComparison, retainWorkshopL2Tries, retainWorkshopRuns, type WorkshopL2Try, type WorkshopState } from './workshopModel';
+import { hasWorkshopComparison, retainWorkshopL2Tries, retainWorkshopRuns, workshopExplorationReady, workshopL2Complete, type WorkshopL2Try, type WorkshopState } from './workshopModel';
 import { retainLearningRecords, type LearningRecords } from './learningModel';
 import { retainInquiryPlans, type InquiryPlans } from './inquiryPlan';
 import { retainLifeObservation, type LifeObservation } from './lifeObservation';
-import { retainCargoOrders } from './cargoModel';
+import { cargoExplorationReady, ordersComplete, retainCargoOrders } from './cargoModel';
+import { balanceExplorationReady, mysteryComplete } from './balanceModel';
 import { balanceRunKey, cargoRunKey, keepEvidence } from './runHistory';
-import { retainSpringReads, type SpringRead } from './scaleModel';
+import { fakeRequestComplete, retainSpringReads, scaleExplorationReady, type SpringRead } from './scaleModel';
 
 export type CargoRun = { parts: number; action: 'push' | 'pull'; gesture: number; distance: number };
 export type BalanceRun = { left: string; right: string; prediction: 'left' | 'right' | 'level'; actual: 'left' | 'right' | 'level' };
@@ -196,6 +197,14 @@ export function readSave(): SaveData | null {
         delivered: item.rescue?.delivered === true && item.rescue?.measured === true && item.rescue?.gate === true,
       },
     };
+    // F15: a completion counts only with proof — the summary completeStage writes (every save since the first
+    // release has one) or the stage's finished records. Genuine saves keep every mission; a completion typed in
+    // by hand alone opens nothing. Only the unproven tail is closed, so earlier missions stay open.
+    const firstUnproven = restored.completed.findIndex(id => id !== 'rescue' && !stageProven(restored, id));
+    if (firstUnproven >= 0) {
+      for (const id of restored.completed.slice(firstUnproven)) delete restored.evidence[id];
+      restored.completed = restored.completed.slice(0, firstUnproven);
+    }
     const rescue = restored.rescue;
     rescue.delivered = rescue.delivered && rescue.zeroed && rescue.measured && rescue.gate && rescue.runs.some(run => run.route === rescue.route && run.force === rescue.force && run.success);
     // Preserve the original four-stage saves; verify evidence for the newly added mission.
@@ -213,6 +222,17 @@ export function readSave(): SaveData | null {
     if (text) keepBroken(text);
     return null;
   }
+}
+
+/** Proof that a mission was really finished: its completion summary, or its records meeting the finish condition. */
+function stageProven(save: SaveData, id: StageId): boolean {
+  const summary = save.evidence[id];
+  if (typeof summary === 'string' && summary.trim()) return true;
+  if (id === 'cargo') return cargoExplorationReady(save.cargo.runs) && ordersComplete(save.cargo.orders);
+  if (id === 'balance') return balanceExplorationReady(save.balance.runs) && mysteryComplete(save.levels?.balance);
+  if (id === 'scale') return scaleExplorationReady(save.scale) && fakeRequestComplete(save.levels?.scale);
+  if (id === 'workshop') return workshopExplorationReady(save.workshop) && workshopL2Complete(save.levels?.workshop);
+  return false;
 }
 
 export function writeSave(save: SaveData): boolean {

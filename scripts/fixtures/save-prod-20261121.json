@@ -1,0 +1,323 @@
+{
+ "version": 1,
+ "mapVillains": [
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "mapFinalePending": false,
+ "currentPage": "map",
+ "completed": [
+  "cargo",
+  "balance",
+  "scale",
+  "workshop",
+  "rescue"
+ ],
+ "evidence": {
+  "cargo": "저장된 6번의 실험에서 같은 바닥·힘·시간으로 1개 상자는 66칸, 5개 상자는 22칸 움직였어요. 밀기·당기기 비교: 부품 1개 · 밀기 66칸 · 당기기 66칸. 같은 상자에 오른쪽으로 같은 힘을 같은 시간 동안 주어 거리가 같아요. 빵집 오븐 수리 부품 배달에서는 1개는 작은 힘, 3개는 중간 힘, 5개는 큰 힘으로 같은 노란 칸에 멈춰, 무거운 상자일수록 같은 곳까지 보내려면 더 큰 힘이 필요했어요.",
+  "balance": "나무 블록과 도자기 블록이 수평임을 관찰했어요. 금속 블록이 더 무거워서 그쪽이 내려갔어요. 예상과 관찰을 3번 비교하며 잠금핀을 뽑아 확인했어요. 똑같이 생긴 수수께끼 상자 3개와 4개에서는 수평대 비교 기록을 이어 보고 진짜 기둥 부품을 찾아냈어요.",
+  "scale": "빈 저울을 0으로 맞추고 사과 모형 80 g과 책 모형 70 g을 하나씩 재었어요. 사과 모형이 10 g 더 무거웠어요. 겉모습으로 헷갈리던 무게를 저울의 숫자로 정확히 비교했어요. 보급소 의뢰에서는 겉모습이 똑같은 부품 4개, 5개 중 무게가 조금 다른 가짜를 저울 숫자로 가려냈어요(판정 2번).",
+  "workshop": "같은 화물로 직접 들기와 두 도구를 시험했어요. 같은 도구에서는 도착 높이를 그대로 두고 설정만 바꿨어요. 지레에서 화물 가까이 / 판자 가운데 / 화물에서 멀리를 시험했고, 화물 가까이에서 직접 들 때보다 작은 힘이 들었어요. 빗면에서 짧고 가파른 빗면 / 길고 완만한 빗면를 시험했고, 길고 완만한 빗면에서 직접 들 때보다 작은 힘이 들었어요. 콩이 힘(6칸) 안에서 옮기는 의뢰에서는 화물 3개를 3번 시도해 모두 올렸어요. 화물 3개를 모두 '빗면 · 길고 완만한 빗면' 설계로 올렸어요. 생활 속 도구 분류: 지레: 병따개, 시소, 장도리, 가위 / 빗면: 미끄럼틀, 휠체어 경사로, 지그재그 산길, 트럭 경사판",
+  "rescue": "영점을 맞춰 코어 180 g을 확인하고 상자를 내 쪽으로 당겨 길을 열었어요. 2번 운반을 시험했어요. 작은 힘으로 똑같이 밀었을 때 짧고 가파른 빗면에서는 코어가 올라가지 못하고, 길고 완만한 빗면에서는 끝까지 도착했어요. 길고 완만한 빗면에서 작은 힘으로 운반하고 중앙 장치에 배터리 코어를 다시 장착해 마을의 전기를 되찾았어요."
+ },
+ "inquiryPlans": {},
+ "soundOn": true,
+ "musicOn": true,
+ "soundStartsOn": true,
+ "soundVolume": 0.3,
+ "voiceOn": true,
+ "effectVolume": 1,
+ "cargo": {
+  "parts": 5,
+  "action": "pull",
+  "runs": [
+   {
+    "parts": 1,
+    "action": "push",
+    "gesture": 120,
+    "distance": 66
+   },
+   {
+    "parts": 3,
+    "action": "push",
+    "gesture": 120,
+    "distance": 44
+   },
+   {
+    "parts": 5,
+    "action": "push",
+    "gesture": 120,
+    "distance": 22
+   },
+   {
+    "parts": 1,
+    "action": "pull",
+    "gesture": 120,
+    "distance": 66
+   },
+   {
+    "parts": 3,
+    "action": "pull",
+    "gesture": 120,
+    "distance": 44
+   },
+   {
+    "parts": 5,
+    "action": "pull",
+    "gesture": 120,
+    "distance": 22
+   }
+  ],
+  "orders": [
+   1,
+   2,
+   3
+  ]
+ },
+ "balance": {
+  "left": "B",
+  "right": "C",
+  "prediction": null,
+  "runs": [
+   {
+    "left": "A",
+    "right": "B",
+    "prediction": "right",
+    "actual": "right"
+   },
+   {
+    "left": "A",
+    "right": "C",
+    "prediction": "level",
+    "actual": "level"
+   },
+   {
+    "left": "B",
+    "right": "C",
+    "prediction": "left",
+    "actual": "left"
+   }
+  ]
+ },
+ "scale": {
+  "zeroed": true,
+  "parts": [],
+  "runs": [
+   {
+    "parts": [
+     "orange"
+    ],
+    "reading": 80,
+    "zeroed": true
+   },
+   {
+    "parts": [
+     "teal"
+    ],
+    "reading": 45,
+    "zeroed": true
+   },
+   {
+    "parts": [
+     "cream"
+    ],
+    "reading": 25,
+    "zeroed": true
+   },
+   {
+    "parts": [
+     "blue"
+    ],
+    "reading": 70,
+    "zeroed": true
+   },
+   {
+    "parts": [
+     "green"
+    ],
+    "reading": 55,
+    "zeroed": true
+   }
+  ]
+ },
+ "workshop": {
+  "direct": true,
+  "lever": false,
+  "ramp": false,
+  "fulcrumSnapped": true,
+  "plankSnapped": true,
+  "rampSnapped": true,
+  "fulcrumPosition": 2,
+  "rampLength": 1,
+  "trials": [
+   {
+    "tool": "lever",
+    "setting": 0,
+    "force": 33.333333333333336,
+    "distance": 1.35
+   },
+   {
+    "tool": "lever",
+    "setting": 1,
+    "force": 100,
+    "distance": 0.45
+   },
+   {
+    "tool": "lever",
+    "setting": 2,
+    "force": 300,
+    "distance": 0.15
+   },
+   {
+    "tool": "ramp",
+    "setting": 0,
+    "force": 56,
+    "distance": 2.5
+   },
+   {
+    "tool": "ramp",
+    "setting": 1,
+    "force": 31.818181818181817,
+    "distance": 4.4
+   }
+  ],
+  "leverFinding": false,
+  "rampFinding": false
+ },
+ "rescue": {
+  "zeroed": true,
+  "loaded": true,
+  "measured": true,
+  "gate": true,
+  "route": "long",
+  "force": 1,
+  "runs": [
+   {
+    "route": "short",
+    "force": 1,
+    "success": false
+   },
+   {
+    "route": "long",
+    "force": 1,
+    "success": true
+   }
+  ],
+  "delivered": true
+ },
+ "savedAt": 1795214323527,
+ "learning": {
+  "cargo": {
+   "signature": "{\"stage\":\"cargo\",\"cards\":[{\"title\":\"부품 1개 상자\",\"detail\":\"밀기 · 같은 힘을 같은 시간 동안\",\"bars\":[{\"label\":\"66칸 이동\",\"value\":66,\"maximum\":66}]},{\"title\":\"부품 5개 상자\",\"detail\":\"밀기 · 같은 힘을 같은 시간 동안\",\"bars\":[{\"label\":\"22칸 이동\",\"value\":22,\"maximum\":66}]}],\"questions\":[[\"fair\",\"force-time\"]]}",
+   "answers": [
+    {
+     "first": "force-time",
+     "chosen": "force-time",
+     "tries": 1
+    }
+   ],
+   "completed": true
+  },
+  "balance": {
+   "signature": "{\"stage\":\"balance\",\"cards\":[{\"title\":\"기울어진 기록\",\"pair\":[\"A\",\"B\"],\"tilt\":\"right\",\"detail\":\"금속 블록 쪽이 내려갔어요.\"},{\"title\":\"수평이 된 기록\",\"pair\":[\"A\",\"C\"],\"tilt\":\"level\",\"detail\":\"두 물체의 무게가 같았어요.\"}],\"questions\":[[\"swap\",\"left\"]]}",
+   "answers": [
+    {
+     "first": "left",
+     "chosen": "left",
+     "tries": 1
+    }
+   ],
+   "completed": true
+  },
+  "workshop": {
+   "signature": "{\"stage\":\"workshop\",\"cards\":[{\"title\":\"내 빗면 · 길고 완만한 빗면\",\"detail\":\"같은 화물 · 같은 도착 높이\",\"bars\":[{\"label\":\"필요한 힘\",\"value\":31.818181818181817,\"maximum\":56},{\"label\":\"화물이 움직인 길\",\"value\":4.4,\"maximum\":4.4}]},{\"title\":\"내 빗면 · 짧고 가파른 빗면\",\"detail\":\"같은 화물 · 같은 도착 높이\",\"bars\":[{\"label\":\"필요한 힘\",\"value\":56,\"maximum\":56},{\"label\":\"화물이 움직인 길\",\"value\":2.5,\"maximum\":4.4}]}],\"questions\":[[\"design\",\"best\"],[\"daily-tool\",\"ramp\"]]}",
+   "answers": [
+    {
+     "first": "best",
+     "chosen": "best",
+     "tries": 1
+    },
+    {
+     "first": "ramp",
+     "chosen": "ramp",
+     "tries": 1
+    }
+   ],
+   "completed": true
+  },
+  "rescue": {
+   "signature": "{\"stage\":\"rescue\",\"cards\":[{\"title\":\"앞서 모은 내 공방 기록 · 짧고 가파른 빗면\",\"detail\":\"같은 화물·높이에서 비교한 빗면\",\"bars\":[{\"label\":\"필요한 힘\",\"value\":56,\"maximum\":56}]},{\"title\":\"앞서 모은 내 공방 기록 · 길고 완만한 빗면\",\"detail\":\"같은 화물·높이에서 비교한 빗면\",\"bars\":[{\"label\":\"필요한 힘\",\"value\":31.818181818181817,\"maximum\":56}]},{\"title\":\"내 코어 운반 · 같은 작은 힘\",\"detail\":\"짧은 길에서 멈춤 → 긴 길에서 도착\"}],\"questions\":[[\"books\",\"long\"]]}",
+   "answers": [
+    {
+     "first": "long",
+     "chosen": "long",
+     "tries": 1
+    }
+   ],
+   "completed": true
+  }
+ },
+ "levels": {
+  "balance": {
+   "cleared": [
+    0,
+    1
+   ],
+   "attempts": 7
+  },
+  "scale": {
+   "cleared": [
+    0,
+    1
+   ],
+   "attempts": 2
+  },
+  "workshop": {
+   "cleared": [
+    0,
+    1,
+    2
+   ],
+   "attempts": 3,
+   "tries": [
+    {
+     "cargo": 0,
+     "tool": "ramp",
+     "setting": 1,
+     "success": true
+    },
+    {
+     "cargo": 1,
+     "tool": "ramp",
+     "setting": 1,
+     "success": true
+    },
+    {
+     "cargo": 2,
+     "tool": "ramp",
+     "setting": 1,
+     "success": true
+    }
+   ]
+  }
+ },
+ "lifeObservation": {
+  "sorted": [
+   "bottle-opener",
+   "seesaw",
+   "claw-hammer",
+   "scissors",
+   "slide",
+   "wheelchair-ramp",
+   "mountain-road",
+   "truck-ramp"
+  ],
+  "missed": [],
+  "object": "지레: 병따개, 시소, 장도리, 가위",
+  "use": "빗면: 미끄럼틀, 휠체어 경사로, 지그재그 산길, 트럭 경사판",
+  "shared": false
+ }
+}
