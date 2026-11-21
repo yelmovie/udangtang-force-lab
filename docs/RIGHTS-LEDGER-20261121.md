@@ -20,32 +20,32 @@
 
 | # | 파일(묶음) | 만든 곳 | 만든 날·기록 위치 | 이용 조건 | 근거 파일 경로 | 상태 |
 |---|---|---|---|---|---|---|
-| 1 | `backgrounds/{lab,cargo,balance,scale,workshop,core}.webp` (6장, 1440×810) | 원본 PNG 파일 이름이 「ChatGPT Image 2026년 9월 22일 오후 …」라 ChatGPT 이미지 생성으로 보임. sharp로 WebP 변환(`scripts/prepare-assets.mjs`) | 원본 시각 2026-09-22. 원본 PNG는 `references/images/`(148장). 프롬프트 기록 없음. 누가 만들었는지(사용자 직접 / 업체 제공) 기록 없음 — 카탈로그는 "보유 자료"라고만 적음 | CREDITS: "앱 제작자 보유. 재배포·상업적 이용 금지". ChatGPT 약관 원문 미보관, 요금제 기록 없음 | `doc/ASSET_CATALOG.md` 3·21~31행, `public/assets/CREDITS.md` 7행 | 근거 약함 (비고: `backgrounds/core.webp`는 화면 코드에서 참조를 못 찾음. 배포본에는 들어감) |
-| 2 | `backgrounds/islands.webp` (1440×810) | 1과 같음(원본 `02_09_35 (2)`) | 1과 같음 | 1과 같음 | `doc/ASSET_CATALOG.md` 26행, `scripts/offline-plugin.mjs` 12행 | 근거 약함 · **배포 제외** |
-| 3 | `backgrounds/balance-tilt.webp`(1440×810), `rescue-lab.webp`(1600×900), `ending-village.webp`(1600×900) | 기록 없음 | 첫 커밋 `4911934`(2026-10-17)에 처음 들어옴. 원본·프롬프트·생성 도구를 저장소·`references/`·`.tmp/`에서 못 찾음. CREDITS 7행의 묶음 문장만 있음 | 확인 불가 | `public/assets/CREDITS.md` 7행, git `4911934` | **출처 미확인** |
+| 1 | `backgrounds/{lab,cargo,balance,scale,workshop,core}.webp` (6장, 1440×810) | Codex(GPT 이미지)(사용자 확인). 이전 기록: 원본 PNG 파일 이름이 「ChatGPT Image 2026년 9월 22일 오후 …」라 ChatGPT 이미지 생성으로 보임. sharp로 WebP 변환(`scripts/prepare-assets.mjs`) | 원본 시각 2026-09-22. 원본 PNG는 `references/images/`(148장). 프롬프트 기록 없음. 누가 만들었는지(사용자 직접 / 업체 제공) 기록 없음 — 카탈로그는 "보유 자료"라고만 적음 | CREDITS: "앱 제작자 보유. 재배포·상업적 이용 금지". ChatGPT 약관 원문 미보관, 요금제 기록 없음. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | `doc/ASSET_CATALOG.md` 3·21~31행, `public/assets/CREDITS.md` 7행; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) (비고: `backgrounds/core.webp`는 화면 코드에서 참조를 못 찾음. 배포본에는 들어감) |
+| 2 | `backgrounds/islands.webp` (1440×810) | Codex(GPT 이미지)(사용자 확인). 이전 기록: 1과 같음(원본 `02_09_35 (2)`) | 1과 같음 | 1과 같음. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | `doc/ASSET_CATALOG.md` 26행, `scripts/offline-plugin.mjs` 12행; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) · **배포 제외** |
+| 3 | `backgrounds/balance-tilt.webp`(1440×810), `rescue-lab.webp`(1600×900), `ending-village.webp`(1600×900) | Codex(GPT 이미지)(사용자 확인). 이전 기록: 기록 없음 | 첫 커밋 `4911934`(2026-10-17)에 처음 들어옴. 원본·프롬프트·생성 도구를 저장소·`references/`·`.tmp/`에서 못 찾음. CREDITS 7행의 묶음 문장만 있음 | 확인 불가. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | `public/assets/CREDITS.md` 7행, git `4911934`; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
 | 4 | `backgrounds/core-hall-v2.webp` (1600×900) | 내장 이미지 생성 도구(`built-in image_gen`) | 2026-10-08. 원본·실제 프롬프트 `references/design/core-studio-v2/` | 프로젝트용 생성. 도구 약관 원문 미보관 | `references/design/core-studio-v2/generation-prompt.json` 2~3행, `doc/ASSET_CATALOG.md` 81행, CREDITS 28행 | 확인됨 |
-| 5 | `backgrounds/workshop-clear.webp`(1600×900), `textures/workshop-wood.webp`(512²) | "생성형 AI"(도구 이름 없음) | 2026-10-18(CREDITS). 원본·프롬프트 못 찾음 | 프로젝트용 생성. 약관 원문 미보관 | CREDITS 14행 | 근거 약함 |
+| 5 | `backgrounds/workshop-clear.webp`(1600×900), `textures/workshop-wood.webp`(512²) | Codex(GPT 이미지)(사용자 확인). 이전 기록: "생성형 AI"(도구 이름 없음) | 2026-10-18(CREDITS). 원본·프롬프트 못 찾음 | 프로젝트용 생성. 약관 원문 미보관. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | CREDITS 14행; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
 
 ## 2. 그림 — 캐릭터·제목
 
 | # | 파일(묶음) | 만든 곳 | 만든 날·기록 위치 | 이용 조건 | 근거 파일 경로 | 상태 |
 |---|---|---|---|---|---|---|
-| 6 | `characters/{student,corgi,squirrel}_poses.webp` (3장, 1448×1086 시트) | ChatGPT 이미지로 보이는 원본(`03_26_49 (3)`, `03_26_48 (1)`, `03_26_48 (2)`) | 2026-09-22, 원본 `references/images/`. 프롬프트·제작자 기록 없음 | CREDITS: "앱 제작자 보유". 약관 원문 미보관 | `doc/ASSET_CATALOG.md` 33~35행, CREDITS 8행 | 근거 약함 |
-| 7 | `ui/title.webp` (1000×375, 한글 제목 글자 포함) | ChatGPT 이미지로 보이는 원본(`02_09_24 (2)`) | 2026-09-22. 프롬프트 기록 없음 | CREDITS: "생성형 AI 제작, 앱 제작자 보유" | `doc/ASSET_CATALOG.md` 32행, CREDITS 27행 | 근거 약함 |
-| 8 | `game/{student,corgi}-{idle,effort,observe,success}.webp` (8장) | ChatGPT 이미지로 보이는 시트 `02_08_03 (3)`에서 잘라냄(`scripts/prepare-game-sprites.mjs`) | 2026-09-22 원본. 프롬프트 기록 없음 | 1과 같음 | `doc/ASSET_CATALOG.md` 43·50행 | 근거 약함 |
+| 6 | `characters/{student,corgi,squirrel}_poses.webp` (3장, 1448×1086 시트) | Codex(GPT 이미지)(사용자 확인). 이전 기록: ChatGPT 이미지로 보이는 원본(`03_26_49 (3)`, `03_26_48 (1)`, `03_26_48 (2)`) | 2026-09-22, 원본 `references/images/`. 프롬프트·제작자 기록 없음 | CREDITS: "앱 제작자 보유". 약관 원문 미보관. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | `doc/ASSET_CATALOG.md` 33~35행, CREDITS 8행; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
+| 7 | `ui/title.webp` (1000×375, 한글 제목 글자 포함) | Codex(GPT 이미지)(사용자 확인). 이전 기록: ChatGPT 이미지로 보이는 원본(`02_09_24 (2)`) | 2026-09-22. 프롬프트 기록 없음 | CREDITS: "생성형 AI 제작, 앱 제작자 보유". ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | `doc/ASSET_CATALOG.md` 32행, CREDITS 27행; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
+| 8 | `game/{student,corgi}-{idle,effort,observe,success}.webp` (8장) | Codex(GPT 이미지)(사용자 확인). 이전 기록: ChatGPT 이미지로 보이는 시트 `02_08_03 (3)`에서 잘라냄(`scripts/prepare-game-sprites.mjs`) | 2026-09-22 원본. 프롬프트 기록 없음 | 1과 같음. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | `doc/ASSET_CATALOG.md` 43·50행; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
 | 9 | `game/balance-student.webp`, `game/balance-corgi.webp` | Higgsfield GPT Image 2.5(기존 학생·코기 그림을 참고 이미지로) | 2026-10-18(CREDITS) | 프로젝트용 생성. Higgsfield 요금제·약관 기록 없음 | CREDITS 19행 | 확인됨 |
-| 10 | `game/student-cargo-push.webp`(800×666), `game/student-cargo-pull.webp`(800×670) | 기록 없음 | 첫 커밋 `4911934`(2026-10-17). 원본·프롬프트 못 찾음 | 확인 불가 | git `4911934` | **출처 미확인** |
-| 11 | `game/workshop-direct-{start,lift}.webp`, `workshop-lever-{easy,hard}.webp`, `workshop-ramp-{easy,hard}.webp` (6장, 420×530) | 기록 없음. CREDITS 9행 묶음 문장("공방 조작 장면 … 기존 시트에서 분리하거나 새로 생성")만 있음 | 첫 커밋 `4911934`(2026-10-17) | 확인 불가 | CREDITS 9행, git `4911934` | **출처 미확인** |
-| 12 | `game/workshop-lever-press-{0,1,2,3,4}.webp` (5장, 627²) | "이미지 생성 서비스"(서비스·모델 이름 기록 없음) | 2026-10-12. 원본 `references/animations/lever-press-atlas.png`, `lever-press-low.png`, 생성 지시 요지 기록 | 약관 원문 미보관 | `references/video/20261012/ASSET-NOTES.md` 7·10·12·17행, `doc/reviews/INTERACTION-20261012.md` 30행 | 근거 약함 |
+| 10 | `game/student-cargo-push.webp`(800×666), `game/student-cargo-pull.webp`(800×670) | Codex(GPT 이미지)(사용자 확인). 이전 기록: 기록 없음 | 첫 커밋 `4911934`(2026-10-17). 원본·프롬프트 못 찾음 | 확인 불가. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | git `4911934`; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
+| 11 | `game/workshop-direct-{start,lift}.webp`, `workshop-lever-{easy,hard}.webp`, `workshop-ramp-{easy,hard}.webp` (6장, 420×530) | Codex(GPT 이미지)(사용자 확인). 이전 기록: 기록 없음. CREDITS 9행 묶음 문장("공방 조작 장면 … 기존 시트에서 분리하거나 새로 생성")만 있음 | 첫 커밋 `4911934`(2026-10-17) | 확인 불가. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | CREDITS 9행, git `4911934`; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
+| 12 | `game/workshop-lever-press-{0,1,2,3,4}.webp` (5장, 627²) | Codex(GPT 이미지)(사용자 확인). 이전 기록: "이미지 생성 서비스"(서비스·모델 이름 기록 없음) | 2026-10-12. 원본 `references/animations/lever-press-atlas.png`, `lever-press-low.png`, 생성 지시 요지 기록 | 약관 원문 미보관. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | `references/video/20261012/ASSET-NOTES.md` 7·10·12·17행, `doc/reviews/INTERACTION-20261012.md` 30행; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
 | 13 | `game/workshop-lever-press-{0,1,2}-hard.webp`, `{3,4}-easy.webp` (5장) | Higgsfield GPT Image 2.5로 표정만 편집, 원본 윤곽에 머리만 합성 | 2026-10-18(CREDITS) | 프로젝트용 생성. Higgsfield 요금제 기록 없음 | CREDITS 13행 | 확인됨 |
 
 ## 3. 그림 — 실험 소품·카드
 
 | # | 파일(묶음) | 만든 곳 | 만든 날·기록 위치 | 이용 조건 | 근거 파일 경로 | 상태 |
 |---|---|---|---|---|---|---|
-| 14 | `game/{scale,tray,wood-block,nut,book,apple,eraser}.webp`(시트 `02_08_02 (1)`), `game/{balance-pan,balance-base,balance-beam,rock}.webp`(`02_08_22 (1)`), `game/crate-empty.webp`(`02_08_41 (1)`) (12장) | ChatGPT 이미지로 보이는 소품 시트에서 잘라냄 | 2026-09-22 원본 `references/images/`. 잘라낸 좌표는 기록, 프롬프트 없음 | 1과 같음 | `doc/ASSET_CATALOG.md` 45~49행, `public/assets/game/manifest.json` | 근거 약함 |
-| 15 | `props/core-cargo.webp`, `props/wood-crate.webp` | ChatGPT 이미지로 보이는 시트 `02_07_38 (1)`에서 잘라냄 | 2026-09-22 | 1과 같음 | `doc/ASSET_CATALOG.md` 36~39행 | 근거 약함 |
-| 16 | `game/balance-{wood,metal,ceramic}-v2.webp`(384²), `game/balance-lock-pin.webp`(400×180) (4장) | 기록 없음. CREDITS 9행 묶음 문장(「수평대·…·잠금핀」)만 있음 | 첫 커밋 `4911934`(2026-10-17) | 확인 불가 | CREDITS 9행, git `4911934` | **출처 미확인** |
+| 14 | `game/{scale,tray,wood-block,nut,book,apple,eraser}.webp`(시트 `02_08_02 (1)`), `game/{balance-pan,balance-base,balance-beam,rock}.webp`(`02_08_22 (1)`), `game/crate-empty.webp`(`02_08_41 (1)`) (12장) | Codex(GPT 이미지)(사용자 확인). 이전 기록: ChatGPT 이미지로 보이는 소품 시트에서 잘라냄 | 2026-09-22 원본 `references/images/`. 잘라낸 좌표는 기록, 프롬프트 없음 | 1과 같음. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | `doc/ASSET_CATALOG.md` 45~49행, `public/assets/game/manifest.json`; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
+| 15 | `props/core-cargo.webp`, `props/wood-crate.webp` | Codex(GPT 이미지)(사용자 확인). 이전 기록: ChatGPT 이미지로 보이는 시트 `02_07_38 (1)`에서 잘라냄 | 2026-09-22 | 1과 같음. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | `doc/ASSET_CATALOG.md` 36~39행; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
+| 16 | `game/balance-{wood,metal,ceramic}-v2.webp`(384²), `game/balance-lock-pin.webp`(400×180) (4장) | Codex(GPT 이미지)(사용자 확인). 이전 기록: 기록 없음. CREDITS 9행 묶음 문장(「수평대·…·잠금핀」)만 있음 | 첫 커밋 `4911934`(2026-10-17) | 확인 불가. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | CREDITS 9행, git `4911934`; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
 | 17 | `game/cargo-part.webp`, `game/cargo-parts-{1,3,5}.webp` | Higgsfield GPT Image 2.5(투명 배경 너트·볼트) + PIL 배치 합성 | 2026-10-18 | 프로젝트용 생성. Higgsfield 요금제 기록 없음 | CREDITS 16행 | 확인됨 |
 | 18 | `game/toolcard-{cargo,balance,scale,workshop,rescue}.webp` (5장, 256²) | Higgsfield GPT Image 2.5 | 2026-10-18 | 위와 같음 | CREDITS 17행 | 확인됨 |
 | 19 | `life-tools/*.webp` (8장, 320×240) | Higgsfield GPT Image 2.5(high, 투명), 프롬프트 요지·다시 만든 이유 기록 | 2026-10-19 | 위와 같음 | CREDITS 18행, `doc/ASSET_CATALOG.md` 93~108행 | 확인됨 |
@@ -59,21 +59,21 @@
 | 22 | `village/npc/baker.webp` | Higgsfield GPT Image 2.5(도토리 박사 그림을 화풍 참고) | 2026-10-17. 작업 원본 `../_tmp_baker/` | 프로젝트용 생성. Higgsfield 요금제 기록 없음 | CREDITS 11행 | 확인됨 |
 | 23 | `village/npc/{inspector,clerk,crafter}.webp` | Higgsfield GPT Image 2.5 시트 1장(0.25크레딧) → 분할 | 2026-10-17 | 위와 같음 | CREDITS 12행, `.project-memory/PROJECT_STATE.md` 340행 | 확인됨 |
 | 24 | `village/props/request-board.webp` | Higgsfield GPT Image 2.5(high, 투명) | 2026-10-20 | 위와 같음 | CREDITS 24행 | 확인됨 |
-| 25 | `village/dialogue/{guide,kong,baker,inspector,clerk,crafter}.webp` (6장, 1024×512 = 입 닫힘·열림 두 칸) | 기록 없음 | 커밋 `db22baa`(2026-11-13 "Add voiced residents and story narration")에 처음 들어옴. CREDITS에 줄 없음, 원본·프롬프트 못 찾음 | 확인 불가 | git `db22baa` | **출처 미확인** |
-| 26 | `village/encounters/wheel-lock-atlas.webp` (500×300, 지도 악당·공격·피격 시트) | 시트를 만든 도구 이름 기록 없음(악당 시안은 "Codex 기본 이미지 생성 도구") | 2026-11-14. 원본 `_scratch/villain-resume-20261114/01-atlas-original.png`, 참고 `01-reference.png` | 약관 원문 미보관. CREDITS에 줄 없음 | `_shared/MAP-VILLAINS-HANDOFF-20261114.md` 116행, `_scratch/villain-concepts-20261114/prompts-v2.md` 3행, `.project-memory/PROJECT_STATE.md` 193행 | 근거 약함 |
+| 25 | `village/dialogue/{guide,kong,baker,inspector,clerk,crafter}.webp` (6장, 1024×512 = 입 닫힘·열림 두 칸) | Codex(GPT 이미지)(사용자 확인). 이전 기록: 기록 없음 | 커밋 `db22baa`(2026-11-13 "Add voiced residents and story narration")에 처음 들어옴. CREDITS에 줄 없음, 원본·프롬프트 못 찾음 | 확인 불가. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | git `db22baa`; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
+| 26 | `village/encounters/wheel-lock-atlas.webp` (500×300, 지도 악당·공격·피격 시트) | Codex(GPT 이미지)(사용자 확인). 이전 기록: 시트를 만든 도구 이름 기록 없음(악당 시안은 "Codex 기본 이미지 생성 도구") | 2026-11-14. 원본 `_scratch/villain-resume-20261114/01-atlas-original.png`, 참고 `01-reference.png` | 약관 원문 미보관. CREDITS에 줄 없음. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | `_shared/MAP-VILLAINS-HANDOFF-20261114.md` 116행, `_scratch/villain-concepts-20261114/prompts-v2.md` 3행, `.project-memory/PROJECT_STATE.md` 193행; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
 
 ## 5. 그림 — 걷는 3D 작업장(`run-stage/`)
 
 | # | 파일(묶음) | 만든 곳 | 만든 날·기록 위치 | 이용 조건 | 근거 파일 경로 | 상태 |
 |---|---|---|---|---|---|---|
 | 27 | `run-stage/{explorer-walk,explorer-push,explorer-pull,corgi-walk,floor,parts-pile,wall,dock,panel,decor-shelf,decor-barrels,decor-bench,bot-walk}.webp` (13장) | `gpt-imagegen` 스킬(ChatGPT Codex 내장 GPT 이미지). `bot-walk`은 지도 악당 픽셀 그림을 참고 | 2026-11-17. 원본 `references/images/run-stage-20261117/`, 프롬프트 표와 공통 문구 기록, 전문 `.tmp/run-stage/gen-images-2.sh` 등 | 프로젝트용 생성. "ChatGPT 구독 사용량"이라는 기록만 있고 요금제 화면·약관 원문 미보관. CREDITS에 줄 없음 | `docs/RUN-STAGE-3D-PLAN-20261117.md` 168~197행, `docs/RUN-STAGE-3D-HANDOFF-20261117.md` 29·42행, `_shared/RUN-STAGE-3D-PLAN-20261117.md` 108행, `.project-memory/PROJECT_STATE.md` 113행(장식 2장 적용) | 확인됨 |
-| 28 | `run-stage/explorer-{idle,jump,cheer}.webp` (3장, 256²) | 새로 만들지 않고 `characters/student_poses.webp`에서 잘라냄 | 2026-11-17 | 6과 같음 | `docs/RUN-STAGE-3D-PLAN-20261117.md` 192행 | 근거 약함(원 그림이 6번 줄) |
+| 28 | `run-stage/explorer-{idle,jump,cheer}.webp` (3장, 256²) | Codex(GPT 이미지) — 원 그림(6번 줄)을 잘라 씀. 새로 만들지 않고 `characters/student_poses.webp`에서 잘라냄 | 2026-11-17 | 6과 같음. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | `docs/RUN-STAGE-3D-PLAN-20261117.md` 192행; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인, 원 그림 6번 줄) |
 
 ## 6. 그림·영상 — 이야기와 개념 영상
 
 | # | 파일(묶음) | 만든 곳 | 만든 날·기록 위치 | 이용 조건 | 근거 파일 경로 | 상태 |
 |---|---|---|---|---|---|---|
-| 29 | `story/intro-01~03.webp`, `story/final-01~03.webp` (6장, 1280×720) | "이미지 생성 서비스"(모델명 기록 없음) | 2026-10-12. 원본 PNG·인물 기준표·제작 프롬프트 `references/video/20261012/`(`VIDEO-PROMPTS.md`) | CREDITS: "앱 제작자 보유". 약관 원문 미보관 | CREDITS 20행("생성 모델명은 기록 없음 — 출처 기록 필요"), `references/video/20261012/ASSET-NOTES.md` 5·12·20행 | 근거 약함 |
+| 29 | `story/intro-01~03.webp`, `story/final-01~03.webp` (6장, 1280×720) | Codex(GPT 이미지)(사용자 확인). 이전 기록: "이미지 생성 서비스"(모델명 기록 없음) | 2026-10-12. 원본 PNG·인물 기준표·제작 프롬프트 `references/video/20261012/`(`VIDEO-PROMPTS.md`) | CREDITS: "앱 제작자 보유". 약관 원문 미보관. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | CREDITS 20행("생성 모델명은 기록 없음 — 출처 기록 필요"), `references/video/20261012/ASSET-NOTES.md` 5·12·20행; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
 | 30 | `story/intro.mp4`, `story/ending.mp4` (그림·움직임) | Google Flow(Veo 3.1 Fast), 29번 장면 PNG를 시작 프레임으로. 2026-11-18 자막을 ffmpeg+libass로 입힘(글꼴 Jua) | 2026-10-12 생성, 10-18 재인코딩, 11-18 소리·자막 교체(커밋 `5354c39`). 자막 큐 `docs/film-captions-20261118/` | CREDITS: "Google Flow·Veo 이용 조건과 워터마크 표기를 따름", "화면 오른쪽 아래에 Veo 워터마크가 남아 있음"(11-18 판에서 지웠다는 기록 없음). Google 요금제 화면·약관 원문 미보관 | CREDITS 21행, `docs/film-captions-20261118/01-intro.ass`(Style: Jua) | 확인됨 |
 | 31 | `concepts/{cargo,balance,scale,workshop,rescue}.{webp,mp4,webm}` (15개) | 직접 코딩한 SVG 장면 → sharp → FFmpeg(`tools/concept-clips/`). 2026-11-19 자막 입힘(글꼴 Jua) | 2026-10-16 제작, 10-19 다시 렌더, 11-19 자막판(커밋 `929310d`). 큐 `docs/concept-captions-20261118/` | CREDITS: "앱 제작자 보유. 제작 도구에 상업 제한 라이선스 없음" | CREDITS 23행, `docs/concept-captions-20261118/balance.ass`(Style: Jua) | 확인됨 |
 
@@ -90,7 +90,7 @@
 |---|---|---|---|---|---|---|
 | 34 | `favicon.svg`, `icons/icon-192.png`, `icons/icon-512.png` | 직접 그린 SVG 플라스크(PNG는 변환) | 커밋 `6e2d035`(2026-10-18) | 앱 제작자 보유 | CREDITS 50행 | 확인됨 |
 | 35 | `src/icons.ts` 안 SVG 선 아이콘 | 직접 그림 | — | 앱 제작자 보유 | CREDITS 51행 | 확인됨 |
-| 36 | `og-image.jpg` (지금 1200×600, 제목 글자가 그려진 3D 카툰 그림) | 기록 없음 | 커밋 `0cc485c`(2026-10-29 "OG 이미지 교체: 나무 간판형 썸네일(1200x600)"). CREDITS 52행은 2026-10-19의 옛 합성본(`lab.webp`+`title.webp`, 1200×630)을 적고 있어 지금 파일과 다름 | 확인 불가 | CREDITS 52행, git `0cc485c` | **출처 미확인** |
+| 36 | `og-image.jpg` (지금 1200×600, 제목 글자가 그려진 3D 카툰 그림) | Codex(GPT 이미지)(사용자 확인). 이전 기록: 기록 없음 | 커밋 `0cc485c`(2026-10-29 "OG 이미지 교체: 나무 간판형 썸네일(1200x600)"). CREDITS 52행은 2026-10-19의 옛 합성본(`lab.webp`+`title.webp`, 1200×630)을 적고 있어 지금 파일과 다름 | 확인 불가. ChatGPT(Codex) 유료 요금제(사용자 확인 「모두 유료 요금제」) | CREDITS 52행, git `0cc485c`; 사용자 확인 2026-11-21 09:25 「16곳 그림은 전부 Codex(GPT)… 맞아?」 → "전부 맞아"(`_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」) | 확인됨(사용자 확인) |
 
 ## 9. 음악
 
@@ -135,7 +135,8 @@
 ## 개수
 
 - 장부 줄: **46줄**
-- 확인됨 **28줄** · 근거 약함 **12줄** · **출처 미확인 6줄**(3·10·11·16·25·36번, 그림 **22장**)
+- (3-1단계 처음) 확인됨 28줄 · 근거 약함 12줄 · 출처 미확인 6줄(그림 22장)
+- **(2026-11-21 09:40 사용자 확인 반영 뒤) 확인됨 46줄(그 가운데 「사용자 확인」 18줄) · 근거 약함 0줄 · 출처 미확인 0줄**
 - 이 중 배포 제외 3줄(2·45·46번)
 
 ## 사용자가 줘야 하는 자료
@@ -164,3 +165,13 @@
 | 36 `og-image.jpg` | 커밋 `0cc485c`(2026-10-29) | 위와 같음(기록 시작 전) | 출처 미확인 그대로 |
 
 - 10번 장부처럼 「사용자 확인(이미지는 다 코덱스로 만들었어)」으로 채울 수 있는 줄이지만, 지침 6장대로 조율 세션이 사용자에게 다시 확인받기 전에는 쓰지 않았다. 확인되면 위 6줄은 「확인됨(사용자 확인)」으로 바꿀 수 있다.
+
+## 사용자 확인 반영 (2026-11-21 09:40)
+
+조율 세션이 사용자에게 「16곳 그림은 전부 Codex(GPT), 영상은 제미나이, 모두 유료 요금제로 만든 게 맞아?」라고 물었고 사용자가 **"전부 맞아"**라고 답했다(09:25, `_shared/CODEX-IMAGE-RECORDS-20261121.md` 「16곳 전체 확인」). 그 「쓰는 법」대로 생성 로그가 없는 그림 줄을 채웠다.
+
+- 바꾼 줄 18줄: 1·2·3·5·6·7·8·10·11·12·14·15·16·25·26·28·29·36번(출처 미확인 6줄 3·10·11·16·25·36 → 확인됨(사용자 확인), 근거 약함 12줄 1·2·5·6·7·8·12·14·15·26·28·29 → 확인됨(사용자 확인)). 근거 약함 줄은 모두 「도구 이름·생성 로그가 없음」이 이유였고, 저장소 기록(「ChatGPT Image …」 원본 이름, 「생성형 AI」, 「이미지 생성 서비스」, 「Codex 기본 이미지 생성 도구」)이 사용자 확인과 어긋나지 않는다.
+- **증거와 어긋나서 그대로 둔 줄(보고)**: 9·13·17·18·19·22·23·24번(학생·코기 균형 그림, 공방 표정, 부품, 도구 카드 5장, 생활 도구 8장, 의뢰인 NPC 4장, 의뢰 게시판). CREDITS 11~19·24행이 「Higgsfield GPT Image 2.5」로 만들었다고 적고 있다. GPT 이미지 모델이지만 만든 곳은 Codex가 아니라 Higgsfield라서 CREDITS 증거대로 두었다(상태는 원래 확인됨). Higgsfield 요금제·약관은 여전히 필요하다.
+- 영상 30번(`story/intro·ending.mp4`)은 CREDITS가 「Google Flow(Veo 3.1 Fast)」라 적고 있어 그대로 두었다. 사용자 말 「영상은 제미나이」와 같은 Google 생성 도구라 어긋나지는 않는다. 워터마크를 남긴 채 판매해도 되는지는 아직 확인이 필요하다.
+- 3D(32·33번 Meshy), 음악·효과음·목소리는 이 확인의 범위가 아니라 바꾸지 않았다.
+- 「사용자가 줘야 하는 자료」에서 1~5번과 11번(그림 도구·원본)은 이 확인으로 풀렸다. 남은 것: 6 Higgsfield 요금제·약관, 7 Google Flow(Veo) 요금제와 워터마크 판매 가능 여부, 8 Meshy, 9 Suno, 10 ElevenLabs 요금제, 12 약관 원문 보관(F11). 요금제 화면 캡처는 납품 증빙으로 남긴다.
