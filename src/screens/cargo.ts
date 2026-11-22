@@ -114,6 +114,9 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     }
     const travel = () => Math.max(64, Math.min(120, field.clientWidth * .12));
     const canPush = () => !busy && !waiting && !autoPlaying && (level === 1 ? !needsSetup : force !== null && !deliveredAll());
+    // 1단계에서 한 번 실험한 뒤에도 아이·「눌러서 밀기/당기기」를 바로 다시 누를 수 있다. 누르는 순간 같은 상자를 출발점으로 되돌린다(상자를 다시 고르지 않아도 됨).
+    const canRearm = () => level === 1 && needsSetup && !busy && !waiting && !autoPlaying;
+    function rearm() { if (!canRearm()) return; needsSetup = false; resetCrate(); update(); }
     function resetForce() { field.style.setProperty('--charge', '0'); crate.style.transform = ''; field.classList.remove('cargo-dragging'); }
     function resetCrate() { crate.style.transform = ''; crate.style.left = endPosition(0); root.querySelector('.cargo-distance')!.textContent = ''; setActorMood('idle'); }
     function positionGuide() {
@@ -196,9 +199,9 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         zone.hidden = level !== 2;
         zone.style.left = endPosition(lo);
         zone.style.setProperty('--zone-span', `${(hi - lo) * .7}%`);
-        handle.disabled = !canPush();
+        handle.disabled = !canPush() && !canRearm();
         tapGo.textContent = `${tapLabel()} →`;
-        tapGo.disabled = !canPush() && !needsForce();
+        tapGo.disabled = !canPush() && !needsForce() && !canRearm();
         autoGo.hidden = !autoPlaying && (level === 1 ? cargoExplorationReady(state.runs) || finding : deliveredAll());
         autoGo.disabled = !autoPlaying && (busy || waiting || !!drag);
         autoGo.textContent = autoPlaying ? '직접 해보기' : '▶ 자동으로 보기';
@@ -384,6 +387,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             nudgeForce();
             return;
         }
+        if (source === handle) rearm();
         if (source.disabled)
             return;
         drag = { pointer: event.pointerId, source, type: source === handle ? 'force' : 'card', x: event.clientX, y: event.clientY, travel: travel(), moved: false, ghost: null };
@@ -461,9 +465,9 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     const stageResize = new ResizeObserver(() => positionGuide());
     stageResize.observe(field);
     handle.addEventListener('click', event => { if (event.detail === 0 && !drag)
-        void experiment(travel()); }, { signal: events.signal });
+        { rearm(); void experiment(travel()); } }, { signal: events.signal });
     // Tap alternative to dragging: the same experiment(), which canPush()/busy already guard against double runs.
-    tapGo.addEventListener('click', () => { if (drag) return; if (needsForce()) nudgeForce(); else void experiment(travel()); }, { signal: events.signal });
+    tapGo.addEventListener('click', () => { if (drag) return; rearm(); if (needsForce()) nudgeForce(); else void experiment(travel()); }, { signal: events.signal });
     /** Level 1 tries not yet in the record, push before pull, light to heavy. */
     function missingTries() {
         return (['push', 'pull'] as const).flatMap(action => [1, 3, 5].map(parts => ({ action, parts })))
