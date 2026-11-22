@@ -83,17 +83,15 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
       content = '<p class="settings-lead">이 브라우저의 모든 실험 기록과 복구 진행을 지울까요? 지운 기록은 되돌릴 수 없어요. 소리 설정은 유지해요.</p><button class="button button-secondary settings-danger" data-settings="confirm-reset">기록을 지우고 처음으로</button>';
     } else return;
     overlay.innerHTML = `<div class="modal-card settings-card"${section === 'menu' ? ' data-science-settings' : ''} role="dialog" aria-modal="true" aria-labelledby="settings-title">
-      <div class="settings-heading"><h2 id="settings-title">${headings[section]}</h2><button type="button" class="settings-close" data-settings="close" aria-label="설정 닫기">×</button></div>
+      <div class="settings-heading"><h2 id="settings-title">${headings[section]}</h2></div>
       ${content}${section === 'menu' ? '' : '<button class="button button-secondary settings-back" data-settings="back">설정으로 돌아가기</button>'}
     </div>`;
-    const target = section === 'menu' && focusAction ? focusAction : 'close';
-    // 같은 동작 버튼이 둘(위 ×·아래 「닫기」)일 때 CSS로 숨긴 쪽에는 초점이 가지 않는다. 보이는 쪽에 둬야 Esc가 창 안에서 잡힌다.
-    const targets = [...overlay.querySelectorAll<HTMLButtonElement>(`[data-settings="${target}"]`)];
-    (targets.find(button => button.getClientRects().length) ?? targets[0])?.focus();
+    // 닫는 방법은 아래 「닫기」와 Esc 둘뿐(위 ×·바깥 눌러 닫기 없음, 2026-11-22). 하위 화면은 「설정으로 돌아가기」에 초점을 둔다.
+    const target = section === 'menu' ? focusAction ?? 'close' : 'back';
+    overlay.querySelector<HTMLButtonElement>(`[data-settings="${target}"]`)?.focus();
     focusAction = undefined;
   };
   overlay.addEventListener('click', event => {
-    if (event.target === overlay) { close(); return; }
     const preview = (event.target as Element).closest<HTMLButtonElement>('[data-preview-stage]')?.dataset.previewStage;
     if (preview && adminUnlocked) { close(); host.navigate(preview as PageId); return; }
     const concept = (event.target as Element).closest<HTMLButtonElement>('[data-concept-open]')?.dataset.conceptOpen;

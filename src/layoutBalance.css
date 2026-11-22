@@ -12,7 +12,6 @@
 
 /* 설정: 위 ×와 아래 「닫기」가 같은 닫기. 16개 공통 기준(2026-11-19)에 따라 아래 오른쪽 「닫기」만 남기고 위 ×를 숨긴다.
    「닫기」가 없는 하위 화면(전체 단계 해금·기록 초기화·개념 영상)은 × 유지. Esc 닫기는 그대로. */
-.settings-card[data-science-settings]:has(.science-settings-footer [data-settings="close"]) .settings-close { display:none; }
 
 /* 균형 다리 조작판: 안내 라벨을 숨긴 뒤 물체 카드가 왼쪽 칸에 몰려 오른쪽이 비었다. 가운데로 모은다. */
 #app .balance-screen .balance-dock .instrument-tools { grid-template-columns:minmax(0, 1fr); justify-items:center; }
