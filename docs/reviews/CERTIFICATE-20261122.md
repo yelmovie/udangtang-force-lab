@@ -7,3 +7,5 @@
 - A4가로PDF1쪽, PNG2400×1697을 직접 열어 화면과 같은 테두리·글자·빈칸·도장·제작표기를 확인. 종이 밖 버튼/안내는 출력에서 제외. prefers-reduced-motion 실행애니메이션0, 설정 재진입 확인.
 - 완료 기록은 기존 실제 플레이 결과를 격리 브라우저에 넣어 확인했으며, 이번 검사에서 전체 미션을 새로 완주하거나 실제 태블릿을 검사한 것은 아니다.
 - 근거 `.tmp/cert-design-20261122/local.json`, `shots/local.pdf`, `shots/local-saved.png`, `compare.png`.
+
+운영: 그림 `d0bf949`·앱 `0c7fd48`·문서 `7eb1169`를 main에 푸시, Worker `4cb85f51-2230-44c3-9265-5dd7ed063c52`. 공식 운영 `https://udangtang-force-lab.yelsam.workers.dev`에서 같은 세뷰·설정 재진입·PNG·PDF를 확인했고 오류0. index와 JS/CSS9개, 새 테두리 그림 SHA256이 최신 배포 빌드와 일치한다.
