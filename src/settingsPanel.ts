@@ -30,6 +30,8 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
   const save = host.save(), adminSave = host.adminSave(), adminUnlocked = host.adminUnlocked();
   const overlay = document.createElement('div');
   overlay.className = 'modal-layer settings-layer';
+  // 바깥이나 글자를 눌러도 초점이 창 안(이 층)에 남아 Esc가 잡힌다. 바깥을 눌러 닫지는 않는다.
+  overlay.tabIndex = -1;
   const appWasInert = app.inert;
   app.inert = true;
   const close = () => { app.inert = appWasInert; overlay.remove(); app.querySelector<HTMLButtonElement>('[data-top="settings"]')?.focus(); };
