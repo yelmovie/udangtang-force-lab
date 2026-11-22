@@ -39,3 +39,5 @@
   .stage-popup h2 { font-size:24px; }
 }
 @media (prefers-reduced-motion: reduce) { .stage-popup-card { animation:none; } }
+
+.confirm-popup .confirm-danger { border-color:#c99d79; background:#fff1df; box-shadow:0 4px 0 #c99d79; }

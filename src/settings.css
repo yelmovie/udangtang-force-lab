@@ -47,3 +47,5 @@
 .settings-layer [data-science-settings] .science-settings-audio {row-gap:12px}
 .settings-layer [data-science-settings] .science-settings-audio :is(.setting-row) {font-size:18px;min-height:52px}
 .settings-layer [data-science-settings] .science-settings-audio input[type=range] {height:48px;margin:0;cursor:pointer}
+.settings-layer .settings-confirm-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 18px; }
+.settings-layer .settings-confirm-actions .button { min-height: 52px; font-size: 20px; }

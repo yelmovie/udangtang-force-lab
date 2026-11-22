@@ -452,13 +452,13 @@ function soundIcon() {
   return `<svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/>${anySound() ? '<path d="M17 8a5 5 0 0 1 0 8M19.5 5a9 9 0 0 1 0 14"/>' : '<path d="m17 9 4 6m0-6-4 6"/>'}</svg>`;
 }
 
-/** In-app yes/no box; window.confirm looks like a browser error on tablets. Resolves true only on the confirm button. */
+/** In-app yes/no box for wiping records (왼쪽 「취소」에 첫 초점, 오른쪽 위험색 「기록 지우기」); window.confirm looks like a browser error on tablets. Resolves true only on the confirm button. */
 function confirmBox(title: string, body: string, okLabel: string): Promise<boolean> {
   return new Promise(resolve => {
     const dialog = document.createElement('dialog');
     dialog.className = 'stage-popup confirm-popup';
     dialog.setAttribute('aria-labelledby', 'confirm-title');
-    dialog.innerHTML = `<div class="stage-popup-card"><h2 id="confirm-title">${title}</h2><div class="stage-popup-body"><p>${body}</p></div><div class="stage-popup-actions"><button class="button button-secondary" data-confirm="no">취소</button><button class="button button-primary" data-confirm="yes">${okLabel}</button></div></div>`;
+    dialog.innerHTML = `<div class="stage-popup-card"><h2 id="confirm-title">${title}</h2><div class="stage-popup-body"><p>${body}</p></div><div class="stage-popup-actions"><button class="button button-secondary" data-confirm="no">취소</button><button class="button button-secondary confirm-danger" data-confirm="yes">${okLabel}</button></div></div>`;
     let answer = false;
     dialog.addEventListener('click', event => {
       const button = (event.target as Element).closest<HTMLButtonElement>('[data-confirm]');
@@ -482,7 +482,7 @@ function renderTitle(root: HTMLElement) {
   else window.addEventListener('load', () => window.setTimeout(reveal, 250), { once: true });
   bindHeader();
   root.querySelector<HTMLButtonElement>('#new-start')?.addEventListener('click', async () => {
-    if (hasSave && !await confirmBox('기존 탐구 기록을 지우고 새로 시작할까요?', '도구 카드와 실험 기록이 이 기기에서 모두 지워져요. 소리 설정은 그대로예요.', '기록 지우고 시작')) return;
+    if (hasSave && !await confirmBox('기존 탐구 기록을 지우고 새로 시작할까요?', '도구 카드와 실험 기록이 이 기기에서 모두 지워져요. 소리 설정은 그대로예요.', '기록 지우기')) return;
     adminUnlocked = false;
     adminSave = null;
     save = { ...freshSave(), ...soundPrefs(save) };
@@ -506,7 +506,7 @@ function renderTitle(root: HTMLElement) {
 }
 
 async function restartFromBeginning() {
-  if(!await confirmBox('처음부터 다시 해볼까요?', '도구 카드와 실험 기록을 지우고 처음부터 시작해요. 소리 설정은 그대로예요.', '처음부터 다시 시작')) return;
+  if(!await confirmBox('처음부터 다시 해볼까요?', '도구 카드와 실험 기록을 지우고 처음부터 시작해요. 소리 설정은 그대로예요.', '기록 지우기')) return;
   const previous=context.save;
   save={...freshSave(),...soundPrefs(previous)};
   adminUnlocked=false; adminSave=null; context.save=save; missionCardShown.clear(); villageReturn=undefined; villageCelebration=undefined;

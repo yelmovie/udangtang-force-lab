@@ -81,11 +81,11 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
         return `<button type="button" class="concept-gallery-item" data-concept-open="${stage.id}"${open ? '' : ' disabled'}><img src="${conceptPoster(stage.id)}" alt=""><span><small>MISSION 0${stage.mission} · ${stage.concept}</small><strong>${conceptClipTitle(stage.id)}</strong><em>${open ? '▶ 영상 보기' : `미션 ${stage.mission}${[2,4,5].includes(stage.mission)?'를':'을'} 마치면 열려요`}</em></span></button>`;
       }).join('')}</div>`;
     } else if (section === 'reset') {
-      content = '<p class="settings-lead">이 브라우저의 모든 실험 기록과 복구 진행을 지울까요? 지운 기록은 되돌릴 수 없어요. 소리 설정은 유지해요.</p><button class="button button-secondary settings-danger" data-settings="confirm-reset">기록을 지우고 처음으로</button>';
+      content = '<p class="settings-lead">이 브라우저의 모든 실험 기록과 복구 진행을 지울까요? 지운 기록은 되돌릴 수 없어요. 소리 설정은 유지해요.</p><div class="settings-confirm-actions"><button type="button" class="button button-secondary" data-settings="back">취소</button><button type="button" class="button button-secondary settings-danger" data-settings="confirm-reset">기록 지우기</button></div>';
     } else return;
     overlay.innerHTML = `<div class="modal-card settings-card"${section === 'menu' ? ' data-science-settings' : ''} role="dialog" aria-modal="true" aria-labelledby="settings-title">
       <div class="settings-heading"><h2 id="settings-title">${headings[section]}</h2></div>
-      ${content}${section === 'menu' ? '' : '<button class="button button-secondary settings-back" data-settings="back">설정으로 돌아가기</button>'}
+      ${content}${section === 'menu' || section === 'reset' ? '' : '<button class="button button-secondary settings-back" data-settings="back">설정으로 돌아가기</button>'}
     </div>`;
     // 닫는 방법은 아래 「닫기」와 Esc 둘뿐(위 ×·바깥 눌러 닫기 없음, 2026-11-22). 하위 화면은 「설정으로 돌아가기」에 초점을 둔다.
     const target = section === 'menu' ? focusAction ?? 'close' : 'back';
