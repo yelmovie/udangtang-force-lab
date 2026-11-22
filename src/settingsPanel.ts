@@ -47,9 +47,10 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
       const summary = (title: string, body: string) => `<details class="science-settings-detail"><summary>${title}</summary>${body}</details>`;
       content = `<div class="science-settings-body">
         <div class="science-settings-audio" aria-label="소리 설정">
-          ${soundSwitch('music','배경 음악',save.musicOn === true)}${soundSwitch('sound','효과음',save.soundOn)}${soundSwitch('voice','목소리',save.voiceOn ?? save.soundOn)}
-        <label class="setting-row settings-wide" for="sound-volume">전체 소리 크기 <input id="sound-volume" type="range" min="0" max="100" step="5" value="${volume}"><output id="volume-value" for="sound-volume">${volume}%</output></label>
-        <label class="setting-row settings-wide" for="effect-volume">효과음 크기 <input id="effect-volume" type="range" min="0" max="100" step="5" value="${effects}"><output id="effect-volume-value" for="effect-volume">${effects}%</output></label></div>
+          ${soundSwitch('music','배경 음악',save.musicOn === true)}${soundSwitch('sound','효과음',save.soundOn)}
+        <label class="setting-row settings-wide" for="effect-volume">효과음 크기 <input id="effect-volume" type="range" min="0" max="100" step="5" value="${effects}"><output id="effect-volume-value" for="effect-volume">${effects}%</output></label>
+          ${soundSwitch('voice','목소리',save.voiceOn ?? save.soundOn)}
+        <label class="setting-row settings-wide" for="sound-volume">전체 소리 크기 <input id="sound-volume" type="range" min="0" max="100" step="5" value="${volume}"><output id="volume-value" for="sound-volume">${volume}%</output></label></div>
         <div class="settings-links science-settings-actions" aria-label="바로 가기">
           <button type="button" data-settings="bag" aria-haspopup="dialog"><span>${bagIcon()}</span> 도구 가방 <small>${cardCount}장</small></button>
           <button type="button" data-settings="prologue"><span>${icons.play}</span> 이 탐험을 하는 이유 다시 보기</button>
