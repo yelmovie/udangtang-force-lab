@@ -53,7 +53,7 @@ export async function drawCertificate(paper: HTMLElement): Promise<HTMLCanvasEle
     for (const line of lines(n)) {
       const y = Y(line.rect.top + line.rect.height / 2);
       if (spacing) { let x = X(line.rect.left); for (const ch of line.text) { ctx.fillText(ch, x, y); x += ctx.measureText(ch).width + spacing * scale; } }
-      else ctx.fillText(line.text, X(line.rect.left), y, line.rect.width * scale + 2);
+      else {const stroke=parseFloat(cs.getPropertyValue('-webkit-text-stroke-width'))||0;if(stroke){ctx.lineWidth=stroke*scale;ctx.strokeStyle=cs.color;ctx.lineJoin='round';ctx.strokeText(line.text,X(line.rect.left),y,line.rect.width*scale+2);}ctx.fillText(line.text, X(line.rect.left), y, line.rect.width * scale + 2);}
     }
   }
   return canvas;

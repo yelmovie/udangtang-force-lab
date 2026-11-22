@@ -9,3 +9,5 @@
 - 근거 `.tmp/cert-design-20261122/local.json`, `shots/local.pdf`, `shots/local-saved.png`, `compare.png`.
 
 운영: 그림 `d0bf949`·앱 `0c7fd48`·문서 `7eb1169`를 main에 푸시, Worker `4cb85f51-2230-44c3-9265-5dd7ed063c52`. 공식 운영 `https://udangtang-force-lab.yelsam.workers.dev`에서 같은 세뷰·설정 재진입·PNG·PDF를 확인했고 오류0. index와 JS/CSS9개, 새 테두리 그림 SHA256이 최신 배포 빌드와 일치한다.
+
+최신 사용자 지시 반영: 인증서 종이의 미션·도구 카드 숫자 요약을 없앴다. 수여 본문은 유지하고 제목은900 굵기와 얇은 획 보강을 화면·인쇄·PNG에 같이 적용했다. 지도·판정·저장 형식은 그대로다.
