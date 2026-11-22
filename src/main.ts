@@ -18,7 +18,6 @@ import { mountScale } from './screens/scale';
 import { mountWorkshop } from './screens/workshop';
 import { mountRescue } from './screens/rescue';
 import { mountVillage } from './screens/village';
-import { canPlayMapFinale, defeatedMapVillains } from './map-villains.js';
 import { playMusic, playSound, soundLeft, stopMusic, stopSounds, setVolume, setEffectVolume, type MapSound, type MusicName } from './sound';
 import { installKongDialogue } from './kongDialogue';
 import { configureVoiceLines, playVoiceLine, stopAllVoices, stopVoiceLine } from './npcDialogueVoice';
@@ -377,8 +376,9 @@ function openEndingCeremony() {
     return;
   }
   stopSounds();
-  if (!adminUnlocked && !canPlayMapFinale(save)) {
-    toast(`지도 악당 5마리를 모두 물리치면 점등식 영상이 열려요. 지금 ${defeatedMapVillains(save)} / 5`);
+  // The finale belongs to finishing every mission, not to the map villains (2026-11-22).
+  if (!adminUnlocked && save.completed.length < stages.length) {
+    toast(`다섯 미션을 모두 마치면 점등식 영상이 열려요. 지금 ${save.completed.length} / ${stages.length}`);
     return;
   }
   if (document.querySelector('.story-layer')) return;

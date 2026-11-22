@@ -2,7 +2,6 @@
 // 앱 상태를 바꾸는 일(화면 이동, 기록 초기화, 해금 켜고 끄기)은 main.ts가 SettingsHost로 넘겨준 함수가 한다.
 import { stages, type PageId, type StageId } from './data';
 import type { SaveData } from './state';
-import { canPlayMapFinale } from './map-villains.js';
 import { setEffectVolume, setVolume, stopSounds } from './sound';
 import { infoContent } from './info';
 import { conceptClipTitle, conceptPoster, openConceptClip } from './conceptClip';
@@ -40,7 +39,7 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
     let content: string;
     if (section === 'menu') {
       const cardCount = earnedToolCards(adminSave ?? save).length;
-      const canWatch = canPlayMapFinale(save) || adminUnlocked;
+      const canWatch = save.completed.length === stages.length || adminUnlocked;
       const canRead = save.completed.length === stages.length || adminUnlocked;
       const volume = Math.round((save.soundVolume ?? .3) * 100), effects = Math.round((save.effectVolume ?? 1) * 100);
       const soundSwitch = (action: 'sound' | 'music' | 'voice', name: string, on: boolean) =>
@@ -58,7 +57,7 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
           <button type="button" data-settings="record"${canRead ? '' : ' disabled aria-describedby="record-locked"'}><span>${icons.book}</span> 나의 탐구 결과 보기</button>
           <button type="button" data-settings="concepts"><span>${icons.film}</span> 개념 영상 다시 보기</button>
         </div>
-        ${canWatch ? '' : '<p class="settings-lock" id="finale-locked">지도에서 다섯 악당을 모두 물리치면 점등식이 열려요.</p>'}
+        ${canWatch ? '' : '<p class="settings-lock" id="finale-locked">다섯 미션을 모두 마치면 점등식이 열려요.</p>'}
         ${canRead ? '' : '<p class="settings-lock" id="record-locked">다섯 미션을 마치면 탐구 결과를 볼 수 있어요.</p>'}
         ${summary('앱 정보 · 배움과 보상',infoContent.about)}
         ${summary('학생용 가이드',infoContent.help)}

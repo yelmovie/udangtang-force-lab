@@ -1,5 +1,4 @@
 import {dockMapAttack} from '../map-attack-control.js';
-import { canPlayMapFinale } from '../map-villains.js';
 import { bindDirectionPad } from '../map-controls.js';
 import type { AppContext } from '../appTypes';
 import type { MapSound } from '../sound';
@@ -258,7 +257,8 @@ export function mountVillage(root: HTMLElement, context: AppContext, options: Vi
         if(v.alive&&token===generation){v.images.set(encounterAtlas,image);v.draw();}
       }).catch(()=>{ /* Keep the encounter playable when optional artwork is unavailable. */ });
       v.entering=false;v.stopRoute();
-      if (!options.adminUnlocked && context.save.mapFinalePending && canPlayMapFinale(context.save)) v.finaleAt=performance.now()+360;
+      // The finale plays once, on arriving from the mission that finished every stage; an old pending flag never replays it.
+      if (!options.adminUnlocked && options.newlyCompleted && stages.every(stage=>context.save.completed.includes(stage.id))) v.finaleAt=performance.now()+360;
       // A lab that has just become open (never on the teacher's unlock-all view): one latch click and sparkle.
       let labOpened=false;
       if(!options.adminUnlocked){

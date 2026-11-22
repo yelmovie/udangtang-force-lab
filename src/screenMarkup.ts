@@ -5,7 +5,6 @@ import { stages } from './data';
 import { escapeHtml } from './escapeHtml';
 import { predictionRecap, predictionVerdict, type PredictionRecap } from './inquiryPlan';
 import { learningRecordComplete, learningSummary, learningTask, missionReviewTask } from './learningModel';
-import { canPlayMapFinale, defeatedMapVillains } from './map-villains.js';
 import { readSave, type SaveData } from './state';
 import { toolCardRowMarkup } from './toolBag';
 import { villageRewards } from './villageStory';
@@ -46,7 +45,7 @@ export function titleScreenMarkup(hasSave: boolean, anySound: () => boolean, sou
 /** Completion screen markup for the given save. */
 export function completeScreenMarkup(save: SaveData, completed: number, adminUnlocked: boolean): string {
   return `<section class="complete-screen">
-    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1><p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 끼웠어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><div class="ending-actions"> ${adminUnlocked || canPlayMapFinale(save) ? '<button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button>' : `<p>지도에서 악당 5마리를 물리치면 점등식 영상이 열려요. 지금 ${defeatedMapVillains(save)} / 5</p>`}<button class="button button-primary" id="restart-ending">처음부터 다시 해보기 ↻</button></div></div></div>
+    <div class="ending-world" aria-label="다시 빛나는 힘 마을"><div class="ending-rays"></div><div class="ending-title"><span class="eyebrow">${adminUnlocked ? '관리자 미리보기' : '배터리를 다시 끼웠어 · 마을에 전기가 돌아왔어'}</span><h1>네가 마을을 살렸어!</h1><p>실험에서 찾은 방법으로 배터리 코어를 옮겨 다시 끼웠어.<br>전기가 돌아와 우당탕 마을에 다시 불이 켜졌어.</p><div class="ending-actions"> ${adminUnlocked || save.completed.length === stages.length ? '<button class="button button-primary" id="replay-ending">마을 점등식 다시 보기 ✦</button>' : `<p>다섯 미션을 모두 마치면 점등식 영상이 열려요. 지금 ${save.completed.length} / ${stages.length}</p>`}<button class="button button-primary" id="restart-ending">처음부터 다시 해보기 ↻</button></div></div></div>
     <details class="complete-details"><summary>내 실험과 발견 살펴보기 · ${completed} / 5</summary>
     <div class="report-grid">${stages.map(stage => {
       const record = save.learning?.[stage.id];

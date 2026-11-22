@@ -1,5 +1,5 @@
 import { villainPatrol } from '../map-villain-patrol.js';
-import { canPlayMapFinale } from '../map-villains.js';
+import { stages } from '../data';
 import { attackRange, contactRange, encounterLines, facingToward, type Encounter } from '../villageEncounters';
 import { revealRewardCard } from '../rewardCards';
 import { voiceLinePending, voiceLinePlaying } from '../npcDialogueVoice';
@@ -79,7 +79,7 @@ export function createVillageEncounters(v: VillageScene) {
     }
     const nearbyEnemy = v.nearbyEnemy, attackTarget = v.attackTarget;
     const fading = attackTarget && hitCount(attackTarget) === 3 && now - v.lastHitAt < 2400;
-    if (v.finaleAt && now>=v.finaleAt && !v.paused() && !cardDue) { v.finaleAt=0; if (!options.adminUnlocked && canPlayMapFinale(context.save)) options.onFinale(); }
+    if (v.finaleAt && now>=v.finaleAt && !v.paused() && !cardDue) { v.finaleAt=0; if (!options.adminUnlocked && stages.every(stage=>context.save.completed.includes(stage.id))) options.onFinale(); }
     const wasFocused = document.activeElement === attack;
     const isPaused = v.paused();
     attack.hidden = !(v.syncAttackDock() && !isPaused);
@@ -147,13 +147,8 @@ export function createVillageEncounters(v: VillageScene) {
     enemy.facing = facingToward(enemy, v.actor, enemy.facing);
     const hits = hitCount(enemy) + 1;
     context.save.mapVillains[enemy.index] = hits;
-    if (!options.adminUnlocked) {
-      if (hits===3 && canPlayMapFinale(context.save)) {
-        context.save.mapFinalePending=true;
-        v.finaleAt=now+(reduced.matches ? 850 : 2300);
-      }
-      context.commit();
-    }
+    // A defeated villain gives only its card; the finale plays once when the last mission is finished (2026-11-22).
+    if (!options.adminUnlocked) context.commit();
     // The villain answers 300 ms after the hit sound (which lands 80 ms after the press).
     v.villainSay(enemy.id, hits + 1, encounterLines[enemy.id][hits+1], 380);
     if (hits===3 && story.complete) hint.textContent=v.restHint();

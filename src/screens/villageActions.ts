@@ -44,7 +44,7 @@ export function createVillageActions(v: VillageScene) {
     if(v.nearBoard)return '의뢰 게시판이야. 게시판을 눌러 마을 사람들의 부탁을 확인해 봐!';
     if(!story.next) {
       const n=defeatedMapVillains(context.save);
-      return n>=5?'마을에 불이 모두 켜졌어! 「내 발견 모아 보기」를 눌러 봐.':`악당 ${n}/5 퇴치 · 다섯 악당을 물리치면 마을 점등식 영상이 열려!`;
+      return n>=5?'마을에 불이 모두 켜졌어! 「내 발견 모아 보기」를 눌러 봐.':`악당 ${n}/5 퇴치 · 악당을 물리치면 성취 카드를 받아!`;
     }
     return `다음 목적지는 ${villageRewards[story.next].name}! 불이 켜진 이름표를 누르면 걸어가요.`;
   }
