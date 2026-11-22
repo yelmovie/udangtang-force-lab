@@ -15,7 +15,7 @@
   "minutes": 35,
   "stages": 5,
   "thumbnail": "thumbnails/thumbnail-16x8.png",
-  "appCommit": "66aa421",
+  "appCommit": "047546b",
   "host": "workers",
   "note": "minutes는 README의 30~40분 코드 기반 추정 중간값(실측 아님). 납품 썸네일 위치는 thumbnails/ 폴더 기준.",
   "consistency": {
@@ -82,7 +82,10 @@
         "PNG 저장",
         "닫기"
       ],
-      "note": "2026-11-22 신설: 실제 5미션 완료 뒤 결과 화면·설정에서 열림. 관리자 미리보기에서는 발급하지 않음. A4 가로 종이와 손으로 쓰는 빈칸(학교55.8mm·이름68.3mm·높이11.3mm), 화면 배치를 읽는2400×1697PNG. 저장형식 그대로라 날짜는 만든 날. 종이 밖에 출력/저장/닫기 버튼. 인증서 기입 안내는 인쇄/PNG에서 제외. 최신 사용자 지시: 인증서의 미션·도구 카드 숫자 요약 제거, 제목900과 얇은 획 보강. 지도·판정·저장은 그대로."
+      "note": "2026-11-22 신설: 실제 5미션 완료 뒤 결과 화면·설정에서 열림. 관리자 미리보기에서는 발급하지 않음. A4 가로 종이와 손으로 쓰는 빈칸(학교55.8mm·이름68.3mm·높이11.3mm), 화면 배치를 읽는2400×1697PNG. 저장형식 그대로라 날짜는 만든 날. 종이 밖에 출력/저장/닫기 버튼. 인증서 기입 안내는 인쇄/PNG에서 제외. 최신 사용자 지시: 인증서의 미션·도구 카드 숫자 요약 제거, 제목900과 얇은 획 보강. 지도·판정·저장은 그대로.",
+      "status": "공식 운영 확인 완료",
+      "verifiedAt": "2026-11-22T20:22:24+09:00",
+      "appCommit": "047546b"
     },
     "rewardCards": {
       "count": 5,
@@ -135,5 +138,29 @@
   },
   "gradeRepo": "3학년",
   "unitRepo": "힘과 우리 생활",
-  "gradeUnitSource": "운영 시트 「이예리 선생님」 탭, 2026-11-22 확인"
+  "gradeUnitSource": "운영 시트 「이예리 선생님」 탭, 2026-11-22 확인",
+  "productionVerification": {
+    "checkedAt": "2026-11-22T20:22:24+09:00",
+    "url": "https://udangtang-force-lab.yelsam.workers.dev",
+    "appCommit": "047546b",
+    "status": "MATCH",
+    "deploymentId": "abc8ff31-2ff7-46c0-b288-af0095acca23",
+    "deploymentAction": "최신 앱이 운영과 일치해 기존 배포 유지, 문서만 갱신",
+    "matchedFiles": 11,
+    "certificateEvidence": ".tmp/cert-design-20261122/prod-no-count.json",
+    "views": [
+      "1280x800",
+      "1024x768",
+      "1920x1080"
+    ],
+    "certificateChecks": [
+      "A4 가로",
+      "손기입 빈칸",
+      "인쇄/PDF 1쪽",
+      "PNG 2400x1697",
+      "진행·성취 숫자 요약 없음",
+      "제목 900·화면/PNG 획 일치"
+    ],
+    "scope": "이번에는 운영 파일 SHA256과 기존 성공한 출력 검증 기록 대조. 실기기·수업 검수는 기존 미확인 상태."
+  }
 }
