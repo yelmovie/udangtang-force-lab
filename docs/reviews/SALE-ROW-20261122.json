@@ -1,23 +1,111 @@
 {
-  "no": 1, "name": "우당탕 힘 실험실", "folder": "1udangtangtang",
-  "grade": "3학년", "semester": "1학기", "subject": "과학", "unit": "힘과 우리 생활",
-  "standards": ["[4과01-01]", "[4과01-02]", "[4과01-03]", "[4과01-04]"],
-  "minutes": 35, "stages": 5,
+  "no": 1,
+  "name": "우당탕 힘 실험실",
+  "folder": "1udangtangtang",
+  "grade": "3학년",
+  "semester": "1학기",
+  "subject": "과학",
+  "unit": "힘과 우리 생활",
+  "standards": [
+    "[4과01-01]",
+    "[4과01-02]",
+    "[4과01-03]",
+    "[4과01-04]"
+  ],
+  "minutes": 35,
+  "stages": 5,
   "thumbnail": "thumbnails/thumbnail-16x8.png",
-  "appCommit": "66aa421", "host": "workers",
+  "appCommit": "66aa421",
+  "host": "workers",
   "note": "minutes는 README의 30~40분 코드 기반 추정 중간값(실측 아님). 납품 썸네일 위치는 thumbnails/ 폴더 기준.",
   "consistency": {
-    "creditLine": {"text": "기획·제작: 옐샘 & ⓒ 아이스크림미디어", "where": ["settings", "start"]},
-    "settings": {
-      "items": ["배경 음악", "효과음", "목소리", "전체 소리 크기", "효과음 크기", "도구 가방", "이 탐험을 하는 이유 다시 보기", "점등식 다시 보기", "나의 탐구 결과 보기", "개념 영상 다시 보기", "앱 정보 · 배움과 보상", "학생용 가이드", "교사용 가이드", "이미지·소리·저작권 고지", "메인 화면", "지금 저장", "탐구 기록 초기화", "닫기"],
-      "close": ["x-button", "esc", "backdrop"], "closeLabel": "설정 닫기(×), 닫기"
+    "creditLine": {
+      "text": "기획·제작: 옐샘 & ⓒ 아이스크림미디어",
+      "where": [
+        "settings",
+        "start"
+      ]
     },
-    "certificate": {"fields": [], "buttons": [], "note": "인증서 화면 없음. 마무리는 엔딩 화면(내 실험과 발견, 스스로 돌아보기, 도구 카드)이며 인증서 서명 줄도 없음"},
-    "rewardCards": {"count": 5, "textPx": 16, "lockedText": "악당을 물리치면 열려요", "note": "카드 이름 최소 20px, 설명 최소 16px, 잠긴 카드 안내 18px(src/reward-cards.css)"},
-    "modalButtons": {"primarySide": "right", "order": ["건너뛰기", "다음 →"], "note": "이야기 창 기준. 미션 카드는 「실험 시작 →」 하나"},
-    "startScreen": {"buttons": ["소리 끄기/켜기", "설정 열기", "시작하기(저장 있으면 새로 시작)", "이어 하기"]}
+    "settings": {
+      "items": [
+        "배경 음악",
+        "효과음",
+        "목소리",
+        "전체 소리 크기",
+        "효과음 크기",
+        "도구 가방",
+        "이 탐험을 하는 이유 다시 보기",
+        "점등식 다시 보기",
+        "나의 탐구 결과 보기",
+        "개념 영상 다시 보기",
+        "앱 정보 · 배움과 보상",
+        "학생용 가이드",
+        "교사용 가이드",
+        "이미지·소리·저작권 고지",
+        "메인 화면",
+        "지금 저장",
+        "탐구 기록 초기화",
+        "닫기"
+      ],
+      "close": [
+        "x-button",
+        "esc",
+        "backdrop"
+      ],
+      "closeLabel": "설정 닫기(×), 닫기"
+    },
+    "certificate": {
+      "fields": [],
+      "buttons": [],
+      "note": "인증서 화면 없음. 마무리는 엔딩 화면(내 실험과 발견, 스스로 돌아보기, 도구 카드)이며 인증서 서명 줄도 없음"
+    },
+    "rewardCards": {
+      "count": 5,
+      "textPx": 16,
+      "lockedText": "악당을 물리치면 열려요",
+      "note": "카드 이름 최소 20px, 설명 최소 16px, 잠긴 카드 안내 18px(src/reward-cards.css)"
+    },
+    "modalButtons": {
+      "primarySide": "right",
+      "order": [
+        "건너뛰기",
+        "다음 →"
+      ],
+      "note": "이야기 창 기준. 미션 카드는 「실험 시작 →」 하나"
+    },
+    "startScreen": {
+      "buttons": [
+        "소리 끄기/켜기",
+        "설정 열기",
+        "시작하기(저장 있으면 새로 시작)",
+        "이어 하기"
+      ]
+    }
   },
-  "ledger": {"rows": 46, "open": 0, "openItems": [], "userPending": ["Higgsfield 요금제·약관", "Google Flow(Veo) 요금제와 워터마크 판매 가능 여부", "Meshy 요금제·상업 이용 조건", "Suno 요금제와 곡 링크", "ElevenLabs 요금제", "업체 제공 자료 근거"]},
-  "teacherGuide": {"needsConfirm": ["교사 검수표 표시(docs/TEACHER-REVIEW-20261121.md)", "실제 수업 시간(30~40분은 추정)"]},
-  "files": {"teacherGuide": "docs/TEACHER-GUIDE.md", "handoff": "docs/DELIVERY-HANDOFF.md"}
+  "ledger": {
+    "rows": 46,
+    "open": 0,
+    "openItems": [],
+    "userPending": [
+      "Higgsfield 요금제·약관",
+      "Google Flow(Veo) 요금제와 워터마크 판매 가능 여부",
+      "Meshy 요금제·상업 이용 조건",
+      "Suno 요금제와 곡 링크",
+      "ElevenLabs 요금제",
+      "업체 제공 자료 근거"
+    ]
+  },
+  "teacherGuide": {
+    "needsConfirm": [
+      "교사 검수표 표시(docs/TEACHER-REVIEW-20261121.md)",
+      "실제 수업 시간(30~40분은 추정)"
+    ]
+  },
+  "files": {
+    "teacherGuide": "docs/TEACHER-GUIDE.md",
+    "handoff": "docs/DELIVERY-HANDOFF.md"
+  },
+  "gradeRepo": "3학년",
+  "unitRepo": "힘과 우리 생활",
+  "gradeUnitSource": "운영 시트 「이예리 선생님」 탭, 2026-11-22 확인"
 }
