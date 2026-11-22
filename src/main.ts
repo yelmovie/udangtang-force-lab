@@ -43,6 +43,7 @@ import { openSettings as openSettingsPanel, type SettingsHost } from './settings
 import { openMissionCard as openMissionCardPanel } from './missionCard';
 import { shownItems, wrapTabAtEnds } from './focusTrap';
 import { completeScreenMarkup, guessMarkup, titleScreenMarkup } from './screenMarkup';
+import { openForceCertificate } from './certificate';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 let save: SaveData = readSave() ?? freshSave();
@@ -535,15 +536,18 @@ function renderComplete(root: HTMLElement) {
   }));
   const ending = root.querySelector<HTMLElement>('.ending-world')!;
   const replay = () => { ending.classList.remove('lit'); void ending.offsetWidth; ending.classList.add('lit'); tone(760); };
+  root.querySelector('#get-certificate')?.addEventListener('click', showCertificate);
   root.querySelector('#replay-ending')?.addEventListener('click', openEndingCeremony);
   root.querySelector('#restart-ending')?.addEventListener('click', restartFromBeginning);
   root.querySelectorAll<HTMLButtonElement>('.report-concept').forEach(button => button.addEventListener('click', () => openConceptClip(button.dataset.concept as StageId)));
   replay();
 }
 
+function showCertificate(){if(!adminUnlocked&&save.completed.length===stages.length)openForceCertificate(app,save,toast);}
+
 const settingsHost: SettingsHost = {
   app, save: () => save, adminSave: () => adminSave, adminUnlocked: () => adminUnlocked,
-  tone, toast, persist, navigate, setAdminMode, updateSoundButton, syncMusic, openEndingCeremony,
+  tone, toast, persist, navigate, setAdminMode, updateSoundButton, syncMusic, openEndingCeremony, openCertificate: showCertificate,
   resetRecords() {
     const sound = soundPrefs(save);
     adminUnlocked = false; adminSave = null;

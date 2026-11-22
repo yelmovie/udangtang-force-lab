@@ -1,0 +1,43 @@
+.certificate-layer{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:8px;background:#173f3d99;backdrop-filter:blur(3px)}
+.certificate-layer .force-cert-dialog{display:flex;flex-direction:column;align-items:center;gap:8px;max-height:calc(100dvh - 16px)}
+.certificate-layer .cert-paper{position:relative;width:min(calc(100vw - 40px),calc((100dvh - 116px)*297/210));aspect-ratio:297/210;flex:none;container-type:inline-size;margin:0;padding:0;background:#fff6df;border:0;border-radius:3px;box-shadow:0 8px 35px #163f3d44;overflow:hidden;animation:cert-paper-arrive .8s ease-out both;color:#1d5357}
+.cert-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
+.cert-content{position:absolute;inset:9% 11% 11%;display:grid;grid-template-rows:6% 14% 24% 20% 9% 22% 5%;justify-items:center;align-items:center;text-align:center;color:#1d5357}
+.cert-content p,.cert-content h2{padding:0;margin:0;color:inherit;line-height:1.45;letter-spacing:0;max-width:none;font-family:inherit}
+.cert-content .cert-world{font-size:1.5cqw;font-weight:800;letter-spacing:.3em;color:#3c7472}
+.cert-content .cert-title{font-size:4.2cqw;font-weight:900;line-height:1.2;white-space:nowrap}
+.cert-recipient{width:100%;align-self:center;display:grid;gap:.25cqw;font-size:1.7cqw;font-weight:800}
+.cert-school-row{display:flex;justify-content:center;gap:.75cqw;align-items:end}
+.cert-field{display:flex;align-items:end;gap:.5cqw;white-space:nowrap}
+.cert-blank{display:inline-block;border-bottom:1px solid #3c7472;height:3.8cqw;vertical-align:bottom;flex:none}
+.cert-field [data-cert-blank=school]{width:18.8cqw}
+.cert-field [data-cert-blank=grade],.cert-field [data-cert-blank=class],.cert-field [data-cert-blank=number]{width:5.6cqw}
+.cert-name-row{display:flex;justify-content:center;align-items:end;gap:.7cqw;font-size:2.2cqw}
+.cert-name-row .cert-blank{width:23cqw}
+.cert-content .cert-award{font-size:1.85cqw;line-height:1.55;font-weight:600}
+.cert-content .cert-achievement{font-size:1.8cqw;font-weight:800;color:#215e62}
+.cert-content .cert-badges{font-size:1.35cqw;font-weight:800;color:#34705f}
+.cert-content .cert-total{font-size:1.6cqw;font-weight:900;color:#215e62}
+.cert-content .cert-practice,.cert-content .cert-result{font-size:1.25cqw;line-height:1.4;color:#3c655a}
+.cert-bottom{width:78%;display:grid;grid-template-columns:1fr 1fr 1fr;gap:3cqw;align-items:center}
+.cert-bottom p{font-size:1.55cqw;line-height:1.5;font-weight:700;white-space:nowrap}
+.cert-bottom small{display:block;font-size:1.2cqw;letter-spacing:.08em;font-weight:500;color:#4c7164;margin-bottom:.5cqw}
+.cert-stamp{display:flex;flex-direction:column;justify-content:center;align-items:center;justify-self:center;width:9cqw;height:9cqw;border:2px solid #4c9476;border-radius:50%;background:#edf6dc;color:#347258;animation:cert-seal-arrive .75s .15s ease-out both}
+.cert-stamp>span{font-size:3.1cqw;line-height:1;margin-bottom:.4cqw;color:#996329}
+.cert-stamp b{font-size:1.3cqw;line-height:1.15}
+.cert-content .cert-credit{font-size:1.05cqw;color:#4b6a5f;white-space:nowrap}
+.certificate-layer .cert-note{font-size:14px;font-weight:700;line-height:1.4;margin:0;padding:5px 14px;background:#fffdf2f2;border-radius:7px;color:#24564a}
+.cert-actions{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.certificate-layer .cert-actions .button{min-height:48px;padding:9px 20px;font-size:18px;margin:0;white-space:nowrap}
+@keyframes cert-paper-arrive{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes cert-seal-arrive{from{opacity:0;scale:1.3}to{opacity:1;scale:1}}
+@media(prefers-reduced-motion:reduce){.cert-paper,.cert-stamp{animation:none!important}}
+@media print{
+ @page{size:A4 landscape;margin:0}
+ html,body{width:297mm!important;height:210mm!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#fff!important}
+ body:has(.certificate-layer)>:not(.certificate-layer){display:none!important}
+ body .certificate-layer{position:absolute!important;inset:0!important;display:block!important;width:297mm!important;height:210mm!important;padding:0!important;background:#fff!important;backdrop-filter:none!important}
+ .certificate-layer .force-cert-dialog{display:block!important;margin:0!important;padding:0!important;max-height:none!important}
+ .certificate-layer .cert-paper{width:297mm!important;height:210mm!important;box-shadow:none!important;border-radius:0!important;animation:none!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ .certificate-layer .cert-note,.certificate-layer .cert-actions{display:none!important}
+}

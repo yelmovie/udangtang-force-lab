@@ -17,7 +17,7 @@ export type SettingsHost = {
   save(): SaveData; adminSave(): SaveData | null; adminUnlocked(): boolean;
   tone(frequency?: number): void; toast(message: string): void; persist(): boolean;
   navigate(page: PageId): void; setAdminMode(enabled: boolean): void;
-  updateSoundButton(): void; syncMusic(): void; openEndingCeremony(): void;
+  updateSoundButton(): void; syncMusic(): void; openEndingCeremony(): void; openCertificate(): void;
   /** 기록 초기화: 소리 설정만 남기고 새 저장으로, 해금 끔, 첫 화면으로 */
   resetRecords(): void;
   /** 첫 화면(제목)으로 */
@@ -58,10 +58,12 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
           <button type="button" data-settings="prologue"><span>${icons.play}</span> 이 탐험을 하는 이유 다시 보기</button>
           <button type="button" data-settings="ending"${canWatch ? '' : ' disabled aria-describedby="finale-locked"'}><span>${icons.sparkle}</span> 점등식 다시 보기</button>
           <button type="button" data-settings="record"${canRead ? '' : ' disabled aria-describedby="record-locked"'}><span>${icons.book}</span> 나의 탐구 결과 보기</button>
+          <button type="button" data-settings="certificate"${!adminUnlocked && save.completed.length === stages.length ? '' : ' disabled aria-describedby="certificate-locked"'}><span>${icons.book}</span> 인증서 받기</button>
           <button type="button" data-settings="concepts"><span>${icons.film}</span> 개념 영상 다시 보기</button>
         </div>
         ${canWatch ? '' : '<p class="settings-lock" id="finale-locked">다섯 미션을 모두 마치면 점등식이 열려요.</p>'}
         ${canRead ? '' : '<p class="settings-lock" id="record-locked">다섯 미션을 마치면 탐구 결과를 볼 수 있어요.</p>'}
+        ${!adminUnlocked && save.completed.length === stages.length ? '' : '<p class="settings-lock" id="certificate-locked">실제로 다섯 미션을 모두 마치면 인증서가 열려요.</p>'}
         ${summary('앱 정보 · 배움과 보상',infoContent.about)}
         ${summary('학생용 가이드',infoContent.help)}
         ${summary('교사용 가이드',infoContent.teacher+`<details class="science-settings-detail"> <summary>성취기준</summary>${infoContent.curriculum}</details><div class="settings-reading"><h3>교사용 도구</h3><div class="settings-links"><button type="button" data-settings="admin"><span>${icons.gear}</span> 전체 단계 해금 <small>${adminUnlocked ? '사용 중' : '꺼짐'}</small></button></div><p>수업에서 바로 살펴볼 수 있어요. 미리보기 진행은 학생 기록에 남지 않아요.</p></div>`)}
@@ -141,6 +143,7 @@ export function openSettings(host: SettingsHost, focusAction?: 'bag') {
     }
     else if (action === 'ending') { close(); host.openEndingCeremony(); }
     else if (action === 'record') { close(); host.navigate('complete'); }
+    else if (action === 'certificate' && !adminUnlocked && save.completed.length === stages.length) { close(); host.openCertificate(); }
     else if (action === 'prologue') { close(); openStoryModal({ lines: prologueLines, finishLabel: '닫기', video: introVideo }); }
     else if (action === 'toggle-admin') {
       const enable = !adminUnlocked;
