@@ -192,3 +192,8 @@
 | 47 | `public/assets/ui/certificate-frame-20261122.webp`(1800×1273, 163444바이트) | Codex 기본 이미지 도구(GPT 이미지) | 2026-11-22, 1회 생성. 원본 `assets/source/certificate/certificate-frame-20261122.png`, 프롬프트 `assets/source/certificate/PROMPT-01.txt`. 이 프로젝트 실험실·도토리 박사 참고, 수평저울·용수철저울·지레·빗면·공구 테두리 | 이 프로젝트용 생성 그림. 요금제·약관 증빙 보관은 기존 F11 사용자 자료 대기 유지 | 위 원본·프롬프트, `public/assets/CREDITS.md` | 확인됨(도구·생성일·원본·프롬프트) |
 
 추가 뒤 출처 장부 47줄이며 기존 46줄의 출처 판정과 자료 대기는 바꾸지 않았습니다.
+
+
+## 2026-11-23 인증서 촛농 봉인
+
+사용자가 이번 작업에 직접 제공한 투명 PNG 원본을 알파를 유지한 768px WebP로 변환하여 사용. 원본: 공통 작업 폴더 `_scratch/certificate-wax-20261123/assets/user-wax-seal-reference.png`. 배포본: `assets/ui/certificate-wax-seal-20261123.webp`. 프로젝트별 문구는 별도 텍스트로 합성하며 생성 AI 이미지로 기재하지 않음.

@@ -1,4 +1,6 @@
 import './certificate.css';
+import {mountCertificateWax} from './certificate-wax.js';
+import {playSound} from './sound';
 import {stages} from './data';
 import type {SaveData} from './state';
 import {shownItems,wrapTabAtEnds} from './focusTrap';
@@ -20,5 +22,5 @@ export function openForceCertificate(app:HTMLElement,save:SaveData,announce:(mes
  overlay.querySelector<HTMLButtonElement>('#certificate-print')!.onclick=()=>window.print();
  overlay.querySelector<HTMLButtonElement>('#certificate-close')!.onclick=close;
  overlay.querySelector<HTMLButtonElement>('#certificate-png')!.onclick=async event=>{const button=event.currentTarget as HTMLButtonElement;button.disabled=true;try{await saveCertificatePng(overlay.querySelector<HTMLElement>('.cert-paper')!,'우당탕_힘탐구_연구원_인증서.png');announce('인증서 PNG를 저장했어요.');}catch{announce('인증서 그림을 불러오지 못했어요. 연결을 확인하고 다시 눌러 주세요.');}finally{button.disabled=false;}};
- app.inert=true;document.body.append(overlay);overlay.querySelector<HTMLButtonElement>('#certificate-print')!.focus({preventScroll:true});
+ app.inert=true;document.body.append(overlay);mountCertificateWax(overlay.querySelector<HTMLElement>('.cert-paper')!,{label:'힘 탐구\n연구원 인증',onImpact:()=>{if(save.soundOn)playSound('hit3');}});overlay.querySelector<HTMLButtonElement>('#certificate-print')!.focus({preventScroll:true});
 }

@@ -1,3 +1,4 @@
+import {finishCertificateWax} from './certificate-wax.js';
 // 인증서 PNG 저장: 화면의 인증서 종이(.cert-paper)를 그대로 캔버스에 옮겨 그린다(새 의존성 없음).
 // 테두리 그림 → 상자(배경·테두리·둥근 모서리) → 글자를 줄 단위로, 화면에서 잰 위치에 비례해 놓는다.
 const LONG_SIDE = 2400;
@@ -27,6 +28,7 @@ function lines(node: Text): {text: string; rect: DOMRect}[] {
 }
 
 export async function drawCertificate(paper: HTMLElement): Promise<HTMLCanvasElement> {
+  finishCertificateWax(paper);
   await document.fonts?.ready;
   for (const animation of paper.getAnimations({ subtree: true })) animation.finish();
   const box = paper.getBoundingClientRect(); const scale = LONG_SIDE / box.width;
@@ -37,12 +39,17 @@ export async function drawCertificate(paper: HTMLElement): Promise<HTMLCanvasEle
   if (frame?.src) { const img = await loadImage(frame.src); const r = frame.getBoundingClientRect(); ctx.drawImage(img, X(r.left), Y(r.top), r.width * scale, r.height * scale); }
   // 상자: 배경색·테두리가 있는 요소(성취 배지, 도장, 이름 밑줄 등)
   for (const el of paper.querySelectorAll<HTMLElement>('.cert-content *')) {
+    if (el.closest('[data-cert-export-ignore]')) continue;
     const cs = getComputedStyle(el); if (cs.display === 'none' || cs.visibility === 'hidden') continue;
     const r = el.getBoundingClientRect(); if (!r.width || !r.height) continue;
     const radius = (cs.borderTopLeftRadius.endsWith('%') ? Math.min(r.width, r.height) * parseFloat(cs.borderTopLeftRadius) / 100 : parseFloat(cs.borderTopLeftRadius)) * scale || 0;
     const bg = cs.backgroundColor; if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') { ctx.fillStyle = bg; roundRect(ctx, X(r.left), Y(r.top), r.width * scale, r.height * scale, radius); ctx.fill(); }
     const bw = parseFloat(cs.borderTopWidth); if (bw > 0 && cs.borderTopStyle !== 'none') { ctx.strokeStyle = cs.borderTopColor; ctx.lineWidth = bw * scale; roundRect(ctx, X(r.left) + bw * scale / 2, Y(r.top) + bw * scale / 2, (r.width - bw) * scale, (r.height - bw) * scale, radius); ctx.stroke(); }
     else { const bb = parseFloat(cs.borderBottomWidth); if (bb > 0 && cs.borderBottomStyle !== 'none') { ctx.fillStyle = cs.borderBottomColor; ctx.fillRect(X(r.left), Y(r.bottom) - bb * scale, r.width * scale, bb * scale); } }
+  }
+  for (const image of paper.querySelectorAll<HTMLImageElement>('.cert-wax-art')) {
+    const loaded = await loadImage(image.src), r = image.getBoundingClientRect();
+    ctx.drawImage(loaded, X(r.left), Y(r.top), r.width * scale, r.height * scale);
   }
   // 글자: 화면에서 잰 줄 위치에 같은 글꼴·크기·색으로
   const walker = document.createTreeWalker(paper.querySelector('.cert-content')!, NodeFilter.SHOW_TEXT);
