@@ -8,7 +8,7 @@ import { missionProgressMarkup, setMissionProgress } from '../missionProgress';
 import { scaleActivityMeasurements, scaleExplorationReady, comparisonParts, emptyScaleReading, fakeDiscoveryText, fakeHint, fakeLabels, fakeLayout, fakeRequestComplete, fakeRounds, fakeSummary, judgeFakePick, nextFakeRound, recordFakePick, recordScaleRun, scaleComparison, recordSpringRead, springDone, springEyeLabels, springHint, springObjects, springParallax, springReading, springStartOffset, springSummary, turnSpringScrew, type EyeLevel, type FakeMeasurement } from '../scaleModel';
 import { requestOpenLabel, showRequestLetter } from '../requestLetter';
 import { predictionRecap } from '../inquiryPlan';
-import { autoPause, autoWait, syncAutoButton } from '../autoPlay';
+import { autoDemoSettingChange, autoPause, autoWait, syncAutoButton } from '../autoPlay';
 import '../instruments.css';
 import '../scalePolish.css';
 
@@ -274,7 +274,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     difference.classList.toggle('matched',level===1 ? !!state.zeroed&&reading===targetWeight : found!==null);
     difference.textContent=differenceText();
     root.querySelector<HTMLButtonElement>('#scale-record-open')!.disabled=busy;
-    syncAutoButton(autoGo,section,autoPlaying,autoSteps().length>0,busy||!!drag);
+    syncAutoButton(autoGo,section,autoPlaying,context.autoDemoEnabled()&&autoSteps().length>0,busy||!!drag);
   }
   function animate(target:Element|null,keyframes:Keyframe[],duration:number) {
     if(!target||reducedMotion()) return;
@@ -516,7 +516,7 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
   }
   /** Uses the same buttons and addPart() as the student: empty the scale, zero it, then one part at a time. */
   async function autoPlay() {
-    if(autoPlaying||busy||waiting||drag||!autoSteps().length) return;
+    if(!context.autoDemoEnabled()||autoPlaying||busy||waiting||drag||!autoSteps().length) return;
     const runId=++autoRunId;
     const autoAlive=()=>active&&autoPlaying&&runId===autoRunId;
     autoPlaying=true; autoResult=null; popup?.close();
@@ -540,7 +540,14 @@ export function mountScale(root: HTMLElement, context: AppContext): () => void {
     // Let the old run end before the result can open the next round's auto controls.
     if(autoResult) { const result=autoResult; autoResult=null; showResult(result); }
   }
-  autoGo.addEventListener('click',event=>{ event.stopPropagation(); if(autoPlaying) { autoPlaying=false; feedback='자동 진행을 멈췄어요. 직접 이어서 해도 돼요.'; update(); } else void autoPlay(); },{signal:events.signal});
+  function stopAutoPlay() {
+    autoPlaying=false; feedback='자동 진행을 멈췄어요. 직접 이어서 해도 돼요.'; update();
+  }
+  autoGo.addEventListener('click',event=>{ event.stopPropagation(); if(autoPlaying) stopAutoPlay(); else void autoPlay(); },{signal:events.signal});
+  window.addEventListener(autoDemoSettingChange, () => {
+    if(autoPlaying&&!context.autoDemoEnabled()) stopAutoPlay();
+    else update();
+  }, { signal: events.signal });
   let drag:{pointer:number;source:HTMLElement;id:string;fromBasket:boolean;x:number;y:number;moved:boolean;ghost:HTMLElement|null}|null=null;
   function endDrag() {
     if(!drag)return;

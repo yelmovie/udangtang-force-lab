@@ -3,6 +3,7 @@ import './autoPlay.css';
 // Shared pieces of each stage's "자동으로 보기": the stage runs its hands-on steps by itself
 // (placing, measuring, pulling, pushing), while predictions and answers stay with the student.
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+export const autoDemoSettingChange = 'auto-demo-setting-change';
 
 /** A pause between automatic steps, so each result can be seen. */
 export function autoPause(ms: number): Promise<void> {

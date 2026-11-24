@@ -29,6 +29,17 @@ const scaleModel = await import(moduleUrl('src/scaleModel.ts'));
 const life = await import(moduleUrl('src/lifeObservation.ts'));
 const challenge = await import(moduleUrl('src/challenges.ts'));
 const coreScene = await import(moduleUrl('src/coreSceneModel.ts'));
+test('automatic demonstrations are off for fresh and legacy saves unless explicitly enabled', () => {
+  const save = state.freshSave();
+  assert.equal(save.showAutoDemo, false);
+  const { showAutoDemo, ...legacy } = save;
+  localStorage.setItem(state.SAVE_KEY, JSON.stringify(legacy));
+  assert.equal(state.readSave().showAutoDemo, false);
+  for (const value of [true, false, 'true']) {
+    localStorage.setItem(state.SAVE_KEY, JSON.stringify({ ...save, showAutoDemo: value }));
+    assert.equal(state.readSave().showAutoDemo, value === true);
+  }
+});
 test('basic scale completion needs two accurate individual measurements, not a 150 g combination', () => {
   const runs = [{parts:['orange'],reading:80,zeroed:true},{parts:['blue'],reading:70,zeroed:true}];
   assert.equal(scaleModel.canCompleteScale({zeroed:true,runs}),true);

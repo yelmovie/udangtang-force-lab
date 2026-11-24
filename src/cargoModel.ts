@@ -3,6 +3,7 @@ import { forceNames } from './rescueModel';
 export type ForceLevel = 1 | 2 | 3;
 export type OrderResult = 'hit' | 'over' | 'short';
 export type CargoOrder = { parts: 1 | 3 | 5; target: readonly [number, number] };
+export const cargoLoads = [1, 3, 5] as const;
 
 // Qualitative model in rail cells; drag speed and length never change it.
 // The medium step is the level 1 "same push": 1, 3 and 5 parts stop at 66, 44 and 22 cells,
@@ -24,7 +25,7 @@ export const cargoOrders: readonly CargoOrder[] = [
 ];
 
 export function cargoActionCompared(runs: readonly { parts: number; action: string }[], action: 'push' | 'pull'): boolean {
-  return [1, 3, 5].every(parts => runs.some(run => run.parts === parts && run.action === action));
+  return cargoLoads.every(parts => runs.some(run => run.parts === parts && run.action === action));
 }
 
 export function cargoExplorationReady(runs: readonly { parts: number; action: string }[]): boolean {
@@ -34,7 +35,7 @@ export function cargoExplorationReady(runs: readonly { parts: number; action: st
 /** Hands-on: compare all three loads in one action and repeat one of them with the other action. */
 export function cargoManualEvidence(runs: readonly { parts: number; action: string }[]) {
   const comparison = (['push', 'pull'] as const).find(action => cargoActionCompared(runs, action));
-  const sameLoad = [1, 3, 5].some(parts => runs.some(run => run.parts === parts && run.action === 'push')
+  const sameLoad = cargoLoads.some(parts => runs.some(run => run.parts === parts && run.action === 'push')
     && runs.some(run => run.parts === parts && run.action === 'pull'));
   return { comparison, sameLoad, ready: comparison !== undefined && sameLoad };
 }

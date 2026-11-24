@@ -58,6 +58,8 @@ export interface SaveData {
   effectVolume?: number;
   /** Sound starts switched on. A save from when it started off has no mark: its untouched "everything off" is switched on once, and later choices are kept. */
   soundStartsOn?: true;
+  /** Shows the optional automatic demonstration buttons when the teacher enables them. */
+  showAutoDemo: boolean;
   /** orders: delivering force step per finished bakery order (level 2); present once the level 1 finding is chosen. */
   cargo: { parts: number; action: 'push' | 'pull'; runs: CargoRun[]; orders?: number[] };
   balance: { left: string | null; right: string | null; prediction: BalanceRun['prediction'] | null; runs: BalanceRun[] };
@@ -96,6 +98,7 @@ export function freshSave(): SaveData {
     soundVolume: 0.3,
     voiceOn: true,
     effectVolume: 1,
+    showAutoDemo: false,
     cargo: { parts: 1, action: 'push', runs: [] },
     balance: { left: null, right: null, prediction: null, runs: [] },
     scale: { zeroed: false, parts: [], runs: [] },
@@ -141,6 +144,7 @@ export function readSave(): SaveData | null {
       effectVolume: typeof item.effectVolume === 'number' && Number.isFinite(item.effectVolume) ? Math.min(1, Math.max(0, Math.round(item.effectVolume * 20) / 20)) : 1,
       musicOn: startedOff || (typeof item.musicOn === 'boolean' ? item.musicOn : item.soundOn === true),
       soundVolume: typeof item.soundVolume === 'number' && Number.isFinite(item.soundVolume) ? Math.min(1, Math.max(0, item.soundVolume)) : 0.3,
+      showAutoDemo: item.showAutoDemo === true,
       cargo: {
         parts: [1, 3, 5].includes(item.cargo?.parts ?? 0) ? item.cargo!.parts : 1,
         action: item.cargo?.action === 'pull' ? 'pull' : 'push',

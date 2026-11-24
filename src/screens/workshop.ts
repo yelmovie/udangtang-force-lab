@@ -8,7 +8,7 @@ import { fingerIcon } from '../interactionHints';
 import { showPredictionChip } from '../predictionChip';
 import { requestOpenLabel, showRequestLetter } from '../requestLetter';
 import { corgiHintButton, mountCorgiHint } from '../corgiHint';
-import { autoPause, autoWait, syncAutoButton } from '../autoPlay';
+import { autoDemoSettingChange, autoPause, autoWait, syncAutoButton } from '../autoPlay';
 import '../workshop.css';
 
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -277,7 +277,7 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     if (workshopExplorationReady(state)) root.querySelector<HTMLElement>('#workshop-choice')!.insertAdjacentHTML('beforeend', workshopL2Complete(levelRecord()) ? '<p class="finding-earned">✓ 공방 친구의 의뢰도 끝냈어요</p>' : `<div class="workshop-request-invite"><img src="/assets/game/corgi-observe.webp" alt="" draggable="false"><p><strong>공방 친구의 의뢰가 왔어요!</strong>콩이 힘으로 화물 3개를 올려 줄래요?</p><button id="workshop-open-request" class="button button-primary" ${busy ? 'disabled' : ''}>${requestOpenLabel} →</button></div>`);
     }
     finish.disabled = busy || !workshopExplorationReady(state) || !workshopL2Complete(levelRecord());
-    syncAutoButton(autoGo, root.querySelector<HTMLElement>('.workshop-redesign')!, autoPlaying, level === 1 && !!scene && !workshopExplorationReady(state), busy);
+    syncAutoButton(autoGo, root.querySelector<HTMLElement>('.workshop-redesign')!, autoPlaying, context.autoDemoEnabled() && level === 1 && !!scene && !workshopExplorationReady(state), busy);
     const leverRuns=state.trials.filter(r=>r.tool==='lever'), rampRuns=state.trials.filter(r=>r.tool==='ramp');
     setMissionProgress(root,[steps.direct,steps.lever,steps.ramp,workshopL2Complete(levelRecord())],
       !steps.direct?'먼저 직접 들어요'
@@ -528,9 +528,9 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
       window.setTimeout(() => { if (active) update(); }, choiceLockMs);
     }
   }, { signal });
-  const autoAlive = () => active && autoPlaying && !!scene;
+  let autoRunId = 0;
   /** One try through the same autoRun() as "눌러서 시험하기", with a pause before and after to watch it. */
-  async function autoTry() {
+  async function autoTry(autoAlive: () => boolean) {
     await autoPause(600);
     if (!autoAlive()) return;
     autoRun();
@@ -538,29 +538,38 @@ export function mountWorkshop(root: HTMLElement, context: AppContext): () => voi
     await autoPause(900);
   }
   async function autoPlay() {
-    if (autoPlaying || level !== 1 || !scene || heldPointer !== null || keyHeld || designPointer !== null || waiting || sliding) return;
+    if (!context.autoDemoEnabled() || autoPlaying || level !== 1 || !scene || heldPointer !== null || keyHeld || designPointer !== null || waiting || sliding) return;
+    const runId = ++autoRunId;
+    const autoAlive = () => active && autoPlaying && !!scene && runId === autoRunId;
     autoPlaying = true; recordDialog?.close();
     setFeedback('자동으로 직접 들기, 지레, 빗면을 차례로 시험해요. 힘 막대를 지켜봐요.'); update();
     const tried = (name: WorkshopTool, setting: number) => state.trials.some(run => run.tool === name && run.setting === setting);
-    if (!state.direct) { configure('direct'); await autoTry(); }
+    if (!state.direct) { configure('direct'); await autoTry(autoAlive); }
     for (const setting of [0, 1, 2] as const) {
       if (!autoAlive()) break;
       if (tried('lever', setting)) continue;
       if (tool !== 'lever') configure('lever');
       resetGesture(); changeFulcrum(setting); context.commit(); update();
-      await autoTry();
+      await autoTry(autoAlive);
     }
     for (const setting of [0, 1] as const) {
       if (!autoAlive()) break;
       if (tried('ramp', setting)) continue;
       if (tool !== 'ramp') configure('ramp');
       if (state.rampLength !== setting) { slider.value = String(setting); slider.dispatchEvent(new Event('input')); }
-      await autoTry();
+      await autoTry(autoAlive);
     }
-    if (!active) return;
+    if (!active || runId !== autoRunId) return;
     autoPlaying = false; update();
   }
-  autoGo.addEventListener('click', () => { if (autoPlaying) { autoPlaying = false; setFeedback('자동 진행을 멈췄어요. 직접 이어서 해도 돼요.'); update(); } else void autoPlay(); }, { signal });
+  function stopAutoPlay() {
+    autoPlaying = false; setFeedback('자동 진행을 멈췄어요. 직접 이어서 해도 돼요.'); update();
+  }
+  autoGo.addEventListener('click', () => { if (autoPlaying) stopAutoPlay(); else void autoPlay(); }, { signal });
+  window.addEventListener(autoDemoSettingChange, () => {
+    if (autoPlaying && !context.autoDemoEnabled()) stopAutoPlay();
+    else update();
+  }, { signal });
   recordButton.addEventListener('click', () => { if (!recordButton.disabled) openRecord(level === 2 ? '의뢰 보기' : '기록 보기', feedback); }, { signal });
   root.querySelector('#turn-left')!.addEventListener('click', () => {scene?.turn(-1);positionHandle();}, { signal });
   root.querySelector('#turn-right')!.addEventListener('click', () => {scene?.turn(1);positionHandle();}, { signal });

@@ -50,7 +50,7 @@ async function until(predicate, label, timeout = 10000) {
 }
 function mount(screen, save = freshSave()) {
   cleanup?.(); root.replaceChildren(); finished = 0; destination = ''; notices = [];
-  context = { save, commit() {}, sound() {}, toast(text) { notices.push(text); }, navigate(page) { destination = page; }, finish() { finished++; } };
+  context = { save, autoDemoEnabled: () => save.showAutoDemo, commit() {}, sound() {}, toast(text) { notices.push(text); }, navigate(page) { destination = page; }, finish() { finished++; } };
   cleanup = screen(root, context);
 }
 function failure(kind) { return root.querySelector(`.scene-recovery[data-failure="${kind}"]:not([hidden])`); }
@@ -164,27 +164,25 @@ document.querySelector('#run-tests').addEventListener('click', async event => {
       assert(!context.save.rescue.loaded && !context.save.rescue.delivered, 'cancelled drag preserves progress');
     });
   }
-  await test('cargo: finish both push and pull comparisons before the bakery letter', async () => {
-    const all=allCargo();
-    for(const oldRequest of [false,true]) for(let missing=0;missing<all.length;missing++){
-      const save=freshSave();save.cargo.runs=all.filter((_,i)=>i!==missing).map(run=>({...run}));
-      if(oldRequest)save.cargo.orders=[];
-      mount(mountCargo,save);
-      assert(root.querySelector('.cargo-finding-cta').hidden,'one missing comparison cannot finish exploration');
-      assert(!root.querySelector('#request-letter-title'),'no early letter even with an old empty request record');
-      click('#cargo-record-open');
-      assert(!root.querySelector('[data-finding]'),'question waits for all six observations');
-      click('.stage-popup-continue');await until(()=>!root.querySelector('dialog'),'partial records closed');
-    }
-    const save=freshSave();save.cargo.parts=1;save.cargo.action='pull';save.cargo.runs=all.filter(run=>!(run.parts===1&&run.action==='pull')).map(run=>({...run}));
-    mount(mountCargo,save);click('#cargo-tap-go');
-    assert(save.cargo.runs.length===5 && !root.querySelector('#request-letter-title'),'last pull still animating: no completion or letter');
-    await until(()=>save.cargo.runs.length===6,'last pull stopped');
-    await until(()=>root.querySelector('dialog[open]'),'last pull result');
-    assert(!root.querySelector('#request-letter-title'),'result can be read before the letter');
-    assert(root.querySelector('[data-finding]'),'question opens after all six observations');
-    click('.stage-popup-continue');await until(()=>!root.querySelector('dialog'),'question dismissed');
-    click('#cargo-record-open');click('[data-finding="heavy"]');
+  await test('cargo: compare all three crates from one starting line with one action per direction', async () => {
+    const save=freshSave();
+    mount(mountCargo,save);
+    assert(root.querySelector('#cargo-auto-go').hidden, 'teacher demo is off by default');
+    assert(root.querySelector('#cargo-tap-go').hidden && root.querySelector('.cargo-inventory').hidden, 'old controls are hidden');
+    click('[data-compare="push"]');
+    assert(save.cargo.runs.length===0, 'records are saved only after all three stop');
+    assert([...root.querySelectorAll('[data-compare]')].every(button=>button.disabled), 'both buttons lock while carts move');
+    await until(()=>save.cargo.runs.length===3,'all three pushes saved together');
+    const distances = () => [...root.querySelectorAll('.cargo-compare-result:not([hidden]) b')].map(result=>result.textContent).join(' ');
+    assert(distances()==='66칸 44칸 22칸','all three distances shown from the starting line');
+    assert(root.querySelector('.cargo-compare-next').hidden,'the second direction is still needed');
+    mount(mountCargo,save);
+    assert(distances()==='66칸 44칸 22칸','comparison survives a return to the mission');
+    click('[data-compare="pull"]');
+    await until(()=>save.cargo.runs.length===6,'all three pulls saved together');
+    assert(distances()==='66칸 44칸 22칸','same force gives the same distances');
+    assert(!root.querySelector('dialog[open]'),'the stage stays visible until the student opens the question');
+    click('.cargo-compare-next');click('[data-finding="heavy"]');
     assert(!root.querySelector('#request-letter-title') && finished===0,'incorrect answer cannot open the request');
     await until(() => root.querySelector('[data-finding="light"]:not(:disabled)'), 'wrong-answer review pause ended');
     click('[data-finding="light"]');

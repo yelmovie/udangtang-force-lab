@@ -358,7 +358,7 @@ function finishWithEvidence(stageId: StageId, summary: string) {
   }, { once: true });
 }
 
-const context: AppContext = { save, commit: persist, navigate, finish, toast, sound: tone, cue };
+const context: AppContext = { save, autoDemoEnabled: () => save.showAutoDemo, commit: persist, navigate, finish, toast, sound: tone, cue };
 
 function setAdminMode(enabled: boolean) {
   adminUnlocked = enabled;
@@ -447,8 +447,13 @@ function settingsIcon() {
 
 /** True while effects, music or voices are on: the header speaker shows sound and mutes all three. */
 function anySound() { return save.soundOn || save.musicOn === true || save.voiceOn === true; }
-/** The sound settings a fresh start keeps. */
-function soundPrefs(from: SaveData) { return { soundOn: from.soundOn, musicOn: from.musicOn, voiceOn: from.voiceOn, soundVolume: from.soundVolume, effectVolume: from.effectVolume }; }
+/** Browser preferences kept when starting with fresh experiment records. */
+function settingsPrefs(from: SaveData) {
+  return {
+    soundOn: from.soundOn, musicOn: from.musicOn, voiceOn: from.voiceOn,
+    soundVolume: from.soundVolume, effectVolume: from.effectVolume, showAutoDemo: from.showAutoDemo,
+  };
+}
 function soundIcon() {
   return `<svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/>${anySound() ? '<path d="M17 8a5 5 0 0 1 0 8M19.5 5a9 9 0 0 1 0 14"/>' : '<path d="m17 9 4 6m0-6-4 6"/>'}</svg>`;
 }
@@ -483,10 +488,10 @@ function renderTitle(root: HTMLElement) {
   else window.addEventListener('load', () => window.setTimeout(reveal, 250), { once: true });
   bindHeader();
   root.querySelector<HTMLButtonElement>('#new-start')?.addEventListener('click', async () => {
-    if (hasSave && !await confirmBox('기존 탐구 기록을 지우고 새로 시작할까요?', '도구 카드와 실험 기록이 이 기기에서 모두 지워져요. 소리 설정은 그대로예요.', '기록 지우기')) return;
+    if (hasSave && !await confirmBox('기존 탐구 기록을 지우고 새로 시작할까요?', '도구 카드와 실험 기록이 이 기기에서 모두 지워져요. 소리와 시연 설정은 유지돼요.', '기록 지우기')) return;
     adminUnlocked = false;
     adminSave = null;
-    save = { ...freshSave(), ...soundPrefs(save) };
+    save = { ...freshSave(), ...settingsPrefs(save) };
     missionCardShown.clear();
     villageReturn = undefined;
     villageCelebration = undefined;
@@ -507,9 +512,8 @@ function renderTitle(root: HTMLElement) {
 }
 
 async function restartFromBeginning() {
-  if(!await confirmBox('처음부터 다시 해볼까요?', '도구 카드와 실험 기록을 지우고 처음부터 시작해요. 소리 설정은 그대로예요.', '기록 지우기')) return;
-  const previous=context.save;
-  save={...freshSave(),...soundPrefs(previous)};
+  if(!await confirmBox('처음부터 다시 해볼까요?', '도구 카드와 실험 기록을 지우고 처음부터 시작해요. 소리와 시연 설정은 유지돼요.', '기록 지우기')) return;
+  save={...freshSave(),...settingsPrefs(save)};
   adminUnlocked=false; adminSave=null; context.save=save; missionCardShown.clear(); villageReturn=undefined; villageCelebration=undefined;
   persist(); navigate('title');
   openStoryModal({lines:prologueLines,finishLabel:'출발!',skippable:true,onDone:()=>navigate('map'),video:introVideo});
@@ -549,9 +553,8 @@ const settingsHost: SettingsHost = {
   app, save: () => save, adminSave: () => adminSave, adminUnlocked: () => adminUnlocked,
   tone, toast, persist, navigate, setAdminMode, updateSoundButton, syncMusic, openEndingCeremony, openCertificate: showCertificate,
   resetRecords() {
-    const sound = soundPrefs(save);
     adminUnlocked = false; adminSave = null;
-    save = { ...freshSave(), ...sound }; context.save = save; missionCardShown.clear();
+    save = { ...freshSave(), ...settingsPrefs(save) }; context.save = save; missionCardShown.clear();
     persist(); viewPage = 'title'; render();
   },
   goTitle() { viewPage = 'title'; render(); },

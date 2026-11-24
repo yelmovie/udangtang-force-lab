@@ -4,6 +4,7 @@ import type { MapSound } from './sound';
 
 export interface AppContext {
   save: SaveData;
+  autoDemoEnabled: () => boolean;
   commit: () => void;
   navigate: (page: PageId) => void;
   finish: (stage: StageId, summary: string) => void;

@@ -9,7 +9,7 @@ import { mountCorgiHint } from '../corgiHint';
 import { setTapHint } from '../interactionHints';
 import { requestOpenLabel, showRequestLetter } from '../requestLetter';
 import { showPredictionChip } from '../predictionChip';
-import { autoPause, autoWait, syncAutoButton } from '../autoPlay';
+import { autoDemoSettingChange, autoPause, autoWait, syncAutoButton } from '../autoPlay';
 import { balanceExplorationReady, candidates, mysteryComparisonReady, isThrifty, judgePick, mysteryComplete, mysteryRound, mysteryRoundCount, nextMysteryRound, pickHint, relationText, thriftyBudget, weigh, type MysteryRecord, type MysteryRound } from '../balanceModel';
 import '../instruments.css';
 import '../balance.css';
@@ -171,7 +171,8 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     setTapHint(requestButton, requestOpen() && !busy);
     recordButton.disabled = busy;
     finish.disabled = !canSave();
-    syncAutoButton(autoGo, root.querySelector<HTMLElement>('.balance-screen')!, autoPlaying, level === 1 ? !canFinish() : !!round && !mysteryDone() && !waiting && !pickReady(), busy);
+    const autoAvailable = level === 1 ? !canFinish() : !!round && !mysteryDone() && !waiting && !pickReady();
+    syncAutoButton(autoGo, root.querySelector<HTMLElement>('.balance-screen')!, autoPlaying, context.autoDemoEnabled() && autoAvailable, busy);
     root.querySelector('#balance-phase')!.textContent = phaseText();
     root.querySelectorAll<HTMLElement>('.balance-dock .dock-label').forEach(label => { label.textContent = phaseText(); });
     const html = resultMarkup();
@@ -408,9 +409,9 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
     }
   },{signal:events.signal});
 
-  const autoAlive = () => active && autoPlaying;
+  let autoRunId = 0;
   /** Places one pair and pulls the pin, the same place() and release() a student's taps use. */
-  async function autoCompare(left: string, right: string) {
+  async function autoCompare(left: string, right: string, autoAlive: () => boolean) {
     place(left, 'left'); await autoPause(500);
     if (!autoAlive()) return;
     place(right, 'right'); await autoPause(600);
@@ -424,24 +425,33 @@ export function mountBalance(root: HTMLElement, context: AppContext): () => void
   }
   /** Level 1: the pairs not compared yet. Level 2: keep the heavier box and compare it with each next one until the records point to one box. */
   async function autoPlay() {
-    if (autoPlaying || frozen() || drag) return;
+    if (!context.autoDemoEnabled() || autoPlaying || frozen() || drag) return;
+    const runId = ++autoRunId;
+    const autoAlive = () => active && autoPlaying && runId === autoRunId;
     autoPlaying = true; closePopup();
     feedback = level === 1 ? '자동으로 블록을 올려요. 어느 쪽이 내려갈지는 직접 예상해요.' : '자동으로 상자를 비교해요. 제일 무거운 상자는 기록을 보고 직접 골라요.';
     update();
-    if (level === 1) for (const [a, b] of missingPairs()) { if (!autoAlive()) break; await autoCompare(a, b); }
+    if (level === 1) for (const [a, b] of missingPairs()) { if (!autoAlive()) break; await autoCompare(a, b, autoAlive); }
     else if (round) {
       let heaviest = round.boxes[0];
       for (const box of round.boxes.slice(1)) {
         if (!autoAlive() || pickReady()) break;
-        await autoCompare(heaviest, box);
+        await autoCompare(heaviest, box, autoAlive);
         if (records.at(-1)?.actual === 'right') heaviest = box;
       }
     }
-    if (!active) return;
-    if (autoPlaying && level === 2 && pickReady()) feedback = '모든 상자를 비교했어요. 기록 카드를 보고 제일 무거운 상자를 골라요.';
+    if (!autoAlive()) return;
+    if (level === 2 && pickReady()) feedback = '모든 상자를 비교했어요. 기록 카드를 보고 제일 무거운 상자를 골라요.';
     autoPlaying = false; update();
   }
-  autoGo.addEventListener('click', () => { if (autoPlaying) { autoPlaying = false; feedback = '자동 진행을 멈췄어요. 직접 이어서 해도 돼요.'; update(); } else void autoPlay(); }, { signal: events.signal });
+  function stopAutoPlay() {
+    autoPlaying = false; feedback = '자동 진행을 멈췄어요. 직접 이어서 해도 돼요.'; update();
+  }
+  autoGo.addEventListener('click', () => { if (autoPlaying) stopAutoPlay(); else void autoPlay(); }, { signal: events.signal });
+  window.addEventListener(autoDemoSettingChange, () => {
+    if (autoPlaying && !context.autoDemoEnabled()) stopAutoPlay();
+    else update();
+  }, { signal: events.signal });
 
   let drag: {pointer:number; source:HTMLElement; startX:number; startY:number; id:string|null; pin:boolean; moved:boolean; ghost:HTMLElement|null} | null = null;
   function dropPan(x:number,y:number) {

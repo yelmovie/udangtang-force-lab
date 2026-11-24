@@ -1,13 +1,14 @@
 import type { AppContext } from '../appTypes';
 import { cargoRunKey, keepEvidence } from '../runHistory';
 import { setMissionProgress } from '../missionProgress';
+import { autoDemoSettingChange } from '../autoPlay';
 import { showPredictionChip } from '../predictionChip';
 import { requestOpenLabel, showRequestLetter } from '../requestLetter';
 import { corgiHintButton, mountCorgiHint } from '../corgiHint';
-import { cargoActionCompared, cargoExplorationReady, cargoManualEvidence, cargoDistance, cargoForceNames, cargoOrders, orderHint, orderResult, orderSolution, ordersComplete, type ForceLevel } from '../cargoModel';
+import { cargoActionCompared, cargoExplorationReady, cargoLoads, cargoManualEvidence, cargoDistance, cargoForceNames, cargoOrders, orderHint, orderResult, orderSolution, ordersComplete, type ForceLevel } from '../cargoModel';
 import type { CargoRun } from '../state';
 import '../cargo.css';
-import { cargoOrdersMarkup, cargoPopupMarkup, cargoScreenMarkup, cargoTracesMarkup, imagePath } from './cargoMarkup';
+import { cargoOrdersMarkup, cargoPopupMarkup, cargoScreenMarkup, cargoTracesMarkup, cargoTrackCells, imagePath } from './cargoMarkup';
 import { fingerIcon } from '../interactionHints';
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 export function mountCargo(root: HTMLElement, context: AppContext): () => void {
@@ -18,10 +19,13 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     let active = true, busy = false, waiting = false, needsSetup = false;
     // "자동으로 보기" runs the missing level 1 tries, or delivers the open level 2 orders, by itself; the student only watches.
     let autoPlaying = false;
+    let autoRunId = 0;
     let showDemo = false;
     let orderNotice = '';
     let nextOrderReady = false;
     let animation: Animation | null = null;
+    let comparisons: Animation[] = [];
+    let lastComparison = [...state.runs].reverse().find(run => cargoActionCompared(state.runs, run.action))?.action;
     let suppressClickUntil = 0;
     let drag: {
         pointer: number;
@@ -52,6 +56,17 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     let feedback = level === 1 ? '같은 힘으로 상자를 움직이고, 멈춘 곳을 비교해요.' : '빵집 문 앞 노란 칸에 딱 멈추게 보내요.';
     root.innerHTML = cargoScreenMarkup(fingerIcon);
     const field = root.querySelector<HTMLElement>('.cargo-scene')!;
+    const compare = root.querySelector<HTMLElement>('.cargo-compare')!;
+    const compareNote = compare.querySelector<HTMLElement>('.cargo-compare-note')!;
+    const compareControls = root.querySelector<HTMLElement>('.cargo-compare-controls')!;
+    const compareNext = compareControls.querySelector<HTMLButtonElement>('.cargo-compare-next')!;
+    const compareButtons = [...compareControls.querySelectorAll<HTMLButtonElement>('[data-compare]')];
+    const compareRows = [...compare.querySelectorAll<HTMLElement>('.cargo-compare-row')].map(row => ({
+        parts: Number(row.dataset.load),
+        motion: row.querySelector<HTMLElement>('.cargo-compare-motion')!,
+        result: row.querySelector<HTMLElement>('.cargo-compare-result')!,
+    }));
+    const manualComparison = () => level === 1 && !showDemo && !animation;
     const crate = root.querySelector<HTMLElement>('.cargo-object')!;
     const handle = root.querySelector<HTMLButtonElement>('.cargo-worker-grip')!;
     const finish = root.querySelector<HTMLButtonElement>('#cargo-finish')!;
@@ -98,10 +113,9 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     function manualEvidence() { return cargoManualEvidence(state.runs); }
     function ready() { return showDemo ? cargoExplorationReady(state.runs) : manualEvidence().ready; }
     function manualHint() {
-        const { comparison } = manualEvidence();
-        if (!comparison) return '한쪽에서 같은 힘으로 부품 1·3·5개 상자를 각각 움직여요.';
-        const other = comparison === 'push' ? '당기기' : '밀기';
-        return `방금 비교한 상자 하나를 골라 이번엔 ${other}로 움직여요.`;
+        if (pushCompared() && !pullCompared()) return '이번엔 ‘당겨서 보기’를 눌러 멈춘 곳을 비교해요.';
+        if (pullCompared() && !pushCompared()) return '이번엔 ‘밀어서 보기’를 눌러 멈춘 곳을 비교해요.';
+        return '아래 버튼을 눌러 세 상자를 같은 힘으로 움직여요.';
     }
     function comparisonRun(parts: number) {
         return latestRun(parts, showDemo ? undefined : manualEvidence().comparison);
@@ -112,10 +126,65 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         const push = latestRun(n, 'push')!.distance, pull = latestRun(n, 'pull')!.distance;
         return `부품 ${n}개 · 밀기 ${push}칸 · 당기기 ${pull}칸. ${push === pull ? '같은 상자에 오른쪽으로 같은 힘을 같은 시간 동안 주어 거리가 같아요.' : '거리가 조금 달라요.'}`;
     }
+    const trackWidth = (distance: number) => `${distance / cargoTrackCells * 100}%`;
+    function updateComparison(needsFinding: boolean) {
+        const showing = manualComparison();
+        compare.hidden = compareControls.hidden = !showing;
+        field.toggleAttribute('data-compare', showing);
+        if (!showing) return;
+        compareNext.hidden = !needsFinding;
+        compareNext.disabled = busy;
+        for (const button of compareButtons) {
+            button.hidden = needsFinding;
+            button.disabled = busy;
+            button.toggleAttribute('data-seen', cargoActionCompared(state.runs, button.dataset.compare as CargoRun['action']));
+        }
+        compare.dataset.action = lastComparison ?? 'push';
+        const moving = comparisons.length > 0;
+        const note = moving ? '세 상자가 같은 출발점에서 움직여요.'
+            : finding && !deliveredAll() ? `위의 ‘${requestOpenLabel}’를 눌러요.`
+            : pushCompared() && pullCompared() ? '같은 상자는 밀어도 당겨도 같은 곳에 멈췄어요.'
+            : needsFinding ? '어느 상자가 출발점에서 가장 멀리 갔나요?'
+            : lastComparison ? manualHint() : '같은 출발점에서 똑같은 시간 동안 힘을 줘요.';
+        if (compareNote.textContent !== note) compareNote.textContent = note;
+        for (const { parts, motion, result } of compareRows) {
+            const run = lastComparison && latestRun(parts, lastComparison);
+            if (!moving) motion.style.width = trackWidth(run ? run.distance : 0);
+            result.hidden = moving || !run;
+            if (run) result.querySelector('b')!.textContent = `${run.distance}칸`;
+        }
+    }
+    async function runComparison(action: CargoRun['action'], keyboard: boolean) {
+        if (!manualComparison() || busy || waiting || autoPlaying) return;
+        busy = true;
+        lastComparison = action;
+        compare.dataset.action = action;
+        const runs = cargoLoads.map(parts => ({ parts, action, gesture: travel(), distance: cargoDistance(parts) }));
+        const startTime = document.timeline.currentTime;
+        comparisons = compareRows.map(({ motion }, i) => {
+            const move = motion.animate([{ width: '0%' }, { width: trackWidth(runs[i].distance) }], {
+                duration: reducedMotion() ? 1 : 1300, easing: 'cubic-bezier(.18,.65,.48,1)', fill: 'forwards',
+            });
+            move.startTime = startTime;
+            return move;
+        });
+        update();
+        try { await Promise.all(comparisons.map(move => move.finished)); } catch { return; }
+        if (!active) return;
+        for (const move of comparisons) move.cancel();
+        comparisons = [];
+        state.action = action;
+        state.runs = keepEvidence([...state.runs, ...runs], cargoRunKey);
+        context.commit();
+        context.sound(710);
+        busy = false;
+        update();
+        if (keyboard) (ready() && !finding ? compareNext : compareButtons.find(b => !b.hasAttribute('data-seen')))?.focus({ preventScroll: true });
+    }
     const travel = () => Math.max(64, Math.min(120, field.clientWidth * .12));
-    const canPush = () => !busy && !waiting && !autoPlaying && (level === 1 ? !needsSetup : force !== null && !deliveredAll());
+    const canPush = () => !busy && !waiting && !autoPlaying && (level === 1 ? !manualComparison() && !needsSetup : force !== null && !deliveredAll());
     // 1단계에서 한 번 실험한 뒤에도 아이·「눌러서 밀기/당기기」를 바로 다시 누를 수 있다. 누르는 순간 같은 상자를 출발점으로 되돌린다(상자를 다시 고르지 않아도 됨).
-    const canRearm = () => level === 1 && needsSetup && !busy && !waiting && !autoPlaying;
+    const canRearm = () => level === 1 && !manualComparison() && needsSetup && !busy && !waiting && !autoPlaying;
     function rearm() { if (!canRearm()) return; needsSetup = false; resetCrate(); update(); }
     function resetForce() { field.style.setProperty('--charge', '0'); crate.style.transform = ''; field.classList.remove('cargo-dragging'); }
     function resetCrate() { crate.style.transform = ''; crate.style.left = endPosition(0); root.querySelector('.cargo-distance')!.textContent = ''; setActorMood('idle'); }
@@ -138,6 +207,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             const label = `주문 ${orders().length + 1} · 부품 ${currentOrder().parts}개`;
             return force ? `${label} · ‘눌러서 밀기’를 눌러요. 끌어서 밀어도 돼요.` : `${label} · 힘을 고르고 ‘눌러서 밀기’를 눌러요`;
         }
+        if (manualComparison() && !ready()) return manualHint();
         if (finding && deliveredAll()) return '배달 완료! 부품과 방향을 바꿔 더 실험해 봐요';
         if (finding) return `위의 ‘${requestOpenLabel}’를 눌러요`;
         if (ready()) return '실험은 끝! 가운데 비교하고 의뢰 받기를 눌러요';
@@ -179,7 +249,8 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         root.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(b => { b.classList.toggle('selected', b.dataset.action === state.action); b.setAttribute('aria-pressed', String(b.dataset.action === state.action)); b.disabled = locked; });
         root.querySelector<HTMLElement>('.cargo-force')?.toggleAttribute('data-waiting', level === 2 && force === null && !deliveredAll());
         root.querySelectorAll<HTMLButtonElement>('[data-force]').forEach(b => { const f = Number(b.dataset.force); b.classList.toggle('selected', f === force); b.setAttribute('aria-pressed', String(f === force)); b.disabled = locked || deliveredAll(); });
-        root.querySelectorAll<HTMLElement>('.cargo-dock [data-level]').forEach(part => { part.hidden = Number(part.dataset.level) !== level; });
+        const comparing = manualComparison();
+        root.querySelectorAll<HTMLElement>('.cargo-dock [data-level]').forEach(part => { part.hidden = comparing || Number(part.dataset.level) !== level; });
         const cards = cargoOrders.map((order, i) => {
             const done = orders()[i] as ForceLevel | undefined, now = !done && !nextOrderReady && i === orders().length;
             return `<span class="cargo-order-card" data-state="${done ? 'done' : now ? 'now' : 'wait'}" aria-label="주문 ${i + 1}, 부품 ${order.parts}개${done ? `, ${forceName(done)}으로 배달 완료` : now ? ', 지금 배달할 주문' : ''}"><small>주문 ${i + 1}</small><b>부품 ${order.parts}개</b>${done ? `<em>✓ ${forceName(done)}</em>` : ''}</span>`;
@@ -199,10 +270,10 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         zone.hidden = level !== 2;
         zone.style.left = endPosition(lo);
         zone.style.setProperty('--zone-span', `${(hi - lo) * .7}%`);
-        handle.disabled = !canPush() && !canRearm();
+        handle.disabled = comparing || (!canPush() && !canRearm());
         tapGo.textContent = `${tapLabel()} →`;
         tapGo.disabled = !canPush() && !needsForce() && !canRearm();
-        autoGo.hidden = !autoPlaying && (level === 1 ? cargoExplorationReady(state.runs) || finding : deliveredAll());
+        autoGo.hidden = !autoPlaying && (!context.autoDemoEnabled() || (level === 1 ? cargoExplorationReady(state.runs) || finding : deliveredAll()));
         autoGo.disabled = !autoPlaying && (busy || waiting || !!drag);
         autoGo.textContent = autoPlaying ? '직접 해보기' : '▶ 자동으로 보기';
         autoGo.setAttribute('aria-pressed', String(autoPlaying));
@@ -211,14 +282,15 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             : `남자아이를 잡고 ${forceLabel}으로 오른쪽 표시까지 밀기. Enter로도 실험`);
         field.dataset.busy = String(busy); field.dataset.setup = String(canPush());
         root.querySelector('#cargo-record-count')!.textContent = String(state.runs.length);
+        recordOpen.hidden = comparing && !state.runs.length;
         recordOpen.disabled = locked || !state.runs.length;
         // The next step sits in the middle of the stage, where it cannot be missed on a board or tablet.
         const needsFinding = level === 1 && ready() && !finding;
-        root.querySelector<HTMLElement>('.cargo-finding-cta')!.hidden = !needsFinding || locked;
+        updateComparison(needsFinding);
+        root.querySelector<HTMLElement>('.cargo-finding-cta')!.hidden = comparing || !needsFinding || locked;
         root.querySelector('.cargo-finding-cta p')!.textContent = showDemo ? '실험 끝! 1·3·5개 상자를 모두 밀고 당겨 봤어요.' : '상자 세 개의 멈춘 곳과 밀기·당기기 기록을 비교해요.';
-        root.querySelector<HTMLElement>('.cargo-scene-caption')!.hidden = needsFinding && !locked && autoGo.hidden;
-        tapGo.hidden = needsFinding && !locked;
-        step.hidden = needsFinding && !locked;
+        root.querySelector<HTMLElement>('.cargo-scene-caption')!.hidden = (comparing || (needsFinding && !locked)) && autoGo.hidden;
+        tapGo.hidden = step.hidden = comparing || (needsFinding && !locked);
         root.querySelector<HTMLButtonElement>('#cargo-finding-go')!.disabled = locked;
         ordersOpen.hidden = !finding || level === 2 || deliveredAll();
         step.textContent = stepText();
@@ -264,6 +336,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         const hadBoth = !!latestRun(1) && !!latestRun(5);
         state.runs.push(run);
         state.runs = keepEvidence(state.runs, cargoRunKey);
+        if (cargoActionCompared(state.runs, run.action)) lastComparison = run.action;
         railRuns.push(run);
         needsSetup = !deliveredAll();
         context.commit();
@@ -326,8 +399,9 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     function exploreFreely() {
         if (!active || level === 1) return update();
         level = 1; force = null; misses = 0; ghosts = []; railRuns = []; needsSetup = false; orderNotice = '';
+        showDemo = false;
         resetCrate();
-        feedback = '배달 완료! 부품 개수나 힘을 주는 쪽을 바꿔 더 실험해 봐요.';
+        feedback = '배달 완료! 세 상자를 다시 움직여 봐요.';
         update();
     }
     function needsForce() { return level === 2 && force === null && !deliveredAll() && !busy && !waiting; }
@@ -362,7 +436,14 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         closePopup(); showRequestLetter(root, 'cargo', enterOrders, () => context.save);
     }, { signal: events.signal });
     recordOpen.addEventListener('click', () => { if (!busy && !waiting && !drag) recordPopup(); }, { signal: events.signal });
-    root.querySelector('#cargo-finding-go')!.addEventListener('click', () => { if (!busy && !waiting && !drag) recordPopup(); }, { signal: events.signal });
+    for (const button of root.querySelectorAll('#cargo-finding-go,.cargo-compare-next')) {
+        button.addEventListener('click', () => { if (!busy && !waiting && !drag) recordPopup(); }, { signal: events.signal });
+    }
+    for (const button of compareButtons) {
+        button.addEventListener('click', event => {
+            void runComparison(button.dataset.compare as CargoRun['action'], event.detail === 0);
+        }, { signal: events.signal });
+    }
     function clearDrag() {
         if (!drag)
             return;
@@ -377,7 +458,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         if (pendingPopup) schedulePopup(pendingPopup, 300);
     }
     root.addEventListener('pointerdown', event => {
-        if (busy || waiting || drag || event.button !== 0)
+        if (manualComparison() || busy || waiting || drag || event.button !== 0)
             return;
         const source = (event.target as Element).closest<HTMLButtonElement>('[data-parts],.cargo-worker-grip');
         if (!source)
@@ -470,13 +551,15 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     tapGo.addEventListener('click', () => { if (drag) return; rearm(); if (needsForce()) nudgeForce(); else void experiment(travel()); }, { signal: events.signal });
     /** Level 1 tries not yet in the record, push before pull, light to heavy. */
     function missingTries() {
-        return (['push', 'pull'] as const).flatMap(action => [1, 3, 5].map(parts => ({ action, parts })))
+        return (['push', 'pull'] as const).flatMap(action => cargoLoads.map(parts => ({ action, parts })))
             .filter(step => !state.runs.some(run => run.parts === step.parts && run.action === step.action));
     }
     /** Runs the missing tries (level 1) or the open orders with their fitting force (level 2)
      * through the same experiment() as a drag, one after another, with a pause to look. */
     async function autoPlay() {
-        if (autoPlaying || busy || waiting || drag || (level === 2 && deliveredAll())) return;
+        if (!context.autoDemoEnabled() || autoPlaying || busy || waiting || drag || (level === 2 && deliveredAll())) return;
+        const runId = ++autoRunId;
+        const running = () => active && autoPlaying && runId === autoRunId;
         autoPlaying = true;
         if (level === 1) showDemo = true;
         orderNotice = '';
@@ -485,25 +568,24 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         feedback = level === 1 ? '자동으로 실험해요. 상자가 어디서 멈추는지 지켜봐요.' : '자동으로 배달해요. 부품 개수마다 어떤 힘을 고르는지 지켜봐요.';
         update();
         const pause = (ms: number) => new Promise<void>(resolve => window.setTimeout(resolve, reducedMotion() ? Math.min(ms, 250) : ms));
-        while (level === 2 && !deliveredAll()) {
-            if (!active || !autoPlaying) break;
+        while (running() && level === 2 && !deliveredAll()) {
             force = null; misses = 0; ghosts = [];
             resetCrate();
             update();
             await pause(700);
-            if (!active || !autoPlaying) break;
+            if (!running()) break;
             force = orderSolution(currentOrder());
             if (force) context.sound(380 + force * 60);
             update();
             await pause(700);
-            if (!active || !autoPlaying) break;
+            if (!running()) break;
             await experiment(travel(), 0, true);
             // The last delivery ends auto mode at once, so its result card offers the finish button.
             if (deliveredAll()) break;
             await pause(1100);
         }
         for (const step of level === 1 ? missingTries() : []) {
-            if (!active || !autoPlaying) break;
+            if (!running()) break;
             if (state.action !== step.action) railRuns = [];
             state.action = step.action;
             state.parts = step.parts;
@@ -512,14 +594,29 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
             context.commit();
             update();
             await pause(700);
-            if (!active || !autoPlaying) break;
+            if (!running()) break;
             await experiment(travel(), 0, true);
             await pause(1100);
         }
+        if (runId !== autoRunId) return;
         autoPlaying = false;
         if (active) update();
     }
-    autoGo.addEventListener('click', () => { if (autoPlaying) { autoPlaying = false; showDemo = false; feedback = '자동 실험을 멈췄어요. 직접 이어서 해도 돼요.'; needsSetup = false; update(); } else void autoPlay(); }, { signal: events.signal });
+    function stopAutoPlay() {
+        autoRunId++;
+        autoPlaying = showDemo = false;
+        feedback = '자동 실험을 멈췄어요. 직접 이어서 해도 돼요.';
+        needsSetup = false;
+        update();
+    }
+    autoGo.addEventListener('click', () => {
+        if (autoPlaying) stopAutoPlay();
+        else void autoPlay();
+    }, { signal: events.signal });
+    window.addEventListener(autoDemoSettingChange, () => {
+        if (autoPlaying && !context.autoDemoEnabled()) stopAutoPlay();
+        else update();
+    }, { signal: events.signal });
     function schedulePopup(show: () => void, delay: number) {
         clearTimeout(popupTimer);
         pendingPopup = show;
@@ -556,7 +653,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         return `<div class="cargo-discovery question-zone"><span class="question-label">생각해 볼 문제</span><strong class="question-prompt">같은 힘·시간으로 움직였을 때, 더 멀리 간 상자는?</strong>${finding ? '' : `<div class="question-choices"><button data-finding="light"${performance.now() < findingLockUntil ? ' disabled' : ''}>부품 1개</button><button data-finding="heavy"${performance.now() < findingLockUntil ? ' disabled' : ''}>부품 5개</button></div>`}<p class="cargo-finding" role="status">${findingNote || findingMessage(finding)}</p></div>`;
     }
     function nextHint() {
-        if (finding && deliveredAll()) return '배달은 끝났어요. 부품 개수나 힘을 주는 쪽을 바꿔 더 실험해 봐요.';
+        if (finding && deliveredAll()) return '배달은 끝났어요. 두 버튼으로 세 상자를 다시 움직여 봐요.';
         if (finding) return level === 1 ? `이 창을 닫고 화면 위쪽의 <strong>${requestOpenLabel}</strong>를 눌러 의뢰를 받아요.` : '';
         if (ready()) return '위에서 <strong>더 멀리 간 상자</strong>를 고르면 빵집에서 도와 달라는 부탁(의뢰)이 와요.';
         if (!showDemo) return manualHint();
@@ -569,7 +666,11 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         const label = asking ? '비교하고 의뢰 받기' : run ? '실험 결과' : '내 실험 기록';
         const title = asking ? '더 멀리 간 상자는 어느 쪽일까?' : run ? `부품 ${run.parts}개 상자를 ${run.action === 'push' ? '밀었더니' : '당겼더니'} ${run.distance}칸 갔어요` : '같은 힘으로 몇 칸 갔을까?';
         const hint = nextHint();
-        openPopup(label, title, `<div class="cargo-record">${cargoTracesMarkup(comparisonRun, directionText)}${questionMarkup()}${level === 2 ? cargoOrdersMarkup(orders(), forceName) : ''}${hint ? `<p class="cargo-popup-next">${hint}</p>` : ''}</div>`);
+        const leavingDemo = showDemo && asking;
+        openPopup(label, title, `<div class="cargo-record">${cargoTracesMarkup(comparisonRun, directionText)}${questionMarkup()}${level === 2 ? cargoOrdersMarkup(orders(), forceName) : ''}${hint ? `<p class="cargo-popup-next">${hint}</p>` : ''}</div>`, leavingDemo ? () => {
+            showDemo = false;
+            update();
+        } : undefined);
     }
     function findingMessage(correct: boolean) {
         const light = comparisonRun(1), heavy = comparisonRun(5);
@@ -626,6 +727,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         clearDrag();
         events.abort();
         animation?.cancel();
+        for (const move of comparisons) move.cancel();
         hint.dispose();
     };
 }
