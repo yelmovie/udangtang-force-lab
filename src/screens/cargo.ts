@@ -72,6 +72,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     const finish = root.querySelector<HTMLButtonElement>('#cargo-finish')!;
     const recordOpen = root.querySelector<HTMLButtonElement>('#cargo-record-open')!;
     const ordersOpen = root.querySelector<HTMLButtonElement>('#cargo-open-orders')!;
+    const requestCta = root.querySelector<HTMLElement>('.cargo-request-cta')!;
     const tapGo = root.querySelector<HTMLButtonElement>('#cargo-tap-go')!;
     const autoGo = root.querySelector<HTMLButtonElement>('#cargo-auto-go')!;
     const deliveryPanel = root.querySelector<HTMLElement>('.cargo-delivery')!;
@@ -156,7 +157,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         compare.dataset.action = lastComparison ?? 'push';
         const moving = comparisons.length > 0;
         const note = moving ? '세 상자가 같은 출발점에서 움직여요.'
-            : finding && !deliveredAll() ? `위의 ‘${requestOpenLabel}’를 눌러요.`
+            : finding && !deliveredAll() ? '빵집에서 부탁이 왔어요.'
             : pushCompared() && pullCompared() ? '같은 상자는 밀어도 당겨도 같은 곳에 멈췄어요.'
             : needsFinding ? '어느 상자가 출발점에서 가장 멀리 갔나요?'
             : lastComparison ? manualHint() : '같은 출발점에서 똑같은 시간 동안 힘을 줘요.';
@@ -255,7 +256,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         }
         if (manualComparison() && !ready()) return manualHint();
         if (finding && deliveredAll()) return '배달 완료! 부품과 방향을 바꿔 더 실험해 봐요';
-        if (finding) return `위의 ‘${requestOpenLabel}’를 눌러요`;
+        if (finding) return `가운데 ‘${requestOpenLabel}’를 눌러요`;
         if (ready()) return '실험은 끝! 가운데 비교하고 의뢰 받기를 눌러요';
         if (needsSetup && !showDemo) return manualHint();
         if (needsSetup) return !pushCompared() ? '밀기로 1·3·5개 상자를 모두 비교해요' : '당기기로 1·3·5개 상자를 모두 비교해요';
@@ -345,7 +346,10 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         tapGo.hidden = step.hidden = comparing || delivering || (needsFinding && !locked);
         root.querySelector<HTMLElement>('.cargo-scene-caption')!.hidden = step.hidden && autoGo.hidden;
         root.querySelector<HTMLButtonElement>('#cargo-finding-go')!.disabled = locked;
-        ordersOpen.hidden = !finding || level === 2 || deliveredAll();
+        const showRequest = level === 1 && finding && !deliveredAll() && !locked && !root.querySelector('.request-letter[open]');
+        const revealRequest = requestCta.hidden && showRequest;
+        requestCta.hidden = !showRequest;
+        if (revealRequest && !popup?.open) ordersOpen.focus({ preventScroll: true });
         step.textContent = stepText();
         root.querySelector('#cargo-feedback')!.textContent = feedback;
         // The request is opened explicitly after the whole exploration, never from update().
@@ -490,8 +494,11 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         }, { signal: events.signal });
     }
     ordersOpen.addEventListener('click', () => {
-        if (busy || waiting || drag || !ready() || !finding || level !== 1) return;
-        closePopup(); showRequestLetter(root, 'cargo', enterOrders, () => context.save);
+        if (requestCta.hidden || drag || !ready()) return;
+        closePopup();
+        const letter = showRequestLetter(root, 'cargo', enterOrders, () => context.save);
+        requestCta.hidden = true;
+        letter.addEventListener('close', update, { once: true, signal: events.signal });
     }, { signal: events.signal });
     recordOpen.addEventListener('click', () => { if (!busy && !waiting && !drag) recordPopup(); }, { signal: events.signal });
     for (const button of root.querySelectorAll('#cargo-finding-go,.cargo-compare-next')) {
@@ -711,7 +718,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
     }
     function nextHint() {
         if (finding && deliveredAll()) return '배달은 끝났어요. 두 버튼으로 세 상자를 다시 움직여 봐요.';
-        if (finding) return level === 1 ? `이 창을 닫고 화면 위쪽의 <strong>${requestOpenLabel}</strong>를 눌러 의뢰를 받아요.` : '';
+        if (finding) return level === 1 ? `이 창을 닫고 가운데 <strong>${requestOpenLabel}</strong>를 눌러 의뢰를 받아요.` : '';
         if (ready()) return '위에서 <strong>더 멀리 간 상자</strong>를 고르면 빵집에서 도와 달라는 부탁(의뢰)이 와요.';
         if (!showDemo) return manualHint();
         if (!pushCompared()) return '<strong>밀기</strong>로 1·3·5개 상자를 모두 움직여 봐요.';
@@ -753,7 +760,7 @@ export function mountCargo(root: HTMLElement, context: AppContext): () => void {
         context.sound(correct ? 720 : 520);
         if (correct) {
             // Leave the stage free; the student opens the request when ready.
-            feedback = `${findingNote} 위의 ‘${requestOpenLabel}’를 눌러요.`;
+            feedback = `${findingNote} 가운데 ‘${requestOpenLabel}’를 눌러요.`;
             closePopup();
             return;
         }

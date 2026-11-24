@@ -187,7 +187,9 @@ document.querySelector('#run-tests').addEventListener('click', async event => {
     await until(() => root.querySelector('[data-finding="light"]:not(:disabled)'), 'wrong-answer review pause ended');
     click('[data-finding="light"]');
     assert(!root.querySelector('#request-letter-title'),'correct finding does not auto-open a letter');
+    await until(()=>root.querySelector('.cargo-request-cta:not([hidden]) #cargo-open-orders'),'request button appears in the scene after the answer');
     click('#cargo-open-orders');await until(()=>root.querySelector('#request-letter-title'),'letter after explicit request button');
+    assert(root.querySelector('.cargo-request-cta').hidden,'request button disappears while the letter is open');
     assert(save.cargo.runs.length===6 && finished===0,'request preserves all observations');
     assert(root.querySelector('#request-letter-accept').textContent==='배달 시작','the short letter can be accepted immediately');
     click('#request-letter-accept');
