@@ -1,5 +1,12 @@
 .request-letter-actions { display: flex; align-items: center; gap: 16px; }
 .request-letter-later { min-height: 48px; padding: 8px 12px; border: 0; background: transparent; color: #705c40; font-size: 16px; font-weight: 800; text-decoration: underline; cursor: pointer; }
+.request-letter[data-compact] .npc-dialogue-stage { width:min(92%, 660px); }
+.request-letter[data-compact] .npc-dialogue-character { width:min(37dvh, 36vw, 300px); }
+.request-letter[data-compact] #request-letter-close { display:block; }
+.request-letter[data-compact] .request-letter-body { cursor:inherit; }
+.request-letter[data-compact] .npc-dialogue-meta { display:none; }
+.request-letter[data-compact] .npc-dialogue-next { min-width:124px; min-height:48px; }
+.request-letter[data-compact] .npc-dialogue-next::after { content:none; }
 @media (max-width: 700px) {
   .request-letter .npc-dialogue-bottom { flex-wrap: wrap; gap: 4px; }
   .request-letter-actions { margin-left: auto; gap: 8px; }

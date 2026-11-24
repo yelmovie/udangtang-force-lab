@@ -189,6 +189,17 @@ document.querySelector('#run-tests').addEventListener('click', async event => {
     assert(!root.querySelector('#request-letter-title'),'correct finding does not auto-open a letter');
     click('#cargo-open-orders');await until(()=>root.querySelector('#request-letter-title'),'letter after explicit request button');
     assert(save.cargo.runs.length===6 && finished===0,'request preserves all observations');
+    assert(root.querySelector('#request-letter-accept').textContent==='배달 시작','the short letter can be accepted immediately');
+    click('#request-letter-accept');
+    assert(root.querySelector('#cargo-tap-go').hidden,'the force buttons are the only push controls');
+    click('[data-force="2"]');
+    await until(()=>root.querySelector('.cargo-delivery-report').dataset.outcome==='over','one tap moves the crate past the target');
+    assert(root.querySelector('.cargo-delivery-count b').textContent==='66칸' && !save.cargo.orders.length,'a miss shows the distance without awarding delivery');
+    click('[data-force="1"]');
+    await until(()=>save.cargo.orders.length===1,'small force delivers the first crate');
+    assert(root.querySelector('.cargo-force').hidden && !root.querySelector('#cargo-next-order').hidden,'the next crate replaces the force controls');
+    click('#cargo-next-order');
+    assert(root.querySelector('.cargo-delivery-load').textContent==='부품 3개 상자','the next crate returns to the start');
   });
   for(const roundIndex of [0,1]) await test('balance: '+(roundIndex===0?3:4)+' boxes finish comparison before the question popup', async () => {
     const save=freshSave();save.balance.runs=allBalance();

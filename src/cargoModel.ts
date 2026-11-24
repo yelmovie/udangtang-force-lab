@@ -68,9 +68,9 @@ export function ordersComplete(orders: readonly number[] | undefined): boolean {
   return !!orders && orders.length >= cargoOrders.length;
 }
 
-/** First miss says where to look and to change one step; a second miss on the same order says which way. */
-export function orderHint(result: Exclude<OrderResult, 'hit'>, misses: number): string {
-  const seen = result === 'over' ? '노란 칸을 지나쳤어요.' : '노란 칸까지 못 갔어요.';
-  if (misses < 2) return `${seen} 힘을 한 단계 바꿔 봐요.`;
-  return `${seen} 흔적을 보고, 힘을 어느 쪽으로 바꿀지 골라 봐요.`;
+/** Point the student at the direction of adjustment while they choose the next force. */
+export function orderHint(result: Exclude<OrderResult, 'hit'>): string {
+  return result === 'over'
+    ? '노란 칸을 지나쳤어요. 힘을 줄여 볼까요?'
+    : '노란 칸에 못 미쳤어요. 힘을 키워 볼까요?';
 }

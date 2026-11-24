@@ -40,17 +40,34 @@ const cargoCompareControls = `<div class="cargo-compare-controls" role="group" a
   <button type="button" class="button button-primary cargo-compare-next" hidden>비교하고 의뢰 받기 →</button>
 </div>`;
 
+const cargoDeliveryMarkup = `<section class="cargo-delivery" aria-labelledby="cargo-delivery-title" hidden>
+  <header>
+    <div class="cargo-delivery-meta"><strong class="cargo-delivery-load"></strong><span class="cargo-delivery-progress"></span></div>
+    <h2 id="cargo-delivery-title" tabindex="-1">빵집 문 앞에 세워요</h2>
+  </header>
+  <div class="cargo-delivery-report" role="status">
+    <span class="cargo-delivery-count" hidden>출발점에서 <b></b></span>
+    <p class="cargo-delivery-note"></p>
+    <p class="cargo-delivery-summary" hidden></p>
+  </div>
+</section>`;
+
+const cargoDeliveryActions = `<div class="cargo-delivery-actions" hidden>
+  <button type="button" class="button button-primary" id="cargo-next-order" hidden>다음 상자 →</button>
+  <button type="button" class="button button-primary" id="cargo-delivery-finish" hidden>운반 레일 복구하기 →</button>
+</div>`;
+
 /** The screen frame; `fingerIcon` is the hint finger mountCargo also uses. */
 export const cargoScreenMarkup = (fingerIcon: string) => `<section class="experiment-screen cargo-expedition">
     <div class="experiment-heading"><div><p class="eyebrow">01 · 물자 배송소</p><h1>멈춘 화물을 움직여라!</h1></div><div class="cargo-tools"><button class="cargo-record-open" id="cargo-record-open">기록 보기 <span id="cargo-record-count">0</span></button><button class="button button-primary cargo-bakery-open" id="cargo-open-orders" hidden>${requestOpenLabel} →</button></div>${missionProgressMarkup('cargo', ['밀기 1·3·5개', '당기기 1·3·5개', '더 멀리 간 상자', '빵집 주문 3장'])}</div>
     <div class="cargo-adventure"><div class="cargo-scene" aria-label="화물 실험 무대">
       <div class="cargo-scene-caption"><span class="instrument-phase cargo-step" id="cargo-step" tabindex="-1"></span><button class="button button-primary cargo-tap-go" id="cargo-tap-go" aria-describedby="cargo-step">눌러서 밀기 →</button><button class="button button-secondary cargo-auto-go" id="cargo-auto-go" aria-pressed="false">▶ 자동으로 보기</button></div>
-      <div class="cargo-order-notice" hidden><p role="status"></p><button type="button" class="button button-primary" id="cargo-next-order" hidden>다음 주문 →</button></div>
+      ${cargoDeliveryMarkup}
       <div class="cargo-finding-cta" hidden><p>실험 끝! 1·3·5개 상자를 모두 밀고 당겨 봤어요.</p><button class="button button-primary" id="cargo-finding-go">비교하고 의뢰 받기 →</button></div>
-      <div class="cargo-rail"><span class="rail-start">출발</span><span class="rail-end">어디까지 갈까?</span><i class="rail-ticks"></i><div class="cargo-target-zone" hidden><span>빵집 문 앞</span></div><div class="cargo-ghosts" aria-hidden="true"></div><div class="cargo-gesture-guide" aria-hidden="true"><span class="cargo-gesture-arrow">→</span><span class="cargo-gesture-target">같은 힘</span></div><div class="cargo-object" data-mood="idle" aria-label="부품을 담는 상자"><span class="cargo-pull-strap" aria-hidden="true"></span><span class="cargo-force-arrow" aria-hidden="true"><b>같은 힘</b></span><button class="cargo-worker-grip"><img class="cargo-worker cargo-worker-push" src="${imagePath('student-cargo-push')}" alt="" draggable="false"><img class="cargo-worker cargo-worker-pull" src="${imagePath('student-cargo-pull')}" alt="" draggable="false"><span class="cargo-grab-cue">${fingerIcon}</span></button><img class="cargo-box-art" src="${imagePath('crate-empty')}" alt="나무 운반 상자" draggable="false"><div class="cargo-contents"></div><span class="cargo-load-tag"></span></div></div>
+      <div class="cargo-rail"><span class="rail-start">출발</span><span class="rail-end">어디까지 갈까?</span><i class="rail-ticks"></i><div class="cargo-delivery-trail" aria-hidden="true" hidden></div><div class="cargo-target-zone" hidden><span>빵집 문 앞</span></div><div class="cargo-ghosts" aria-hidden="true"></div><div class="cargo-gesture-guide" aria-hidden="true"><span class="cargo-gesture-arrow">→</span><span class="cargo-gesture-target">같은 힘</span></div><div class="cargo-object" data-mood="idle" aria-label="부품을 담는 상자"><span class="cargo-pull-strap" aria-hidden="true"></span><span class="cargo-force-arrow" aria-hidden="true"><b>같은 힘</b></span><button class="cargo-worker-grip"><img class="cargo-worker cargo-worker-push" src="${imagePath('student-cargo-push')}" alt="" draggable="false"><img class="cargo-worker cargo-worker-pull" src="${imagePath('student-cargo-pull')}" alt="" draggable="false"><span class="cargo-grab-cue">${fingerIcon}</span></button><img class="cargo-box-art" src="${imagePath('crate-empty')}" alt="나무 운반 상자" draggable="false"><div class="cargo-contents"></div><span class="cargo-load-tag"></span></div></div>
       <div class="cargo-distance" role="status"></div>
       ${cargoCompareMarkup()}
-    </div><div class="cargo-dock">${cargoCompareControls}<div class="cargo-inventory" data-level="1"><strong>① 상자에 담을 부품</strong><div class="cargo-load-options">${[1, 3, 5].map(n => `<button data-parts="${n}" aria-label="같은 금속 부품 ${n}개 담기"><img src="${imagePath(`cargo-parts-${n}`)}" alt="" draggable="false"><span>부품 ${n}개</span></button>`).join('')}</div></div><div class="cargo-method" data-level="1"><strong>② 힘을 주는 쪽</strong><div class="segmented"><button data-action="push" aria-label="뒤에서 밀기">밀기</button><button data-action="pull" aria-label="앞에서 당기기">당기기</button></div></div><div class="cargo-orders" data-level="2"><strong>빵집 주문서</strong><div class="cargo-order-cards"></div></div><div class="cargo-force" data-level="2"><strong>힘 단계</strong><div class="segmented">${([1, 2, 3] as const).map(f => `<button data-force="${f}"><i class="cargo-step-arrow" style="--step:${f}" aria-hidden="true"></i>${cargoForceNames[f - 1]}</button>`).join('')}</div></div></div></div>
+    </div><div class="cargo-dock">${cargoCompareControls}${cargoDeliveryActions}<div class="cargo-inventory" data-level="1"><strong>① 상자에 담을 부품</strong><div class="cargo-load-options">${[1, 3, 5].map(n => `<button data-parts="${n}" aria-label="같은 금속 부품 ${n}개 담기"><img src="${imagePath(`cargo-parts-${n}`)}" alt="" draggable="false"><span>부품 ${n}개</span></button>`).join('')}</div></div><div class="cargo-method" data-level="1"><strong>② 힘을 주는 쪽</strong><div class="segmented"><button data-action="push" aria-label="뒤에서 밀기">밀기</button><button data-action="pull" aria-label="앞에서 당기기">당기기</button></div></div><div class="cargo-orders" data-level="2"><strong>빵집 주문서</strong><div class="cargo-order-cards"></div></div><div class="cargo-force" data-level="2"><strong>힘 단계</strong><div class="segmented">${([1, 2, 3] as const).map(f => `<button data-force="${f}"><i class="cargo-step-arrow" style="--step:${f}" aria-hidden="true"></i>${cargoForceNames[f - 1]}</button>`).join('')}</div></div></div></div>
     <div class="experiment-footer"><span class="feedback" id="cargo-feedback" role="status"></span><button class="button button-primary" id="cargo-finish" disabled>운반 레일 복구하기 →</button></div></section>`;
 
 /** Result popup frame (label, title, body; the finding and finish buttons follow the stage state). */

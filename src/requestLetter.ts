@@ -14,44 +14,46 @@ export function showRequestLetter(root: HTMLElement, stage: RequestStage, accept
   const existing = root.querySelector<HTMLDialogElement>('.request-letter[open]');
   if (existing) return existing;
   const request = villageRequests[stage];
+  const compact = stage === 'cargo';
+  const startLabel = compact ? '배달 시작' : '부탁 들어주기';
   const dialog = document.createElement('dialog');
   dialog.className = 'request-letter npc-dialogue';
+  dialog.toggleAttribute('data-compact', compact);
   dialog.setAttribute('aria-labelledby', 'request-letter-title');
   dialog.innerHTML = `<div class="npc-dialogue-stage"><div class="npc-dialogue-character"><span class="npc-dialogue-frame" aria-hidden="true"></span></div><div class="request-letter-paper npc-dialogue-panel">
     <h2 class="npc-dialogue-name" id="request-letter-title">${request.client}</h2>
     <button class="npc-dialogue-close" id="request-letter-close" aria-label="의뢰 대화 닫기">×</button>
-    <p class="request-letter-body" data-dialogue-text></p>
-    <div class="npc-dialogue-bottom"><div class="npc-dialogue-meta"><span>${villageRewards[stage].name} 의뢰인</span><button class="npc-dialogue-replay" type="button" data-dialogue-voice hidden>다시 듣기</button></div>
-    <div class="request-letter-actions"><button class="request-letter-later" id="request-letter-later">나중에 볼게요</button><button class="npc-dialogue-next" id="request-letter-accept">부탁 들어주기</button></div></div>
+    <p class="request-letter-body" data-dialogue-text>${compact ? '빵집 문 앞 노란 칸에 상자를 세워 주세요.' : ''}</p>
+    <div class="npc-dialogue-bottom"><div class="npc-dialogue-meta">${compact ? '' : `<span>${villageRewards[stage].name} 의뢰인</span>`}<button class="npc-dialogue-replay" type="button" data-dialogue-voice hidden>다시 듣기</button></div>
+    <div class="request-letter-actions">${compact ? '' : '<button class="request-letter-later" id="request-letter-later">나중에 볼게요</button>'}<button class="npc-dialogue-next" id="request-letter-accept">${startLabel}</button></div></div>
   </div></div>`;
   setDialoguePortrait(dialog.querySelector<HTMLElement>('.npc-dialogue-frame')!, request.pose);
   const voice = mountDialogueVoice(dialog, settings);
   let accepted = false;
   const next = dialog.querySelector<HTMLButtonElement>('#request-letter-accept')!;
-  const text = mountDialogueText(dialog, next, fromPanel => {
+  function advance(fromPanel: boolean) {
     if (fromPanel) { next.focus(); return; }
-    if (accepted) return;
+    if (accepted || !dialog.open) return;
     accepted = true;
     voice.stop();
     dialog.close();
     accept();
-  });
-  function showLine() {
-    text.show(request.quote, '부탁 들어주기', true);
-    voice.show(`npc-dialogue/${stage}-request`);
   }
-  dialog.querySelector('#request-letter-later')!.addEventListener('click', () => dialog.close());
+  const text = compact ? undefined : mountDialogueText(dialog, next, advance);
+  if (compact) next.addEventListener('click', () => advance(false));
+  dialog.querySelector('#request-letter-later')?.addEventListener('click', () => dialog.close());
   dialog.querySelector('#request-letter-close')!.addEventListener('click', () => dialog.close());
   // A whole-screen render can remove an open native dialog without firing close.
   const removal = new MutationObserver(() => {
-    if (!dialog.isConnected) { voice.destroy(); text.destroy(); removal.disconnect(); }
+    if (!dialog.isConnected) { voice.destroy(); text?.destroy(); removal.disconnect(); }
   });
-  dialog.addEventListener('close', () => { voice.destroy(); text.destroy(); removal.disconnect(); dialog.remove(); }, { once: true });
+  dialog.addEventListener('close', () => { voice.destroy(); text?.destroy(); removal.disconnect(); dialog.remove(); }, { once: true });
   root.append(dialog);
   removal.observe(root, { childList: true });
   if (root.parentElement) removal.observe(root.parentElement, { childList: true });
   dialog.showModal();
-  showLine();
+  text?.show(request.quote, startLabel, true);
+  voice.show(`npc-dialogue/${stage}-request`);
   next.focus();
   return dialog;
 }
